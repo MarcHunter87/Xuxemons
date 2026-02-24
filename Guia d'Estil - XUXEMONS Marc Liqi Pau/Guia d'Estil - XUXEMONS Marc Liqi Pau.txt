@@ -1,0 +1,2676 @@
+﻿GUIA D'ESTIL 
+XUXEMONS
+
+
+  
+
+
+
+Autors:
+-Marc Bañeres
+-Liqiang Yang
+-Pau Guiu
+________________
+ÍNDICE
+
+
+PALETA DE COLORS        1
+COLORS PRINCIPALS        1
+COLOR PRIMARI        1
+COLOR SECUNDARI        1
+COLOR D'ACCENT        2
+COLORS DE SISTEMA        2
+SUCCESS        2
+DANGER:        3
+WARNING:        3
+INFO        4
+ESCALA DE GRISOS        4
+BLANC        4
+GRIS CLAR        5
+GRIS MITJÀ        5
+GRIS FOSC        6
+NEGRE        6
+TEMA FOSC        7
+COLOR PRIMARI        7
+COLOR SECUNDARI        7
+COLOR D'ACCENT        8
+TIPOGRAFIES        9
+TÍTOLS        9
+H1        9
+H2        9
+H3        10
+H4        10
+H5        11
+H6        11
+ALTRES        12
+TEXT (PARÀGRAF)        12
+TEXT2 (PARÀGRAF)        12
+CAPTION        13
+STRONG        14
+STRONG2        14
+COMPONENTS REUTILITZABLES        15
+BOTONS        15
+PRIMARI        15
+SECUNDARI        16
+PERILL        17
+FANTASMA        19
+TEXT        20
+TARGETES        22
+TARGETA POWER        22
+TARGETA TECHNICAL        23
+TARGETA TECHNICAL        24
+TARGETES DE TOTS ELS XUXEMONS        25
+TARGETA XUXEMON        25
+TARGETA FRIEND        26
+TARGETA D’USUARI        26
+ALTRES COMPONENTS        28
+EFECTES D’ESTAT        28
+FOOTER        28
+BARRA DE NAVEGACIÓ PRINCIPAL        29
+MENÚ LATERAL (SIDEBAR)        30
+MENÚ DESPLEGABLE (DROPDOWN)        31
+BREADCRUMBS        31
+FORMULARIS        32
+EMAIL        32
+PASSWORD        33
+PHONE NUMBER        34
+TEXT        35
+TEXTAREA        36
+TEXTAREA/DROPDOWN        37
+CHECKBOX        38
+RADIOBUTTON        38
+ESPAIAT I LAYOUT        39
+SISTEMA D'ESPAIAT        39
+GRID        39
+XUXEDEX        39
+INVENTORY (MOCHILA)        39
+PERFIL D’USUARI DESKTOP I TABLET        40
+PERFIL D’USUARI MOBILE        40
+BREAKPOINTS RESPONSIVE        41
+DESKTOP        41
+TABLET        42
+MOBILE        43
+SISTEMA D'ICONES        44
+BATALLA        44
+CONNECTAT        44
+ABSENT        44
+EMOTE        45
+AMIC        45
+ENVIAR        45
+RECENT        46
+AUGMENT        46
+DISMINUIR        46
+ACTIU        47
+LEVEL        47
+REQUESTS        47
+ICONES OBLIGATÒRIES DEL JOC        48
+XUXEMONS        48
+ICONES DE XUXEMONS EN TARGETES.        48
+POWER        49
+JIN DAAHAD        49
+GORE MAGALA        49
+SEREGIOS        50
+CONGALALA        50
+UTH DUNA        51
+ARKVELD        51
+G. ARKVELD        52
+ZOH’SHIA        52
+G. ANJANATH        53
+GRAVIOS        53
+SPEED        54
+GOGMAZIOS        54
+ROMPOPOLO        54
+LAGIACRUS        55
+LALABARINA        55
+NERSCYLLA        56
+HIRABAMI        56
+AJARAKAN        57
+G. RATHALOS        57
+RATHALOS        58
+G. ODOGARON        58
+XU WU        59
+TECHNICAL        59
+OMEGA        59
+YIAN KUT KU        60
+GYPCEROS        60
+CHATACABRA        61
+QUEMATRICE        61
+DOSHAGUMA        62
+REY DAU        62
+NU UDRA        63
+BLANGONGA        63
+RATHIAN        64
+EFECTES D’ESTAT        65
+PARALISIS        65
+SON        65
+CONFUSIÓ        66
+XUXES        66
+HEALING HERB        66
+HEALING POTION        67
+MAX POTION        67
+DMG POTION        67
+DEFENSE POTION        68
+PROOF OF A HERO        68
+FLASHBANG        68
+PARALYZING KNIFE        69
+SLEEPING KNIFE        69
+XUXES VACUNES        69
+NULBERRY        69
+TIPUS ELEMENTALS        70
+POWER        70
+SPEED        70
+TECHNICAL        71
+TAULA DE TIPUS        71
+ICONES DE SISTEMA        72
+NAVEGACIÓ        72
+HOME        72
+XUXEDEX        72
+INVENTORY        72
+FRIENDS        73
+FRIENDS MOBILE/TABLET        73
+BATTLE        73
+CHAT        74
+CHAT MOBILE/TABLET        74
+ADMIN        74
+PERFIL        75
+CONFIGURACIÓ        75
+LOGOUT        75
+ACCIONS        76
+AFEGIR        76
+ELIMINAR USUARI        76
+GUARDAR        76
+CANCEL·LAR        76
+BUSCAR        77
+FILTRAR        77
+FILTRAR 2        77
+NOTIFICACIONS        78
+ESTATS        78
+ÈXIT        78
+ERROR        78
+ADVERTÈNCIA        79
+INFORMACIÓ        79
+LOADING        79
+DESKTOP        80
+LOGIN        80
+REGISTRE        80
+PÀGINA PRINCIPAL        81
+PÀGINA DE BATALLA        82
+XUXEDEX        83
+XUXEDEX FILTRADA PER POWER        84
+XUXEDEX FILTRADA PER SPEED        85
+XUXEDEX FILTRADA PER TECHNICAL        86
+MOTXILLA        87
+PERFIL D’USUARI        88
+EDITAR PERFIL D’USUARI        89
+PÀGINA D’AMICS        90
+CHAT        90
+PANEL D’ADMIN        91
+TABLET        92
+PERFIL D’USUARI        92
+MOBILE        93
+PERFIL D’USUARI        93
+BARRA LATERAL        94
+TEMA FOSC        95
+LOGIN        95
+REGISTRE        95
+NAVEGACIÓ        96
+
+
+
+
+PALETA DE COLORS
+
+
+COLORS PRINCIPALS
+
+
+COLOR PRIMARI
+
+
+Color primari de la web.
+  
+
+
+
+COLOR SECUNDARI
+
+
+Color secundari de la web.
+  
+________________
+
+COLOR D'ACCENT
+
+
+Color representatiu de la web.
+  
+
+
+
+COLORS DE SISTEMA
+
+
+SUCCESS
+
+
+Colors per èxit o tipus tècnic.
+  
+
+DANGER:
+
+
+Colors per èxit o tipus potent.
+  
+
+
+
+WARNING:
+
+
+Color per alertes.
+  
+________________
+
+
+
+INFO
+
+
+Color per missatges informatius.
+  
+
+
+
+ESCALA DE GRISOS
+
+
+BLANC
+  
+________________
+
+GRIS CLAR
+
+
+Utilitzat per als strokes.
+  
+
+
+
+GRIS MITJÀ
+  
+________________
+
+GRIS FOSC
+  
+
+
+
+NEGRE
+  
+
+________________
+
+
+
+
+
+
+TEMA FOSC 
+
+
+Colors Principals adaptats per al tema fosc. Els colors no adaptats és perquè es reutilitzen.
+
+
+COLOR PRIMARI
+
+
+Color primari de la web versió tema fosc.
+  
+
+
+
+COLOR SECUNDARI
+
+
+Color secundari de la web versió tema fosc.
+  
+________________
+
+COLOR D'ACCENT
+
+
+Color representatiu de la web  versió tema fosc..
+  
+
+
+
+Ajustaments de contrast i saturació
+
+
+Ens hem assegurat de que hi hagi un bon contrast i saturació en l'elecció de colors.
+________________
+TIPOGRAFIES
+
+
+S’ha utilitzat en tot moment lletra Poppins. 
+
+
+TÍTOLS
+
+
+H1
+  
+
+
+
+H2
+  
+________________
+
+H3
+  
+
+
+
+H4
+  
+________________
+
+H5
+  
+
+
+
+H6
+  
+
+
+
+________________
+
+
+ALTRES
+
+
+TEXT (PARÀGRAF)
+  
+
+
+
+TEXT2 (PARÀGRAF)
+  
+________________
+
+TEXT3 (PARÀGRAF)
+  
+
+
+
+CAPTION
+  
+
+
+
+STRONG
+  
+
+
+
+STRONG2
+  
+________________
+
+
+
+COMPONENTS REUTILITZABLES
+
+
+BOTONS
+
+
+PRIMARI
+
+
+Component del botó primari amb els seus estats default, hover, active, focus (Inner Shadow) i disabled.
+
+
+Gran.
+  
+  
+
+
+
+Mitjà.
+  
+  
+________________
+
+Petit.
+  
+  
+
+
+
+SECUNDARI
+
+
+Component del botó secundari amb els seus estats default, hover, active, focus (Inner Shadow) i disabled.
+
+
+Gran.
+  
+  
+________________
+
+Mitjà.
+  
+  
+
+
+
+Petit.
+  
+  
+
+
+
+PERILL
+
+
+Component del botó perill amb els seus estats default, hover, active, focus (Inner Shadow) i disabled.
+
+
+Gran.
+  
+  
+________________
+
+Mitjà.
+  
+  
+
+
+
+Petit.
+  
+  
+________________
+
+FANTASMA
+
+
+Component del botó fantasma amb els seus estats default, hover, active, focus (Inner Shadow) i disabled.
+
+
+Gran.
+  
+  
+
+
+
+Mitjà.
+  
+  
+________________
+
+Petit.
+  
+  
+
+
+
+TEXT
+
+
+Component del botó text amb els seus estats default, hover, active, focus (Inner Shadow) i disabled.
+
+
+Gran.
+  
+  
+________________
+
+Mitjà.
+  
+  
+
+
+
+Petit.
+  
+  
+
+
+
+
+
+
+
+
+
+________________
+
+
+TARGETES
+
+
+TARGETA POWER
+
+
+Les 3 versions de la targeta Power: default, disabled i combat.
+En aquest cas la de combat té un efecte d’estat aplicat.
+      
+
+  
+
+
+
+Padding intern
+
+
+La targeta té un padding de horitzontal de 75px en els 2 costats del nom.
+La targeta té un padding horitzontal de 10px en els 2 costats de la imatge.
+
+
+En la targeta de combat, hi ha un padding horitzontal de de 32px.
+
+
+Border-radius
+  
+
+
+
+En la de combat es de:
+  
+________________
+
+TARGETA TECHNICAL
+
+
+Les 3 versions de la targeta Technical: default, disabled i combat.
+  
+
+  
+
+  
+
+  
+
+
+
+Padding intern
+
+
+La targeta té un padding de horitzontal de 75px en els 2 costats del nom.
+La targeta té un padding horitzontal de 10px en els 2 costats de la imatge.
+
+
+En la targeta de combat, hi ha un padding horitzontal de de 32px.
+
+
+Border-radius
+  
+
+
+
+En la de combat es de:
+  
+________________
+
+TARGETA TECHNICAL
+
+
+Les 3 versions de la targeta Technical: default, disabled i combat.
+  
+
+  
+
+  
+
+  
+
+
+
+Padding intern
+
+
+La targeta té un padding de horitzontal de 75px en els 2 costats del nom.
+La targeta té un padding horitzontal de 10px en els 2 costats de la imatge.
+
+
+En la targeta de combat, hi ha un padding horitzontal de de 32px.
+
+
+Border-radius
+  
+
+
+
+En la tarjeta de combat es de:
+  
+________________
+
+TARGETES DE TOTS ELS XUXEMONS
+
+
+Mida: 271px x 330px
+  
+
+
+
+TARGETA XUXEMON
+
+
+  
+
+  
+  
+
+TARGETA FRIEND
+  
+
+
+
+  
+
+  
+
+
+
+TARGETA D’USUARI
+  
+
+  
+
+  
+________________
+
+  
+
+  
+
+  
+
+
+
+  
+
+  
+
+  
+________________
+
+ALTRES COMPONENTS
+
+
+TIPUS
+  
+
+
+
+Mida: 77px x 85px
+
+
+EFECTES D’ESTAT
+
+
+  
+
+
+
+Mida: 75px x 75px
+
+
+FOOTER
+
+
+  
+
+
+
+Padding intern
+La targeta té un padding de 80px horitzontal i 65px vertical.
+
+
+Mida: 1440px x 314px.
+________________
+MENÚS I NAVEGACIÓ
+
+
+BARRA DE NAVEGACIÓ PRINCIPAL
+
+
+Component del de la navbar amb els seus estats default, hover i admin.
+En el cas de Active també s’utilitza el de hover.
+  
+
+  
+________________
+
+
+
+
+
+MENÚ LATERAL (SIDEBAR)
+
+
+  
+
+
+
+  
+
+________________
+
+
+MENÚ DESPLEGABLE (DROPDOWN)
+
+
+Al prémer el botó hamburguesa s’obra el menú lateral.
+  
+
+
+
+Padding intern
+La targeta té un padding de 16px horitzontal i 16px vertical.
+
+
+Mida: 430px x 73px.
+
+
+BREADCRUMBS
+
+
+Component de Breadcrumb. Estat default, hover, default 2 i hover 2.
+  
+
+
+
+Mida: 323px x 17px.
+
+
+Resultat:
+  
+________________
+
+FORMULARIS
+
+
+EMAIL
+
+
+Component del de camp d’email per a formularis amb els seus estats default, focus, error i disabled. 
+
+
+En el cas de filled i success s'utilitza el de default.
+  
+
+
+
+Mida de camps: 500px x 21px.
+
+
+Padding intern: 16 horizontal i 18 vertical (Sense contar nom de camp).
+
+
+Colors de vora: Gris Clar o Danger.
+________________
+PASSWORD
+
+
+Component del de camp de password per a formularis amb els seus estats default, focus, error i disabled. 
+
+
+En el cas de filled i success s'utilitza el de default.
+  
+
+
+
+Mida de camps: 500px x 21px.
+
+
+Padding intern: 16 horizontal i 18 vertical (Sense contar nom de camp).
+
+
+Colors de vora: Gris Clar o Danger.
+________________
+PHONE NUMBER
+
+
+Component del de camp de phone number per a formularis amb els seus estats default, focus, error i disabled. 
+
+
+En el cas de filled i success s'utilitza el de default.
+  
+
+
+
+Mida de camps: 500px x 21px.
+
+
+Padding intern: 16 horizontal i 18 vertical (Sense contar nom de camp).
+
+
+Colors de vora: Gris Clar o Danger.
+________________
+TEXT
+
+
+Component del de camp de text per a formularis amb els seus estats default, focus, error i disabled. 
+
+
+En el cas de filled i success s'utilitza el de default.
+  
+
+
+
+Mida de camps: 500px x 21px.
+
+
+Padding intern: 16 horizontal i 18 vertical (Sense contar nom de camp).
+
+
+Colors de vora: Gris Clar o Danger.
+________________
+TEXTAREA
+
+
+Component del de camp de textarea per a formularis amb els seus estats default, focus, error i disabled. 
+
+
+En el cas de filled i success s'utilitza el de default.
+  
+
+
+
+Mida de camps: 500px x 21px.
+
+
+Padding intern: 16 horizontal i 18 vertical (Sense contar nom de camp).
+
+
+Colors de vora: Gris Clar o Danger.
+________________
+TEXTAREA/DROPDOWN
+
+
+Component del de camp de textarea o dropdown per a formularis amb els seus estats default, focus, error i disabled. 
+
+
+En el cas de filled i success s'utilitza el de default.
+  
+
+
+
+Mida de camps: 500px x 21px.
+
+
+Padding intern: 16 horizontal i 18 vertical (Sense contar nom de camp).
+
+
+Colors de vora: Gris Clar o Danger.
+________________
+CHECKBOX
+
+
+Component del de camp de checkbox per a formularis amb els seus estats default, filled i disabled. 
+  
+
+
+
+
+
+Mida de camps: 500px x 21px.
+
+
+RADIOBUTTON
+
+
+Component del de camp de radiobutton per a formularis amb els seus estats default, filled i disabled. 
+  
+
+
+
+Mida de camps: 500px x 21px.
+________________
+ESPAIAT I LAYOUT
+
+
+SISTEMA D'ESPAIAT
+
+
+El body té un padding intern de 80px horitzontal i 50px vertical.
+  
+  
+
+
+
+GRID
+
+
+XUXEDEX
+
+
+4x8
+  
+
+
+
+INVENTORY (MOCHILA)
+
+
+5x5
+  
+________________
+
+PERFIL D’USUARI DESKTOP I TABLET
+
+
+2x3
+  
+
+
+
+PERFIL D’USUARI MOBILE
+
+
+1x3
+  
+
+________________
+
+
+BREAKPOINTS RESPONSIVE
+
+
+DESKTOP 
+
+
+> 1024px.
+  
+________________
+
+TABLET 
+
+
+768-1024px.
+  
+________________
+
+
+
+MOBILE 
+
+
+< 768px.
+  
+________________
+
+SISTEMA D'ICONES
+
+
+BATALLA
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 15px x 15px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Fight.
+
+
+CONNECTAT
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 12px x 12px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Connected.
+
+
+ABSENT
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 12px x 12px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Absent.
+EMOTE
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 29px x 29px.
+
+
+Format: PNG.
+
+
+Padding intern: 6px horitzontal i 6px vertical.
+
+
+Text alternatiu: Emote.
+
+
+AMIC
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 18px x 13px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Friend.
+
+
+ENVIAR
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 30px x 31px.
+
+
+Format: PNG.
+
+
+Padding intern: 8px horitzontal i 9px vertical.
+
+
+Text alternatiu: Send.
+________________
+RECENT
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 18px x 18px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Recent.
+
+
+AUGMENT
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 10px x 6px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Increase.
+
+
+DISMINUIR
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 10px x 6px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Decrease.
+________________
+ACTIU
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 8px x 8px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Active.
+
+
+LEVEL
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 38px x 37px.
+
+
+Format: PNG.
+
+
+Padding intern: 14px horitzontal i 9px vertical.
+
+
+Text alternatiu: Level.
+
+
+REQUESTS
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 21px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Requests.
+ICONES OBLIGATÒRIES DEL JOC
+
+
+XUXEMONS
+
+
+ICONES DE XUXEMONS EN TARGETES.
+
+
+Mida de la targeta: 271px x 330px.
+  
+
+________________
+
+
+POWER
+
+
+JIN DAAHAD
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Jin Daahad.
+
+
+GORE MAGALA
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Gore Magala.
+________________
+SEREGIOS
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Seregios.
+
+
+CONGALALA
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Congalala.
+________________
+UTH DUNA
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Uth Duna.
+
+
+ARKVELD
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Arkveld.
+________________
+G. ARKVELD
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: G. Arkveld.
+
+
+ZOH’SHIA
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Zoh’Shia.
+________________
+G. ANJANATH
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: G. Anjanath.
+
+
+GRAVIOS
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Gravios.
+________________
+SPEED
+
+
+GOGMAZIOS
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Gogmazios.
+
+
+ROMPOPOLO
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Rompopolo.
+________________
+LAGIACRUS
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Lagiacrus.
+
+
+LALABARINA
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Lalabarina.
+________________
+NERSCYLLA
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Nerscylla.
+
+
+HIRABAMI
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Hirabami.
+________________
+AJARAKAN
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Ajarakan.
+
+
+G. RATHALOS
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: G. Rathalos.
+________________
+RATHALOS
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Rathalos.
+
+
+G. ODOGARON
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: G. Odogaron.
+________________
+XU WU
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Xu Wu.
+
+
+TECHNICAL
+
+
+OMEGA
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Omega.
+________________
+YIAN KUT KU
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Yian Kut Ku.
+
+
+GYPCEROS
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Gypceros.
+________________
+CHATACABRA
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Chatacabra.
+
+
+QUEMATRICE
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Quematrice.
+________________
+DOSHAGUMA
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Doshaguma.
+
+
+REY DAU
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Rey Dau.
+NU UDRA
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Nu Udra.
+
+
+BLANGONGA
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Blangonga.
+________________
+RATHIAN
+  
+
+
+
+Mida: 210px x Auto.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Rathian.
+________________
+
+
+EFECTES D’ESTAT
+
+
+  
+
+
+
+PARALISIS
+  
+
+Efecte: El Xuxemon afectat no pot atacar durant 1 torn.
+
+
+Mida: 18px x 18px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Paralysis.
+
+
+SON
+  
+
+Efecte: El Xuxemon afectat no pot atacar durant 1 torn i rep més dany.
+
+
+Mida: 18px x 18px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Sleep.
+________________
+CONFUSIÓ
+  
+
+Efecte: El Xuxemon afectat té un 50% de possibilitats de fallar l’atac.
+
+
+Mida: 18px x 18px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Confusion.
+
+
+XUXES
+
+
+  
+
+
+
+Estats default i focus.
+Quan no queden més unitats d’un objecte, apareix x0.
+
+
+HEALING HERB
+  
+
+
+
+Efecte: Curació baixa.
+
+
+Mida: 61px x 61px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Healing Herb.
+HEALING POTION
+  
+
+
+
+Efecte: Curació mitjana.
+
+
+Mida: 61px x  61px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Healing Potion.
+
+
+MAX POTION
+  
+
+
+
+Efecte: Curació alta (curació completa de la vida).
+
+
+Mida: 61px x 61px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Max Potion.
+
+
+DMG POTION
+  
+
+
+
+Efecte: Augment de dany mitjà.
+
+
+Mida: 61px x 61px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: DMG Potion.
+________________
+DEFENSE POTION
+  
+
+
+
+Efecte: Augment de defensa mitjà.
+
+
+Mida: 61px x 61px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: DEFENSE POTION.
+
+
+PROOF OF A HERO
+  
+
+
+
+Efecte: Reviure un Xuxemon al que li hagi baixat la vida a 0.
+
+
+Mida: 61px x 61px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Proof of a Hero.
+
+
+FLASHBANG
+  
+
+
+
+Efecte: Cega a un Xuxemon enemic aplicant confusió.
+
+
+Mida: 61px x 61px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Flashbang.
+________________
+
+
+PARALYZING KNIFE
+  
+
+
+
+Efecte: Paralitza a un Xuxemon enemic.
+
+
+Mida: 61px x 61px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Paralyzing Knife.
+
+
+SLEEPING KNIFE
+  
+
+
+
+Efecte: Dorm a un Xuxemon enemic.
+
+
+Mida: 61px x 61px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Seeping Knife.
+
+
+XUXES VACUNES
+
+
+NULBERRY
+  
+
+
+
+Efecte: Cura qualsevol estat alterat.
+
+
+Mida: 61px x 61px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Nulberry.
+________________
+TIPUS ELEMENTALS
+
+
+  
+
+
+
+POWER
+  
+  
+
+
+
+Mida: 77px x 85px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Power.
+
+
+SPEED
+  
+  
+
+
+
+Mida: 77px x 85px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Speed.
+TECHNICAL
+  
+  
+
+
+
+Mida: 77px x 85px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Technical.
+
+
+TAULA DE TIPUS
+  
+________________
+
+ICONES DE SISTEMA
+
+
+NAVEGACIÓ
+
+
+HOME
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 22px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Home.
+
+
+XUXEDEX
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 22px x 16px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Xuxedex.
+
+
+INVENTORY
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 20px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Inventory.
+________________
+FRIENDS
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 35px x 22px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Friends.
+
+
+FRIENDS MOBILE/TABLET
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 22px x 16px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Friends.
+
+
+BATTLE
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 20px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Battle.
+________________
+CHAT
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 15px x 15px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Chat.
+
+
+CHAT MOBILE/TABLET
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 22px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Chat.
+
+
+ADMIN
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 29px x 32px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Admin.
+________________
+
+
+PERFIL
+
+
+No hi ha una icona de Perfil, s’utilitza aquest apartat.
+  
+
+
+
+CONFIGURACIÓ
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 20px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Options.
+
+
+LOGOUT
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 14px x 14px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Logout.
+
+
+ACCIONS
+
+
+AFEGIR
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 20px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Add.
+
+
+ELIMINAR USUARI
+
+
+No hi ha una icona de eliminar usuari, s’utilitza aquest botó.
+
+
+  
+
+
+
+GUARDAR
+
+
+No hi ha una icona de guardar, s’utilitza aquest botó.
+  
+
+
+
+CANCEL·LAR
+
+
+No hi ha una icona de crear usuari, s’utilitza el botó.
+  
+
+
+
+________________
+
+
+BUSCAR
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 18px x 18px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Serch.
+
+
+FILTRAR
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 12px x 12px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Filter.
+
+
+FILTRAR 2
+  
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 24px x 24px.
+
+
+Format: PNG.
+
+
+Padding intern: 7px horitzontal i 10px vertical.
+
+
+Text alternatiu: Filter.
+
+
+NOTIFICACIONS
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 22px x 19px.
+
+
+Format: PNG.
+
+
+Padding intern: 0px.
+
+
+Text alternatiu: Notifications.
+
+
+
+
+ESTATS
+
+
+ÈXIT
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 20px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 2px horitzontal i 4px vertical.
+
+
+Text alternatiu: Success.
+
+
+ERROR
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 20px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 3px horitzontal i 3px vertical.
+
+
+Text alternatiu: Error.
+ADVERTÈNCIA
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 20px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 1px horitzontal i 2px vertical.
+
+
+Text alternatiu: Warning.
+
+
+INFORMACIÓ
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 20px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 2px horitzontal i 2px vertical.
+
+
+Text alternatiu: Information.
+
+
+LOADING
+  
+
+
+
+Estil visual: Icones sòlides.
+
+
+Mida base: 20px x 20px.
+
+
+Format: PNG.
+
+
+Padding intern: 1px horitzontal i 1px vertical.
+
+
+Text alternatiu: Loading.
+________________
+DESKTOP
+
+
+LOGIN
+  
+
+
+
+REGISTRE
+  
+________________
+
+PÀGINA PRINCIPAL
+  
+________________
+
+PÀGINA DE BATALLA
+  
+________________
+
+XUXEDEX
+  
+________________
+
+XUXEDEX FILTRADA PER POWER
+  
+________________
+
+XUXEDEX FILTRADA PER SPEED
+  
+________________
+
+XUXEDEX FILTRADA PER TECHNICAL
+  
+________________
+
+MOTXILLA
+  
+________________
+
+PERFIL D’USUARI
+  
+________________
+
+EDITAR PERFIL D’USUARI
+  
+________________
+
+PÀGINA D’AMICS
+  
+
+
+
+CHAT
+  
+________________
+
+PANEL D’ADMIN
+  
+________________
+
+TABLET
+
+
+PERFIL D’USUARI
+  
+________________
+
+MOBILE
+
+
+PERFIL D’USUARI
+  
+________________
+
+BARRA LATERAL
+  
+________________
+
+TEMA FOSC
+
+
+LOGIN
+  
+
+
+
+REGISTRE
+  
+________________
+
+NAVEGACIÓ
+
+
+Figma:
+https://www.figma.com/design/HEfiqkr0EssqxwKRgqLaCK/Xuxemons?node-id=0-1&t=Ah5A9QvJWCWhzFQV-1
