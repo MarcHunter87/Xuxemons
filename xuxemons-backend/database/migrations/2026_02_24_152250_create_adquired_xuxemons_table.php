@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('adquired_xuxemons', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreignId('xuxemon_id')->constrained('xuxemons');
             $table->unsignedInteger('level')->default(1);
             $table->unsignedInteger('experience')->default(0);

@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('battles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('opponent_user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('winner_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('user_id');
+            $table->string('opponent_user_id');
+            $table->string('winner_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreign('opponent_user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreign('winner_id')->references('id')->on('users')->nullOnDelete();
             $table->unsignedInteger('turn')->default(0);
             $table->timestamps();
         });

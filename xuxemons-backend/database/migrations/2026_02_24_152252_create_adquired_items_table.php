@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('adquired_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreignId('item_id')->constrained('items');
             $table->unsignedInteger('quantity')->default(1);
             $table->timestamps();

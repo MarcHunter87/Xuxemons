@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreignId('slot_1_adquired_xuxemon_id')->nullable()->constrained('adquired_xuxemons')->nullOnDelete();
             $table->foreignId('slot_2_adquired_xuxemon_id')->nullable()->constrained('adquired_xuxemons')->nullOnDelete();
             $table->foreignId('slot_3_adquired_xuxemon_id')->nullable()->constrained('adquired_xuxemons')->nullOnDelete();
