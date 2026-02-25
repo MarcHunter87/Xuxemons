@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('avatar_path')->nullable();
             $table->enum('theme', ['light', 'dark'])->default('light');
-            $table->enum('role', ['admin', 'user'])->default('user');
+            $table->enum('role', ['admin', 'player'])->default('player');
             $table->timestamp('last_seen_at')->nullable();
             $table->unsignedInteger('win_streak')->default(0);
             $table->rememberToken();

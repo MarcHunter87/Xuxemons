@@ -21,12 +21,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - xuxemons-network
 
   # =====================
   # LARAVEL
   # =====================
   backend:
-    image: php:8.4-apache
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
     container_name: xuxemons_laravel_app
     restart: always
     working_dir: /var/www/html
@@ -38,13 +42,27 @@ services:
         condition: service_healthy
     ports:
       - "${BACKEND_PORT}:80"
+    networks:
+      - xuxemons-network
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${MYSQL_DATABASE}
+      - DB_USERNAME=root
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=http://localhost:${BACKEND_PORT}
     command: >
       bash -c "
-      apt-get update &&
-      apt-get install -y libzip-dev unzip git &&
-      docker-php-ext-install pdo pdo_mysql &&
-      a2enmod rewrite &&
+      composer install --no-interaction --optimize-autoloader &&
+      [ ! -f /var/www/html/.env ] && cp /var/www/html/.env.example /var/www/html/.env || true &&
+      php artisan key:generate --no-interaction &&
+      php artisan config:cache &&
+      php artisan route:cache &&
+      php artisan view:cache &&
       php artisan migrate --force &&
+      echo 'Server started' &&
       apache2-foreground
       "
 
@@ -68,6 +86,12 @@ services:
       "
     depends_on:
       - backend
+    networks:
+      - xuxemons-network
 
 volumes:
   mysql_data:
+ 
+networks:
+  xuxemons-network:
+    driver: bridge

@@ -1,1 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+    --primary-color: #F3F5F4;
+    --secondary-color: #ACDBFD;
+    --accent-color: #128AFB;
+    --text-alt-color: #2A2B2B;
+
+    --success-color: #28A745;
+    --danger-color: #D0181B;
+    --warning-color: #FFC107;
+
+    --escala-gris1-color: #FFFFFF;
+    --escala-gris2-color: #C8C8C8;
+    --escala-gris3-color: #9C9C9C;
+    --escala-gris4-color: #777777;
+    --escala-grid5-color: #000000;
+
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}

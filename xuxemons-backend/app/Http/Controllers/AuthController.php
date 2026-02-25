@@ -31,7 +31,7 @@ class AuthController extends Controller
             'surname' => $validated['surname'],
             'email' => $validated['email'],
             'password' => $validated['password'],
-            'role' => $isFirstUser ? 'admin' : 'user',
+            'role' => $isFirstUser ? 'admin' : 'player',
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;

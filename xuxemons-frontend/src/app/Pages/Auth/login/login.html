@@ -1,0 +1,30 @@
+<section class="login-page">
+	<div class="brand">
+		<div class="logo">
+            <img ngSrc="/icons/logo.svg" width="80" height="80" alt="Xuxemons Logo" priority/>
+        </div>
+		<h1>Welcome Back</h1>
+		<p>Sign in to continue your journey</p>
+	</div>
+
+	<form class="login-card" aria-label="Login form">
+		<label class="field">
+			<span class="label-text">User ID</span>
+			<input type="text" name="userid" placeholder="your-user-id" />
+		</label>
+
+		<label class="field">
+			<span class="label-text">Password</span>
+			<input type="password" name="password" placeholder="********" />
+		</label>
+
+		<label class="checkbox-row">
+			<input type="checkbox" name="remember" />
+			<span>Remember me</span>
+		</label>
+
+		<button type="button" class="btn-primary">Log In</button>
+
+		<p class="register-link">Don't have an account? <a routerLink="/register">Register Now</a></p>
+	</form>
+</section>
