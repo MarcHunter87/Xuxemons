@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthServices {
-  private apiUrl = '/api';
+  private apiUrl = 'http://localhost:8080/api';
   private http = inject(HttpClient);
   private router = inject(Router);
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
@@ -48,10 +48,10 @@ export class AuthServices {
       tap((response: AuthResponse) => {
         if (response.access_token) {
           this.setItem('token', response.access_token);
-          if (response.user) {
-            this.setItem('user', JSON.stringify(response.user));
-            this.userSubject.next(response.user);
-          }
+        }
+        if (response.user) {
+          this.setItem('user', JSON.stringify(response.user));
+          this.userSubject.next(response.user);
         }
       })
     );
