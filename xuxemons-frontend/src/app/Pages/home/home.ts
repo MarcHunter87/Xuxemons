@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { Breadcrumb } from '../../breadcrumb/breadcrumb';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [Breadcrumb],
+  imports: [],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })

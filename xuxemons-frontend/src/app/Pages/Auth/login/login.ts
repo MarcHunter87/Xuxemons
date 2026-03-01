@@ -21,9 +21,11 @@ export class Login {
     private fb: FormBuilder,
     private authService: AuthService
   ) {
+    const creds = this.authService.getRememberedCredentials();
     this.loginForm = this.fb.group({
-      id: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      id: [creds?.id ?? '', [Validators.required]],
+      password: [creds?.password ?? '', [Validators.required, Validators.minLength(6)]],
+      rememberMe: [!!creds],
     });
   }
 
@@ -59,10 +61,12 @@ export class Login {
     this.isLoading = true;
     this.errorMessage = null;
 
+    const rememberMe = this.loginForm.get('rememberMe')!.value;
+    
     this.authService.login({
       id: this.loginForm.get('id')!.value,
       password: this.loginForm.get('password')!.value,
-    }).subscribe({
+    }, rememberMe).subscribe({
       next: () => {
         this.isLoading = false;
       },

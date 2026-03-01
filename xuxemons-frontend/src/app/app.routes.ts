@@ -7,6 +7,7 @@ import { Xuxedex } from './pages/xuxedex/xuxedex';
 import { Inventory } from './pages/inventory/inventory';
 import { Friends } from './pages/friends/friends';
 import { Profile } from './pages/profile/profile';
+import { EditProfile } from './pages/edit-profile/edit-profile';
 import { Admin } from './pages/admin/admin';
 import { authGuard } from './guard/auth-guard';
 import { adminGuard } from './guard/admin-guard';
@@ -47,8 +48,11 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    component: Profile,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    children: [
+      { path: '', component: Profile },
+      { path: 'edit', component: EditProfile }
+    ]
   },
   {
     path: 'admin',

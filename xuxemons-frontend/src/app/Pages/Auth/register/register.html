@@ -130,7 +130,13 @@
       <span id="regAcceptTerms-error" class="error-message" aria-live="polite">{{ getErrorMessage('acceptTerms') }}</span>
     }
 
-    <button type="submit" class="btn-primary">Register</button>
+    <button type="submit" class="btn-primary" [disabled]="isLoading" [attr.aria-busy]="isLoading">
+      @if (isLoading) {
+        <span class="btn-loading-icon" aria-hidden="true"></span>
+      } @else {
+        Register
+      }
+    </button>
 
     <p class="login-link-text">Already have an account? <a routerLink="/login">Log in</a></p>
   </form>

@@ -55,12 +55,18 @@
       }
     </div>
 
-    <label class="checkbox-row">
-      <input type="checkbox" name="remember" />
+    <label class="checkbox-row" for="rememberMe">
+      <input type="checkbox" id="rememberMe" formControlName="rememberMe" />
       <span>Remember me</span>
     </label>
 
-    <button type="submit" class="btn-primary">Log In</button>
+    <button type="submit" class="btn-primary" [disabled]="isLoading" [attr.aria-busy]="isLoading">
+      @if (isLoading) {
+        <span class="btn-loading-icon" aria-hidden="true"></span>
+      } @else {
+        Log In
+      }
+    </button>
 
     <p class="register-link">Don't have an account? <a routerLink="/register">Register Now</a></p>
   </form>

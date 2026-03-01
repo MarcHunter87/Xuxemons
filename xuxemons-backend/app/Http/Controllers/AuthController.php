@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -18,7 +19,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
-        $name = preg_replace('/\s+/', '', $validated['name']) ?? ''; // Eliminar espacios
+        $name = preg_replace('/\s+/', '', $validated['name']) ?? '';
 
         do {
             $number = str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT);
@@ -36,7 +37,7 @@ class AuthController extends Controller
             'role' => $isFirstUser ? 'admin' : 'player',
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = JWTAuth::fromUser($user);
 
         return response()->json([
             'access_token' => $token,
@@ -54,14 +55,14 @@ class AuthController extends Controller
 
         $id = $validated['id'];
 
-        if (!Auth::attempt(['id' => $id, 'password' => $validated['password']])) {
+        if (!$token = Auth::guard('api')->attempt(['id' => $id, 'password' => $validated['password']])) {
             return response()->json([
                 'message' => 'User ID or password is incorrect. Please try again.'
             ], 401);
         }
 
-        $user = User::where('id', $id)->firstOrFail();
-        $token = $user->createToken('auth_token')->plainTextToken;
+        /** @var User $user */
+        $user = Auth::guard('api')->user();
 
         return response()->json([
             'access_token' => $token,
@@ -72,10 +73,47 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        Auth::guard('api')->logout();
 
         return response()->json([
             'message' => 'Logged out successfully'
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        /** @var User $user */
+        $user = Auth::guard('api')->user();
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:30',
+            'surname' => 'sometimes|string|max:30',
+            'email' => 'sometimes|string|email|max:120|unique:users,email,' . $user->id,
+            'password' => 'sometimes|string|min:6',
+        ]);
+
+        if (isset($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user' => $user->fresh(),
+        ]);
+    }
+
+    public function deleteAccount(Request $request)
+    {
+        /** @var User $user */
+        $user = Auth::guard('api')->user();
+        
+        Auth::guard('api')->logout();
+        $user->delete();
+
+        return response()->json([
+            'message' => 'Account deleted successfully'
         ]);
     }
 }

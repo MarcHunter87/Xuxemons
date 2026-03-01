@@ -112,18 +112,11 @@
   opacity: 0.8;
 }
 
-.toggle-password:focus-visible {
-  outline: 3px solid var(--accent-color);
-  outline-offset: 2px;
-}
-
 .toggle-password .bi {
   font-size: 20px;
 }
 
 .input:focus {
-  outline: 3px solid var(--accent-color);
-  outline-offset: 2px;
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(18, 138, 251, 0.15);
 }
@@ -165,11 +158,6 @@
   cursor: pointer;
 }
 
-.checkbox-row input[type='checkbox']:focus-visible {
-  outline: 3px solid var(--accent-color);
-  outline-offset: 2px;
-}
-
 .btn-primary {
   height: 52px;
   background-color: var(--accent-color);
@@ -194,19 +182,25 @@
   filter: brightness(0.85);
 }
 
-.btn-primary:focus-visible {
-  outline: 3px solid var(--accent-color);
-  outline-offset: 2px;
-}
-
 .btn-primary:disabled {
-  opacity: 0.6;
+  opacity: 0.9;
   cursor: not-allowed;
 }
 
-.register-link a:focus-visible {
-  outline: 3px solid var(--accent-color);
-  outline-offset: 2px;
+.btn-loading-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: var(--white-color);
+  border-radius: 50%;
+  animation: btn-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .register-link {

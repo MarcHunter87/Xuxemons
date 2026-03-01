@@ -33,7 +33,7 @@
 .brand-name {
   font-size: 25px;
   font-weight: 800;
-  color: var(--text-alt-color);
+  color: var(--white-color);
   letter-spacing: 0.04em;
 }
 
@@ -55,18 +55,20 @@ nav {
 .nav-links a {
   font-size: 20px;
   font-weight: 500;
-  color: var(--text-alt-color);
+  color: var(--white-color);
   text-decoration: none;
-  padding: 0.25rem 0;
-  transition: color 0.2s;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
 }
 
 .nav-links a:hover {
-  color: var(--white-color);
+  background-color: var(--white-color);
+  color: var(--accent-color);
+  transform: translateY(-1px);
 }
 
 .nav-links a.active {
-  color: var(--white-color);
   font-weight: 700;
 }
 
@@ -94,7 +96,7 @@ nav {
 
 .icon-btn:hover {
   background-color: var(--white-color);
-  color: var(--text-alt-color);
+  color: var(--accent-color);
 }
 
 .icon-btn:focus-visible {
@@ -108,6 +110,9 @@ nav {
   gap: 0.5rem;
   text-decoration: none;
   cursor: pointer;
+  padding: 0.35rem 0.6rem;
+  border-radius: 9999px;
+  transition: background-color 0.25s ease;
 }
 
 .avatar {
@@ -133,18 +138,26 @@ nav {
 .profile-name {
   font-size: 14px;
   font-weight: 700;
-  color: var(--text-alt-color);
+  color: var(--white-color);
+  transition: color 0.25s ease;
 }
 
 .profile-sub {
   font-size: 12px;
   font-weight: 400;
-  color: var(--text-alt-color);
+  color: var(--white-color);
+  opacity: 0.9;
+  transition: color 0.25s ease, opacity 0.25s ease;
+}
+
+.profile-link:hover {
+  background-color: var(--white-color);
 }
 
 .profile-link:hover .profile-name,
 .profile-link:hover .profile-sub {
-  color: var(--white-color);
+  color: var(--accent-color);
+  opacity: 1;
 }
 
 .profile-link:focus-visible {

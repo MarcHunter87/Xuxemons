@@ -23,12 +23,16 @@
   color: var(--dark-gray-color);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.2s;
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  margin: 0 -0.25rem;
+  border-radius: 6px;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .breadcrumb a:hover {
-  color: var(--accent-color);
-  text-decoration: underline;
+  background-color: var(--secondary-color);
+  color: var(--text-alt-color);
 }
 
 .breadcrumb a:focus-visible {

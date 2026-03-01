@@ -26,6 +26,8 @@ export class Breadcrumb implements OnInit, OnDestroy {
     'inventory': 'Inventory',
     'profile': 'Profile',
     'edit': 'Edit Profile',
+    'friends': 'Friends',
+    'admin': 'Admin',
     'leaderboard': 'Leaderboard',
     'game-rules': 'Game Rules',
   };
@@ -55,12 +57,17 @@ export class Breadcrumb implements OnInit, OnDestroy {
         this.items.push({ label, path: acc });
       }
     } else {
-      this.items = [{ label: 'Home', path: '/' }];
-      let acc = '';
-      for (const seg of segments) {
-        acc += `/${seg}`;
-        const label = this.labels[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1);
-        this.items.push({ label, path: acc });
+      if (segments.length === 0) {
+        this.items = [{ label: 'Home', path: '/' }];
+      } else {
+        let acc = '';
+        const pathItems: BreadcrumbItem[] = [];
+        for (const seg of segments) {
+          acc += `/${seg}`;
+          const label = this.labels[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1);
+          pathItems.push({ label, path: acc });
+        }
+        this.items = pathItems;
       }
     }
   }

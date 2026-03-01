@@ -2,7 +2,7 @@
   <div class="navbar-inner">
 
     <a class="brand" routerLink="/" aria-label="Xuxemons Home">
-      <img src="/icons/logo.svg" alt="Xuxemons logo">
+      <img src="/icons/logo%20v2.svg" alt="Xuxemons logo">
       <span class="brand-name">XUXEMONS</span>
     </a>
 
@@ -19,13 +19,13 @@
 
     <div class="navbar-right">
       @if (isAdmin) {
-        <button class="icon-btn" aria-label="Admin panel">
+        <a routerLink="/admin" class="icon-btn" aria-label="Admin panel">
           <i class="bi bi-shield-fill-check"></i>
-        </button>
+        </a>
       }
-      <button class="icon-btn" aria-label="Users">
+      <a routerLink="/friends" class="icon-btn" aria-label="Friends">
         <i class="bi bi-people-fill"></i>
-      </button>
+      </a>
       <a routerLink="/profile" class="profile-link" aria-label="My Profile">
         <div class="avatar" aria-hidden="true">
           <i class="bi bi-person-fill"></i>

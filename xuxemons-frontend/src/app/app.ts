@@ -3,10 +3,11 @@ import { Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { Header } from './header/header';
 import { Footer } from './footer/footer';
+import { Breadcrumb } from './breadcrumb/breadcrumb';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Header, Footer],
+  imports: [RouterOutlet, Header, Footer, Breadcrumb],
   standalone: true,
   templateUrl: './app.html',
   styleUrls: ['./app.css']

@@ -1,5 +1,5 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, tap, BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
@@ -62,11 +62,16 @@ export class AuthService {
     );
   }
 
-  login(credentials: LoginPayload): Observable<AuthResponse> {
+  login(credentials: LoginPayload, rememberMe: boolean = false): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(res => {
         this.saveAuth(res);
         if (res.access_token) {
+          if (rememberMe) {
+            this.setRememberedCredentials(credentials.id, credentials.password);
+          } else {
+            this.clearRememberedCredentials();
+          }
           this.router.navigate(['/'], { replaceUrl: true });
         }
       })
@@ -74,17 +79,22 @@ export class AuthService {
   }
 
   logout(): void {
-    const token = this.getToken();
-    this.clearAuth();
+    const hadToken = !!this.getToken();
+    if (hadToken) {
+      this.http.post(`${this.apiUrl}/logout`, {}).subscribe({
+        next: () => this.clearLocalAuth(),
+        error: () => this.clearLocalAuth(),
+      });
+    } else {
+      this.clearLocalAuth();
+    }
+  }
 
-    const options = token
-      ? { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) }
-      : {};
-
-    this.http.post(`${this.apiUrl}/logout`, {}, options).subscribe({
-      error: () => {
-      }
-    });
+  private clearLocalAuth(): void {
+    this.getStorage()?.removeItem('token');
+    this.getStorage()?.removeItem('user');
+    this.userSubject.next(null);
+    this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 
   getToken(): string | null {
@@ -113,10 +123,39 @@ export class AuthService {
     }
   }
 
-  private clearAuth(): void {
-    this.getStorage()?.removeItem('token');
-    this.getStorage()?.removeItem('user');
-    this.userSubject.next(null);
-    this.router.navigate(['/login']);
+  getRememberedCredentials(): { id: string; password: string } | null {
+    const raw = this.getStorage()?.getItem('rememberedCredentials');
+    if (!raw) return null;
+    try {
+      const data = JSON.parse(raw) as { id: string; password: string };
+      return data?.id != null && data?.password != null ? data : null;
+    } catch {
+      return null;
+    }
+  }
+
+  setRememberedCredentials(id: string, password: string): void {
+    this.getStorage()?.setItem('rememberedCredentials', JSON.stringify({ id, password }));
+  }
+
+  clearRememberedCredentials(): void {
+    this.getStorage()?.removeItem('rememberedCredentials');
+  }
+
+  updateProfile(data: Partial<User & { password?: string }>): Observable<{ user: User }> {
+    return this.http.put<{ user: User }>(`${this.apiUrl}/profile`, data).pipe(
+      tap(res => {
+        this.getStorage()?.setItem('user', JSON.stringify(res.user));
+        this.userSubject.next(res.user);
+      })
+    );
+  }
+
+  deleteAccount(): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/profile`).pipe(
+      tap(() => {
+        this.clearLocalAuth();
+      })
+    );
   }
 }
