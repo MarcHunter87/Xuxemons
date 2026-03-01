@@ -1,0 +1,51 @@
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+
+    <div class="footer-columns">
+
+      <div class="footer-brand">
+        <a routerLink="/" class="brand" aria-label="Xuxemons Home">
+          <img src="/icons/logo.svg" alt="Xuxemons logo">
+          <span class="brand-name">Xuxemons</span>
+        </a>
+        <p class="brand-desc">
+          The next generation creature collection game. Build your team, master your strategy, and conquer the arena.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h2 class="footer-col-title">Game</h2>
+        <ul role="list">
+          <li><a routerLink="/game-rules">Game Rules</a></li>
+          <li><a routerLink="/leaderboard">Leaderboard</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h2 class="footer-col-title">Community</h2>
+        <ul role="list">
+          <li><a href="https://discord.gg" target="_blank" rel="noopener noreferrer">Discord</a></li>
+          <li><a routerLink="/help">Help Center</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h2 class="footer-col-title">Company</h2>
+        <ul role="list">
+          <li><a routerLink="/privacy">Privacy Policy</a></li>
+          <li><a routerLink="/terms">Terms of Service</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <span class="copyright">© {{ currentYear }} Xuxemons Studio. All rights reserved.</span>
+      <span class="server-status">
+        <span class="status-dot" aria-hidden="true"></span>
+        Servers Online
+      </span>
+    </div>
+
+  </div>
+</footer>

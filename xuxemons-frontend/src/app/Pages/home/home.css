@@ -1,0 +1,48 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.home-main {
+  flex: 1;
+  background-color: var(--white-color);
+}
+
+.home-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 3rem;
+}
+
+.hero {
+  margin-top: 1rem;
+}
+
+.hero h1 {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 1.25rem;
+  line-height: 1.1;
+}
+
+.hero-title-black {
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--black-color);
+}
+
+.hero-title-blue {
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--accent-color);
+}
+
+.hero-desc {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--black-color);
+  line-height: 1.7;
+  max-width: 520px;
+  margin: 0;
+}

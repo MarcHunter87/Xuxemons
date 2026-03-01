@@ -36,19 +36,13 @@ class AuthController extends Controller
             'role' => $isFirstUser ? 'admin' : 'player',
         ]);
 
-        $response = [
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => $user,
-        ];
-
-        try {
-            $token = $user->createToken('auth_token')->plainTextToken;
-            $response['access_token'] = $token;
-        } catch (\Throwable $e) {
-            \Log::error('Token creation failed: ' . $e->getMessage());
-        }
-
-        return response()->json($response);
+        ]);
     }
 
     public function login(Request $request)
@@ -67,7 +61,6 @@ class AuthController extends Controller
         }
 
         $user = User::where('id', $id)->firstOrFail();
-
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

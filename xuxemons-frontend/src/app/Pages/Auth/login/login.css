@@ -1,107 +1,259 @@
-.root-reset {
-	/* placeholder to keep file non-empty during edits */
-}
-
-html, body {
-	height: 100%;
-	margin: 0;
-}
-
 .login-page {
-	height: 100vh;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	background: linear-gradient(180deg, var(--secondary-color) 0%, #dff2ff 100%);
-	font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-	color: var(--text-alt-color);
-	padding: 1.5rem;
-	box-sizing: border-box;
-	overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--secondary-color);
+  font-family: 'Poppins', sans-serif;
+  color: var(--text-alt-color);
+  padding: 2rem 1rem;
+  box-sizing: border-box;
 }
 
 .brand {
-	text-align: center;
-	margin-bottom: 1.25rem;
+  text-align: center;
 }
-.brand .logo {
-	font-size: 3rem;
-	margin-bottom: 0.5rem;
+
+.brand-logo {
+  display: block;
+  margin: 0 auto 0.75rem;
+  width: 72px;
+  height: 72px;
 }
+
 .brand h1 {
-	margin: 0;
-	font-size: 2rem;
-	font-weight: 800;
+  margin: 0 0 0.25rem;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-alt-color);
 }
+
 .brand p {
-	margin: 0.25rem 0 0;
-	color: rgba(42,43,43,0.8);
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-alt-color);
 }
 
 .login-card {
-	width: 420px;
-	max-width: 100%;
-	background: var(--escala-gris1-color);
-	border-radius: 12px;
-	padding: 1.75rem;
-	box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
+  width: 100%;
+  max-width: 460px;
+  background: var(--white-color);
+  border: 2.5px solid var(--light-gray-color);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: slideUp 0.35s ease;
 }
 
-.field {
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
-.label-text {
-	font-size: 0.85rem;
-	font-weight: 600;
+
+.label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-alt-color);
 }
-.field input[type="text"],
-.field input[type="password"] {
-	height: 44px;
-	border-radius: 8px;
-	border: 1px solid var(--escala-gris2-color);
-	padding: 0 0.75rem;
-	font-size: 0.95rem;
+
+.input {
+  height: 48px;
+  border-radius: 8px;
+  border: 2.5px solid var(--black-color);
+  padding: 0 0.875rem;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  color: var(--text-alt-color);
+  background: var(--white-color);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper .input {
+  padding-right: 48px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+  color: var(--dark-gray-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: visible;
+  opacity: 1;
+}
+
+.toggle-password:hover {
+  color: var(--text-alt-color);
+}
+
+.toggle-password:active {
+  transform: translateY(-50%) scale(0.92);
+  opacity: 0.8;
+}
+
+.toggle-password:focus-visible {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.toggle-password .bi {
+  font-size: 20px;
+}
+
+.input:focus {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(18, 138, 251, 0.15);
+}
+
+.input::placeholder {
+  color: var(--medium-gray-color);
+}
+
+.input-error {
+  border-color: var(--danger-color) !important;
+}
+
+.input-error:focus {
+  outline: 3px solid var(--danger-color);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(208, 24, 27, 0.1) !important;
+}
+
+.error-message {
+  font-size: 14px;
+  color: var(--danger-color);
+  font-weight: 500;
+  animation: slideDown 0.25s ease;
 }
 
 .checkbox-row {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 16px;
+  color: var(--text-alt-color);
+  cursor: pointer;
+}
+
+.checkbox-row input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+
+.checkbox-row input[type='checkbox']:focus-visible {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
 }
 
 .btn-primary {
-	margin-top: 0.25rem;
-	background: linear-gradient(180deg, var(--accent-color), #0b6fe0);
-	color: white;
-	border: none;
-	height: 52px;
-	border-radius: 10px;
-	font-weight: 800;
-	font-size: 1.05rem;
-	cursor: pointer;
+  height: 52px;
+  background-color: var(--accent-color);
+  color: var(--white-color);
+  border: none;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 18px;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.1s;
+  margin-top: 0.25rem;
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.85);
+}
+
+.btn-primary:focus-visible {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.register-link a:focus-visible {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
 }
 
 .register-link {
-	text-align: center;
-	margin: 0.5rem 0 0;
-	font-size: 0.9rem;
-	color: var(--escala-gris4-color);
+  text-align: center;
+  margin: 0.25rem 0 0;
+  font-size: 14px;
+  color: var(--dark-gray-color);
 }
+
 .register-link a {
-	color: var(--accent-color);
-	text-decoration: none;
-	font-weight: 700;
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 480px) {
-	.login-card { padding: 1rem; }
-	.brand h1 { font-size: 1.4rem; }
-}
+  .login-card {
+    padding: 1.5rem 1.25rem;
+  }
 
+  .brand h1 {
+    font-size: 22px;
+  }
+}

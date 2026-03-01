@@ -1,0 +1,41 @@
+<header class="navbar" role="banner">
+  <div class="navbar-inner">
+
+    <a class="brand" routerLink="/" aria-label="Xuxemons Home">
+      <img src="/icons/logo.svg" alt="Xuxemons logo">
+      <span class="brand-name">XUXEMONS</span>
+    </a>
+
+    <nav aria-label="Main navigation">
+      <ul class="nav-links" role="list">
+        <li>
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+        </li>
+        <li><a routerLink="/battle" routerLinkActive="active">Battle</a></li>
+        <li><a routerLink="/xuxedex" routerLinkActive="active">Xuxedex</a></li>
+        <li><a routerLink="/inventory" routerLinkActive="active">Inventory</a></li>
+      </ul>
+    </nav>
+
+    <div class="navbar-right">
+      @if (isAdmin) {
+        <button class="icon-btn" aria-label="Admin panel">
+          <i class="bi bi-shield-fill-check"></i>
+        </button>
+      }
+      <button class="icon-btn" aria-label="Users">
+        <i class="bi bi-people-fill"></i>
+      </button>
+      <a routerLink="/profile" class="profile-link" aria-label="My Profile">
+        <div class="avatar" aria-hidden="true">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        <div class="profile-info">
+          <span class="profile-name">{{ getUserName() }}</span>
+          <span class="profile-sub">My Profile</span>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</header>
