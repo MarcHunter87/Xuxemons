@@ -18,7 +18,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('avatar_path')->nullable();
+            $table->string('icon_path')->nullable();
+            $table->string('banner_path')->nullable();
+            $table->unsignedInteger('level')->default(1);
+            $table->unsignedInteger('xp')->default(0);
             $table->enum('theme', ['light', 'dark'])->default('light');
             $table->enum('role', ['admin', 'player'])->default('player');
             $table->timestamp('last_seen_at')->nullable();

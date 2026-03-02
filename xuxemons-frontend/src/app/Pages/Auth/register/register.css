@@ -43,7 +43,7 @@
   border: 2.5px solid var(--light-gray-color);
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 32px var(--shadow-color);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -103,7 +103,8 @@
   opacity: 1;
 }
 
-.toggle-password:hover {
+.toggle-password:hover,
+.toggle-password:focus-visible {
   color: var(--text-alt-color);
 }
 
@@ -118,7 +119,7 @@
 
 .input:focus {
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(18, 138, 251, 0.15);
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .input::placeholder {
@@ -132,7 +133,7 @@
 .input-error:focus {
   outline: 3px solid var(--danger-color);
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(208, 24, 27, 0.1) !important;
+  box-shadow: 0 0 0 3px var(--danger-glow) !important;
 }
 
 .error-message {
@@ -166,7 +167,8 @@
   font-weight: 600;
 }
 
-.checkbox-row a:hover {
+.checkbox-row a:hover,
+.checkbox-row a:focus-visible {
   text-decoration: underline;
 }
 
@@ -192,7 +194,8 @@
   margin-top: 0.25rem;
 }
 
-.btn-primary:hover:not(:disabled) {
+.btn-primary:hover:not(:disabled),
+.btn-primary:focus-visible:not(:disabled) {
   filter: brightness(0.9);
   transform: translateY(-1px);
 }
@@ -211,7 +214,7 @@
   display: inline-block;
   width: 24px;
   height: 24px;
-  border: 3px solid rgba(255, 255, 255, 0.35);
+  border: 3px solid var(--white-alpha-35);
   border-top-color: var(--white-color);
   border-radius: 50%;
   animation: btn-spin 0.7s linear infinite;
@@ -236,7 +239,8 @@
   font-weight: 700;
 }
 
-.login-link-text a:hover {
+.login-link-text a:hover,
+.login-link-text a:focus-visible {
   text-decoration: underline;
 }
 

@@ -1,6 +1,6 @@
 <main class="profile-main">
   <div class="profile-banner">
-    <a routerLink="/profile/edit" class="profile-btn-primary profile-edit-btn" aria-label="Edit profile">Edit Profile</a>
+    <a routerLink="/profile/edit" class="btn-primary btn-sm profile-edit-btn" aria-label="Edit profile">Edit Profile</a>
   </div>
 
   <div class="profile-content">
@@ -9,9 +9,6 @@
         <div class="profile-avatar" aria-hidden="true">
           <i class="bi bi-person-fill"></i>
         </div>
-        <button type="button" class="profile-avatar-edit" aria-label="Edit profile picture">
-          <i class="bi bi-pencil-fill"></i>
-        </button>
       </div>
       <div class="profile-hero-info">
         <h1 id="profile-title" class="profile-username">{{ user?.name ?? user?.id ?? 'User' }}</h1>
@@ -23,6 +20,6 @@
       <h2 id="section-title" class="profile-section-title">My Profile</h2>
     </section>
 
-    <button type="button" class="profile-btn-danger" (click)="logout()">Log out</button>
+    <button type="button" class="btn-danger" (click)="logout()">Log out</button>
   </div>
 </main>

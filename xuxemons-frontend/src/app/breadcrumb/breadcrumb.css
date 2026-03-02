@@ -30,7 +30,8 @@
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-.breadcrumb a:hover {
+.breadcrumb a:hover,
+.breadcrumb a:focus-visible {
   background-color: var(--secondary-color);
   color: var(--text-alt-color);
 }

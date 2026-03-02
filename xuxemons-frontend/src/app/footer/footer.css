@@ -80,7 +80,8 @@
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-.footer-col a:hover {
+.footer-col a:hover,
+.footer-col a:focus-visible {
   background-color: var(--secondary-color);
   color: var(--text-alt-color);
 }

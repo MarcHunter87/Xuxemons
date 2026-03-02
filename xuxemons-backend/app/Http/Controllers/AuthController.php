@@ -57,7 +57,7 @@ class AuthController extends Controller
 
         if (!$token = Auth::guard('api')->attempt(['id' => $id, 'password' => $validated['password']])) {
             return response()->json([
-                'message' => 'User ID or password is incorrect. Please try again.'
+                'message' => 'Login failed. Incorrect User or Password'
             ], 401);
         }
 

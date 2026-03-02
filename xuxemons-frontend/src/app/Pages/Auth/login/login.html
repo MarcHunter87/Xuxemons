@@ -7,7 +7,10 @@
     </div>
 
     @if (errorMessage) {
-      <p class="error-message" role="alert" aria-live="polite">{{ errorMessage }}</p>
+      <div class="alert alert-danger" role="alert" aria-live="polite">
+        <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
     }
 
     <div class="form-group">
