@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { AuthService, User } from '../../services/auth';
+import { AuthService, User } from '../../core/services/auth';
 
 @Component({
   selector: 'app-profile',

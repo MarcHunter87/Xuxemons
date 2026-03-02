@@ -1,9 +1,9 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
-import { Header } from './header/header';
-import { Footer } from './footer/footer';
-import { Breadcrumb } from './breadcrumb/breadcrumb';
+import { Header } from './core/layouts/header/header';
+import { Footer } from './core/layouts/footer/footer';
+import { Breadcrumb } from './core/components/breadcrumb/breadcrumb';
 
 @Component({
   selector: 'app-root',
