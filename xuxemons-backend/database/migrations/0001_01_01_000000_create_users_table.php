@@ -24,6 +24,7 @@ return new class extends Migration
             $table->unsignedInteger('xp')->default(0);
             $table->enum('theme', ['light', 'dark'])->default('light');
             $table->enum('role', ['admin', 'player'])->default('player');
+            $table->boolean('is_active')->default(true);
             $table->timestamp('last_seen_at')->nullable();
             $table->unsignedInteger('win_streak')->default(0);
             $table->rememberToken();

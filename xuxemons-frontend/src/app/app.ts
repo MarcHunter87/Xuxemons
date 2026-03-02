@@ -14,6 +14,8 @@ import { Breadcrumb } from './core/components/breadcrumb/breadcrumb';
 })
 export class App implements OnInit, OnDestroy {
   protected readonly showLayout = signal(true);
+  protected readonly showTopBreadcrumb = signal(true);
+  protected readonly isProfilePage = signal(false);
   private sub: { unsubscribe: () => void } | null = null;
 
   constructor(private router: Router) {}
@@ -21,6 +23,8 @@ export class App implements OnInit, OnDestroy {
   private updateShowLayout(): void {
     const url = this.router.url.split('?')[0];
     this.showLayout.set(url !== '/login' && url !== '/register');
+    this.showTopBreadcrumb.set(url !== '/profile');
+    this.isProfilePage.set(url === '/profile');
   }
 
   ngOnInit(): void {

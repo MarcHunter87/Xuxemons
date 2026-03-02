@@ -1,6 +1,4 @@
 import { Routes } from '@angular/router';
-import { Login } from './pages/auth/login/login';
-import { Register } from './pages/auth/register/register';
 import { Home } from './pages/home/home';
 import { Battle } from './pages/battle/battle';
 import { Xuxedex } from './pages/xuxedex/xuxedex';
@@ -11,6 +9,8 @@ import { EditProfile } from './pages/edit-profile/edit-profile';
 import { Admin } from './pages/admin/admin';
 import { authGuard } from './guard/auth-guard';
 import { adminGuard } from './guard/admin-guard';
+import { Register } from './pages/Auth/register/register';
+import { Login } from './pages/Auth/login/login';
 
 export const routes: Routes = [
   {

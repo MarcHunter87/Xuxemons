@@ -1,1 +1,150 @@
-<p>edit-profile works!</p>
+<main class="edit-profile-main">
+	<section class="edit-profile-section" aria-labelledby="edit-profile-title">
+		<h1 id="edit-profile-title" class="visually-hidden">Edit Profile</h1>
+
+		<h2 class="block-title">Banner</h2>
+		<div class="banner-dropzone" role="button" tabindex="0" aria-label="Upload banner image">
+			<i class="bi bi-upload" aria-hidden="true"></i>
+		</div>
+
+		<h2 class="block-title">Profile Picture</h2>
+		<div class="avatar-center-wrap">
+			<div class="profile-avatar" role="img" aria-label="Current profile picture">
+				<i class="bi bi-person-fill" aria-hidden="true"></i>
+			</div>
+			<button type="button" class="avatar-edit-btn" aria-label="Edit profile picture">
+				<i class="bi bi-pencil-fill" aria-hidden="true"></i>
+			</button>
+		</div>
+
+		<section class="form-section" aria-labelledby="personal-information-title">
+			<h2 id="personal-information-title" class="block-title">Personal Information</h2>
+			<p class="section-subtitle">Update your basic profile information visible to your trainer account.</p>
+			<form class="edit-card" [formGroup]="personalInfoForm" novalidate (ngSubmit)="updatePersonalInformation()">
+				<div class="inputs-row">
+					<div class="field-group">
+						<label for="name">Name</label>
+						<input id="name" type="text" formControlName="name" />
+						@if (controlError('personal', 'name'); as nameError) {
+							<p class="form-message form-message-error">{{ nameError }}</p>
+						}
+					</div>
+					<div class="field-group">
+						<label for="surname">Surname</label>
+						<input id="surname" type="text" formControlName="surname" />
+						@if (controlError('personal', 'surname'); as surnameError) {
+							<p class="form-message form-message-error">{{ surnameError }}</p>
+						}
+					</div>
+					<div class="field-group">
+						<label for="email">Email</label>
+						<input id="email" type="email" formControlName="email" />
+						@if (controlError('personal', 'email'); as emailError) {
+							<p class="form-message form-message-error">{{ emailError }}</p>
+						}
+					</div>
+				</div>
+
+				@if (personalInfoError()) {
+					<p class="form-message form-message-error">{{ personalInfoError() }}</p>
+				}
+				@if (personalInfoSuccess()) {
+					<p class="form-message form-message-success" role="status" aria-live="polite">{{ personalInfoSuccess() }}</p>
+				}
+
+				<hr class="section-divider" />
+
+				<div class="actions-row">
+					<button type="button" class="btn-cancel" (click)="resetFormsPersonal()">Reset Personal Information</button>
+					<button type="submit" class="btn-primary btn-sm">Save</button>
+				</div>
+			</form>
+		</section>
+
+		<section class="form-section" aria-labelledby="security-title">
+			<h2 id="security-title" class="block-title">Security</h2>
+			<p class="section-subtitle">Update your trainer information and manage your account security.</p>
+			<form class="edit-card" [formGroup]="passwordForm" novalidate (ngSubmit)="updatePassword()">
+				<div class="field-group field-full">
+					<label for="current-password">Current Password</label>
+					<div class="password-input-wrap">
+						<input id="current-password" [type]="passwordInputType('current_password')" formControlName="current_password" placeholder="Enter your current password"/>
+						<button
+							type="button"
+							class="password-toggle-btn"
+							(click)="togglePasswordVisibility('current_password')"
+							[attr.aria-label]="showPassword.current_password ? 'Hide current password' : 'Show current password'"
+						>
+							<i class="bi" [class.bi-eye]="showPassword.current_password" [class.bi-eye-slash]="!showPassword.current_password" aria-hidden="true"></i>
+						</button>
+					</div>
+				</div>
+
+				<div class="field-group field-full">
+					<label for="new-password">New Password</label>
+					<div class="password-input-wrap">
+						<input id="new-password" [type]="passwordInputType('new_password')" formControlName="new_password" placeholder="Enter your new password"/>
+						<button
+							type="button"
+							class="password-toggle-btn"
+							(click)="togglePasswordVisibility('new_password')"
+							[attr.aria-label]="showPassword.new_password ? 'Hide new password' : 'Show new password'"
+						>
+							<i class="bi" [class.bi-eye]="showPassword.new_password" [class.bi-eye-slash]="!showPassword.new_password" aria-hidden="true"></i>
+						</button>
+					</div>
+					@if (controlError('password', 'new_password'); as newPasswordError) {
+						<p class="form-message form-message-error">{{ newPasswordError }}</p>
+					}
+				</div>
+
+				<div class="field-group field-full">
+					<label for="confirm-password">Confirm Password</label>
+					<div class="password-input-wrap">
+						<input id="confirm-password" [type]="passwordInputType('confirm_password')" formControlName="confirm_password" placeholder="Confirm your password"/>
+						<button
+							type="button"
+							class="password-toggle-btn"
+							(click)="togglePasswordVisibility('confirm_password')"
+							[attr.aria-label]="showPassword.confirm_password ? 'Hide confirm password' : 'Show confirm password'"
+						>
+							<i class="bi" [class.bi-eye]="showPassword.confirm_password" [class.bi-eye-slash]="!showPassword.confirm_password" aria-hidden="true"></i>
+						</button>
+					</div>
+					@if (controlError('password', 'confirm_password'); as confirmPasswordError) {
+						<p class="form-message form-message-error">{{ confirmPasswordError }}</p>
+					}
+				</div>
+
+				@if (passwordError()) {
+					<p class="form-message form-message-error">{{ passwordError() }}</p>
+				}
+				@if (passwordSuccess()) {
+					<p class="form-message form-message-success" role="status" aria-live="polite">{{ passwordSuccess() }}</p>
+				}
+
+				<hr class="section-divider" />
+
+				<div class="actions-row">
+					<button type="button" class="btn-cancel" (click)="resetPasswordForm()">Reset Password</button>
+					<button type="submit" class="btn-primary btn-sm">Save</button>
+				</div>
+			</form>
+		</section>
+
+		<h2 class="block-title block-title-spaced">Danger Zone</h2>
+		<p class="section-subtitle">Actions here are permanent and cannot be undone.</p>
+		<section class="danger-card" aria-labelledby="danger-title">
+			<div>
+				<h3 id="danger-title">Delete your Account</h3>
+				<p>Permanently delete your profile, battle history, and Xuxemons data.</p>
+				@if (deactivateError()) {
+					<p class="danger-error" role="alert">{{ deactivateError() }}</p>
+				}
+			</div>
+			<button type="button" class="btn-danger btn-sm" [disabled]="isDeactivating()" (click)="confirmDeactivateAccount()">
+				{{ isDeactivating() ? 'Deactivating...' : 'Delete Account' }}
+			</button>
+		</section>
+	</section>
+</main>

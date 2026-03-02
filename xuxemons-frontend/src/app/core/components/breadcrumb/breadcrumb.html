@@ -4,7 +4,7 @@
       <li>
         @if (!isLast(i)) {
           <a [routerLink]="item.path">{{ item.label }}</a>
-          <span class="separator" aria-hidden="true">›</span>
+          <span class="separator" aria-hidden="true">></span>
         } @else {
           <span aria-current="page">{{ item.label }}</span>
         }

@@ -25,9 +25,36 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface UpdatePersonalInfoPayload {
+  name: string;
+  surname: string;
+  email: string;
+}
+
+export interface UpdatePasswordPayload {
+  current_password: string;
+  new_password: string;
+}
+
 interface AuthResponse {
   access_token?: string;
   user?: User;
+}
+
+interface UpdatePersonalInfoResponse {
+  message: string;
+  user: User;
+  errors?: Record<string, string[]>;
+}
+
+interface UpdatePasswordResponse {
+  message: string;
+  errors?: Record<string, string[]>;
+}
+
+interface DeactivateAccountResponse {
+  message: string;
+  errors?: Record<string, string[]>;
 }
 
 @Injectable({
@@ -147,6 +174,27 @@ export class AuthService {
       tap(res => {
         this.getStorage()?.setItem('user', JSON.stringify(res.user));
         this.userSubject.next(res.user);
+      })
+    );
+  }
+
+  updatePersonalInfo(data: UpdatePersonalInfoPayload): Observable<UpdatePersonalInfoResponse> {
+    return this.http.put<UpdatePersonalInfoResponse>(`${this.apiUrl}/profile/personalinfo`, data).pipe(
+      tap(res => {
+        this.getStorage()?.setItem('user', JSON.stringify(res.user));
+        this.userSubject.next(res.user);
+      })
+    );
+  }
+
+  updatePassword(data: UpdatePasswordPayload): Observable<UpdatePasswordResponse> {
+    return this.http.put<UpdatePasswordResponse>(`${this.apiUrl}/profile/updatePassword`, data);
+  }
+
+  deactivateAccount(): Observable<DeactivateAccountResponse> {
+    return this.http.put<DeactivateAccountResponse>(`${this.apiUrl}/profile/deactivateAccount`, {}).pipe(
+      tap(() => {
+        this.clearLocalAuth();
       })
     );
   }

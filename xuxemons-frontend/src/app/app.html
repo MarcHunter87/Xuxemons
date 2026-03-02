@@ -3,8 +3,10 @@
 }
 <main class="app-main">
   @if (showLayout()) {
-    <div class="app-content">
-      <app-breadcrumb></app-breadcrumb>
+    <div class="app-content" [class.profile-no-padding-bottom]="isProfilePage()">
+      @if (showTopBreadcrumb()) {
+        <app-breadcrumb></app-breadcrumb>
+      }
       <router-outlet></router-outlet>
     </div>
   } @else {

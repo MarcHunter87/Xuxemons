@@ -2,11 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth';
+import { Breadcrumb } from "../../core/components/breadcrumb/breadcrumb";
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, Breadcrumb],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
