@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { AuthService, User } from '../services/auth';
+import { AuthService, User } from '../../services/auth';
 
 @Component({
   selector: 'app-header',
@@ -19,7 +19,7 @@ export class Header implements OnInit, OnDestroy {
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.sub = this.authService.user$.subscribe(user => {
+    this.sub = this.authService.user$.subscribe((user: User | null) => {
       this.user = user;
       this.isAdmin = user?.role === 'admin';
     });
