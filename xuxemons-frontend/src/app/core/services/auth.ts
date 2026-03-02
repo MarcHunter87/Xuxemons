@@ -10,6 +10,9 @@ export interface User {
   surname: string;
   email: string;
   role: 'admin' | 'player';
+  level: number;
+  xp: number;
+  win_streak: number;
 }
 
 export interface RegisterPayload {
@@ -34,7 +37,7 @@ interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:8080/api';
+  private readonly apiUrl = 'http://localhost:8001/api';
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
@@ -48,12 +51,24 @@ export class AuthService {
 
   private getStoredUser(): User | null {
     const raw = this.getStorage()?.getItem('user');
-    return raw ? (JSON.parse(raw) as User) : null;
+    if (!raw) return null;
+    try {
+      const user = JSON.parse(raw) as User;
+      // Ensure defaults even if not sent by old API versions or cleared local storage
+      return {
+        ...user,
+        level: user.level || 1,
+        xp: user.xp || 0,
+        win_streak: user.win_streak || 0
+      };
+    } catch {
+      return null;
+    }
   }
 
   register(payload: RegisterPayload): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, payload).pipe(
-      tap(res => {
+      tap((res: AuthResponse) => {
         this.saveAuth(res);
         if (res.access_token) {
           this.router.navigate(['/'], { replaceUrl: true });
@@ -64,7 +79,7 @@ export class AuthService {
 
   login(credentials: LoginPayload, rememberMe: boolean = false): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap(res => {
+      tap((res: AuthResponse) => {
         this.saveAuth(res);
         if (res.access_token) {
           if (rememberMe) {
@@ -118,8 +133,14 @@ export class AuthService {
       this.getStorage()?.setItem('token', res.access_token);
     }
     if (res.user) {
-      this.getStorage()?.setItem('user', JSON.stringify(res.user));
-      this.userSubject.next(res.user);
+      const userWithDefaults: User = {
+        ...res.user,
+        level: res.user.level || 1,
+        xp: res.user.xp || 0,
+        win_streak: res.user.win_streak || 0
+      };
+      this.getStorage()?.setItem('user', JSON.stringify(userWithDefaults));
+      this.userSubject.next(userWithDefaults);
     }
   }
 
@@ -144,9 +165,15 @@ export class AuthService {
 
   updateProfile(data: Partial<User & { password?: string }>): Observable<{ user: User }> {
     return this.http.put<{ user: User }>(`${this.apiUrl}/profile`, data).pipe(
-      tap(res => {
-        this.getStorage()?.setItem('user', JSON.stringify(res.user));
-        this.userSubject.next(res.user);
+      tap((res: { user: User }) => {
+        const userWithDefaults: User = {
+          ...res.user,
+          level: res.user.level || 1,
+          xp: res.user.xp || 0,
+          win_streak: res.user.win_streak || 0
+        };
+        this.getStorage()?.setItem('user', JSON.stringify(userWithDefaults));
+        this.userSubject.next(userWithDefaults);
       })
     );
   }
