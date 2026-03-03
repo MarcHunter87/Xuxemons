@@ -11,6 +11,8 @@ class Item extends Model
         'description',
         'effect_type',
         'effect_value',
+        'is_stackable',
+        'max_quantity',
         'status_effect_id',
         'icon_path',
     ];

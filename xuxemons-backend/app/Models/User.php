@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -61,6 +62,14 @@ class User extends Authenticatable implements JWTSubject
             'last_seen_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relación con la mochila del usuario
+     */
+    public function bag(): HasOne
+    {
+        return $this->hasOne(Bag::class, 'user_id', 'id');
     }
 
     public function getJWTIdentifier()

@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->text('description');
-            $table->enum('effect_type', ['Heal', 'DMG Up', 'Defense Up', 'Revive', 'Remove Status Effects']);
+            $table->enum('effect_type', ['Heal', 'DMG Up', 'Defense Up', 'Revive', 'Remove Status Effects', 'Apply Status Effects', 'Evolve']);
             $table->unsignedInteger('effect_value')->nullable();
+            $table->boolean('is_stackable')->default(true);
+            $table->unsignedInteger('max_quantity')->default(5);
             $table->foreignId('status_effect_id')->nullable()->constrained('status_effects')->nullOnDelete();
             $table->string('icon_path');
             $table->timestamps();
