@@ -24,6 +24,8 @@ export class EditProfile {
   passwordSuccess = signal('');
   deactivateError = signal('');
   isDeactivating = signal(false);
+  isSavingPersonalInfo = signal(false);
+  isSavingPassword = signal(false);
   showPassword: Record<'current_password' | 'new_password' | 'confirm_password', boolean> = {
     current_password: false,
     new_password: false,
@@ -75,6 +77,7 @@ export class EditProfile {
       return;
     }
 
+    this.isSavingPersonalInfo.set(true);
     const { name, surname, email } = this.personalInfoForm.getRawValue();
 
     this.authService.updatePersonalInfo({
@@ -83,6 +86,7 @@ export class EditProfile {
       email: (email ?? '').trim(),
     }).subscribe({
       next: ({ message, user }) => {
+        this.isSavingPersonalInfo.set(false);
         this.user = user;
         this.personalInfoForm.patchValue({
           name: user.name,
@@ -93,6 +97,7 @@ export class EditProfile {
         this.cdr.detectChanges();
       },
       error: err => {
+        this.isSavingPersonalInfo.set(false);
         const backendErrors = err?.error?.errors as Record<string, string[]> | undefined;
         this.personalInfoError.set(
           backendErrors?.['email']?.[0]
@@ -132,16 +137,19 @@ export class EditProfile {
       return;
     }
 
+    this.isSavingPassword.set(true);
     this.authService.updatePassword({
       current_password: (current_password ?? '').trim(),
       new_password: (new_password ?? '').trim(),
     }).subscribe({
       next: ({ message }) => {
+        this.isSavingPassword.set(false);
         this.passwordSuccess.set(message || 'Password updated successfully.');
         this.resetPasswordForm(false);
         this.cdr.detectChanges();
       },
       error: err => {
+        this.isSavingPassword.set(false);
         const backendErrors = err?.error?.errors as Record<string, string[]> | undefined;
         this.passwordError.set(
           backendErrors?.['current_password']?.[0]

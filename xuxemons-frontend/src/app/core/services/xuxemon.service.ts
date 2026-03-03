@@ -16,19 +16,19 @@ export class XuxemonService {
             id: 1,
             name: 'Gore Magala',
             type: { name: 'Power' },
-            image_url: 'http://localhost:8001/Xuxemons/Gore Magala.png'
+            image_url: 'http://localhost:8080/xuxemons/Gore Magala.png'
         },
         {
             id: 2,
             name: 'Lagiacrus',
             type: { name: 'Speed' },
-            image_url: 'http://localhost:8001/Xuxemons/Lagiacrus.png'
+            image_url: 'http://localhost:8080/xuxemons/Lagiacrus.png'
         },
         {
             id: 3,
             name: 'Seregios',
             type: { name: 'Technical' },
-            image_url: 'http://localhost:8001/Xuxemons/Seregios.png'
+            image_url: 'http://localhost:8080/xuxemons/Seregios.png'
         }
     ]);
 }

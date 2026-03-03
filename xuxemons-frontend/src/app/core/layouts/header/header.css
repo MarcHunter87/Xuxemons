@@ -85,7 +85,7 @@ nav {
   font-weight: 700;
   background-color: var(--white-color);
   color: var(--accent-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .navbar-right {
@@ -194,7 +194,7 @@ nav {
 
 .profile-link.active {
   background-color: var(--white-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .profile-link.active .profile-name,

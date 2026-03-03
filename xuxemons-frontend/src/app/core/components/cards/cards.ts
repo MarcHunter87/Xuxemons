@@ -13,10 +13,8 @@ export class Cards {
 
   getTypeBadge(): string {
     const type = this.xuxemon?.type?.name || 'Power';
-    let filename = 'Types=Power.svg';
-    if (type === 'Speed') filename = 'Speed 2.svg';
-    if (type === 'Technical') filename = 'Technical 1.svg';
-    return `http://localhost:8001/Badges/${filename}`;
+    const filename = `${type}.svg`;
+    return `http://localhost:8080/badges/${encodeURIComponent(filename)}`;
   }
 
   getTypeClass(): string {

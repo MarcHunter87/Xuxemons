@@ -23,6 +23,7 @@
     --shadow-color: rgba(0, 0, 0, 0.12);
     --accent-glow: rgba(13, 110, 253, 0.15);
     --danger-glow: rgba(208, 24, 27, 0.1);
+    --success-glow: rgba(40, 167, 69, 0.4);
     --danger-bg-alpha: rgba(208, 24, 27, 0.12);
     --danger-border-alpha: rgba(158, 11, 11, 0.35);
     --white-alpha-35: rgba(255, 255, 255, 0.35);
