@@ -1,0 +1,6 @@
+@if (user$ | async; as user) {
+  <div class="stats-card">
+    <span class="label">Total Battles</span>
+    <p class="value">{{ user.total_battles ?? 0 }}</p>
+  </div>
+}

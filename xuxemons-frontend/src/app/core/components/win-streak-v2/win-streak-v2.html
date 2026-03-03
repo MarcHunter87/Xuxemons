@@ -1,0 +1,13 @@
+@if (user$ | async; as user) {
+  <div class="stats-card">
+    <div class="card-header">
+      <div class="header-info">
+        <span class="label">Win Streak</span>
+        <h2 class="streak-text">{{ user.win_streak ?? 0 }}</h2>
+      </div>
+      <div class="badge-icon">
+        <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
+      </div>
+    </div>
+  </div>
+}

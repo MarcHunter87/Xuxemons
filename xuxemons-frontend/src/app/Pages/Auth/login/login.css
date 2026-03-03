@@ -123,7 +123,7 @@
 }
 
 .input::placeholder {
-  color: var(--medium-gray-color);
+  color: var(--text-muted);
 }
 
 .input-error {
@@ -142,7 +142,7 @@
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   animation: slideDown 0.25s ease;
 }
@@ -160,7 +160,7 @@
 }
 
 .error-message {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--danger-color);
   font-weight: 500;
   animation: slideDown 0.25s ease;
@@ -231,7 +231,7 @@
 .register-link {
   text-align: center;
   margin: 0.25rem 0 0;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--dark-gray-color);
 }
 

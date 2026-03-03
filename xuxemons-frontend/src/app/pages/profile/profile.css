@@ -98,7 +98,7 @@
 }
 
 .profile-section-label {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--dark-gray-color);
   margin-bottom: 0.5rem;
 }
@@ -108,4 +108,92 @@
   border-radius: 8px;
   box-shadow: 0 4px 8px var(--shadow-color);
   padding: 1.25rem;
+}
+
+.profile-stats-row {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  width: 100%;
+}
+
+.profile-stats-trainer {
+  flex: 1 1 50%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-stats-trainer app-trainer-lvl {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+.profile-stats-cards {
+  flex: 1 1 50%;
+  min-width: 0;
+  display: flex;
+  gap: 1rem;
+}
+
+.profile-stats-cards .profile-stat-card,
+.profile-stats-cards app-collection,
+.profile-stats-cards app-total-battles {
+  flex: 1 1 0%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.profile-stat-card {
+  background-color: var(--primary-color);
+  border-radius: 16px;
+  padding: 32px;
+  border: 1px solid var(--light-gray-color);
+  box-shadow: 0 4px 6px -1px var(--shadow-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.profile-stat-label {
+  color: var(--dark-gray-color);
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: capitalize;
+  margin-bottom: 6px;
+}
+
+.profile-stat-value {
+  color: var(--text-alt-color);
+  font-size: 44px;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+}
+
+@media (max-width: 900px) {
+  .profile-stats-row {
+    flex-direction: column;
+  }
+
+  .profile-stats-trainer {
+    flex: none;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .profile-stats-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-stats-cards {
+    grid-template-columns: 1fr;
+  }
 }

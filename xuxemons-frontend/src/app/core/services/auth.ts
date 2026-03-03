@@ -14,6 +14,10 @@ export interface User {
   icon_path?: string | null;
   banner_path?: string | null;
   updated_at?: string;
+  level?: number;
+  xp?: number;
+  win_streak?: number;
+  total_battles?: number;
 }
 
 export interface RegisterPayload {

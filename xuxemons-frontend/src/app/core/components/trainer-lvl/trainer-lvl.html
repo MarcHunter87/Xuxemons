@@ -1,0 +1,23 @@
+@if (user$ | async; as user) {
+  <div class="stats-card">
+    <div class="card-header">
+      <div class="header-info">
+        <span class="label">Trainer Level</span>
+        <h2 class="level-text">Lv. {{ getLevel(user) }}</h2>
+      </div>
+      <div class="badge-icon">
+        <i class="bi bi-trophy-fill" aria-hidden="true"></i>
+      </div>
+    </div>
+
+    <div class="xp-section">
+      <div class="xp-info">
+        <span class="xp-numbers">{{ getCurrentXp(user) }} / {{ getNextLevelXp(user) }} XP</span>
+        <span class="percentage-text">{{ getProgressPercentage(user) | number:'1.0-0' }}%</span>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" [style.width.%]="getProgressPercentage(user)"></div>
+      </div>
+    </div>
+  </div>
+}
