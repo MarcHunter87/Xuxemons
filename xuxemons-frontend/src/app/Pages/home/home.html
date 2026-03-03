@@ -5,7 +5,16 @@
       <span class="hero-title-blue">Legendary Creatures</span>
     </h1>
     <p class="hero-desc">
-      Welcome to the ultimate Xuxemon adventure. Collect rare species, master the elements, and rise to the top of the global leaderboards.
+      Welcome to the ultimate Xuxemon adventure. Collect rare species, master the elements, and rise to the top of the
+      global leaderboards.
     </p>
+
+    <div class="stats-container" *ngIf="user$ | async as user">
+      <app-trainer-lvl [level]="user.level || 1" [currentXp]="user.xp || 0" [nextLevelXp]="(user.level || 1) * 100">
+      </app-trainer-lvl>
+
+      <app-win-streak-v1 [streak]="user.win_streak || 0">
+      </app-win-streak-v1>
+    </div>
   </section>
 </main>

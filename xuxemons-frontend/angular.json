@@ -64,6 +64,12 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": [
+              "localhost",
+              "0.0.0.0"
+            ]
+          },
           "configurations": {
             "production": {
               "buildTarget": "xuxemons-frontend:build:production"
