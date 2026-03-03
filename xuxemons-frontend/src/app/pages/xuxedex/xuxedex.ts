@@ -1,14 +1,14 @@
-import { Component } from '@angular/core';
-import { CatalogoXuxemon } from '../../core/components/catalogo-Xuxemon/catalogo-Xuxemon';
+import { Component, inject } from '@angular/core';
 import { FilterXuxedex } from '../../core/components/filter-xuxedex/filter-xuxedex';
-
+import { Cards } from '../../core/components/cards/cards';
+import { XuxemonService } from '../../core/services/xuxemon.service';
 
 @Component({
   selector: 'app-xuxedex',
-  imports: [CatalogoXuxemon, FilterXuxedex],
+  imports: [FilterXuxedex, Cards],
   templateUrl: './xuxedex.html',
   styleUrl: './xuxedex.css',
 })
 export class Xuxedex {
-
+  xuxemons = inject(XuxemonService).xuxemons;
 }

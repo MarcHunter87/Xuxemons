@@ -39,6 +39,7 @@ class UserSeeder extends Seeder
             'email' => 'liqi@gmail.com', 
             'password' => '123456',
             'role' => 'player',
+            'icon_path' => '/users/icons/#Liqi1990.png',
             ],
             ['id' => '#Pau2000', 
             'name' => 'Pau', 

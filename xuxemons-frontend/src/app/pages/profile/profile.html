@@ -40,6 +40,14 @@
       </div>
     </section>
 
+    <section class="profile-xuxe-grid" aria-label="Xuxemon catalog">
+      @for (xuxemon of xuxemons(); track xuxemon.id) {
+        <app-cards [xuxemon]="xuxemon"></app-cards>
+      } @empty {
+        <p class="no-results">No Xuxemons found matching your search.</p>
+      }
+    </section>
+
     <button type="button" class="btn-danger" [disabled]="isLoggingOut()" (click)="logout()" [attr.aria-busy]="isLoggingOut()">
       @if (isLoggingOut()) {
         <span class="btn-loading-icon" aria-hidden="true"></span>
