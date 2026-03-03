@@ -32,6 +32,8 @@ RUN echo 'opcache.enable=1' >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.
 # Create a php.ini with better settings
 RUN echo 'display_errors=Off' >> /usr/local/etc/php/conf.d/app.ini && \
     echo 'log_errors=On' >> /usr/local/etc/php/conf.d/app.ini && \
-    echo 'error_log=/var/log/php_errors.log' >> /usr/local/etc/php/conf.d/app.ini
+    echo 'error_log=/var/log/php_errors.log' >> /usr/local/etc/php/conf.d/app.ini && \
+    echo 'upload_max_filesize=25M' >> /usr/local/etc/php/conf.d/app.ini && \
+    echo 'post_max_size=26M' >> /usr/local/etc/php/conf.d/app.ini
 
 WORKDIR /var/www/html

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -107,21 +108,74 @@ class UserController extends Controller
             /** @var User $user */
             $user = Auth::guard('api')->user();
 
-            $user->is_active = false;
-            $user->save();
+            $user->update(['is_active' => false]);
 
             Auth::guard('api')->logout();
 
             return response()->json([
-                'message' => 'Account deactivated successfully.',
+                'message' => 'Account deleted successfully.',
             ]);
         } catch (Throwable $e) {
             return response()->json([
-                'message' => 'Could not deactivate account',
+                'message' => 'Couldn\'t delete account',
                 'errors' => [
                     'server' => [$e->getMessage()],
                 ],
             ], 500);
+        }
+    }
+
+    public function uploadBanner(Request $request)
+    {
+        return $this->uploadProfileImage($request, 'banner', 'banner_path', 'banners', 15360, 'Banner', 'Couldn\'t upload banner');
+    }
+
+    public function uploadIcon(Request $request)
+    {
+        return $this->uploadProfileImage($request, 'icon', 'icon_path', 'icons', 10240, 'Icon', 'Couldn\'t upload icon');
+    }
+
+    private function uploadProfileImage(Request $request, string $field, string $pathKey, string $dir, int $maxKb, string $label, string $errorMessage): \Illuminate\Http\JsonResponse
+    {
+        try {
+            /** @var User $user */
+            $user = Auth::guard('api')->user();
+
+            $request->validate([
+                $field => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:' . $maxKb,
+            ], [
+                "{$field}.required" => "{$label} image is required.",
+                "{$field}.image" => 'File must be an image.',
+                "{$field}.mimes" => "{$label} must be jpeg, png, jpg, gif, or webp.",
+                "{$field}.max" => "{$label} must be less than " . round($maxKb / 1024) . 'MB.',
+            ]);
+
+            $file = $request->file($field);
+            $ext = $file->getClientOriginalExtension();
+            $filename = $user->id . '.' . $ext;
+            $publicPath = public_path("users/{$dir}");
+
+            if (!file_exists($publicPath)) {
+                mkdir($publicPath, 0755, true);
+            }
+
+            $oldPath = $user->{$pathKey} ? public_path($user->{$pathKey}) : null;
+            if ($oldPath && file_exists($oldPath)) {
+                unlink($oldPath);
+            }
+
+            $file->move($publicPath, $filename);
+            $user->{$pathKey} = "/users/{$dir}/{$filename}";
+            $user->save();
+
+            return response()->json([
+                'message' => "{$label} uploaded successfully.",
+                'user' => $user->fresh(),
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        } catch (Throwable $e) {
+            return response()->json(['message' => $errorMessage, 'errors' => ['server' => [$e->getMessage()]]], 500);
         }
     }
 }

@@ -50,6 +50,21 @@
   animation: slideUp 0.35s ease;
 }
 
+.id-preview {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-alt-color);
+}
+
+.id-preview-label {
+  margin-right: 0.35rem;
+}
+
+.id-preview strong {
+  font-family: monospace;
+  color: var(--accent-color);
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

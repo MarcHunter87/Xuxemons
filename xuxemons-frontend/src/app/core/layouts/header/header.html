@@ -26,12 +26,16 @@
       <a routerLink="/friends" class="icon-btn" aria-label="Friends">
         <i class="bi bi-people-fill"></i>
       </a>
-      <a routerLink="/profile" class="profile-link" aria-label="My Profile">
+      <a routerLink="/profile" routerLinkActive="active" class="profile-link" aria-label="My Profile">
         <div class="avatar" aria-hidden="true">
-          <i class="bi bi-person-fill"></i>
+          @if (iconUrl && !iconLoadError) {
+            <img [src]="iconUrl" alt="Profile icon" (error)="iconLoadError = true">
+          } @else {
+            <i class="bi bi-person-fill"></i>
+          }
         </div>
         <div class="profile-info">
-          <span class="profile-name">{{ getUserName() }}</span>
+          <span class="profile-name">{{ displayName }}</span>
           <span class="profile-sub">My Profile</span>
         </div>
       </a>

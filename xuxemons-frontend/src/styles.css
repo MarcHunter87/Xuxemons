@@ -127,3 +127,19 @@ a.btn-sm {
   font-size: 16px;
   font-weight: 600;
 }
+
+.btn-loading-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--white-alpha-35);
+  border-top-color: var(--white-color);
+  border-radius: 50%;
+  animation: btn-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

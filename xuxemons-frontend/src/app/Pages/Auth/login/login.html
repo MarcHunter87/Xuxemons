@@ -1,7 +1,7 @@
 <section class="login-page">
   <form class="login-card" [formGroup]="loginForm" (ngSubmit)="onSubmit()" aria-label="Login form">
     <div class="brand">
-      <img src="/icons/logo.svg" class="brand-logo" alt="Xuxemons logo" />
+      <img src="/icons/logo.svg" class="brand-logo" alt="Xuxemons logo">
       <h1>Welcome Back</h1>
       <p>Sign in to continue your journey</p>
     </div>
@@ -22,8 +22,9 @@
         placeholder="#NameXXXX"
         class="input"
         [class.input-error]="isFieldInvalid('id')"
-        aria-describedby="userId-error"
-      />
+        [attr.aria-describedby]="isFieldInvalid('id') ? 'userId-error' : null"
+        [attr.aria-invalid]="isFieldInvalid('id')"
+      >
       @if (isFieldInvalid('id')) {
         <span id="userId-error" class="error-message" aria-live="polite">
           {{ getErrorMessage('id') }}
@@ -38,11 +39,12 @@
           [attr.type]="showPassword ? 'text' : 'password'"
           id="loginPassword"
           formControlName="password"
-          placeholder="········"
+          placeholder="********"
           class="input"
           [class.input-error]="isFieldInvalid('password')"
-          aria-describedby="loginPassword-error"
-        />
+          [attr.aria-describedby]="isFieldInvalid('password') ? 'loginPassword-error' : null"
+          [attr.aria-invalid]="isFieldInvalid('password')"
+        >
         <button type="button" class="toggle-password" tabindex="0" (click)="togglePassword()" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
           @if (showPassword) {
             <i class="bi bi-eye-fill" aria-hidden="true"></i>
@@ -59,7 +61,7 @@
     </div>
 
     <label class="checkbox-row" for="rememberMe">
-      <input type="checkbox" id="rememberMe" formControlName="rememberMe" />
+      <input type="checkbox" id="rememberMe" formControlName="rememberMe">
       <span>Remember me</span>
     </label>
 
@@ -71,6 +73,6 @@
       }
     </button>
 
-    <p class="register-link">Don't have an account? <a routerLink="/register">Register Now</a></p>
+    <p class="register-link">Don't have an account? <a href="/register">Register Now</a></p>
   </form>
 </section>

@@ -1,7 +1,8 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth';
 
 @Component({
@@ -11,12 +12,13 @@ import { AuthService } from '../../../core/services/auth';
   templateUrl: './register.html',
   styleUrls: ['./register.css'],
 })
-export class Register {
+export class Register implements OnInit {
   registerForm: FormGroup;
   isLoading = false;
   errorMessage: string | null = null;
   showPassword = false;
   showConfirmPassword = false;
+  idSuffix = '';
 
   constructor(
     private fb: FormBuilder,
@@ -31,6 +33,10 @@ export class Register {
       confirmPassword: ['', [Validators.required]],
       acceptTerms: [false, [Validators.requiredTrue]],
     }, { validators: this.passwordMatchValidator });
+  }
+
+  ngOnInit(): void {
+    this.idSuffix = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
   }
 
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
@@ -51,6 +57,23 @@ export class Register {
   isFieldInvalid(fieldName: string): boolean {
     const control = this.registerForm.get(fieldName);
     return !!(control && control.invalid && control.touched);
+  }
+
+  get idPreview(): string {
+    const name = this.registerForm.get('name')?.value ?? '';
+    const nom = String(name).replace(/\s+/g, '');
+    return nom ? `#${nom}${this.idSuffix}` : `#${this.idSuffix}`;
+  }
+
+  getGeneratedId(): string {
+    const name = this.registerForm.get('name')?.value ?? '';
+    const nom = String(name).replace(/\s+/g, '') || 'User';
+    return `#${nom}${this.idSuffix}`;
+  }
+
+  private getRegisterError(err: { error?: { message?: string; errors?: Record<string, string[]> } }): string {
+    const msg = (Object.values(err?.error?.errors ?? {}) as string[][]).flat()[0];
+    return msg ?? err?.error?.message ?? 'Registration failed. Please try again.';
   }
 
   getErrorMessage(fieldName: string): string {
@@ -75,22 +98,19 @@ export class Register {
     this.errorMessage = null;
 
     this.authService.register({
+      id: this.getGeneratedId(),
       name: this.registerForm.get('name')!.value,
       surname: this.registerForm.get('surname')!.value,
       email: this.registerForm.get('email')!.value,
       password: this.registerForm.get('password')!.value,
       password_confirmation: this.registerForm.get('confirmPassword')!.value,
-    }).subscribe({
-      next: () => {
+    }).pipe(
+      finalize(() => {
         this.isLoading = false;
         this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.errorMessage =
-          err?.error?.message ?? 'Registration failed. Please try again.';
-        this.cdr.detectChanges();
-      }
+      }),
+    ).subscribe({
+      error: (err) => { this.errorMessage = this.getRegisterError(err); },
     });
   }
 }

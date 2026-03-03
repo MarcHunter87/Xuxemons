@@ -1,5 +1,5 @@
 <main class="profile-main">
-  <div class="profile-banner">
+  <div class="profile-banner" [style.background-image]="'url(' + getBannerUrl() + ')'">
     <a routerLink="/profile/edit" class="btn-primary btn-sm profile-edit-btn" aria-label="Edit profile">Edit Profile</a>
   </div>
 
@@ -7,12 +7,16 @@
     <div class="profile-hero">
       <div class="profile-avatar-wrap">
         <div class="profile-avatar" aria-hidden="true">
-          <i class="bi bi-person-fill"></i>
+          @if (getIconUrl(); as iconUrl) {
+            <img [src]="iconUrl" alt="Profile icon" (error)="iconLoadError = true">
+          } @else {
+            <i class="bi bi-person-fill"></i>
+          }
         </div>
       </div>
       <div class="profile-hero-info">
-        <h1 id="profile-title" class="profile-username">{{ user?.name?.toUpperCase() ?? user?.id?.toUpperCase() ?? 'User' }}</h1>
-        <p class="profile-meta">{{ user?.id?.toUpperCase() }}</p>
+        <h1 id="profile-title" class="profile-username">{{ user?.name?.toUpperCase() ?? user?.id ?? 'User' }}</h1>
+        <p class="profile-meta">{{ user?.id }}</p>
       </div>
     </div>
 
@@ -22,6 +26,12 @@
       <h2 id="section-title" class="profile-section-title">My Profile</h2>
     </section>
 
-    <button type="button" class="btn-danger" (click)="logout()">Log out</button>
+    <button type="button" class="btn-danger" [disabled]="isLoggingOut()" (click)="logout()" [attr.aria-busy]="isLoggingOut()">
+      @if (isLoggingOut()) {
+        <span class="btn-loading-icon" aria-hidden="true"></span>
+      } @else {
+        Log out
+      }
+    </button>
   </div>
 </main>

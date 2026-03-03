@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -13,23 +14,33 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
+            'id' => [
+                'required',
+                'string',
+                'max:50',
+                'regex:/^#[A-Za-z0-9]+\d{4}$/',
+                Rule::unique('users', 'id'),
+            ],
             'name' => 'required|string|max:30',
             'surname' => 'required|string|max:30',
-            'email' => 'required|string|email|max:120|unique:users',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:120',
+                Rule::unique('users', 'email')->where('is_active', true),
+            ],
             'password' => 'required|string|min:6',
+        ], [
+            'email.unique' => 'This email is already in use.',
+            'id.unique' => 'This ID is already taken. Please refresh the page to get a new one.',
+            'id.regex' => 'Invalid ID format. It must be #Name plus 4 digits.',
         ]);
-
-        $name = preg_replace('/\s+/', '', $validated['name']) ?? '';
-
-        do {
-            $number = str_pad(random_int(0, 9999), 4, '0', STR_PAD_LEFT);
-            $finalId = "#{$name}{$number}";
-        } while (User::where('id', $finalId)->exists());
 
         $isFirstUser = User::count() === 0;
 
         $user = User::create([
-            'id' => $finalId,
+            'id' => $validated['id'],
             'name' => $validated['name'],
             'surname' => $validated['surname'],
             'email' => $validated['email'],
@@ -63,6 +74,13 @@ class AuthController extends Controller
 
         /** @var User $user */
         $user = Auth::guard('api')->user();
+
+        if (!$user->is_active) {
+            Auth::guard('api')->logout();
+            return response()->json([
+                'message' => 'This account has been deleted.'
+            ], 401);
+        }
 
         return response()->json([
             'access_token' => $token,

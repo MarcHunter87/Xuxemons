@@ -83,6 +83,9 @@ nav {
 
 .nav-links a.active {
   font-weight: 700;
+  background-color: var(--white-color);
+  color: var(--accent-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .navbar-right {
@@ -130,17 +133,24 @@ nav {
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background-color: var(--secondary-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 28px;
   color: var(--black-color);
   overflow: hidden;
   flex-shrink: 0;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .profile-info {
@@ -150,14 +160,14 @@ nav {
 }
 
 .profile-name {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--white-color);
   transition: color 0.25s ease;
 }
 
 .profile-sub {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   color: var(--white-color);
   opacity: 0.9;
@@ -180,4 +190,15 @@ nav {
 .profile-link:focus-visible {
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
+}
+
+.profile-link.active {
+  background-color: var(--white-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.profile-link.active .profile-name,
+.profile-link.active .profile-sub {
+  color: var(--accent-color);
+  opacity: 1;
 }

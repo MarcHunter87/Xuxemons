@@ -1,7 +1,8 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable, tap, BehaviorSubject } from 'rxjs';
+import { Observable, of, tap, BehaviorSubject } from 'rxjs';
+import { delay, catchError, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
 export interface User {
@@ -10,9 +11,13 @@ export interface User {
   surname: string;
   email: string;
   role: 'admin' | 'player';
+  icon_path?: string | null;
+  banner_path?: string | null;
+  updated_at?: string;
 }
 
 export interface RegisterPayload {
+  id: string;
   name: string;
   surname: string;
   email: string;
@@ -67,7 +72,7 @@ export class AuthService {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   private readonly userSubject = new BehaviorSubject<User | null>(this.getStoredUser());
-  user$ = this.userSubject.asObservable();
+  user$ = this.userSubject.pipe(delay(0));
 
   private getStorage(): Storage | null {
     return this.isBrowser ? localStorage : null;
@@ -105,16 +110,20 @@ export class AuthService {
     );
   }
 
-  logout(): void {
+  logout(): Observable<void> {
     const hadToken = !!this.getToken();
     if (hadToken) {
-      this.http.post(`${this.apiUrl}/logout`, {}).subscribe({
-        next: () => this.clearLocalAuth(),
-        error: () => this.clearLocalAuth(),
-      });
-    } else {
-      this.clearLocalAuth();
+      return this.http.post<void>(`${this.apiUrl}/logout`, {}).pipe(
+        tap(() => this.clearLocalAuth()),
+        catchError(() => {
+          this.clearLocalAuth();
+          return of(undefined);
+        }),
+        map(() => undefined)
+      );
     }
+    this.clearLocalAuth();
+    return of(undefined);
   }
 
   private clearLocalAuth(): void {
@@ -126,6 +135,14 @@ export class AuthService {
 
   getToken(): string | null {
     return this.getStorage()?.getItem('token') ?? null;
+  }
+  
+  getAssetUrl(path: string, cacheBust?: string): string {
+    const base = this.apiUrl.replace(/\/api\/?$/, '') || this.apiUrl;
+    const p = path.startsWith('/') ? path : `/${path}`;
+    const encoded = p.split('/').map(segment => encodeURIComponent(segment)).join('/');
+    const url = `${base}${encoded}`;
+    return cacheBust ? `${url}?v=${encodeURIComponent(cacheBust)}` : url;
   }
 
   getUser(): User | null {
@@ -143,6 +160,9 @@ export class AuthService {
   private saveAuth(res: AuthResponse): void {
     if (res.access_token) {
       this.getStorage()?.setItem('token', res.access_token);
+      if (typeof ngDevMode === 'undefined' || ngDevMode) {
+        console.log('JWT guardado en localStorage (login/register)');
+      }
     }
     if (res.user) {
       this.getStorage()?.setItem('user', JSON.stringify(res.user));
@@ -205,5 +225,35 @@ export class AuthService {
         this.clearLocalAuth();
       })
     );
+  }
+
+  private authHeaders(): HttpHeaders {
+    const token = this.getToken();
+    return new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
+  }
+
+  uploadProfileImage(file: File, type: 'banner' | 'icon'): Observable<{ message: string; user: User }> {
+    const ext = (file.name.split('.').pop()?.toLowerCase() ?? 'png').replace(/[^a-z0-9]/g, '') || 'png';
+    const formData = new FormData();
+    formData.append(type, file, `${type}.${ext}`);
+    return this.http.post<{ message: string; user: User }>(
+      `${this.apiUrl}/profile/upload-${type}`,
+      formData,
+      { headers: this.authHeaders() }
+    ).pipe(
+      tap(res => {
+        const user = { ...res.user, updated_at: new Date().toISOString() };
+        this.getStorage()?.setItem('user', JSON.stringify(user));
+        this.userSubject.next(user);
+      })
+    );
+  }
+
+  uploadBanner(file: File): Observable<{ message: string; user: User }> {
+    return this.uploadProfileImage(file, 'banner');
+  }
+
+  uploadIcon(file: File): Observable<{ message: string; user: User }> {
+    return this.uploadProfileImage(file, 'icon');
   }
 }

@@ -3,19 +3,47 @@
 		<h1 id="edit-profile-title" class="visually-hidden">Edit Profile</h1>
 
 		<h2 class="block-title">Banner</h2>
-		<div class="banner-dropzone" role="button" tabindex="0" aria-label="Upload banner image">
-			<i class="bi bi-upload" aria-hidden="true"></i>
+		<input type="file" #bannerInput accept="image/*" class="file-input" (change)="onBannerSelected($event)" aria-hidden="true">
+		<div
+			class="banner-dropzone"
+			[class.has-image]="bannerPreview() !== '/images/default_banner.png'"
+			[style.background-image]="'url(' + bannerPreview() + ')'"
+			role="button"
+			tabindex="0"
+			aria-label="Upload banner image"
+			(click)="openBannerPicker()"
+			(keydown.enter)="openBannerPicker()"
+			(keydown.space)="openBannerPicker()"
+		>
+			@if (isUploadingBanner()) {
+				<span class="upload-spinner" aria-hidden="true"></span>
+			} @else {
+				<i class="bi bi-upload" aria-hidden="true"></i>
+			}
 		</div>
 
 		<h2 class="block-title">Profile Picture</h2>
-		<div class="avatar-center-wrap">
+		<input type="file" #iconInput accept="image/*" class="file-input" (change)="onIconSelected($event)" aria-hidden="true">
+		<div class="avatar-center-wrap" (click)="openIconPicker()">
 			<div class="profile-avatar" role="img" aria-label="Current profile picture">
-				<i class="bi bi-person-fill" aria-hidden="true"></i>
+				@if (iconPreview()) {
+					<img [src]="iconPreview()" alt="Profile icon">
+				} @else {
+					<i class="bi bi-person-fill" aria-hidden="true"></i>
+				}
 			</div>
-			<button type="button" class="avatar-edit-btn" aria-label="Edit profile picture">
-				<i class="bi bi-pencil-fill" aria-hidden="true"></i>
+			<button type="button" class="avatar-edit-btn" aria-label="Edit profile picture" (click)="openIconPicker(); $event.stopPropagation()">
+				@if (isUploadingIcon()) {
+					<span class="upload-spinner-small" aria-hidden="true"></span>
+				} @else {
+					<i class="bi bi-pencil-fill" aria-hidden="true"></i>
+				}
 			</button>
 		</div>
+
+		@if (uploadError()) {
+			<p id="upload-error" class="form-message form-message-error" role="status" aria-live="polite">{{ uploadError() }}</p>
+		}
 
 		<section class="form-section" aria-labelledby="personal-information-title">
 			<h2 id="personal-information-title" class="block-title">Personal Information</h2>
@@ -24,39 +52,39 @@
 				<div class="inputs-row">
 					<div class="field-group">
 						<label for="name">Name</label>
-						<input id="name" type="text" formControlName="name" />
+						<input id="name" type="text" formControlName="name" [attr.aria-describedby]="controlError('personal', 'name') ? 'name-error' : null" [attr.aria-invalid]="!!controlError('personal', 'name')">
 						@if (controlError('personal', 'name'); as nameError) {
-							<p class="form-message form-message-error">{{ nameError }}</p>
+							<p id="name-error" class="form-message form-message-error" role="status" aria-live="polite">{{ nameError }}</p>
 						}
 					</div>
 					<div class="field-group">
 						<label for="surname">Surname</label>
-						<input id="surname" type="text" formControlName="surname" />
+						<input id="surname" type="text" formControlName="surname" [attr.aria-describedby]="controlError('personal', 'surname') ? 'surname-error' : null" [attr.aria-invalid]="!!controlError('personal', 'surname')">
 						@if (controlError('personal', 'surname'); as surnameError) {
-							<p class="form-message form-message-error">{{ surnameError }}</p>
+							<p id="surname-error" class="form-message form-message-error" role="status" aria-live="polite">{{ surnameError }}</p>
 						}
 					</div>
 					<div class="field-group">
 						<label for="email">Email</label>
-						<input id="email" type="email" formControlName="email" />
+						<input id="email" type="email" formControlName="email" [attr.aria-describedby]="controlError('personal', 'email') ? 'email-error' : null" [attr.aria-invalid]="!!controlError('personal', 'email')">
 						@if (controlError('personal', 'email'); as emailError) {
-							<p class="form-message form-message-error">{{ emailError }}</p>
+							<p id="email-error" class="form-message form-message-error" role="status" aria-live="polite">{{ emailError }}</p>
 						}
 					</div>
 				</div>
 
 				@if (personalInfoError()) {
-					<p class="form-message form-message-error">{{ personalInfoError() }}</p>
+					<p id="personal-info-error" class="form-message form-message-error" role="status" aria-live="polite">{{ personalInfoError() }}</p>
 				}
 				@if (personalInfoSuccess()) {
 					<p class="form-message form-message-success" role="status" aria-live="polite">{{ personalInfoSuccess() }}</p>
 				}
 
-				<hr class="section-divider" />
+				<hr class="section-divider">
 
 				<div class="actions-row">
 					<button type="button" class="btn-cancel" (click)="resetFormsPersonal()">Reset Personal Information</button>
-					<button type="submit" class="btn-primary btn-sm">Save</button>
+					<button type="submit" class="btn-primary btn-sm">Save personal information</button>
 				</div>
 			</form>
 		</section>
@@ -68,7 +96,7 @@
 				<div class="field-group field-full">
 					<label for="current-password">Current Password</label>
 					<div class="password-input-wrap">
-						<input id="current-password" [type]="passwordInputType('current_password')" formControlName="current_password" placeholder="Enter your current password"/>
+						<input id="current-password" [type]="passwordInputType('current_password')" formControlName="current_password" placeholder="Enter your current password">
 						<button
 							type="button"
 							class="password-toggle-btn"
@@ -83,7 +111,7 @@
 				<div class="field-group field-full">
 					<label for="new-password">New Password</label>
 					<div class="password-input-wrap">
-						<input id="new-password" [type]="passwordInputType('new_password')" formControlName="new_password" placeholder="Enter your new password"/>
+						<input id="new-password" [type]="passwordInputType('new_password')" formControlName="new_password" placeholder="Enter your new password" [attr.aria-describedby]="controlError('password', 'new_password') ? 'new-password-error' : null" [attr.aria-invalid]="!!controlError('password', 'new_password')">
 						<button
 							type="button"
 							class="password-toggle-btn"
@@ -94,14 +122,14 @@
 						</button>
 					</div>
 					@if (controlError('password', 'new_password'); as newPasswordError) {
-						<p class="form-message form-message-error">{{ newPasswordError }}</p>
+						<p id="new-password-error" class="form-message form-message-error" role="status" aria-live="polite">{{ newPasswordError }}</p>
 					}
 				</div>
 
 				<div class="field-group field-full">
 					<label for="confirm-password">Confirm Password</label>
 					<div class="password-input-wrap">
-						<input id="confirm-password" [type]="passwordInputType('confirm_password')" formControlName="confirm_password" placeholder="Confirm your password"/>
+						<input id="confirm-password" [type]="passwordInputType('confirm_password')" formControlName="confirm_password" placeholder="Confirm your new password" [attr.aria-describedby]="controlError('password', 'confirm_password') ? 'confirm-password-error' : null" [attr.aria-invalid]="!!controlError('password', 'confirm_password')">
 						<button
 							type="button"
 							class="password-toggle-btn"
@@ -112,22 +140,22 @@
 						</button>
 					</div>
 					@if (controlError('password', 'confirm_password'); as confirmPasswordError) {
-						<p class="form-message form-message-error">{{ confirmPasswordError }}</p>
+						<p id="confirm-password-error" class="form-message form-message-error" role="status" aria-live="polite">{{ confirmPasswordError }}</p>
 					}
 				</div>
 
 				@if (passwordError()) {
-					<p class="form-message form-message-error">{{ passwordError() }}</p>
+					<p id="password-error" class="form-message form-message-error" role="status" aria-live="polite">{{ passwordError() }}</p>
 				}
 				@if (passwordSuccess()) {
 					<p class="form-message form-message-success" role="status" aria-live="polite">{{ passwordSuccess() }}</p>
 				}
 
-				<hr class="section-divider" />
+				<hr class="section-divider">
 
 				<div class="actions-row">
 					<button type="button" class="btn-cancel" (click)="resetPasswordForm()">Reset Password</button>
-					<button type="submit" class="btn-primary btn-sm">Save</button>
+					<button type="submit" class="btn-primary btn-sm">Save password</button>
 				</div>
 			</form>
 		</section>
@@ -139,11 +167,15 @@
 				<h3 id="danger-title">Delete your Account</h3>
 				<p>Permanently delete your profile, battle history, and Xuxemons data.</p>
 				@if (deactivateError()) {
-					<p class="danger-error" role="alert">{{ deactivateError() }}</p>
+					<p id="deactivate-error" class="danger-error" role="status" aria-live="polite">{{ deactivateError() }}</p>
 				}
 			</div>
-			<button type="button" class="btn-danger btn-sm" [disabled]="isDeactivating()" (click)="confirmDeactivateAccount()">
-				{{ isDeactivating() ? 'Deactivating...' : 'Delete Account' }}
+			<button type="button" class="btn-danger btn-sm" [disabled]="isDeactivating()" (click)="confirmDeactivateAccount()" [attr.aria-describedby]="deactivateError() ? 'deactivate-error' : null" [attr.aria-busy]="isDeactivating()">
+				@if (isDeactivating()) {
+					<span class="btn-loading-icon" aria-hidden="true"></span>
+				} @else {
+					Delete Account
+				}
 			</button>
 		</section>
 	</section>

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, signal, ElementRef, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, User } from '../../core/services/auth';
 
@@ -9,9 +9,15 @@ import { AuthService, User } from '../../core/services/auth';
   styleUrl: './edit-profile.css',
 })
 export class EditProfile {
+  @ViewChild('bannerInput') bannerInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('iconInput') iconInput!: ElementRef<HTMLInputElement>;
+
   user: User | null = null;
-  bannerPreview: string | null = '/images/default_banner.png';
-  avatarPreview: string | null = null;
+  bannerPreview = signal<string>('/images/default_banner.png');
+  iconPreview = signal<string | null>(null);
+  isUploadingBanner = signal(false);
+  isUploadingIcon = signal(false);
+  uploadError = signal('');
   personalInfoError = signal('');
   personalInfoSuccess = signal('');
   passwordError = signal('');
@@ -50,6 +56,13 @@ export class EditProfile {
       surname: this.user?.surname ?? '',
       email: this.user?.email ?? '',
     });
+
+    if (this.user?.banner_path) {
+      this.bannerPreview.set(this.authService.getAssetUrl(this.user.banner_path, this.user.updated_at));
+    }
+    if (this.user?.icon_path) {
+      this.iconPreview.set(this.authService.getAssetUrl(this.user.icon_path, this.user.updated_at));
+    }
   }
 
   updatePersonalInformation(): void {
@@ -115,7 +128,7 @@ export class EditProfile {
     if ((new_password ?? '') !== (confirm_password ?? '')) {
       confirmControl?.setErrors({ ...(confirmControl?.errors ?? {}), mismatch: true });
       confirmControl?.markAsTouched();
-      this.passwordError.set('New password and confirm password must be the same.');
+      this.passwordError.set('');
       return;
     }
 
@@ -222,7 +235,7 @@ export class EditProfile {
   confirmDeactivateAccount(): void {
     this.deactivateError.set('');
 
-    const confirmed = window.confirm('Are you sure you want to deactivate your account?');
+    const confirmed = window.confirm('Are you sure you want to delete your account?'); //dialog
     if (!confirmed) {
       return;
     }
@@ -239,9 +252,73 @@ export class EditProfile {
         this.deactivateError.set(
           backendErrors?.['server']?.[0]
           ?? err?.error?.message
-          ?? 'Could not deactivate account.'
+          ?? 'Couldn\'t delete account.'
         );
         this.isDeactivating.set(false);
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  openBannerPicker(): void {
+    this.bannerInput.nativeElement.click();
+  }
+
+  openIconPicker(): void {
+    this.iconInput.nativeElement.click();
+  }
+
+  onBannerSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file?.type.startsWith('image/')) {
+      this.uploadImage(file, 'banner', 15 * 1024 * 1024, 'Banner image must be less than 15MB.');
+    } else if (file) {
+      this.uploadError.set('Please select a valid image file.');
+    }
+  }
+
+  onIconSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file?.type.startsWith('image/')) {
+      this.uploadImage(file, 'icon', 10 * 1024 * 1024, 'Icon image must be less than 10MB.');
+    } else if (file) {
+      this.uploadError.set('Please select a valid image file.');
+    }
+  }
+
+  private uploadImage(file: File, type: 'banner' | 'icon', maxBytes: number, sizeError: string): void {
+    if (file.size > maxBytes) {
+      this.uploadError.set(sizeError);
+      return;
+    }
+    this.uploadError.set('');
+    const preview = type === 'banner' ? this.bannerPreview : this.iconPreview;
+    const setUploading = (v: boolean) => (type === 'banner' ? this.isUploadingBanner : this.isUploadingIcon).set(v);
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      preview.set(reader.result as string);
+      this.cdr.detectChanges();
+    };
+    reader.readAsDataURL(file);
+
+    const req = type === 'banner' ? this.authService.uploadBanner(file) : this.authService.uploadIcon(file);
+    req.subscribe({
+      next: () => {
+        this.user = this.authService.getUser();
+        const path = type === 'banner' ? this.user?.banner_path : this.user?.icon_path;
+        if (path && this.user?.updated_at) {
+          preview.set(this.authService.getAssetUrl(path, this.user.updated_at));
+        }
+        setUploading(false);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        const errors = err?.error?.errors as Record<string, string[]> | undefined;
+        const msg = errors?.[type]?.[0] ?? Object.values(errors ?? {})[0]?.[0] ?? err?.error?.message ?? `Could not upload ${type}.`;
+        this.uploadError.set(msg);
+        setUploading(false);
         this.cdr.detectChanges();
       },
     });

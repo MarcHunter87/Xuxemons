@@ -1,7 +1,7 @@
 <section class="register-page">
   <form class="register-card" [formGroup]="registerForm" (ngSubmit)="onSubmit()" aria-label="Register form">
     <div class="brand">
-      <img src="/icons/logo.svg" class="brand-logo" alt="Xuxemons logo" />
+      <img src="/icons/logo.svg" class="brand-logo" alt="Xuxemons logo">
       <h1>Join Our Community</h1>
       <p>Create your account and discover catch them all</p>
     </div>
@@ -9,6 +9,11 @@
     @if (errorMessage) {
       <p class="error-message" role="alert" aria-live="polite">{{ errorMessage }}</p>
     }
+
+    <p class="id-preview" aria-live="polite">
+      <span class="id-preview-label">Your ID will be:</span>
+      <strong id="regIdPreview">{{ idPreview }}</strong>
+    </p>
 
     <div class="form-group">
       <label for="regName" class="label">Name</label>
@@ -19,8 +24,9 @@
         placeholder="Name"
         class="input"
         [class.input-error]="isFieldInvalid('name')"
-        aria-describedby="regName-error"
-      />
+        [attr.aria-describedby]="isFieldInvalid('name') ? 'regName-error' : null"
+        [attr.aria-invalid]="isFieldInvalid('name')"
+      >
       @if (isFieldInvalid('name')) {
         <span id="regName-error" class="error-message" aria-live="polite">
           {{ getErrorMessage('name') }}
@@ -37,8 +43,9 @@
         placeholder="Surname"
         class="input"
         [class.input-error]="isFieldInvalid('surname')"
-        aria-describedby="regSurname-error"
-      />
+        [attr.aria-describedby]="isFieldInvalid('surname') ? 'regSurname-error' : null"
+        [attr.aria-invalid]="isFieldInvalid('surname')"
+      >
       @if (isFieldInvalid('surname')) {
         <span id="regSurname-error" class="error-message" aria-live="polite">
           {{ getErrorMessage('surname') }}
@@ -55,8 +62,9 @@
         placeholder="youremail@address.com"
         class="input"
         [class.input-error]="isFieldInvalid('email')"
-        aria-describedby="regEmail-error"
-      />
+        [attr.aria-describedby]="isFieldInvalid('email') ? 'regEmail-error' : null"
+        [attr.aria-invalid]="isFieldInvalid('email')"
+      >
       @if (isFieldInvalid('email')) {
         <span id="regEmail-error" class="error-message" aria-live="polite">
           {{ getErrorMessage('email') }}
@@ -71,11 +79,12 @@
           [attr.type]="showPassword ? 'text' : 'password'"
           id="regPassword"
           formControlName="password"
-          placeholder="········"
+          placeholder="********"
           class="input"
           [class.input-error]="isFieldInvalid('password')"
-          aria-describedby="regPassword-error"
-        />
+          [attr.aria-describedby]="isFieldInvalid('password') ? 'regPassword-error' : null"
+          [attr.aria-invalid]="isFieldInvalid('password')"
+        >
         <button type="button" class="toggle-password" tabindex="0" (click)="togglePassword()" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
           @if (showPassword) {
             <i class="bi bi-eye-fill" aria-hidden="true"></i>
@@ -98,11 +107,12 @@
           [attr.type]="showConfirmPassword ? 'text' : 'password'"
           id="regConfirmPassword"
           formControlName="confirmPassword"
-          placeholder="········"
+          placeholder="********"
           class="input"
           [class.input-error]="isFieldInvalid('confirmPassword') || (registerForm.errors?.['passwordMismatch'] && registerForm.get('confirmPassword')?.touched)"
-          aria-describedby="regConfirmPassword-error"
-        />
+          [attr.aria-describedby]="(isFieldInvalid('confirmPassword') || (registerForm.errors?.['passwordMismatch'] && registerForm.get('confirmPassword')?.touched)) ? 'regConfirmPassword-error' : null"
+          [attr.aria-invalid]="isFieldInvalid('confirmPassword') || !!(registerForm.errors?.['passwordMismatch'] && registerForm.get('confirmPassword')?.touched)"
+        >
         <button type="button" class="toggle-password" tabindex="0" (click)="toggleConfirmPassword()" [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'">
           @if (showConfirmPassword) {
             <i class="bi bi-eye-fill" aria-hidden="true"></i>
@@ -123,8 +133,8 @@
     </div>
 
     <label class="checkbox-row" [class.checkbox-error]="isFieldInvalid('acceptTerms')">
-      <input type="checkbox" formControlName="acceptTerms" id="regAcceptTerms" aria-describedby="regAcceptTerms-error" />
-      <span>I accept the <a routerLink="/terms">Terms and Conditions</a> and the <a routerLink="/privacy">Privacy Policy</a></span>
+      <input type="checkbox" formControlName="acceptTerms" id="regAcceptTerms" [attr.aria-describedby]="isFieldInvalid('acceptTerms') ? 'regAcceptTerms-error' : null" [attr.aria-invalid]="isFieldInvalid('acceptTerms')">
+      <span>I accept the <a href="/terms">Terms and Conditions</a> and the <a href="/privacy">Privacy Policy</a></span>
     </label>
     @if (isFieldInvalid('acceptTerms')) {
       <span id="regAcceptTerms-error" class="error-message" aria-live="polite">{{ getErrorMessage('acceptTerms') }}</span>
@@ -138,6 +148,6 @@
       }
     </button>
 
-    <p class="login-link-text">Already have an account? <a routerLink="/login">Log in</a></p>
+    <p class="login-link-text">Already have an account? <a href="/login">Log in</a></p>
   </form>
 </section>
