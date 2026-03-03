@@ -1,1 +1,8 @@
-<p>xuxedex works!</p>
+<app-filter-xuxedex></app-filter-xuxedex>
+<div class="xuxe-grid">
+  @for (xuxemon of xuxemons(); track xuxemon.id) {
+    <app-cards [xuxemon]="xuxemon"></app-cards>
+  } @empty {
+    <p class="no-results">No Xuxemons found matching your search.</p>
+  }
+</div>

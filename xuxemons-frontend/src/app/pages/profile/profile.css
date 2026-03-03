@@ -16,7 +16,7 @@
   top: 1.25rem;
   right: max(2rem, calc((100vw - 1280px) / 2 + 2rem));
   border: 2px solid var(--white-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .profile-edit-btn:focus-visible {
@@ -196,4 +196,14 @@
   .profile-stats-cards {
     grid-template-columns: 1fr;
   }
+}
+
+.profile-xuxe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  max-width: 1800px;
+  margin: auto;
+  gap: 25px;
+  padding: 35px;
+  justify-items: center;
 }

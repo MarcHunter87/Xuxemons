@@ -84,7 +84,13 @@
 
 				<div class="actions-row">
 					<button type="button" class="btn-cancel" (click)="resetFormsPersonal()">Reset Personal Information</button>
-					<button type="submit" class="btn-primary btn-sm">Save personal information</button>
+					<button type="submit" class="btn-primary btn-sm" [disabled]="isSavingPersonalInfo()" [attr.aria-busy]="isSavingPersonalInfo()">
+						@if (isSavingPersonalInfo()) {
+							<span class="btn-loading-icon" aria-hidden="true"></span>
+						} @else {
+							Save personal information
+						}
+					</button>
 				</div>
 			</form>
 		</section>
@@ -155,7 +161,13 @@
 
 				<div class="actions-row">
 					<button type="button" class="btn-cancel" (click)="resetPasswordForm()">Reset Password</button>
-					<button type="submit" class="btn-primary btn-sm">Save password</button>
+					<button type="submit" class="btn-primary btn-sm" [disabled]="isSavingPassword()" [attr.aria-busy]="isSavingPassword()">
+						@if (isSavingPassword()) {
+							<span class="btn-loading-icon" aria-hidden="true"></span>
+						} @else {
+							Save password
+						}
+					</button>
 				</div>
 			</form>
 		</section>

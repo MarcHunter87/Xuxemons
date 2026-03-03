@@ -1,0 +1,12 @@
+<div class="card-wrapper" [ngClass]="getTypeClass()">
+    <img [src]="getTypeBadge()" alt="badge" class="badge">
+
+    <div class="card">
+        <div class="card-image">
+            <img [src]="xuxemon?.image_url" [alt]="xuxemon?.name">
+        </div>
+        <div class="card-footer">
+            <h4>{{ xuxemon?.name }}</h4>
+        </div>
+    </div>
+</div>

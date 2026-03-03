@@ -108,7 +108,7 @@ class UserController extends Controller
             /** @var User $user */
             $user = Auth::guard('api')->user();
 
-            $user->update(['is_active' => false]);
+            $user->update(['is_active' => false, 'email' => '']);
 
             Auth::guard('api')->logout();
 
