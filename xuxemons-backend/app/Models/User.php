@@ -36,6 +36,7 @@ class User extends Authenticatable implements JWTSubject
         'is_active',
         'last_seen_at',
         'win_streak',
+        'total_battles',
     ];
 
     /**

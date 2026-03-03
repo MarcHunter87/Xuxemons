@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService, type User } from '../../services/auth';
 
 @Component({
     selector: 'app-trainer-lvl',
@@ -9,11 +10,23 @@ import { CommonModule } from '@angular/common';
     styleUrl: './trainer-lvl.css'
 })
 export class TrainerLvl {
-    @Input() level: number = 0;
-    @Input() currentXp: number = 0;
-    @Input() nextLevelXp: number = 1200;
+    user$ = inject(AuthService).user$;
 
-    get progressPercentage(): number {
-        return Math.min(100, Math.max(0, (this.currentXp / this.nextLevelXp) * 100));
+    getLevel(user: User | null): number {
+        return user?.level ?? 1;
+    }
+
+    getCurrentXp(user: User | null): number {
+        return user?.xp ?? 0;
+    }
+
+    getNextLevelXp(user: User | null): number {
+        return (user?.level ?? 1) * 100;
+    }
+
+    getProgressPercentage(user: User | null): number {
+        const next = this.getNextLevelXp(user);
+        if (!next) return 0;
+        return Math.min(100, Math.max(0, (this.getCurrentXp(user) / next) * 100));
     }
 }

@@ -47,14 +47,14 @@
 }
 
 .brand-desc {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--dark-gray-color);
   line-height: 1.6;
   margin: 0;
 }
 
 .footer-col-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--black-color);
   margin: 0 0 0.75rem;
@@ -70,7 +70,7 @@
 }
 
 .footer-col a {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--info-color);
   text-decoration: none;
   display: inline-block;
@@ -102,7 +102,7 @@
 }
 
 .copyright {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--accent-on-light);
   font-weight: 500;
 }
@@ -111,7 +111,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--accent-on-light);
   font-weight: 500;
 }

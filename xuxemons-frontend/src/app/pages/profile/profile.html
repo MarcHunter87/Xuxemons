@@ -1,6 +1,6 @@
 <main class="profile-main">
   <div class="profile-banner" [style.background-image]="'url(' + getBannerUrl() + ')'">
-    <a routerLink="/profile/edit" class="btn-primary btn-sm profile-edit-btn" aria-label="Edit profile">Edit Profile</a>
+    <a routerLink="/profile/edit" class="btn-primary btn-sm profile-edit-btn">Edit Profile</a>
   </div>
 
   <div class="profile-content">
@@ -24,6 +24,20 @@
 
     <section class="profile-section" aria-labelledby="section-title">
       <h2 id="section-title" class="profile-section-title">My Profile</h2>
+    </section>
+
+    <section class="profile-stats-row" aria-label="Profile statistics">
+      <div class="profile-stats-trainer">
+        <app-trainer-lvl></app-trainer-lvl>
+      </div>
+      <div class="profile-stats-cards">
+        <div class="profile-stat-card">
+          <span class="profile-stat-label">Win Streak</span>
+          <p class="profile-stat-value">{{ user?.win_streak ?? 0 }}</p>
+        </div>
+        <app-collection></app-collection>
+        <app-total-battles></app-total-battles>
+      </div>
     </section>
 
     <button type="button" class="btn-danger" [disabled]="isLoggingOut()" (click)="logout()" [attr.aria-busy]="isLoggingOut()">

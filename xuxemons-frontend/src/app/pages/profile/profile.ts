@@ -2,12 +2,15 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal } from '@angula
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth';
-import { Breadcrumb } from "../../core/components/breadcrumb/breadcrumb";
+import { Breadcrumb } from '../../core/components/breadcrumb/breadcrumb';
+import { TrainerLvl } from '../../core/components/trainer-lvl/trainer-lvl';
+import { Collection } from '../../core/components/collection/collection';
+import { TotalBattles } from '../../core/components/total-battles/total-battles';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink, Breadcrumb],
+  imports: [CommonModule, RouterLink, Breadcrumb, TrainerLvl, Collection, TotalBattles],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })

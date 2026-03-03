@@ -50,7 +50,7 @@
 
 .separator {
   font-size: 16px;
-  color: var(--medium-gray-color);
+  color: var(--text-muted);
   user-select: none;
 }
 

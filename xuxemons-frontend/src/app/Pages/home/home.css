@@ -6,7 +6,6 @@
 
 .home-main {
   background-color: var(--white-color);
-  padding: 2rem;
 }
 
 .hero {
@@ -38,21 +37,21 @@
   color: var(--black-color);
   line-height: 1.7;
   max-width: 520px;
-  margin: 0 0 2rem;
+  margin: 0;
 }
 
-.stats-container {
+.stats-row {
   display: flex;
-  gap: 24px;
-  margin-top: 3rem;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
   width: 100%;
-  max-width: 1200px;
   align-items: stretch;
-  flex-wrap: wrap;
 }
 
-app-trainer-lvl,
-app-win-streak-v1 {
-  flex: 1;
-  min-width: 450px;
+.stats-row app-trainer-lvl,
+.stats-row app-win-streak-v1 {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 200px;
+  height: 100%;
 }
