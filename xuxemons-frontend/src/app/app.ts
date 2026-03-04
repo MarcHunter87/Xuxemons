@@ -31,7 +31,17 @@ export class App implements OnInit, OnDestroy {
     this.updateShowLayout();
     this.sub = this.router.events.pipe(
       filter(e => e.constructor.name === 'NavigationEnd')
-    ).subscribe(() => this.updateShowLayout());
+    ).subscribe(() => {
+      this.updateShowLayout();
+      if (this.showLayout()) {
+        setTimeout(() => {
+          const b = document.body;
+          b.setAttribute('tabindex', '-1');
+          b.focus();
+          b.removeAttribute('tabindex');
+        }, 0);
+      }
+    });
   }
 
   ngOnDestroy(): void {
