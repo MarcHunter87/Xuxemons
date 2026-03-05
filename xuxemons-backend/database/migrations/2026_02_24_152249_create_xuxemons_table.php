@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name', 128)->unique();
             $table->text('description')->nullable();
             $table->foreignId('type_id')->constrained('types');
-            $table->foreignId('status_effect_id')->nullable()->constrained('status_effects')->nullOnDelete();
+            $table->enum('size', ['Small', 'Medium', 'Large'])->default('Small');
             $table->foreignId('attack_1_id')->constrained('attacks');
             $table->foreignId('attack_2_id')->constrained('attacks');
             $table->unsignedInteger('hp')->default(1);
