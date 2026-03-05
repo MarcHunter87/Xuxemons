@@ -10,5 +10,6 @@ import { XuxemonService } from '../../core/services/xuxemon.service';
   styleUrl: './xuxedex.css',
 })
 export class Xuxedex {
-  xuxemons = inject(XuxemonService).xuxemons;
+  public xuxemonService = inject(XuxemonService);
+  xuxemons = this.xuxemonService.displayXuxemons;
 }

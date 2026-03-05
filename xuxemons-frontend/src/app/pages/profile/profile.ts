@@ -1,18 +1,16 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth';
-import { XuxemonService } from '../../core/services/xuxemon.service';
 import { Breadcrumb } from '../../core/components/breadcrumb/breadcrumb';
 import { TrainerLvl } from '../../core/components/trainer-lvl/trainer-lvl';
 import { Collection } from '../../core/components/collection/collection';
 import { TotalBattles } from '../../core/components/total-battles/total-battles';
-import { Cards } from '../../core/components/cards/cards';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink, Breadcrumb, TrainerLvl, Collection, TotalBattles, Cards],
+  imports: [CommonModule, RouterLink, Breadcrumb, TrainerLvl, Collection, TotalBattles],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
@@ -21,13 +19,12 @@ export class Profile implements OnInit, OnDestroy {
   iconLoadError = false;
   bannerLoadError = false;
   isLoggingOut = signal(false);
-  xuxemons = inject(XuxemonService).xuxemons;
   private sub: { unsubscribe: () => void } | null = null;
 
   constructor(
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.user = this.authService.getUser();
@@ -58,7 +55,7 @@ export class Profile implements OnInit, OnDestroy {
   logout(): void {
     this.isLoggingOut.set(true);
     this.authService.logout().subscribe({
-      next: () => {},
+      next: () => { },
       error: () => {
         this.isLoggingOut.set(false);
         this.cdr.detectChanges();

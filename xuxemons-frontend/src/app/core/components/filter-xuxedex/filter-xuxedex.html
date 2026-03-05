@@ -10,15 +10,24 @@
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" placeholder="Search Xuxemons...">
+                <input type="text" placeholder="Search Xuxemons..." [ngModel]="xuxemonService.searchQuery()"
+                    (ngModelChange)="xuxemonService.searchQuery.set($event)">
             </div>
 
             <div class="select-box">
-                <select id="TypeXuxemon">
+                <select id="TypeXuxemon" [ngModel]="xuxemonService.typeXuxemon()"
+                    (ngModelChange)="xuxemonService.typeXuxemon.set($event)">
                     <option value="">All Types</option>
                     <option value="Power">Power</option>
                     <option value="Speed">Speed</option>
                     <option value="Technical">Technical</option>
+                </select>
+            </div>
+            <div class="select-box">
+                <select id="TypeInventory" [ngModel]="xuxemonService.typeInventory()"
+                    (ngModelChange)="xuxemonService.typeInventory.set($event)">
+                    <option value="all">All Xuxemons</option>
+                    <option value="my">My Xuxemons</option>
                 </select>
             </div>
         </div>
