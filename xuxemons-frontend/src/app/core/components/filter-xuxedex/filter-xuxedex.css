@@ -112,13 +112,6 @@
     transition: box-shadow 0.4s ease, filter 0.4s ease;
 }
 
-.type-table-img:hover {
-    box-shadow:
-        0 -25px 50px -8px var(--danger-glow),
-        -25px 0 50px -8px var(--accent-glow),
-        25px 0 50px -8px var(--success-glow);
-    filter: drop-shadow(0 4px 6px var(--shadow-color)) brightness(1.05);
-}
 
 @media (max-width: 900px) {
     .xuxedex-header-container {
