@@ -22,4 +22,5 @@ Route::middleware('auth:api')->group(function () {
     // Rutas de Inventario
     Route::get('/inventory', [InventoryController::class, 'getInventory']);
     Route::get('/inventory/item/{itemId}', [InventoryController::class, 'getInventoryItem']);
+    Route::delete('/inventory/item/{bagItemId}', [InventoryController::class, 'discardItem']);
 });

@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, afterNextRender, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 interface ApiInventoryItem {
   id: string | number;
@@ -33,7 +34,7 @@ interface InventoryItem {
 
 @Component({
   selector: 'app-inventory',
-  imports: [NgClass],
+  imports: [NgClass, FormsModule],
   templateUrl: './inventory.html',
   styleUrl: './inventory.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +60,11 @@ export class Inventory {
   readonly errorMessage = signal<string | null>(null);
   readonly selectedFilter = signal('all');
   readonly availableEffectTypes = signal<string[]>([]);
+  readonly discardMode = signal(false);
+  readonly discardQuantity = signal(1);
+  readonly discardError = signal<string | null>(null);
+  readonly discardApiError = signal<string | null>(null);
+  readonly isDiscarding = signal(false);
 
   readonly emptySlots = computed(() => {
     const remaining = this.maxSlots - this.filteredItems().length;
@@ -192,11 +198,76 @@ export class Inventory {
 
   discardItem(): void {
     const item = this.selectedItem();
-    if (item) {
-      this.items.update(items => items.filter(i => i.id !== item.id));
-      this.filteredItems.update(items => items.filter(i => i.id !== item.id));
-      this.selectedItem.set(null);
+    if (!item || !item.bag_item_id) return;
+
+    if (item.quantity === 1) {
+      this.callDiscardApi(item.bag_item_id, 1);
+    } else {
+      this.discardQuantity.set(1);
+      this.discardError.set(null);
+      this.discardApiError.set(null);
+      this.discardMode.set(true);
     }
+  }
+
+  updateDiscardQuantity(val: number): void {
+    const max = this.selectedItem()?.quantity ?? 1;
+    const parsed = Math.floor(val);
+    this.discardQuantity.set(parsed);
+    this.discardApiError.set(null);
+    if (!parsed || isNaN(parsed)) {
+      this.discardError.set('Please enter a valid number.');
+    } else if (parsed < 1) {
+      this.discardError.set('Quantity must be at least 1.');
+    } else if (parsed > max) {
+      this.discardError.set(`You only have ${max} unit${max > 1 ? 's' : ''} in stock.`);
+    } else {
+      this.discardError.set(null);
+    }
+  }
+
+  confirmDiscard(): void {
+    const item = this.selectedItem();
+    if (!item || !item.bag_item_id) return;
+    const qty = this.discardQuantity();
+    if (qty < 1 || qty > item.quantity || this.discardError()) return;
+    this.callDiscardApi(item.bag_item_id, qty);
+  }
+
+  cancelDiscard(): void {
+    this.discardMode.set(false);
+    this.discardError.set(null);
+    this.discardApiError.set(null);
+  }
+
+  private callDiscardApi(bagItemId: number, quantity: number): void {
+    this.isDiscarding.set(true);
+    this.http.delete<{ message: string; remaining: number }>(
+      `http://localhost:8080/api/inventory/item/${bagItemId}`,
+      { body: { quantity } }
+    ).subscribe({
+      next: (res) => {
+        const item = this.selectedItem()!;
+        if (res.remaining === 0) {
+          this.items.update(items => items.filter(i => i.bag_item_id !== bagItemId));
+          this.filteredItems.update(items => items.filter(i => i.bag_item_id !== bagItemId));
+          this.selectedItem.set(null);
+        } else {
+          const newQty = item.quantity - quantity;
+          const updatedItem = { ...item, quantity: newQty };
+          this.items.update(items => items.map(i => i.id === item.id ? updatedItem : i));
+          this.filteredItems.update(items => items.map(i => i.id === item.id ? updatedItem : i));
+          this.selectedItem.set(updatedItem);
+        }
+        this.discardMode.set(false);
+        this.isDiscarding.set(false);
+      },
+      error: (err) => {
+        const msg = err?.error?.message ?? err?.message ?? 'Unexpected error. Please try again.';
+        this.discardApiError.set(msg);
+        this.isDiscarding.set(false);
+      }
+    });
   }
 
   getSlotClass(item: InventoryItem): string {

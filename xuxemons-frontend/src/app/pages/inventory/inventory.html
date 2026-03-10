@@ -105,11 +105,48 @@
                   (click)="useItem()">
                   Use
                 </button>
-                <button 
-                  class="btn btn-danger btn-lg w-100"
-                  (click)="discardItem()">
-                  Discard
-                </button>
+
+                @if (discardMode()) {
+                  <!-- Quantity Picker -->
+                  <div class="discard-picker">
+                    <p class="discard-label">How many do you want to discard?</p>
+                    <div class="discard-controls">
+                      <button class="qty-btn" (click)="updateDiscardQuantity(discardQuantity() - 1)" [disabled]="discardQuantity() <= 1 || isDiscarding()">−</button>
+                      <input
+                        class="qty-input"
+                        [class.qty-input-error]="discardError()"
+                        type="number"
+                        [ngModel]="discardQuantity()"
+                        (ngModelChange)="updateDiscardQuantity($event)"
+                        min="1"
+                        [max]="selectedItem()!.quantity"
+                        [disabled]="isDiscarding()" />
+                      <button class="qty-btn" (click)="updateDiscardQuantity(discardQuantity() + 1)" [disabled]="discardQuantity() >= selectedItem()!.quantity || isDiscarding()">+</button>
+                    </div>
+                    @if (discardError()) {
+                      <p class="discard-error">⚠ {{ discardError() }}</p>
+                    }
+                    @if (discardApiError()) {
+                      <div class="discard-api-error">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span>{{ discardApiError() }}</span>
+                      </div>
+                    }
+                    <p class="discard-hint">Max: {{ selectedItem()!.quantity }} unit{{ selectedItem()!.quantity > 1 ? 's' : '' }}</p>
+                    <div class="discard-confirm-row">
+                      <button class="btn btn-secondary btn-lg flex-1" (click)="cancelDiscard()" [disabled]="isDiscarding()">Cancel</button>
+                      <button class="btn btn-danger btn-lg flex-1" (click)="confirmDiscard()" [disabled]="isDiscarding() || !!discardError() || discardQuantity() < 1">
+                        @if (isDiscarding()) { Discarding... } @else { Confirm Discard }
+                      </button>
+                    </div>
+                  </div>
+                } @else {
+                  <button 
+                    class="btn btn-danger btn-lg w-100"
+                    (click)="discardItem()">
+                    Discard
+                  </button>
+                }
               </div>
 
               <!-- Info Message -->

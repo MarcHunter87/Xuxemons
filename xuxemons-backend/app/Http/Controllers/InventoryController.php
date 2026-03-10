@@ -193,7 +193,61 @@ class InventoryController extends Controller
     }
 
     /**
-     * Obtiene los slots máximos de la mochila del usuario
+     * Elimina (descarta) una cantidad de un item de la mochila.
+     * Si la cantidad a eliminar iguala o supera la cantidad actual, elimina el BagItem.
+     * Si es menor, resta la cantidad.
+     *
+     * @param Request $request
+     * @param int $bagItemId  ID del BagItem
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function discardItem(Request $request, $bagItemId)
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user) {
+                return response()->json(['message' => 'User not authenticated'], 401);
+            }
+
+            $quantity = (int) $request->input('quantity', 1);
+            if ($quantity < 1) {
+                return response()->json(['message' => 'Quantity must be at least 1'], 422);
+            }
+
+            $bag = Bag::where('user_id', $user->id)->first();
+
+            if (!$bag) {
+                return response()->json(['message' => 'User does not have a bag'], 404);
+            }
+
+            $bagItem = BagItem::where('id', $bagItemId)
+                ->where('bag_id', $bag->id)
+                ->first();
+
+            if (!$bagItem) {
+                return response()->json(['message' => 'Item not found in inventory'], 404);
+            }
+
+            if ($quantity >= $bagItem->quantity) {
+                $bagItem->delete();
+                return response()->json(['message' => 'Item removed from inventory', 'remaining' => 0], 200);
+            }
+
+            $bagItem->quantity -= $quantity;
+            $bagItem->save();
+
+            return response()->json([
+                'message' => 'Item quantity updated',
+                'remaining' => $bagItem->quantity
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error discarding item', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Calcula slots considerando items stackeables vs no stackeables y max_quantity
      * 
      * @return \Illuminate\Http\JsonResponse

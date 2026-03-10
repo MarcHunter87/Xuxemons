@@ -501,6 +501,126 @@
   margin-top: auto;
 }
 
+/* Discard quantity picker */
+.discard-picker {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.07) 0%, rgba(220, 38, 38, 0.04) 100%);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  animation: fadeInUp 0.2s ease;
+}
+
+.discard-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--danger-color);
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.discard-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.qty-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--danger-color);
+  background: transparent;
+  color: var(--danger-color);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-btn:hover:not(:disabled) {
+  background: var(--danger-color);
+  color: white;
+}
+
+.qty-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.qty-input {
+  width: 64px;
+  text-align: center;
+  border: 2px solid var(--danger-color);
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-alt-color);
+  background: var(--primary-color);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.qty-input.qty-input-error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+}
+
+.qty-input::-webkit-inner-spin-button,
+.qty-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.discard-confirm-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.discard-error {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #dc2626;
+  text-align: center;
+  margin: 0 0 0.4rem;
+}
+
+.discard-api-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(220, 38, 38, 0.06) 100%);
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #dc2626;
+  animation: slideDown 0.25s ease;
+}
+
+.discard-api-error i {
+  flex-shrink: 0;
+  font-size: 0.95rem;
+}
+
+.discard-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0 0 0.75rem;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-on-light) 100%);
   border: none;
