@@ -46,6 +46,10 @@
     transition: transform 6s cubic-bezier(0.1, 0, 0.1, 1);
 }
 
+.roulette-track.no-transition {
+    transition: none !important;
+}
+
 .roulette-item {
     min-width: 188px;
     height: 100%;

@@ -8,7 +8,7 @@
 
     <ng-container *ngIf="rouletteItems().length > 0">
         <div class="roulette-box">
-            <div class="roulette-track" [class.spinning]="isSpinning()" [style.transform]="trackTransform()">
+            <div class="roulette-track" [class.spinning]="isSpinning()" [class.no-transition]="noTransition()" [style.transform]="trackTransform()">
                 <div *ngFor="let item of rouletteItems()" class="roulette-item"
                     [style.background-color]="getTypeColor(item.type.name)">
                     <img [src]="item.image_url" [alt]="item.name">

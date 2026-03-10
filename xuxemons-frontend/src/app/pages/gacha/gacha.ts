@@ -13,28 +13,27 @@ export class Gacha implements OnInit {
     private xuxemonService = inject(XuxemonService);
 
     public isSpinning = signal(false);
+    public noTransition = signal(false);
     public awardedXuxemon = signal<Xuxemon | null>(null);
     public showAward = signal(false);
-    public toastXuxemon = signal<Xuxemon | null>(null);
     public rouletteItems = signal<Xuxemon[]>([]);
     public trackTransform = signal<string>('translateX(0)');
     public isDataLoaded = signal(false);
 
     ngOnInit() {
-        this.refreshRoulette();
+        this.loadRoulette();
     }
 
-    async refreshRoulette() {
+    async loadRoulette() {
         await this.xuxemonService.loadAllXuxemons();
         this.isDataLoaded.set(true);
         this.initRoulette();
     }
 
     initRoulette() {
-        const currentList = this.xuxemonService.xuxemonsList();
-        if (currentList.length > 0) {
-            const initialList = Array.from({ length: 100 }, () => currentList[Math.floor(Math.random() * currentList.length)]);
-            this.rouletteItems.set(initialList);
+        const list = this.xuxemonService.xuxemonsList();
+        if (list.length > 0) {
+            this.rouletteItems.set(Array.from({ length: 100 }, () => list[Math.floor(Math.random() * list.length)]));
         } else {
             this.rouletteItems.set([]);
         }
@@ -43,20 +42,22 @@ export class Gacha implements OnInit {
     async spin() {
         if (this.isSpinning()) return;
 
+        this.showAward.set(false);
         this.awardedXuxemon.set(null);
-
         this.isSpinning.set(true);
-        this.trackTransform.set('translateX(0)');
-        setTimeout(() => {
-            this.trackTransform.set('translateX(-3000px)');
-        }, 50);
 
-        const winner = await this.xuxemonService.awardRandomXuxemon();
+        this.noTransition.set(true);
+        this.trackTransform.set('translateX(0)');
+        this.initRoulette();
+
+        const winnerPromise = this.xuxemonService.awardRandomXuxemon();
+
+        const winner = await winnerPromise;
 
         if (!winner) {
             this.isSpinning.set(false);
-            this.trackTransform.set('translateX(0)');
-            alert("Session expired or error. Please log out and log in again.");
+            this.noTransition.set(false);
+            alert('Session expired or error. Please log out and log in again.');
             return;
         }
 
@@ -67,29 +68,27 @@ export class Gacha implements OnInit {
         });
 
         setTimeout(() => {
-            const itemWidth = 188;
-            const containerWidth = 1000;
-            const winnerIndex = 80;
-            const offset = -(winnerIndex * itemWidth) + (containerWidth / 2) - (itemWidth / 2);
-            this.trackTransform.set(`translateX(${offset}px)`);
-        }, 5800);
+            this.noTransition.set(false);
+            setTimeout(() => {
+                const itemWidth = 188;
+                const containerWidth = 1000;
+                const offset = -(80 * itemWidth) + (containerWidth / 2) - (itemWidth / 2);
+                this.trackTransform.set(`translateX(${offset}px)`);
+            }, 20);
+        }, 50);
 
         setTimeout(() => {
             this.isSpinning.set(false);
             this.awardedXuxemon.set(winner);
-            setTimeout(() => {
-                this.showAward.set(true);
-                this.toastXuxemon.set(winner);
-                setTimeout(() => this.toastXuxemon.set(null), 4000);
-            }, 1000);
+            this.showAward.set(true);
         }, 6200);
     }
 
     getTypeColor(typeName: string): string {
         switch (typeName) {
-            case 'Power': return '#ff4757'; // Red
-            case 'Speed': return '#1e90ff'; // Blue
-            case 'Technical': return '#2ed573'; // Green
+            case 'Power': return '#ff4757';
+            case 'Speed': return '#1e90ff';
+            case 'Technical': return '#2ed573';
             default: return '#eee';
         }
     }
@@ -97,7 +96,5 @@ export class Gacha implements OnInit {
     closeModal() {
         this.showAward.set(false);
         this.awardedXuxemon.set(null);
-        this.trackTransform.set('translateX(0)');
-        this.initRoulette();
     }
 }
