@@ -16,7 +16,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
+            ItemSeeder::class,
             TypeSeeder::class,
+            BagSeeder::class,
             StatusEffectSeeder::class,
             AttackSeeder::class,
             XuxemonSeeder::class,
