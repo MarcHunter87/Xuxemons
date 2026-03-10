@@ -1,0 +1,10 @@
+.xuxe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    max-width: 1800px;
+    margin: auto;
+    gap: 25px;
+    padding: 35px;
+    justify-items: center;
+
+}
