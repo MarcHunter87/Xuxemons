@@ -18,6 +18,7 @@ export class Gacha implements OnInit {
     public toastXuxemon = signal<Xuxemon | null>(null);
     public rouletteItems = signal<Xuxemon[]>([]);
     public trackTransform = signal<string>('translateX(0)');
+    public isDataLoaded = signal(false);
 
     ngOnInit() {
         this.refreshRoulette();
@@ -25,6 +26,7 @@ export class Gacha implements OnInit {
 
     async refreshRoulette() {
         await this.xuxemonService.loadAllXuxemons();
+        this.isDataLoaded.set(true);
         this.initRoulette();
     }
 
@@ -34,7 +36,7 @@ export class Gacha implements OnInit {
             const initialList = Array.from({ length: 100 }, () => currentList[Math.floor(Math.random() * currentList.length)]);
             this.rouletteItems.set(initialList);
         } else {
-            setTimeout(() => this.initRoulette(), 1000);
+            this.rouletteItems.set([]);
         }
     }
 
@@ -53,6 +55,8 @@ export class Gacha implements OnInit {
 
         if (!winner) {
             this.isSpinning.set(false);
+            this.trackTransform.set('translateX(0)');
+            alert("Session expired or error. Please log out and log in again.");
             return;
         }
 

@@ -54,11 +54,16 @@ class XuxemonController extends Controller
         }
 
         try {
+            $bonusDefense = rand(1, 20);
+            $bonusHp = rand(1, 40);
+
             AdquiredXuxemon::create([
                 'user_id' => $userId,
                 'xuxemon_id' => $randomXuxemon->id,
                 'level' => 1,
                 'experience' => 0,
+                'bonus_hp' => $bonusHp,
+                'bonus_defense' => $bonusDefense,
             ]);
             Log::info('awardRandom: Success for user ' . $userId);
         } catch (\Exception $e) {

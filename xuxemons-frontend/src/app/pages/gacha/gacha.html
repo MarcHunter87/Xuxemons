@@ -1,48 +1,32 @@
 <div class="gacha-container">
-    <h1 class="main-title">Gacha Xuxemon</h1>
-    <p class="subtitle">¡Prueba tu suerte y consigue un nuevo Xuxemon!</p>
+    <h1 class="main-title">Gacha</h1>
+    <p class="subtitle">Try your luck!</p>
 
-    <div class="roulette-box">
-        <div class="roulette-track" [class.spinning]="isSpinning()" [style.transform]="trackTransform()">
-            <div *ngFor="let item of rouletteItems()" class="roulette-item"
-                [style.background-color]="getTypeColor(item.type.name)">
-                <img [src]="item.image_url" [alt]="item.name">
-                <span>{{ item.name }}</span>
-            </div>
-        </div>
-        <div class="roulette-pointer"></div>
+    <div *ngIf="isDataLoaded() && rouletteItems().length === 0" class="empty-db-message">
+        <h2>No Xuxemons available</h2>
     </div>
 
-    <button class="spin-button" [disabled]="isSpinning()" (click)="spin()">
-        {{ isSpinning() ? 'Girando...' : 'Girar Ruleta' }}
-    </button>
-
-    <div class="modal-overlay" *ngIf="showAward()">
-        <div class="modal-content">
-            <h1 class="main-title">¡FELICIDADES!</h1>
-            <p class="subtitle">Has conseguido un nuevo Xuxemon:</p>
-
-            <div class="winner-display">
-                <div class="image-wrapper">
-                    <img [src]="awardedXuxemon()?.image_url" [alt]="awardedXuxemon()?.name"
-                        [style.filter]="'drop-shadow(0 0 35px ' + getTypeColor(awardedXuxemon()?.type?.name || '') + '80)'">
+    <ng-container *ngIf="rouletteItems().length > 0">
+        <div class="roulette-box">
+            <div class="roulette-track" [class.spinning]="isSpinning()" [style.transform]="trackTransform()">
+                <div *ngFor="let item of rouletteItems()" class="roulette-item"
+                    [style.background-color]="getTypeColor(item.type.name)">
+                    <img [src]="item.image_url" [alt]="item.name">
+                    <span>{{ item.name }}</span>
                 </div>
-                <h2 class="winner-name">{{ awardedXuxemon()?.name }}</h2>
-                <span class="type-badge" [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name || '')">
-                    {{ awardedXuxemon()?.type?.name }}
-                </span>
             </div>
-
-            <button class="btn-primary recoger-button" (click)="closeModal()">
-                RECOGER
-            </button>
+            <div class="roulette-pointer"></div>
         </div>
-    </div>
 
-    <div class="toast" *ngIf="toastXuxemon()">
-        <img [src]="toastXuxemon()?.image_url" [alt]="toastXuxemon()?.name">
-        <div class="toast-text">
-            Has conseguido {{ toastXuxemon()?.name }}
-        </div>
+        <button class="spin-button" [disabled]="isSpinning()" (click)="spin()">
+            Spin
+        </button>
+    </ng-container>
+
+    <div *ngIf="showAward()" style="margin-top: 20px; padding: 20px; border: 2px solid #ccc; border-radius: 10px; text-align: center; background: #fff;">
+        <h2>Has recibido: {{ awardedXuxemon()?.name }}</h2>
+        <img [src]="awardedXuxemon()?.image_url" [alt]="awardedXuxemon()?.name" style="width: 150px; height: 150px; margin: 10px 0;">
+        <br>
+        <button (click)="closeModal()" class="btn-primary" style="padding: 10px 30px; font-size: 1.2rem;">OK</button>
     </div>
 </div>
