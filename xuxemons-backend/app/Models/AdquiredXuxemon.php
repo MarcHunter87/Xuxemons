@@ -13,6 +13,11 @@ class AdquiredXuxemon extends Model
         'experience',
     ];
 
+    public function xuxemon()
+    {
+        return $this->belongsTo(Xuxemon::class);
+    }
+
     public function getHpAttribute(): int
     {
         $base = $this->xuxemon?->hp ?? 1;

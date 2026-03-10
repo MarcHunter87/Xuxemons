@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-cards',
@@ -10,11 +11,12 @@ import { CommonModule } from '@angular/common';
 })
 export class Cards {
   @Input() xuxemon: any;
+  private auth = inject(AuthService);
 
   getTypeBadge(): string {
     const type = this.xuxemon?.type?.name || 'Power';
     const filename = `${type}.svg`;
-    return `http://localhost:8080/badges/${encodeURIComponent(filename)}`;
+    return this.auth.getAssetUrl(`/badges/${encodeURIComponent(filename)}`);
   }
 
   getTypeClass(): string {

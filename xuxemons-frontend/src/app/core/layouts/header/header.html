@@ -14,14 +14,15 @@
         <li><a routerLink="/battle" routerLinkActive="active">Battle</a></li>
         <li><a routerLink="/xuxedex" routerLinkActive="active">Xuxedex</a></li>
         <li><a routerLink="/inventory" routerLinkActive="active">Inventory</a></li>
+        <li><a routerLink="/gacha" routerLinkActive="active">Gacha</a></li>
       </ul>
     </nav>
 
     <div class="navbar-right">
       @if (isAdmin) {
-        <a routerLink="/admin" class="icon-btn" aria-label="Admin panel">
-          <i class="bi bi-shield-fill-check"></i>
-        </a>
+      <a routerLink="/admin" class="icon-btn" aria-label="Admin panel">
+        <i class="bi bi-shield-fill-check"></i>
+      </a>
       }
       <a routerLink="/friends" class="icon-btn" aria-label="Friends">
         <i class="bi bi-people-fill"></i>
@@ -29,9 +30,9 @@
       <a routerLink="/profile" routerLinkActive="active" class="profile-link" aria-label="My Profile">
         <div class="avatar" aria-hidden="true">
           @if (iconUrl && !iconLoadError) {
-            <img [src]="iconUrl" alt="Profile icon" (error)="iconLoadError = true">
+          <img [src]="iconUrl" alt="Profile icon" (error)="iconLoadError = true">
           } @else {
-            <i class="bi bi-person-fill"></i>
+          <i class="bi bi-person-fill"></i>
           }
         </div>
         <div class="profile-info">

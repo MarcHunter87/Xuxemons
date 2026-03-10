@@ -18,7 +18,7 @@ export class App implements OnInit, OnDestroy {
   protected readonly isProfilePage = signal(false);
   private sub: { unsubscribe: () => void } | null = null;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   private updateShowLayout(): void {
     const url = this.router.url.split('?')[0];
@@ -35,10 +35,12 @@ export class App implements OnInit, OnDestroy {
       this.updateShowLayout();
       if (this.showLayout()) {
         setTimeout(() => {
-          const b = document.body;
-          b.setAttribute('tabindex', '-1');
-          b.focus();
-          b.removeAttribute('tabindex');
+          if (typeof document !== 'undefined') {
+            const b = document.body;
+            b.setAttribute('tabindex', '-1');
+            b.focus();
+            b.removeAttribute('tabindex');
+          }
         }, 0);
       }
     });

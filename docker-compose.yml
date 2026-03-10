@@ -60,7 +60,7 @@ services:
   # ANGULAR
   # =====================
   frontend:
-    image: node:latest
+    image: node:20
     container_name: xuxemons_angular_app
     working_dir: /app
     environment:
