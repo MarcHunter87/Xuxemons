@@ -31,11 +31,20 @@ class BagSeeder extends Seeder
         // Asignar un item de cada tipo a la mochila de Liqi
         $liqi_bag = Bag::where('user_id', '#Liqi1990')->first();
         
-        foreach ($items as $item) {
+        foreach ($items as $index => $item) {
+            // Determinar la cantidad basada en el tipo de item y su posición
+            if (strtolower($item->effect_type) === 'revive') {
+                $quantity = 1; // Revive siempre tiene cantidad 1
+            } elseif ($index === 0) {
+                $quantity = 6; // Primer item tiene 6
+            } else {
+                $quantity = 5; // Resto tienen 5
+            }
+            
             BagItem::create([
                 'bag_id' => $liqi_bag->id,
                 'item_id' => $item->id,
-                'quantity' => 2,
+                'quantity' => $quantity,
             ]);
         }
     }

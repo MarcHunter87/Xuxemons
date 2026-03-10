@@ -15,7 +15,7 @@ class ItemSeeder extends Seeder
     {
         Item::create([
             'name' => 'Healing Potion',
-            'description' => 'A glowing green potion that immediately restores a portion of your Xuxemon\'s health points during a battle.',
+            'description' => 'A glowing green potion that restores a portion of your Xuxemon\'s health points during battle.',
             'effect_type' => 'Heal',
             'effect_value' => 20,
             'is_stackable' => true,
@@ -26,7 +26,7 @@ class ItemSeeder extends Seeder
 
         Item::create([
             'name' => 'Max Potion',
-            'description' => 'A brilliant azure potion that completely restores a Xuxemon\'s health points in a single dose during battle.',
+            'description' => 'A brilliant azure potion that completely restores a Xuxemon\'s full health in a single dose.',
             'effect_type' => 'Heal',
             'effect_value' => 100,
             'is_stackable' => true,
@@ -37,7 +37,7 @@ class ItemSeeder extends Seeder
 
         Item::create([
             'name' => 'Healing Herb',
-            'description' => 'A fragrant emerald herb that gently restores a portion of your Xuxemon\'s health during intense battles.',
+            'description' => 'A fragrant emerald herb that gently restores a portion of your Xuxemon\'s health during battles.',
             'effect_type' => 'Heal',
             'effect_value' => 20,
             'is_stackable' => true,
@@ -48,7 +48,7 @@ class ItemSeeder extends Seeder
 
         Item::create([
             'name' => 'DMG Potion',
-            'description' => 'A fiery crimson potion that temporarily amplifies a Xuxemon\'s attack power, dealing increased damage throughout the battle.',
+            'description' => 'A fiery crimson potion that temporarily amplifies a Xuxemon\'s attack power and damage output.',
             'effect_type' => 'DMG Up',
             'effect_value' => 10,
             'is_stackable' => true,
@@ -59,7 +59,7 @@ class ItemSeeder extends Seeder
 
         Item::create([
             'name' => 'Defense Potion',
-            'description' => 'A shimmering golden potion that hardens a Xuxemon\'s defenses, reducing damage taken during combat.',
+            'description' => 'A shimmering golden potion that hardens a Xuxemon\'s defenses and reduces damage taken.',
             'effect_type' => 'Defense Up',
             'effect_value' => 10,
             'is_stackable' => true,
@@ -70,7 +70,7 @@ class ItemSeeder extends Seeder
 
         Item::create([
             'name' => 'Revive',
-            'description' => 'A precious crystalline orb that brings a fainted Xuxemon back to consciousness with full vigor and vitality.',
+            'description' => 'A precious crystalline orb that brings a fainted Xuxemon back to consciousness with full vigor.',
             'effect_type' => 'Revive',
             'effect_value' => 100,
             'is_stackable' => false,
@@ -81,18 +81,18 @@ class ItemSeeder extends Seeder
 
         Item::create([
             'name' => 'Nulberry',
-            'description' => 'A mystical purple berry that instantly purges all negative status conditions and ailments from a Xuxemon.',
+            'description' => 'A mystical purple berry that instantly purges all negative status conditions and ailments.',
             'effect_type' => 'Remove Status Effects',
             'effect_value' => null,
-            'is_stackable' => true,
-            'max_quantity' => 5,
+            'is_stackable' => false,
+            'max_quantity' => 1,
             'status_effect_id' => null,
             'icon_path' => 'items/nulberry.png',
         ]);
 
         Item::create([
             'name' => 'Flash',
-            'description' => 'A blinding burst of brilliant light that obscures an opponent Xuxemon\'s vision, significantly reducing their attack accuracy.',
+            'description' => 'A blinding burst of light that obscures an opponent\'s vision and reduces their attack accuracy.',
             'effect_type' => 'Apply Status Effects',
             'effect_value' => 50,
             'is_stackable' => true,
@@ -103,7 +103,7 @@ class ItemSeeder extends Seeder
 
         Item::create([
             'name' => 'Paralyzing Knife',
-            'description' => 'A venomous blade that strikes quickly and induces temporary paralysis on an opponent Xuxemon, severely limiting their mobility.',
+            'description' => 'A venomous blade that induces temporary paralysis on an opponent Xuxemon, limiting their mobility.',
             'effect_type' => 'Apply Status Effects',
             'effect_value' => 40,
             'is_stackable' => true,
@@ -114,7 +114,7 @@ class ItemSeeder extends Seeder
 
         Item::create([
             'name' => 'Sleeping Knife',
-            'description' => 'A razor-sharp blade laced with a soporific toxin that swiftly puts an opponent Xuxemon into a deep, restful slumber.',
+            'description' => 'A razor-sharp blade laced with soporific toxin that puts an opponent Xuxemon into deep slumber.',
             'effect_type' => 'Apply Status Effects',
             'effect_value' => 40,
             'is_stackable' => true,
@@ -124,7 +124,7 @@ class ItemSeeder extends Seeder
         ]);
         Item::create([
             'name' => 'Special Meat',
-            'description' => 'A rare and exquisite delicacy that provides extraordinary nourishment and mysterious enhancements to a Xuxemon\'s overall prowess.',
+            'description' => 'A rare delicacy that provides nourishment and mysterious enhancements to a Xuxemon\'s prowess.',
             'effect_type' => 'Evolve',
             'effect_value' => 20,
             'is_stackable' => true,

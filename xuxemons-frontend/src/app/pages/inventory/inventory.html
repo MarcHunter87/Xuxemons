@@ -1,5 +1,5 @@
   <!-- Loading Animation -->
-  @if (isLoading) {
+  @if (isLoading()) {
     <div class="loading-container">
       <div class="spinner"></div>
       <p class="loading-text">Loading your inventory...</p>
@@ -7,24 +7,51 @@
   }
 
   <!-- Error Message -->
-  @if (errorMessage && !isLoading) {
+  @if (errorMessage() && !isLoading()) {
     <div class="error-message">
       <i class="bi bi-exclamation-triangle"></i>
-      <p>{{ errorMessage }}</p>
+      <p>{{ errorMessage() }}</p>
     </div>
   }
 
   <!-- Inventory Content -->
-  @if (!isLoading) {
+  @if (!isLoading()) {
+    <!-- Title Section -->
+    <div class="inventory-header">
+      <h1 class="inventory-title">My Inventory</h1>
+      <p class="inventory-subtitle">Manage your items and equipment</p>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <label class="filter-label">Filter by Type:</label>
+      <div class="filter-buttons">
+        <button 
+          class="filter-btn"
+          [class.active]="selectedFilter() === 'all'"
+          (click)="applyFilter('all')">
+          All Items
+        </button>
+        @for (effectType of availableEffectTypes(); track effectType) {
+          <button 
+            class="filter-btn"
+            [class.active]="selectedFilter() === effectType"
+            (click)="applyFilter(effectType)">
+            {{ effectType }}
+          </button>
+        }
+      </div>
+    </div>
+
     <div class="row g-4">
       <!-- Left Section: Item Grid -->
       <div class="col-lg-7">
         <div class="items-grid">
           <!-- Actual Items -->
-          @for (item of items; track item.id) {
+          @for (item of filteredItems(); track item.id) {
             <div 
               class="item-slot filled"
-              [class.selected]="selectedItem?.id === item.id"
+              [ngClass]="[getSlotClass(item), selectedItem()?.id === item.id ? 'selected' : '']"
               (click)="selectItem(item)">
               <span class="item-badge">{{ item.quantity }}</span>
               <img class="item-icon" [src]="item.iconPath" [alt]="item.name">
@@ -32,7 +59,7 @@
           }
           
           <!-- Empty Slots -->
-          @for (slot of emptySlots; track $index) {
+          @for (slot of emptySlots(); track $index) {
             <div class="item-slot empty"></div>
           }
         </div>
@@ -40,35 +67,34 @@
 
       <!-- Right Section: Item Details -->
       <div class="col-lg-5">
-        @if (selectedItem) {
+        @if (selectedItem()) {
           <div class="item-details">
             <div class="detail-card">
               <!-- Large Icon -->
-              <div class="detail-icon-container">
-                <img class="detail-icon" [src]="selectedItem.iconPath" [alt]="selectedItem.name">
+              <div class="detail-icon-container" [ngClass]="getIconBackgroundClass()">
+                <img class="detail-icon" [src]="selectedItem()!.iconPath" [alt]="selectedItem()!.name">
               </div>
 
               <!-- Item Name -->
-              <h3 class="item-name mt-3">{{ selectedItem.name }}</h3>
+              <h3 class="item-name mt-3">{{ selectedItem()!.name }}</h3>
 
               <!-- Tags -->
               <div class="item-tags mb-3">
-                <span class="badge tag-category">{{ selectedItem.category }}</span>
-                <span class="badge tag-type">{{ selectedItem.type }}</span>
+                <span class="badge {{ getTagClass() }}">{{ selectedItem()!.type }}</span>
               </div>
 
               <!-- Description -->
-              <p class="item-description">{{ selectedItem.description }}</p>
+              <p class="item-description">{{ selectedItem()!.description }}</p>
 
               <!-- Effect & Quantity -->
               <div class="row mt-4 mb-4">
                 <div class="col-6">
                   <p class="text-muted small mb-1">Effect</p>
-                  <p class="effect-text">{{ selectedItem.effect }}</p>
+                  <p class="effect-text">{{ selectedItem()!.effect }}</p>
                 </div>
                 <div class="col-6 text-end">
                   <p class="text-muted small mb-1">Quantity</p>
-                  <p class="quantity-text">{{ selectedItem.quantity }} units</p>
+                  <p class="quantity-text">{{ selectedItem()!.quantity }} units</p>
                 </div>
               </div>
 
@@ -89,7 +115,7 @@
               <!-- Info Message -->
               <div class="info-message mt-3">
                 <i class="bi bi-info-circle"></i>
-                <span>Storage capacity: 50/100. You can increase your inventory slots by leveling up.</span>
+                <span>Storage capacity: {{ usedCapacity() }}/{{ totalCapacity() }}. Available slots: {{ availableCapacity() }}.</span>
               </div>
             </div>
           </div>

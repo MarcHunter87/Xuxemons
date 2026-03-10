@@ -1,8 +1,9 @@
-import { Component, OnInit, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, afterNextRender, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { NgClass } from '@angular/common';
 
 interface ApiInventoryItem {
-  id: number;
+  id: string | number;
   name: string;
   description: string;
   quantity: number;
@@ -11,10 +12,11 @@ interface ApiInventoryItem {
   effect_value: number;
   is_stackable: boolean;
   max_quantity: number;
+  bag_item_id?: number;
 }
 
 interface InventoryItem {
-  id: number;
+  id: string | number;
   name: string;
   iconPath: string;
   quantity: number;
@@ -26,64 +28,84 @@ interface InventoryItem {
   effect_value?: number;
   is_stackable?: boolean;
   max_quantity?: number;
+  bag_item_id?: number;
 }
 
 @Component({
   selector: 'app-inventory',
-  imports: [],
+  imports: [NgClass],
   templateUrl: './inventory.html',
   styleUrl: './inventory.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Inventory implements OnInit {
+export class Inventory {
   private http = inject(HttpClient);
-  private cdr = inject(ChangeDetectorRef);
   private apiUrl = 'http://localhost:8080/api/inventory';
 
-  selectedItem: InventoryItem | null = null;
-  maxSlots = 20; // 4x5 grid
-  items: InventoryItem[] = [];
-  isLoading = false;
-  errorMessage: string | null = null;
-
-  ngOnInit(): void {
-    this.loadInventory();
+  constructor() {
+    afterNextRender(() => {
+      this.loadInventory();
+    });
   }
+
+  readonly selectedItem = signal<InventoryItem | null>(null);
+  readonly maxSlots = 20;
+  readonly maxCapacity = signal(0);
+  readonly maxSlotsFromBackend = signal(0);
+  readonly usedSlotsFromBackend = signal(0);
+  readonly items = signal<InventoryItem[]>([]);
+  readonly filteredItems = signal<InventoryItem[]>([]);
+  readonly isLoading = signal(true);
+  readonly errorMessage = signal<string | null>(null);
+  readonly selectedFilter = signal('all');
+  readonly availableEffectTypes = signal<string[]>([]);
+
+  readonly emptySlots = computed(() => {
+    const remaining = this.maxSlots - this.filteredItems().length;
+    return Array(Math.max(0, remaining)).fill(0);
+  });
+
+  readonly usedCapacity = computed(() =>
+    this.usedSlotsFromBackend() > 0 ? this.usedSlotsFromBackend() : this.items().length
+  );
+
+  readonly totalCapacity = computed(() =>
+    this.maxSlotsFromBackend() > 0 ? this.maxSlotsFromBackend() : 50
+  );
+
+  readonly availableCapacity = computed(() => this.totalCapacity() - this.usedCapacity());
 
   /**
    * Carga el inventario desde la API
    */
   loadInventory(): void {
-    this.isLoading = true;
-    this.errorMessage = null;
-    this.cdr.markForCheck();
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
 
     console.log('🔄 Iniciando carga del inventario desde:', this.apiUrl);
 
-    this.http.get<{ message: string; data: { items: ApiInventoryItem[] } }>(this.apiUrl).subscribe({
+    this.http.get<{ message: string; data: { items: ApiInventoryItem[], max_slots?: number, used_slots?: number, available_slots?: number, max_capacity?: number, capacity?: number } }>(this.apiUrl).subscribe({
       next: (response) => {
         console.log('✅ Inventario cargado exitosamente:', response);
         console.log('📦 Items recibidos:', response.data.items);
-        this.items = this.transformApiItems(response.data.items);
-        console.log('✨ Items transformados:', this.items);
-        this.isLoading = false;
-        this.cdr.markForCheck();
-        // Seleccionar el primer item por defecto si existe
-        if (this.items.length > 0) {
-          this.selectItem(this.items[0]);
-          console.log('🎯 Item seleccionado:', this.items[0]);
-        } else {
-          console.log('⚠️ No hay items en el inventario');
+        const transformed = this.transformApiItems(response.data.items)
+          .sort((a, b) => (a.effect_type ?? '').localeCompare(b.effect_type ?? ''));
+        this.items.set(transformed);
+        this.maxSlotsFromBackend.set(response.data.max_slots || 20);
+        this.usedSlotsFromBackend.set(response.data.used_slots || 0);
+        this.maxCapacity.set(response.data.max_slots || 20);
+        this.extractEffectTypes();
+        this.filteredItems.set(transformed);
+        console.log('✨ Items transformados:', transformed);
+        this.isLoading.set(false);
+        if (transformed.length > 0) {
+          this.selectItem(transformed[0]);
         }
       },
       error: (error) => {
         console.error('❌ Error cargando inventario:', error);
-        console.error('Status:', error.status);
-        console.error('Mensaje:', error.message);
-        console.error('Respuesta completa:', error);
-        this.errorMessage = `Failed to load inventory. Error: ${error.status} - ${error.message}`;
-        this.isLoading = false;
-        this.cdr.markForCheck();
+        this.errorMessage.set(`Failed to load inventory. Error: ${error.status} - ${error.message}`);
+        this.isLoading.set(false);
       }
     });
   }
@@ -93,15 +115,13 @@ export class Inventory implements OnInit {
    * Si el item no es stackable, crea una entrada separada para cada unidad
    */
   private transformApiItems(apiItems: ApiInventoryItem[]): InventoryItem[] {
-    const transformedItems: InventoryItem[] = [];
-
-    apiItems.forEach(item => {
+    return apiItems.map(item => {
       const path = item.icon_path.startsWith('/') ? item.icon_path : `/${item.icon_path}`;
-      const baseItem = {
+      return {
         id: item.id,
         name: item.name,
         iconPath: `http://localhost:8080${path}`,
-        category: this.getCategoryFromType(item.effect_type),
+        category: item.effect_type,
         type: item.effect_type,
         description: item.description,
         effect: this.getEffectString(item.effect_type, item.effect_value),
@@ -109,45 +129,14 @@ export class Inventory implements OnInit {
         effect_value: item.effect_value,
         is_stackable: item.is_stackable,
         max_quantity: item.max_quantity,
+        quantity: item.quantity,
+        bag_item_id: item.bag_item_id,
       };
-
-      // Si es stackable, agregarlo una sola vez con su cantidad total
-      if (item.is_stackable) {
-        transformedItems.push({
-          ...baseItem,
-          quantity: item.quantity,
-        });
-      } else {
-        // Si no es stackable, crear una entrada para cada unidad
-        for (let i = 0; i < item.quantity; i++) {
-          transformedItems.push({
-            ...baseItem,
-            quantity: 1,
-          });
-        }
-      }
     });
-
-    return transformedItems;
   }
 
 
 
-  /**
-   * Obtiene la categoría basada en el tipo de efecto
-   */
-  private getCategoryFromType(effectType: string): string {
-    const categoryMap: { [key: string]: string } = {
-      'healing': 'Consumable',
-      'mana': 'Consumable',
-      'status': 'Consumable',
-      'revival': 'Consumable',
-      'buff': 'Consumable',
-      'level_up': 'Consumable',
-      'capture': 'Capture',
-    };
-    return categoryMap[effectType] || 'Item';
-  }
 
   /**
    * Obtiene la cadena de efecto formateada
@@ -163,34 +152,69 @@ export class Inventory implements OnInit {
     return effectMap[effectType] || `Effect: ${effectValue}`;
   }
 
-  get emptySlots(): number[] {
-    const remaining = this.maxSlots - this.items.length;
-    return Array(remaining).fill(0);
+  /**
+   * Extrae los tipos de efectos únicos de los items
+   */
+  private extractEffectTypes(): void {
+    const effectTypes = new Set<string>();
+    this.items().forEach(item => {
+      if (item.effect_type) {
+        effectTypes.add(item.effect_type);
+      }
+    });
+    this.availableEffectTypes.set(Array.from(effectTypes).sort());
+  }
+
+  /**
+   * Aplica el filtro de effect_type a los items
+   */
+  applyFilter(effectType: string): void {
+    this.selectedFilter.set(effectType);
+    if (effectType === 'all') {
+      this.filteredItems.set(this.items());
+    } else {
+      this.filteredItems.set(this.items().filter(item => item.effect_type === effectType));
+    }
+    this.selectedItem.set(null);
   }
 
   selectItem(item: InventoryItem): void {
-    this.selectedItem = item;
+    this.selectedItem.set(item);
   }
 
   useItem(): void {
-    if (this.selectedItem && this.selectedItem.quantity > 0) {
-      console.log('Using item:', this.selectedItem.name);
+    const item = this.selectedItem();
+    if (item && item.quantity > 0) {
+      console.log('Using item:', item.name);
       // Implement use logic here
     }
   }
 
   discardItem(): void {
-    if (this.selectedItem) {
-      const index = this.items.findIndex(i => i.id === this.selectedItem!.id);
-      if (index !== -1) {
-        this.items[index].quantity--;
-        if (this.items[index].quantity === 0) {
-          this.items.splice(index, 1);
-          this.selectedItem = null;
-        } else {
-          this.selectedItem = { ...this.items[index] };
-        }
-      }
+    const item = this.selectedItem();
+    if (item) {
+      this.items.update(items => items.filter(i => i.id !== item.id));
+      this.filteredItems.update(items => items.filter(i => i.id !== item.id));
+      this.selectedItem.set(null);
     }
+  }
+
+  getSlotClass(item: InventoryItem): string {
+    const effectType = (item.effect_type || 'default').toLowerCase().trim().replace(/ /g, '-');
+    return `slot-bg-${effectType}`;
+  }
+
+  getTagClass(): string {
+    const item = this.selectedItem();
+    if (!item) return 'tag-default';
+    const effectType = (item.effect_type || 'default').toLowerCase().trim().replace(/ /g, '-');
+    return `tag-${effectType}`;
+  }
+
+  getIconBackgroundClass(): string {
+    const item = this.selectedItem();
+    if (!item) return 'icon-bg-default';
+    const effectType = (item.effect_type || 'default').toLowerCase().trim().replace(/ /g, '-');
+    return `icon-bg-${effectType}`;
   }
 }
