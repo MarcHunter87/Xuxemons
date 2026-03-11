@@ -18,4 +18,9 @@ class Xuxemon extends Model
         'defense',
         'icon_path',
     ];
+
+    public function type()
+    {
+        return $this->belongsTo(Type::class);
+    }
 }

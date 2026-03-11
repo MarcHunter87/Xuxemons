@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { Home } from './pages/home/home';
 import { Battle } from './pages/battle/battle';
+import { Gacha } from './pages/gacha/gacha';
 import { Xuxedex } from './pages/xuxedex/xuxedex';
 import { Inventory } from './pages/inventory/inventory';
 import { Friends } from './pages/friends/friends';
@@ -29,6 +30,11 @@ export const routes: Routes = [
   {
     path: 'battle',
     component: Battle,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'gacha',
+    component: Gacha,
     canActivate: [authGuard]
   },
   {

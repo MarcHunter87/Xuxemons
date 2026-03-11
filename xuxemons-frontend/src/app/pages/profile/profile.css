@@ -1,6 +1,9 @@
+.profile-main {
+  overflow-x: hidden;
+}
+
 .profile-banner {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
+  width: 100%;
   height: 21.875vw;
   min-height: 280px;
   background-color: var(--info-color);
@@ -14,7 +17,7 @@
 .profile-edit-btn {
   position: absolute;
   top: 1.25rem;
-  right: max(2rem, calc((100vw - 1280px) / 2 + 2rem));
+  right: max(2rem, calc((100% - 1280px) / 2 + 2rem));
   border: 2px solid var(--white-color);
   box-shadow: 0 2px 8px var(--shadow-color);
 }
@@ -30,7 +33,9 @@
 
 .profile-content {
   position: relative;
-  padding-bottom: 2.5rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem 2.5rem;
 }
 
 .profile-hero {
