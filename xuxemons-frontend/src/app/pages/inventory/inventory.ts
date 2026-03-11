@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, afterNextRender, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject, afterNextRender, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -41,6 +41,7 @@ interface InventoryItem {
 })
 export class Inventory {
   private http = inject(HttpClient);
+  private cdr = inject(ChangeDetectorRef);
   private apiUrl = 'http://localhost:8080/api/inventory';
 
   constructor() {
@@ -200,14 +201,10 @@ export class Inventory {
     const item = this.selectedItem();
     if (!item || !item.bag_item_id) return;
 
-    if (item.quantity === 1) {
-      this.callDiscardApi(item.bag_item_id, 1);
-    } else {
-      this.discardQuantity.set(1);
-      this.discardError.set(null);
-      this.discardApiError.set(null);
-      this.discardMode.set(true);
-    }
+    this.discardQuantity.set(1);
+    this.discardError.set(null);
+    this.discardApiError.set(null);
+    this.discardMode.set(true);
   }
 
   updateDiscardQuantity(val: number): void {
@@ -246,26 +243,20 @@ export class Inventory {
       `http://localhost:8080/api/inventory/item/${bagItemId}`,
       { body: { quantity } }
     ).subscribe({
-      next: (res) => {
-        const item = this.selectedItem()!;
-        if (res.remaining === 0) {
-          this.items.update(items => items.filter(i => i.bag_item_id !== bagItemId));
-          this.filteredItems.update(items => items.filter(i => i.bag_item_id !== bagItemId));
-          this.selectedItem.set(null);
-        } else {
-          const newQty = item.quantity - quantity;
-          const updatedItem = { ...item, quantity: newQty };
-          this.items.update(items => items.map(i => i.id === item.id ? updatedItem : i));
-          this.filteredItems.update(items => items.map(i => i.id === item.id ? updatedItem : i));
-          this.selectedItem.set(updatedItem);
-        }
+      next: () => {
         this.discardMode.set(false);
+        this.discardError.set(null);
+        this.discardApiError.set(null);
         this.isDiscarding.set(false);
+        this.selectedItem.set(null);
+        this.loadInventory();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         const msg = err?.error?.message ?? err?.message ?? 'Unexpected error. Please try again.';
         this.discardApiError.set(msg);
         this.isDiscarding.set(false);
+        this.cdr.markForCheck();
       }
     });
   }
