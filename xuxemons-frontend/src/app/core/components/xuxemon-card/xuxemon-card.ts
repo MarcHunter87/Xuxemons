@@ -1,15 +1,14 @@
-import { Component, Input, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, Input } from '@angular/core';
 import { AuthService } from '../../services/auth';
+import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-cards',
-  standalone: true,
+  selector: 'app-xuxemon-card',
   imports: [CommonModule],
-  templateUrl: './cards.html',
-  styleUrl: './cards.css',
+  templateUrl: './xuxemon-card.html',
+  styleUrl: './xuxemon-card.css',
 })
-export class Cards {
+export class XuxemonCard {
   @Input() xuxemon: any;
   private auth = inject(AuthService);
 

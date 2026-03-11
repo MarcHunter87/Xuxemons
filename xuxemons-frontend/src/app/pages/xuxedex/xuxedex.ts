@@ -1,11 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FilterXuxedex } from '../../core/components/filter-xuxedex/filter-xuxedex';
-import { Cards } from '../../core/components/cards/cards';
 import { XuxemonService } from '../../core/services/xuxemon.service';
+import { XuxemonCard } from '../../core/components/xuxemon-card/xuxemon-card';
 
 @Component({
   selector: 'app-xuxedex',
-  imports: [FilterXuxedex, Cards],
+  imports: [FilterXuxedex, XuxemonCard],
   templateUrl: './xuxedex.html',
   styleUrl: './xuxedex.css',
 })
