@@ -70,10 +70,10 @@ interface DeactivateAccountResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:8080/api';
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly apiUrl = this.isBrowser ? 'http://localhost:8080/api' : 'http://backend/api';
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   private readonly userSubject = new BehaviorSubject<User | null>(this.getStoredUser());
   user$ = this.userSubject.pipe(delay(0));
