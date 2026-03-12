@@ -15,7 +15,6 @@ class BagSeeder extends Seeder
      */
     public function run(): void
     {
-        // Crear mochilas para todos los usuarios
         $users = ['#Nipah1983', '#Marc1987', '#Liqi1990', '#Pau2000'];
         
         foreach ($users as $userId) {
@@ -25,7 +24,6 @@ class BagSeeder extends Seeder
             ]);
         }
 
-        // Obtener todos los items
         $items = Item::all();
 
         foreach ($users as $userId) {

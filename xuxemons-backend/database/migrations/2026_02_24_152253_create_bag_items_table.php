@@ -17,11 +17,9 @@ return new class extends Migration
             $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
             $table->unsignedInteger('quantity')->default(1);
             $table->timestamps();
-            
-            // Restricción única: no puede haber duplicados del mismo item en la misma bolsa
+
             $table->unique(['bag_id', 'item_id']);
-            
-            // Índice para búsquedas rápidas por bolsa
+
             $table->index('bag_id');
         });
     }

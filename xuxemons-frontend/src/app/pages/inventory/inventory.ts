@@ -83,18 +83,18 @@ export class Inventory {
   readonly availableCapacity = computed(() => this.totalCapacity() - this.usedCapacity());
 
   /**
-   * Carga el inventario desde la API
+   * Loads the inventory from the API
    */
   loadInventory(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    console.log('🔄 Iniciando carga del inventario desde:', this.apiUrl);
+    console.log('Starting inventory load from:', this.apiUrl);
 
     this.http.get<{ message: string; data: { items: ApiInventoryItem[], max_slots?: number, used_slots?: number, available_slots?: number, max_capacity?: number, capacity?: number } }>(this.apiUrl).subscribe({
       next: (response) => {
-        console.log('✅ Inventario cargado exitosamente:', response);
-        console.log('📦 Items recibidos:', response.data.items);
+        console.log('Inventory loaded successfully:', response);
+        console.log('Items received:', response.data.items);
         const transformed = this.transformApiItems(response.data.items)
           .sort((a, b) => (a.effect_type ?? '').localeCompare(b.effect_type ?? ''));
         this.items.set(transformed);
@@ -103,7 +103,7 @@ export class Inventory {
         this.maxCapacity.set(response.data.max_slots || 20);
         this.extractEffectTypes();
         this.filteredItems.set(transformed);
-        console.log('✨ Items transformados:', transformed);
+        console.log('Transformed items:', transformed);
         this.isLoading.set(false);
         if (transformed.length > 0) {
           this.selectItem(transformed[0]);
@@ -118,8 +118,8 @@ export class Inventory {
   }
 
   /**
-   * Transforma los items de la API al formato del componente
-   * Si el item no es stackable, crea una entrada separada para cada unidad
+   * Transforms API items into the component format
+   * If the item is not stackable, creates a separate entry for each unit
    */
   private transformApiItems(apiItems: ApiInventoryItem[]): InventoryItem[] {
     return apiItems.map(item => {
@@ -160,7 +160,7 @@ export class Inventory {
   }
 
   /**
-   * Extrae los tipos de efectos únicos de los items
+   * Extracts the unique effect types from the items
    */
   private extractEffectTypes(): void {
     const effectTypes = new Set<string>();
@@ -173,7 +173,7 @@ export class Inventory {
   }
 
   /**
-   * Aplica el filtro de effect_type a los items
+   * Applies the effect_type filter to the items
    */
   applyFilter(effectType: string): void {
     this.selectedFilter.set(effectType);

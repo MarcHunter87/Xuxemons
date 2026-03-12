@@ -165,7 +165,7 @@ export class AuthService {
     if (res.access_token) {
       this.getStorage()?.setItem('token', res.access_token);
       if (typeof ngDevMode === 'undefined' || ngDevMode) {
-        console.log('JWT guardado en localStorage (login/register)');
+        console.log('JWT stored in localStorage (login/register)');
       }
     }
     if (res.user) {
