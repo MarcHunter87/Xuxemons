@@ -1,9 +1,65 @@
-<app-filter-xuxedex></app-filter-xuxedex>
 
-<div class="xuxe-grid">
-  @for (xuxemon of xuxemons(); track xuxemon.id) {
-  <app-xuxemon-card [xuxemon]="xuxemon"></app-xuxemon-card>
-  } @empty {
-  <p class="no-results">No Xuxemons found matching your search.</p>
-  }
+<div class="container-fluid xuxedex-container">
+  <section class="user-xuxemons-section">
+    <div class="xuxedex-header">
+      <h2 class="xuxedex-title">My Xuxemons</h2>
+      <p class="xuxedex-subtitle">The Xuxemons you've captured.</p>
+    </div>
+
+    <app-filter-xuxedex
+      [xuxemons]="myXuxemonsSortedByName()"
+      (filteredXuxemonsChange)="onMyXuxemonsFilteredChange($event)"
+    ></app-filter-xuxedex>
+
+    <div class="row g-4">
+      @for (xuxemon of paginatedMyXuxemons(); track xuxemon.id) {
+      <article class="col-6 col-md-3 col-xl-2">
+        <app-xuxemon-card [xuxemon]="xuxemon"></app-xuxemon-card>
+      </article>
+      } @empty {
+      <p class="col-12 no-results">You haven't captured any Xuxemon yet.</p>
+      }
+    </div>
+
+    @if (myXuxemonsTotalPages() > 1) {
+    <div class="pagination-controls">
+      <button (click)="prevMyXuPage()" [disabled]="myXuxemonsCurrentPage() === 0" class="btn-pagination">Previous</button>
+      <span class="pagination-info">Page {{ myXuxemonsCurrentPage() + 1 }} of {{ myXuxemonsTotalPages() }}</span>
+      <button (click)="nextMyXuPage()" [disabled]="myXuxemonsCurrentPage() === myXuxemonsTotalPages() - 1" class="btn-pagination">Next</button>
+    </div>
+    }
+  </section>
+
+  <section class="xuxedex-section">
+    <div class="xuxedex-header">
+      <h1 class="xuxedex-title">Xuxedex</h1>
+      <p class="xuxedex-subtitle">Browse every Xuxemon discovered and explore the full collection.</p>
+    </div>
+
+    <div class="row g-4">
+      @for (xuxemon of paginatedXuxemons(); track xuxemon.id) {
+      <article class="col-6 col-md-3 col-xl-2">
+          @if (isXuxemonCaptured(xuxemon.id)) {
+            <app-xuxemon-card [xuxemon]="xuxemon"></app-xuxemon-card>
+          } @else {
+            <div class="xuxemon-card-locked">
+              <div class="locked-content">
+                <p class="locked-text">?</p>
+              </div>
+            </div>
+          }
+      </article>
+      } @empty {
+      <p class="col-12 no-results">No Xuxemons found matching your search.</p>
+      }
+    </div>
+
+    @if (xuxemonsTotalPages() > 1) {
+    <div class="pagination-controls">
+      <button (click)="prevXuPage()" [disabled]="xuxemonsCurrentPage() === 0" class="btn-pagination">Previous</button>
+      <span class="pagination-info">Page {{ xuxemonsCurrentPage() + 1 }} of {{ xuxemonsTotalPages() }}</span>
+      <button (click)="nextXuPage()" [disabled]="xuxemonsCurrentPage() === xuxemonsTotalPages() - 1" class="btn-pagination">Next</button>
+    </div>
+    }
+  </section>
 </div>

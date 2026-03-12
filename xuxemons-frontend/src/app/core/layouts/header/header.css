@@ -19,7 +19,7 @@
   width: 100%;
   padding: 0 2rem;
   height: 64px;
-  max-width: 1280px;
+  max-width: var(--layout-max-width);
   margin: 0 auto;
   gap: 2rem;
 }

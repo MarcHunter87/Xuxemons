@@ -8,6 +8,7 @@ export interface Xuxemon {
     id: number;
     name: string;
     type: { name: string };
+    size: 'Small' | 'Medium' | 'Large';
     image_url: string;
 }
 
@@ -52,6 +53,7 @@ export class XuxemonService {
                 id: x.id,
                 name: x.name,
                 type: x.type,
+                size: x.size ?? 'Small',
                 image_url: this.auth.getAssetUrl(`/${x.icon_path || ''}`)
             })) as Xuxemon[];
             this.xuxemonsList.set(data);
@@ -69,6 +71,7 @@ export class XuxemonService {
                 id: x.id,
                 name: x.name,
                 type: x.type,
+                size: x.size ?? 'Small',
                 image_url: this.auth.getAssetUrl(`/${x.icon_path || ''}`)
             })) as Xuxemon[];
             this.myXuxemonsList.set(data);
@@ -86,6 +89,7 @@ export class XuxemonService {
                 id: raw?.id,
                 name: raw?.name,
                 type: raw?.type,
+                size: raw?.size ?? 'Small',
                 image_url: this.auth.getAssetUrl(`/${raw?.icon_path || ''}`)
             };
             await this.loadMyXuxemons();
