@@ -6,12 +6,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = authService.getToken();
 
-  console.log('🔍 Interceptor - getToken() retornó:', token ? `"${token.substring(0, 20)}..."` : 'null');
-  console.log('📍 Interceptor - URL:', req.url);
+  console.log('Interceptor - getToken() returned:', token ? `"${token.substring(0, 20)}..."` : 'null');
+  console.log('Interceptor - URL:', req.url);
 
   if (token) {
     if (typeof ngDevMode === 'undefined' || ngDevMode) {
-      console.log('✅ JWT en petición:', req.method, req.url);
+      console.log('JWT present in request:', req.method, req.url);
     }
     const authReq = req.clone({
       setHeaders: { Authorization: `Bearer ${token}` }
@@ -20,7 +20,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   if (typeof ngDevMode === 'undefined' || ngDevMode) {
-    console.log('❌ Sin token, petición sin Authorization:', req.method, req.url);
+    console.log('No token, request without Authorization header:', req.method, req.url);
   }
   return next(req);
 };

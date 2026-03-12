@@ -17,8 +17,7 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->unsignedInteger('max_slots')->default(20);
             $table->timestamps();
-            
-            // Índice para búsquedas rápidas por usuario
+
             $table->unique('user_id');
         });
     }

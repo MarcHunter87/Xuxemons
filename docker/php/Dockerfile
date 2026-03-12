@@ -4,13 +4,14 @@ FROM php:8.4-apache
 RUN apt-get update -qq && \
     apt-get install -y -qq \
     libzip-dev \
+    libsodium-dev \
     unzip \
     git \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-install -j4 pdo pdo_mysql zip
+# Install PHP extensions (including sodium)
+RUN docker-php-ext-install -j4 pdo pdo_mysql zip sodium
 
 # Enable Apache modules
 RUN a2enmod rewrite
