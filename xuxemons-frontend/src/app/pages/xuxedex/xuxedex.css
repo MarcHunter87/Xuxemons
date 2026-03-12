@@ -1,9 +1,120 @@
-.xuxe-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  max-width: 1800px;
-  margin: auto;
-  gap: 25px;
-  padding: 35px;
-  justify-items: center;
+.xuxedex-container {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.xuxemon-card-locked {
+  width: 100%;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #f1f3f5 0%, #e9ecef 100%);
+  border: 6px solid #ced4da;
+  border-radius: 20px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.locked-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.locked-text {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #6c757d;
+  margin: 0;
+}
+
+@media (max-width: 767.98px) {
+  .xuxemon-card-locked {
+    min-height: 268px;
+  }
+}
+.user-xuxemons-section {
+  margin-bottom: 3rem;
+}
+
+.xuxedex-section {
+  margin-bottom: 3rem;
+}
+
+.xuxedex-header {
+  padding: 0 0 1.5rem;
+}
+
+.xuxedex-title {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: var(--black-color);
+}
+
+.xuxedex-subtitle {
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+.no-results {
+  text-align: center;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 3rem;
+  padding: 2rem 0;
+  border-top: 2px solid #e9ecef;
+}
+
+.btn-pagination {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  background-color: #0d6efd;
+  color: white;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 140px;
+  text-align: center;
+}
+
+.btn-pagination:hover:not(:disabled) {
+  background-color: #0b5ed7;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.btn-pagination:active:not(:disabled) {
+  background-color: #0a58ca;
+  transform: translateY(0);
+}
+
+.btn-pagination:disabled {
+  background-color: #6c757d;
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-weight: 700;
+  color: var(--text-color, #333);
+  min-width: 180px;
+  text-align: center;
+  font-size: 1.1rem;
 }

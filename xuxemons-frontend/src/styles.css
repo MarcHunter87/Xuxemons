@@ -27,6 +27,8 @@
     --danger-bg-alpha: rgba(208, 24, 27, 0.12);
     --danger-border-alpha: rgba(158, 11, 11, 0.35);
     --white-alpha-35: rgba(255, 255, 255, 0.35);
+
+    --layout-max-width: 1400px;
 }
 
 *,
