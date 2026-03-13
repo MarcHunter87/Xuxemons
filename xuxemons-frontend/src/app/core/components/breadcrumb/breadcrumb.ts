@@ -29,7 +29,6 @@ export class Breadcrumb implements OnInit, OnDestroy {
     'friends': 'Friends',
     'admin': 'Admin',
     'leaderboard': 'Leaderboard',
-    'game-rules': 'Game Rules',
   };
 
   constructor(private router: Router) {}

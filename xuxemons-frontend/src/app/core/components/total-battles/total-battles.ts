@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
 
@@ -11,4 +11,5 @@ import { AuthService } from '../../services/auth';
 })
 export class TotalBattles {
   user$ = inject(AuthService).user$;
+  statsReady = input(false);
 }

@@ -98,6 +98,14 @@ class AuthController extends Controller
         ]);
     }
 
+    public function me(Request $request)
+    {
+        /** @var User $user */
+        $user = Auth::guard('api')->user();
+
+        return response()->json($user->fresh());
+    }
+
     public function updateProfile(Request $request)
     {
         /** @var User $user */

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
@@ -12,4 +12,5 @@ import { AuthService } from '../../services/auth';
 })
 export class WinStreakV1 {
     user$ = inject(AuthService).user$;
+    statsReady = input(true);
 }
