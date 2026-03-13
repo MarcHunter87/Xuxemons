@@ -1,6 +1,6 @@
 
 
-.badge {
+.type-badge {
     position: absolute;
     top: -24px;
     left: -24px;
@@ -8,6 +8,14 @@
     height: 88px;
     z-index: 10;
     transition: transform 0.2s ease-in-out;
+}
+
+.card-wrapper {
+    position: relative;
+}
+
+.size-badge {
+    z-index: 12;
 }
 
 .xuxemon-card {
@@ -66,7 +74,7 @@
     transform: translateY(-6px);
 }
 
-.card-wrapper:hover .badge {
+.card-wrapper:hover .type-badge {
     transform: scale(1.04);
 }
 
@@ -115,7 +123,7 @@
 }
 
 @media (max-width: 767.98px) {
-    .badge {
+    .type-badge {
         width: 72px;
         height: 72px;
         top: -18px;
@@ -144,4 +152,5 @@
         width: 134px;
         height: 134px;
     }
+
 }

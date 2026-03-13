@@ -1,4 +1,5 @@
 <div class="card-wrapper" [ngClass]="getTypeClass()">
+
     <div class="card xuxemon-card h-100">
         <div class="card-body p-0 card-image d-flex align-items-center justify-content-center">
             <div class="image-frame d-flex align-items-center justify-content-center">
@@ -7,6 +8,9 @@
         </div>
         <div class="card-footer d-flex justify-content-center align-items-center text-center">
             <h4 class="mb-0 text-sm">{{ xuxemon?.name }}</h4>
+            @if (showSizeBadge && xuxemon?.size) {
+                <span class="size-badge badge rounded-pill text-bg-dark border border-light-subtle position-absolute top-0 end-0 m-2 px-2 py-1">{{ xuxemon.size }}</span>
+            }
         </div>
     </div>
 </div>

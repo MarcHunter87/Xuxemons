@@ -142,9 +142,6 @@ export class Inventory {
     });
   }
 
-
-
-
   /**
    * Obtiene la cadena de efecto formateada
    */

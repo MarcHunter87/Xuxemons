@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 })
 export class XuxemonCard {
   @Input() xuxemon: any;
+  @Input() showSizeBadge = false;
   private auth = inject(AuthService);
 
   getTypeBadge(): string {
