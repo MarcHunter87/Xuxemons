@@ -210,3 +210,24 @@ a.btn-sm {
     transform: rotate(360deg);
   }
 }
+
+/* Standardized Page Headers */
+.page-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+}
+
+.page-title {
+    font-size: 44px;
+    font-weight: 800;
+    color: var(--black-color);
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+}
+
+.page-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.5;
+}

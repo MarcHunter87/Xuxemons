@@ -1,8 +1,4 @@
-.xuxedex-container {
-  max-width: none;
-  margin: 0;
-  padding: 0;
-}
+
 
 .xuxemon-card-locked {
   width: 100%;
@@ -46,22 +42,7 @@
   margin-bottom: 3rem;
 }
 
-.xuxedex-header {
-  padding: 0 0 1.5rem;
-}
 
-.xuxedex-title {
-  margin: 0;
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 700;
-  color: var(--black-color);
-}
-
-.xuxedex-subtitle {
-  margin: 0.5rem 0 0;
-  font-size: 1rem;
-  color: var(--text-color);
-}
 
 .type-chart-panel {
   display: grid;

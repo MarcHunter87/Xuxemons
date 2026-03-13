@@ -10,6 +10,7 @@ export interface Xuxemon {
     type: { name: string };
     size: 'Small' | 'Medium' | 'Large';
     image_url: string;
+    adquired_at?: string;
 }
 
 @Injectable({
@@ -72,7 +73,8 @@ export class XuxemonService {
                 name: x.name,
                 type: x.type,
                 size: x.size ?? 'Small',
-                image_url: this.auth.getAssetUrl(`/${x.icon_path || ''}`)
+                image_url: this.auth.getAssetUrl(`/${x.icon_path || ''}`),
+                adquired_at: x.adquired_at
             })) as Xuxemon[];
             this.myXuxemonsList.set(data);
         } catch (error) {

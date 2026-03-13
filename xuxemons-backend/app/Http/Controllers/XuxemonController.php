@@ -42,8 +42,14 @@ class XuxemonController extends Controller
 
         $myXuxemons = AdquiredXuxemon::where('user_id', $userId)
             ->with(['xuxemon.type'])
+            ->orderBy('created_at', 'desc')
             ->get()
-            ->map(fn($a) => $a->xuxemon)
+            ->map(function ($a) {
+                if (!$a->xuxemon) return null;
+                $x = $a->xuxemon;
+                $x->adquired_at = $a->created_at;
+                return $x;
+            })
             ->filter()
             ->values();
 

@@ -1,32 +1,79 @@
-<div class="gacha-container">
-    <h1 class="main-title">Gacha</h1>
-    <p class="subtitle">Try your luck!</p>
-
-    <div *ngIf="isDataLoaded() && rouletteItems().length === 0" class="empty-db-message">
-        <h2>No Xuxemons available</h2>
+<div>
+    <div class="page-header">
+        <h1 class="page-title">Gacha</h1>
+        <p class="page-subtitle">Try your luck and obtain new Xuxemons!</p>
     </div>
 
-    <ng-container *ngIf="rouletteItems().length > 0">
-        <div class="roulette-box">
-            <div class="roulette-track" [class.spinning]="isSpinning()" [class.no-transition]="noTransition()" [style.transform]="trackTransform()">
-                <div *ngFor="let item of rouletteItems()" class="roulette-item"
-                    [style.background-color]="getTypeColor(item.type.name)">
-                    <img [src]="item.image_url" [alt]="item.name">
-                    <span>{{ item.name }}</span>
+    @if (isDataLoaded() && rouletteItems().length === 0) {
+        <div class="alert alert-info text-center">
+            <h2>No Xuxemons available</h2>
+        </div>
+    }
+
+    @if (rouletteItems().length > 0) {
+        <div class="d-flex flex-column align-items-center mb-5">
+            <div class="roulette-box" #rouletteBox>
+                <div class="roulette-track" [class.spinning]="isSpinning()" [class.no-transition]="noTransition()" [style.transform]="trackTransform()">
+                    @for (item of rouletteItems(); track $index) {
+                        <div class="roulette-item" [style.background-color]="getTypeColor(item.type.name)">
+                            <img [src]="item.image_url" [alt]="item.name">
+                            <span>{{ item.name }}</span>
+                        </div>
+                    }
                 </div>
+                <div class="roulette-pointer"></div>
             </div>
-            <div class="roulette-pointer"></div>
+
+            <button class="btn-primary spin-button" [disabled]="isSpinning()" (click)="spin()">
+                @if (!isSpinning()) {
+                    <span>Spin</span>
+                } @else {
+                    <div class="btn-loading-icon"></div>
+                }
+            </button>
         </div>
 
-        <button class="spin-button" [disabled]="isSpinning()" (click)="spin()">
-            Spin
-        </button>
-    </ng-container>
 
-    <div *ngIf="showAward()" style="margin-top: 20px; padding: 20px; border: 2px solid #ccc; border-radius: 10px; text-align: center; background: #fff;">
-        <h2>Has recibido: {{ awardedXuxemon()?.name }}</h2>
-        <img [src]="awardedXuxemon()?.image_url" [alt]="awardedXuxemon()?.name" style="width: 150px; height: 150px; margin: 10px 0;">
-        <br>
-        <button (click)="closeModal()" class="btn-primary" style="padding: 10px 30px; font-size: 1.2rem;">OK</button>
-    </div>
+        @if (historyXuxemons().length > 0) {
+            <div class="recent-xuxemons-section bg-white p-4 rounded-5 border shadow-sm">
+                <h3 class="recent-title text-center mb-4">Obtained History</h3>
+                <div class="d-flex flex-wrap justify-content-center gap-4">
+                    @for (xuxe of historyXuxemons(); track xuxe.id) {
+                        <div class="recent-card text-center" style="width: 140px;">
+                            <div class="recent-image-box p-3 rounded-4 shadow-sm mb-2" [style.background-color]="getTypeColor(xuxe.type.name)">
+                                <img [src]="xuxe.image_url" [alt]="xuxe.name" class="img-fluid">
+                            </div>
+                            <div class="recent-info">
+                                <span class="fw-bold d-block text-dark">{{ xuxe.name }}</span>
+                                <span class="text-secondary small">{{ xuxe.adquired_at | date:'short' }}</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+
+
+    @if (showAward()) {
+        <div class="modal-overlay d-flex align-items-center justify-content-center">
+            <div class="modal-content p-5 text-center shadow-lg border-0 rounded-5 animate-pop" style="max-width: 500px;">
+                <h2 class="winner-title fw-black mb-4">Congratulations!</h2>
+                <div class="winner-display d-flex flex-column align-items-center gap-3">
+                    <div class="image-wrapper p-4 rounded-4 shadow mb-2" [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name || '')">
+                        <img [src]="awardedXuxemon()?.image_url" [alt]="awardedXuxemon()?.name" class="img-fluid animate-float">
+                    </div>
+                    <h3 class="winner-name fw-black h1 mb-0">{{ awardedXuxemon()?.name }}</h3>
+                    <span class="type-badge px-4 py-2 text-white rounded-pill fw-bold text-uppercase small" 
+                          [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name || '')">
+                        {{ awardedXuxemon()?.type?.name }}
+                    </span>
+                </div>
+                <div class="modal-actions d-flex gap-2 mt-4 pt-2">
+                    <button (click)="spinAgain()" class="btn-primary flex-grow-1 py-3 px-4 rounded-4">Spin Again</button>
+                    <button (click)="closeModal()" class="btn btn-light flex-grow-1 py-3 px-4 rounded-4 border">Close</button>
+                </div>
+            </div>
+        </div>
+    }
 </div>
