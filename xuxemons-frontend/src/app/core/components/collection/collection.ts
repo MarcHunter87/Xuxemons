@@ -1,4 +1,5 @@
-import { Component, input } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { XuxemonService } from '../../services/xuxemon.service';
 
 @Component({
   selector: 'app-collection',
@@ -7,7 +8,25 @@ import { Component, input } from '@angular/core';
   templateUrl: './collection.html',
   styleUrl: './collection.css',
 })
-export class Collection {
-  current = input<number>(0);
-  total = input<number>(33);
+export class Collection implements OnInit {
+  private xuxemonService = inject(XuxemonService);
+
+  acquired = signal(0);
+  total = signal(0);
+  loading = signal(true);
+  loadError = signal(false);
+
+  async ngOnInit(): Promise<void> {
+    this.loading.set(true);
+    this.loadError.set(false);
+    const stats = await this.xuxemonService.loadCollectionStats();
+    if (stats) {
+      this.acquired.set(stats.acquired);
+      this.total.set(stats.total);
+      this.loadError.set(false);
+    } else {
+      this.loadError.set(true);
+    }
+    this.loading.set(false);
+  }
 }

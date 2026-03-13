@@ -13,6 +13,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/xuxemons', [XuxemonController::class, 'index']);
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('/user', [AuthController::class, 'me']);
+    Route::get('/xuxemons/collection-stats', [XuxemonController::class, 'collectionStats']);
     Route::get('/xuxemons/me', [XuxemonController::class, 'myXuxemons']);
     Route::post('/xuxemons/award-random', [XuxemonController::class, 'awardRandom']);
     Route::post('/logout', [AuthController::class, 'logout']);

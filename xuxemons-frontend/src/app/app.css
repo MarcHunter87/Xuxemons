@@ -10,8 +10,11 @@
 }
 
 .app-content.profile-no-padding-bottom {
-  max-width: 100%;
+  max-width: none;
+  width: 100%;
+  margin: 0;
   padding: 0 0 3rem;
+  box-sizing: border-box;
 }
 
 .app-content app-breadcrumb {

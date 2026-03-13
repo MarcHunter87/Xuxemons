@@ -10,7 +10,7 @@
   </section>
 
   <section class="stats-row" aria-label="Trainer level and win streak">
-    <app-trainer-lvl></app-trainer-lvl>
-    <app-win-streak-v1></app-win-streak-v1>
+    <app-trainer-lvl [statsReady]="statsReady()"></app-trainer-lvl>
+    <app-win-streak-v1 [statsReady]="statsReady()"></app-win-streak-v1>
   </section>
 </main>

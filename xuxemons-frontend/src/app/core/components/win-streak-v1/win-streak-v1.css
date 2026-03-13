@@ -47,6 +47,18 @@
   line-height: 1.1;
 }
 
+.streak-text--loading {
+  display: flex;
+  align-items: center;
+  min-height: 1.1em;
+}
+
+.battle-btn--placeholder {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: default;
+}
+
 .badge-icon {
   background-color: var(--secondary-color);
   padding: 12px;

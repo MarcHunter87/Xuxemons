@@ -28,15 +28,24 @@
 
     <section class="profile-stats-row" aria-label="Profile statistics">
       <div class="profile-stats-trainer">
-        <app-trainer-lvl></app-trainer-lvl>
+        <app-trainer-lvl [statsReady]="statsReady()"></app-trainer-lvl>
       </div>
       <div class="profile-stats-cards">
-        <div class="profile-stat-card">
-          <span class="profile-stat-label">Win Streak</span>
-          <p class="profile-stat-value">{{ user?.win_streak ?? 0 }}</p>
+        <div class="profile-stat-slot">
+          <div class="stat-card" [attr.aria-busy]="!statsReady()">
+            <span class="stat-card__label">Win Streak</span>
+            <p class="stat-card__value">
+              @if (!statsReady()) {
+                <span class="stat-card__spinner" aria-hidden="true"></span>
+                <span class="visually-hidden">Cargando</span>
+              } @else if (user$ | async; as u) {
+                {{ u.win_streak ?? 0 }}
+              }
+            </p>
+          </div>
         </div>
         <app-collection></app-collection>
-        <app-total-battles></app-total-battles>
+        <app-total-battles [statsReady]="statsReady()"></app-total-battles>
       </div>
     </section>
 
