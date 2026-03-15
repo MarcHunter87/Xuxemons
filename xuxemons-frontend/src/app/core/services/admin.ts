@@ -31,4 +31,9 @@ export class AdminService {
       quantity: quantity,
     });
   }
+
+  awardRandomXuxemonToUser(userId: string): Observable<any> {
+    const encoded = encodeURIComponent(userId);
+    return this.http.post<any>(`${this.apiUrl}/users/${encoded}/award-random`, {});
+  }
 }

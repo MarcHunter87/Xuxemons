@@ -28,6 +28,14 @@ export class XuxemonCard implements AfterViewChecked {
     return this.xuxemon?.type?.name?.toLowerCase() || 'power';
   }
 
+  getSizeClass(): string {
+    return this.xuxemon?.size?.toLowerCase() || '';
+  }
+
+  getDynamicClasses(): string {
+    return [this.getTypeClass(), this.getSizeClass()].filter(Boolean).join(' ');
+  }
+
   openDetails(): void {
     if (!this.xuxemon) return;
     this.showDetails.set(true);

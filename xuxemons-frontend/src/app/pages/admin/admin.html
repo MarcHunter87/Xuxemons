@@ -38,7 +38,8 @@
               <th scope="col">User</th>
               <th scope="col">Email</th>
               <th scope="col">Bag status</th>
-              <th scope="col" class="actions-column">Action</th>
+              <th scope="col" class="col-items">Items</th>
+              <th scope="col" class="col-xuxemons">Xuxemons</th>
             </tr>
           </thead>
           <tbody>
@@ -66,16 +67,33 @@
                     </span>
                   }
                 </td>
-                <td class="actions-column">
+                <td class="col-items">
                   <button
-                    class="give-item-btn"
+                    class="table-action-btn give-item-btn"
                     [disabled]="!canGiveItems(user.id)"
                     [routerLink]="['/admin/give-item-form', getEncodedUserId(user.id)]"
                     [title]="!canGiveItems(user.id) ? 'Bag is full or still loading' : 'Give item to player'"
                     [attr.aria-label]="'Give item to ' + getUserFullName(user)"
                   >
-                    <i class="bi bi-gift" style="margin-right: 0.375rem;"></i>
-                    Give Item
+                    <i class="bi bi-gift" aria-hidden="true"></i>
+                    Give
+                  </button>
+                </td>
+                <td class="col-xuxemons">
+                  <button
+                    type="button"
+                    class="table-action-btn give-xuxemon-btn"
+                    [disabled]="awardLoadingUserId() !== null"
+                    (click)="giveRandomXuxemon(user)"
+                    [title]="'Give random Xuxemon to ' + getUserFullName(user)"
+                    [attr.aria-label]="'Give random Xuxemon to ' + getUserFullName(user)"
+                  >
+                    @if (awardLoadingUserId() === user.id) {
+                      <span class="btn-loading-icon" aria-hidden="true"></span>
+                    } @else {
+                      <i class="bi bi-dice-5" aria-hidden="true"></i>
+                      Random
+                    }
                   </button>
                 </td>
               </tr>
@@ -84,5 +102,58 @@
         </table>
       </div>
     }
+  </div>
+}
+
+@if (showAwardModal() && awardedXuxemon()) {
+  <div class="award-modal-overlay" (click)="closeAwardModal()">
+    <div class="award-modal-content animate-pop" (click)="$event.stopPropagation()">
+      <h2 class="award-modal-title">Xuxemon awarded</h2>
+      <div class="award-modal-display">
+        <div
+          class="award-modal-image-wrapper"
+          [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+        >
+          <img
+            [src]="awardedXuxemon()?.image_url"
+            [alt]="awardedXuxemon()?.name"
+            class="award-modal-image"
+          />
+        </div>
+        <p class="award-modal-name">{{ awardedXuxemon()?.name }}</p>
+        <span
+          class="award-modal-type-badge"
+          [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+        >
+          {{ awardedXuxemon()?.type?.name }}
+        </span>
+        @if (awardedXuxemon()?.hp != null && awardedXuxemon()?.attack != null && awardedXuxemon()?.defense != null) {
+          <div class="award-modal-stats">
+            <div class="award-stat stat-hp">
+              <span class="stat-label">HP</span>
+              <span class="stat-value">{{ awardedXuxemon()?.hp }}</span>
+            </div>
+            <div class="award-stat stat-attack">
+              <span class="stat-label">Attack</span>
+              <span class="stat-value">{{ awardedXuxemon()?.attack }}</span>
+            </div>
+            <div class="award-stat stat-defense">
+              <span class="stat-label">Defense</span>
+              <span class="stat-value">{{ awardedXuxemon()?.defense }}</span>
+            </div>
+          </div>
+        }
+      </div>
+      <div class="award-modal-actions">
+        <button type="button" (click)="closeAwardModal()" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (awardError()) {
+  <div class="award-error-toast" role="alert">
+    {{ awardError() }}
+    <button type="button" (click)="dismissAwardError()" aria-label="Dismiss">×</button>
   </div>
 }

@@ -17,7 +17,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
     Route::get('/xuxemons/collection-stats', [XuxemonController::class, 'collectionStats']);
     Route::get('/xuxemons/me', [XuxemonController::class, 'myXuxemons']);
-    Route::post('/xuxemons/award-random', [XuxemonController::class, 'awardRandom']);
+    Route::post('/xuxemons/award-random', [XuxemonController::class, 'awardRandomXuxemon']);
     Route::put('/xuxemons/{id}', [XuxemonController::class, 'update']);
     Route::delete('/xuxemons/{id}', [XuxemonController::class, 'delete']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -39,4 +39,5 @@ Route::middleware('auth:api')->group(function () {
     // Rutas de Admin
     Route::get('/users', [AdminController::class, 'getAllUsers']);
     Route::get('/users/{userId}/bag-status', [AdminController::class, 'checkBagStatus']);
+    Route::post('/users/{userId}/award-random', [XuxemonController::class, 'awardRandomXuxemonToUser']);
 });

@@ -1,6 +1,6 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth';
@@ -21,12 +21,14 @@ export class XuxemonService {
     private readonly myXuxemonsList$ = new BehaviorSubject<Xuxemon[]>([]);
     private readonly typeInventory$ = new BehaviorSubject<string>('all');
     private readonly typeXuxemon$ = new BehaviorSubject<string>('');
+    private readonly sizeXuxemon$ = new BehaviorSubject<string>('');
     private readonly searchQuery$ = new BehaviorSubject<string>('');
 
     readonly xuxemonsList: Observable<Xuxemon[]> = this.xuxemonsList$.asObservable();
     readonly myXuxemonsList: Observable<Xuxemon[]> = this.myXuxemonsList$.asObservable();
     readonly typeInventory: Observable<string> = this.typeInventory$.asObservable();
     readonly typeXuxemon: Observable<string> = this.typeXuxemon$.asObservable();
+    readonly sizeXuxemon: Observable<string> = this.sizeXuxemon$.asObservable();
     readonly searchQuery: Observable<string> = this.searchQuery$.asObservable();
 
     readonly displayXuxemons: Observable<Xuxemon[]> = combineLatest([
@@ -34,17 +36,19 @@ export class XuxemonService {
         this.myXuxemonsList$,
         this.typeInventory$,
         this.typeXuxemon$,
+        this.sizeXuxemon$,
         this.searchQuery$
     ]).pipe(
-        map(([list, myList, typeInv, typeXuxe, query]) => {
+        map(([list, myList, typeInv, typeXuxe, sizeXuxe, query]) => {
             const baseList = typeInv === 'my' ? myList : list;
             if (!baseList.length) return [];
             const q = (query || '').toLowerCase().trim();
             return baseList.filter(x => {
                 const xType = x.type?.name || '';
                 const matchesType = !typeXuxe || xType === typeXuxe;
+                const matchesSize = !sizeXuxe || x.size === sizeXuxe;
                 const matchesQuery = !q || (x.name || '').toLowerCase().includes(q);
-                return matchesType && matchesQuery;
+                return matchesType && matchesSize && matchesQuery;
             });
         })
     );
@@ -60,14 +64,16 @@ export class XuxemonService {
     getDisplayXuxemons(): Xuxemon[] {
         const typeInv = this.typeInventory$.getValue();
         const typeXuxe = this.typeXuxemon$.getValue();
+        const sizeXuxe = this.sizeXuxemon$.getValue();
         const query = (this.searchQuery$.getValue() || '').toLowerCase().trim();
         const baseList = typeInv === 'my' ? this.myXuxemonsList$.getValue() : this.xuxemonsList$.getValue();
         if (!baseList.length) return [];
         return baseList.filter(x => {
             const xType = x.type?.name || '';
             const matchesType = !typeXuxe || xType === typeXuxe;
+            const matchesSize = !sizeXuxe || x.size === sizeXuxe;
             const matchesQuery = !query || (x.name || '').toLowerCase().includes(query);
-            return matchesType && matchesQuery;
+            return matchesType && matchesSize && matchesQuery;
         });
     }
 
@@ -77,6 +83,10 @@ export class XuxemonService {
 
     setTypeXuxemon(value: string): void {
         this.typeXuxemon$.next(value);
+    }
+
+    setSizeXuxemon(value: string): void {
+        this.sizeXuxemon$.next(value);
     }
 
     setSearchQuery(value: string): void {
@@ -108,7 +118,12 @@ export class XuxemonService {
     async loadAllXuxemons(): Promise<void> {
         if (!isPlatformBrowser(this.platformId)) return;
         try {
-            const raw = await firstValueFrom(this.http.get<any[]>(`${this.apiUrl}/xuxemons`));
+            const type = this.typeXuxemon$.getValue();
+            const size = this.sizeXuxemon$.getValue();
+            let params = new HttpParams();
+            if (type) params = params.set('type', type);
+            if (size) params = params.set('size', size);
+            const raw = await firstValueFrom(this.http.get<any[]>(`${this.apiUrl}/xuxemons`, { params }));
             const data = (raw || []).map(x => ({
                 id: x.id,
                 name: x.name,

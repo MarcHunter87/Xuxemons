@@ -10,9 +10,18 @@ use Illuminate\Support\Facades\DB;
 
 class XuxemonController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Xuxemon::with(['type', 'attack1.statusEffect', 'attack2.statusEffect'])->get());
+        $query = Xuxemon::with(['type', 'attack1.statusEffect', 'attack2.statusEffect']);
+
+        if ($request->filled('type')) {
+            $query->whereHas('type', fn ($q) => $q->where('name', $request->input('type')));
+        }
+        if ($request->filled('size')) {
+            $query->where('size', $request->input('size'));
+        }
+
+        return response()->json($query->get());
     }
 
     public function collectionStats()
@@ -66,7 +75,37 @@ class XuxemonController extends Controller
         return response()->json($myXuxemons);
     }
 
-    public function awardRandom()
+    private function getRandomXuxemon(string $userId): ?array
+    {
+        $randomXuxemon = Xuxemon::with(['type', 'attack1.statusEffect', 'attack2.statusEffect'])->inRandomOrder()->first();
+        if (! $randomXuxemon) {
+            return null;
+        }
+
+        $adquired = AdquiredXuxemon::create([
+            'user_id' => $userId,
+            'xuxemon_id' => $randomXuxemon->id,
+            'level' => 1,
+            'experience' => 0,
+            'bonus_hp' => rand(1, 100),
+            'bonus_attack' => rand(1, 20),
+            'bonus_defense' => rand(1, 20),
+        ]);
+        $maxHp = $adquired->hp;
+        $adquired->update(['current_hp' => $maxHp]);
+
+        $adquired->load('xuxemon.type', 'xuxemon.attack1.statusEffect', 'xuxemon.attack2.statusEffect');
+        $xuxemon = $adquired->xuxemon->toArray();
+        $xuxemon['level'] = $adquired->level;
+        $xuxemon['hp'] = $maxHp;
+        $xuxemon['current_hp'] = $maxHp;
+        $xuxemon['attack'] = $adquired->attack;
+        $xuxemon['defense'] = $adquired->defense;
+
+        return $xuxemon;
+    }
+
+    public function awardRandomXuxemon()
     {
         try {
             $userId = Auth::guard('api')->id();
@@ -74,30 +113,29 @@ class XuxemonController extends Controller
                 return response()->json(['message' => 'Unauthorized'], 401);
             }
 
-            $randomXuxemon = Xuxemon::with(['type', 'attack1.statusEffect', 'attack2.statusEffect'])->inRandomOrder()->first();
-            if (! $randomXuxemon) {
+            $xuxemon = $this->getRandomXuxemon($userId);
+            if ($xuxemon === null) {
                 return response()->json(['message' => 'No Xuxemons available'], 404);
             }
 
-            $adquired = AdquiredXuxemon::create([
-                'user_id' => $userId,
-                'xuxemon_id' => $randomXuxemon->id,
-                'level' => 1,
-                'experience' => 0,
-                'bonus_hp' => rand(1, 100),
-                'bonus_attack' => rand(1, 20),
-                'bonus_defense' => rand(1, 20),
-            ]);
-            $maxHp = $adquired->hp;
-            $adquired->update(['current_hp' => $maxHp]);
+            return response()->json($xuxemon);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Server error: '.$e->getMessage()], 500);
+        }
+    }
 
-            $adquired->load('xuxemon.type', 'xuxemon.attack1.statusEffect', 'xuxemon.attack2.statusEffect');
-            $xuxemon = $adquired->xuxemon->toArray();
-            $xuxemon['level'] = $adquired->level;
-            $xuxemon['hp'] = $maxHp;
-            $xuxemon['current_hp'] = $maxHp;
-            $xuxemon['attack'] = $adquired->attack;
-            $xuxemon['defense'] = $adquired->defense;
+    public function awardRandomXuxemonToUser(string $userId)
+    {
+        try {
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $xuxemon = $this->getRandomXuxemon($userId);
+            if ($xuxemon === null) {
+                return response()->json(['message' => 'No Xuxemons available'], 404);
+            }
 
             return response()->json($xuxemon);
         } catch (\Throwable $e) {
