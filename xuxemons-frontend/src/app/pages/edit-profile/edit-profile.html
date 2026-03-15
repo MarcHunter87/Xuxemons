@@ -24,7 +24,15 @@
 
 		<h2 class="block-title">Profile Picture</h2>
 		<input type="file" #iconInput accept="image/*" class="file-input" (change)="onIconSelected($event)" aria-hidden="true">
-		<div class="avatar-center-wrap" (click)="openIconPicker()">
+		<div
+			class="avatar-center-wrap"
+			tabindex="0"
+			role="button"
+			aria-label="Change profile picture"
+			(click)="openIconPicker()"
+			(keydown.enter)="openIconPicker()"
+			(keydown.space)="$event.preventDefault(); openIconPicker()"
+		>
 			<div class="profile-avatar" role="img" aria-label="Current profile picture">
 				@if (iconPreview()) {
 					<img [src]="iconPreview()" alt="Profile icon">

@@ -76,6 +76,48 @@ export class XuxemonService {
         }
     }
 
+    async loadCollectionStats(): Promise<{ acquired: number; total: number } | null> {
+        if (!isPlatformBrowser(this.platformId)) return null;
+        try {
+            const raw = await firstValueFrom(
+                this.http.get<{ acquired: number; total: number }>(
+                    `${this.apiUrl}/xuxemons/collection-stats`,
+                ),
+            );
+            if (raw && typeof raw.total === 'number' && typeof raw.acquired === 'number') {
+                return {
+                    acquired: Math.max(0, raw.acquired),
+                    total: Math.max(0, raw.total),
+                };
+            }
+        } catch {}
+        
+        try {
+            const [all, mine] = await Promise.all([
+                firstValueFrom(this.http.get<unknown[]>(`${this.apiUrl}/xuxemons`)),
+                firstValueFrom(this.http.get<unknown[]>(`${this.apiUrl}/xuxemons/me`)),
+            ]);
+            const mineArr: unknown[] = Array.isArray(mine) ? mine : [];
+            const uniqueIds = new Set<number>();
+            for (const x of mineArr) {
+                if (
+                    typeof x === 'object' &&
+                    x !== null &&
+                    'id' in x &&
+                    typeof (x as { id: unknown }).id === 'number'
+                ) {
+                    uniqueIds.add((x as { id: number }).id);
+                }
+            }
+            return {
+                total: Array.isArray(all) ? all.length : 0,
+                acquired: uniqueIds.size,
+            };
+        } catch {
+            return null;
+        }
+    }
+
     async awardRandomXuxemon() {
         if (!isPlatformBrowser(this.platformId)) return null;
         try {

@@ -12,10 +12,16 @@
 
 .edit-profile-main {
 	width: 100%;
+	max-width: var(--layout-max-width);
+	margin: 0 auto;
+	box-sizing: border-box;
 }
 
 .edit-profile-section {
-	max-width: 1180px;
+	max-width: var(--layout-max-width);
+	width: 100%;
+	margin: 0 auto;
+	box-sizing: border-box;
 }
 
 .block-title {
@@ -112,6 +118,37 @@
 	width: fit-content;
 	margin: 0 auto 1.15rem;
 	cursor: pointer;
+	border-radius: 50%;
+}
+
+.avatar-center-wrap:hover .profile-avatar,
+.avatar-center-wrap:focus-within .profile-avatar {
+	opacity: 0.85;
+	border-color: var(--white-color);
+	box-shadow: 0 0 0 3px var(--accent-color);
+}
+
+.avatar-center-wrap:has(.avatar-edit-btn:hover) .profile-avatar {
+	opacity: 1;
+	border-color: var(--accent-color);
+	box-shadow: none;
+}
+
+.avatar-center-wrap:hover .avatar-edit-btn {
+	background: var(--secondary-color);
+	color: var(--accent-color);
+	border-color: var(--accent-color);
+	transform: scale(1.1);
+}
+
+.avatar-center-wrap:focus-visible {
+	outline: none;
+}
+
+.avatar-center-wrap:focus-visible .profile-avatar {
+	border-color: var(--white-color);
+	box-shadow: 0 0 0 4px var(--white-color), 0 0 0 7px var(--accent-color);
+	opacity: 0.95;
 }
 
 .profile-avatar {
@@ -126,6 +163,7 @@
 	color: var(--accent-color);
 	font-size: 64px;
 	overflow: hidden;
+	transition: opacity 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .profile-avatar img {

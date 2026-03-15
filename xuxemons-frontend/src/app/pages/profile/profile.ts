@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService, User } from '../../core/services/auth';
@@ -16,15 +16,18 @@ import { TotalBattles } from '../../core/components/total-battles/total-battles'
 })
 export class Profile implements OnInit, OnDestroy {
   user: User | null = null;
+  user$ = inject(AuthService).user$;
   iconLoadError = false;
   bannerLoadError = false;
   isLoggingOut = signal(false);
+  statsReady = signal(false);
   private sub: { unsubscribe: () => void } | null = null;
 
   constructor(
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
-  ) { }
+  ) {}
+
 
   ngOnInit(): void {
     this.user = this.authService.getUser();
@@ -32,6 +35,9 @@ export class Profile implements OnInit, OnDestroy {
       this.user = u;
       this.iconLoadError = false;
       this.bannerLoadError = false;
+    });
+    this.authService.refreshUserFromApi().subscribe(u => {
+      if (u) this.statsReady.set(true);
     });
   }
 

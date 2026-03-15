@@ -105,6 +105,16 @@ export class AuthService {
     return this.getStoredUser();
   }
 
+  refreshUserFromApi(): Observable<User | null> {
+    return this.http.get<User>(`${this.apiUrl}/user`).pipe(
+      tap(user => {
+        this.getStorage()?.setItem('user', JSON.stringify(user));
+        this.userSubject.next(user);
+      }),
+      catchError(() => of(null)),
+    );
+  }
+
   isAuthenticated(): boolean {
     return !!this.getToken();
   }

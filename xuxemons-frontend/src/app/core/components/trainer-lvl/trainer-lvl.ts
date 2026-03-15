@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService, type User } from '../../services/auth';
 
@@ -11,6 +11,7 @@ import { AuthService, type User } from '../../services/auth';
 })
 export class TrainerLvl {
     user$ = inject(AuthService).user$;
+    statsReady = input(true);
 
     getLevel(user: User | null): number {
         return user?.level ?? 1;

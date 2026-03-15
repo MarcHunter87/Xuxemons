@@ -1,4 +1,20 @@
-@if (user$ | async; as user) {
+@if (!statsReady()) {
+  <div class="stats-card" aria-busy="true">
+    <div class="card-header">
+      <div class="header-info">
+        <span class="label">Win Streak</span>
+        <h2 class="streak-text streak-text--loading">
+          <span class="stat-card__spinner" aria-hidden="true"></span>
+          <span class="visually-hidden">Cargando</span>
+        </h2>
+      </div>
+      <div class="badge-icon">
+        <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
+      </div>
+    </div>
+    <span class="battle-btn battle-btn--placeholder">Search Battle</span>
+  </div>
+} @else if (user$ | async; as user) {
   <div class="stats-card">
     <div class="card-header">
       <div class="header-info">

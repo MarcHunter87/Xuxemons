@@ -14,6 +14,8 @@ Route::get('/xuxemons', [XuxemonController::class, 'index']);
 Route::get('/items', [InventoryController::class, 'getAllItems']);
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('/user', [AuthController::class, 'me']);
+    Route::get('/xuxemons/collection-stats', [XuxemonController::class, 'collectionStats']);
     Route::get('/xuxemons/me', [XuxemonController::class, 'myXuxemons']);
     Route::post('/xuxemons/award-random', [XuxemonController::class, 'awardRandom']);
     Route::put('/xuxemons/{id}', [XuxemonController::class, 'update']);

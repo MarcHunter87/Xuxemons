@@ -6,12 +6,31 @@ use App\Models\AdquiredXuxemon;
 use App\Models\Xuxemon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class XuxemonController extends Controller
 {
     public function index()
     {
         return response()->json(Xuxemon::with('type')->get());
+    }
+
+    public function collectionStats()
+    {
+        $userId = Auth::guard('api')->id();
+        if (!$userId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $total = Xuxemon::query()->count();
+        $acquired = (int) DB::table('adquired_xuxemons')
+            ->where('user_id', $userId)
+            ->count(DB::raw('DISTINCT xuxemon_id'));
+
+        return response()->json([
+            'total' => $total,
+            'acquired' => $acquired,
+        ]);
     }
 
     public function myXuxemons()

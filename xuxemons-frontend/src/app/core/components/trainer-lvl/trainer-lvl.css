@@ -5,18 +5,16 @@
   min-height: 0;
 }
 
-.stats-card {
-  flex: 1;
-  min-height: 0;
-  background-color: var(--primary-color);
-  border-radius: 16px;
-  padding: 32px;
-  border: 1px solid var(--light-gray-color);
-  width: 100%;
-  box-shadow: 0 4px 6px -1px var(--shadow-color);
-  display: flex;
-  flex-direction: column;
+/* Misma caja que el resto de stat-card; XP abajo */
+.trainer-stat-card {
   justify-content: space-between;
+}
+
+.level-text {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  min-height: 1.1em;
 }
 
 .card-header {
@@ -29,22 +27,6 @@
 .header-info {
   display: flex;
   flex-direction: column;
-}
-
-.label {
-  color: var(--dark-gray-color);
-  font-size: 16px;
-  font-weight: 500;
-  text-transform: capitalize;
-  margin-bottom: 6px;
-}
-
-.level-text {
-  color: var(--text-alt-color);
-  font-size: 44px;
-  font-weight: 800;
-  margin: 0;
-  line-height: 1.1;
 }
 
 .badge-icon {

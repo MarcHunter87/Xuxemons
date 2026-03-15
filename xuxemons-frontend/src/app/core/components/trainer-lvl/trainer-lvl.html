@@ -1,9 +1,33 @@
-@if (user$ | async; as user) {
-  <div class="stats-card">
+@if (!statsReady()) {
+  <div class="stat-card trainer-stat-card" aria-busy="true">
     <div class="card-header">
       <div class="header-info">
-        <span class="label">Trainer Level</span>
-        <h2 class="level-text">Lv. {{ getLevel(user) }}</h2>
+        <span class="stat-card__label">Trainer Level</span>
+        <h2 class="stat-card__value level-text">
+          <span class="stat-card__spinner" aria-hidden="true"></span>
+          <span class="visually-hidden">Cargando</span>
+        </h2>
+      </div>
+      <div class="badge-icon">
+        <i class="bi bi-trophy-fill" aria-hidden="true"></i>
+      </div>
+    </div>
+    <div class="xp-section">
+      <div class="xp-info">
+        <span class="xp-numbers">&nbsp;</span>
+        <span class="percentage-text">&nbsp;</span>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+} @else if (user$ | async; as user) {
+  <div class="stat-card trainer-stat-card">
+    <div class="card-header">
+      <div class="header-info">
+        <span class="stat-card__label">Trainer Level</span>
+        <h2 class="stat-card__value level-text">Lv. {{ getLevel(user) }}</h2>
       </div>
       <div class="badge-icon">
         <i class="bi bi-trophy-fill" aria-hidden="true"></i>

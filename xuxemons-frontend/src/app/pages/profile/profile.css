@@ -1,9 +1,17 @@
 .profile-main {
   overflow-x: hidden;
+  width: 100%;
+}
+
+:host {
+  display: block;
+  width: 100%;
+  max-width: none;
 }
 
 .profile-banner {
-  width: 100%;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
   height: 21.875vw;
   min-height: 280px;
   background-color: var(--info-color);
@@ -12,12 +20,13 @@
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
+  box-sizing: border-box;
 }
 
 .profile-edit-btn {
   position: absolute;
   top: 1.25rem;
-  right: max(2rem, calc((100% - 1280px) / 2 + 2rem));
+  right: max(2rem, calc((100vw - var(--layout-max-width)) / 2 + 2rem));
   border: 2px solid var(--white-color);
   box-shadow: 0 2px 8px var(--shadow-color);
 }
@@ -33,16 +42,17 @@
 
 .profile-content {
   position: relative;
-  max-width: 1280px;
+  max-width: var(--layout-max-width);
   margin: 0 auto;
   padding: 0 2rem 2.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .profile-hero {
   display: flex;
   align-items: flex-end;
   gap: 1.5rem;
-  margin-left: 1.25rem;
   margin-bottom: 2.5rem;
 }
 
@@ -143,41 +153,24 @@
   min-width: 0;
   display: flex;
   gap: 1rem;
+  align-items: stretch;
 }
 
-.profile-stats-cards .profile-stat-card,
+.profile-stats-cards .profile-stat-slot,
 .profile-stats-cards app-collection,
 .profile-stats-cards app-total-battles {
   flex: 1 1 0%;
   min-width: 0;
   max-width: 100%;
-}
-
-.profile-stat-card {
-  background-color: var(--primary-color);
-  border-radius: 16px;
-  padding: 32px;
-  border: 1px solid var(--light-gray-color);
-  box-shadow: 0 4px 6px -1px var(--shadow-color);
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  align-self: stretch;
 }
 
-.profile-stat-label {
-  color: var(--dark-gray-color);
-  font-size: 16px;
-  font-weight: 500;
-  text-transform: capitalize;
-  margin-bottom: 6px;
-}
-
-.profile-stat-value {
-  color: var(--text-alt-color);
-  font-size: 44px;
-  font-weight: 800;
-  margin: 0;
-  line-height: 1.1;
+.profile-stats-cards .profile-stat-slot > .stat-card {
+  flex: 1;
+  width: 100%;
+  min-height: 100%;
 }
 
 @media (max-width: 900px) {
