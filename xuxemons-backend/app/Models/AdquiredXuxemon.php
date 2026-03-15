@@ -14,11 +14,18 @@ class AdquiredXuxemon extends Model
         'bonus_hp',
         'bonus_attack',
         'bonus_defense',
+        'current_hp',
+        'status_effect_id',
     ];
 
     public function xuxemon()
     {
         return $this->belongsTo(Xuxemon::class);
+    }
+
+    public function statusEffect()
+    {
+        return $this->belongsTo(StatusEffect::class);
     }
 
     public function getHpAttribute(): int

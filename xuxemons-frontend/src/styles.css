@@ -144,7 +144,8 @@ textarea:focus-visible,
 }
 
 .btn-primary,
-.btn-danger {
+.btn-danger,
+.btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -164,6 +165,22 @@ textarea:focus-visible,
 .btn-primary {
   background-color: var(--accent-color);
   color: var(--white-color);
+}
+
+.btn-secondary {
+  background-color: var(--dark-gray-color);
+  color: var(--white-color);
+}
+
+.btn-secondary:hover:not(:disabled),
+.btn-secondary:focus-visible:not(:disabled) {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.85);
 }
 
 .btn-primary:hover:not(:disabled),
@@ -194,13 +211,15 @@ textarea:focus-visible,
 }
 
 button.btn-primary:disabled,
-button.btn-danger:disabled {
+button.btn-danger:disabled,
+button.btn-secondary:disabled {
   opacity: 0.9;
   cursor: not-allowed;
 }
 
 .btn-sm.btn-primary,
 .btn-sm.btn-danger,
+.btn-sm.btn-secondary,
 a.btn-sm {
   min-height: 0;
   padding: 0.625rem 1.25rem;

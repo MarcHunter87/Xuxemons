@@ -15,6 +15,7 @@ return new class extends Migration
             $table->integer('bonus_hp')->default(0);
             $table->integer('bonus_attack')->default(0);
             $table->integer('bonus_defense')->default(0);
+            $table->foreignId('status_effect_id')->nullable()->after('bonus_defense')->constrained('status_effects')->nullOnDelete();
         });
     }
 
@@ -24,7 +25,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('adquired_xuxemons', function (Blueprint $table) {
-            $table->dropColumn(['bonus_hp', 'bonus_attack', 'bonus_defense']);
+            $table->dropForeign(['status_effect_id']);
+            $table->dropColumn(['bonus_hp', 'bonus_attack', 'bonus_defense', 'status_effect_id']);
         });
     }
 };

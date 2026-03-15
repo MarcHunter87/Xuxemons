@@ -1,4 +1,5 @@
-import { Component, inject, signal, OnInit, ViewChild, ElementRef, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, ViewChild, ElementRef, computed } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { XuxemonService, Xuxemon } from '../../core/services/xuxemon.service';
 
@@ -9,8 +10,9 @@ import { XuxemonService, Xuxemon } from '../../core/services/xuxemon.service';
     templateUrl: './gacha.html',
     styleUrl: './gacha.css',
 })
-export class Gacha implements OnInit {
+export class Gacha implements OnInit, OnDestroy {
     private xuxemonService = inject(XuxemonService);
+    private subs = new Subscription();
 
     @ViewChild('rouletteBox') rouletteBox!: ElementRef<HTMLElement>;
 
@@ -21,11 +23,17 @@ export class Gacha implements OnInit {
     public rouletteItems = signal<Xuxemon[]>([]);
     public trackTransform = signal<string>('translateX(0)');
     public isDataLoaded = signal(false);
-    public historyXuxemons = computed(() => this.xuxemonService.myXuxemonsList().slice(0, 6));
+    public historyXuxemons = computed(() => this.myXuxemonsList().slice(0, 6));
+    private myXuxemonsList = signal<Xuxemon[]>([]);
 
     ngOnInit() {
         this.loadRoulette();
         this.xuxemonService.loadMyXuxemons();
+        this.subs.add(this.xuxemonService.myXuxemonsList.subscribe(list => this.myXuxemonsList.set(list)));
+    }
+
+    ngOnDestroy() {
+        this.subs.unsubscribe();
     }
 
     async loadRoulette() {
@@ -35,7 +43,7 @@ export class Gacha implements OnInit {
     }
 
     initRoulette() {
-        const list = this.xuxemonService.xuxemonsList();
+        const list = this.xuxemonService.getXuxemonsList();
         if (list.length > 0) {
             this.rouletteItems.set(Array.from({ length: 100 }, () => list[Math.floor(Math.random() * list.length)]));
         } else {
@@ -96,10 +104,10 @@ export class Gacha implements OnInit {
 
     getTypeColor(typeName: string): string {
         switch (typeName) {
-            case 'Power': return '#ff4757';
-            case 'Speed': return '#1e90ff';
-            case 'Technical': return '#2ed573';
-            default: return '#eee';
+            case 'Power': return '#D0181B';
+            case 'Speed': return '#0D6EFD';
+            case 'Technical': return '#28A745';
+            default: return '#777';
         }
     }
 

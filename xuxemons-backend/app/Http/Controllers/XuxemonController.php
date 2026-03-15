@@ -12,7 +12,7 @@ class XuxemonController extends Controller
 {
     public function index()
     {
-        return response()->json(Xuxemon::with('type')->get());
+        return response()->json(Xuxemon::with(['type', 'attack1.statusEffect', 'attack2.statusEffect'])->get());
     }
 
     public function collectionStats()
@@ -41,7 +41,7 @@ class XuxemonController extends Controller
         }
 
         $myXuxemons = AdquiredXuxemon::where('user_id', $userId)
-            ->with(['xuxemon.type'])
+            ->with(['xuxemon.type', 'xuxemon.attack1.statusEffect', 'xuxemon.attack2.statusEffect', 'statusEffect'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($a) {
@@ -50,6 +50,13 @@ class XuxemonController extends Controller
                 }
                 $x = $a->xuxemon;
                 $x->adquired_at = $a->created_at;
+                $x->level = $a->level;
+                $maxHp = $a->hp;
+                $x->hp = $maxHp;
+                $x->current_hp = $a->getAttribute('current_hp') !== null ? (int) $a->current_hp : $maxHp;
+                $x->attack = $a->attack;
+                $x->defense = $a->defense;
+                $x->status_effect_applied = $a->statusEffect;
 
                 return $x;
             })
@@ -67,7 +74,7 @@ class XuxemonController extends Controller
                 return response()->json(['message' => 'Unauthorized'], 401);
             }
 
-            $randomXuxemon = Xuxemon::with('type')->inRandomOrder()->first();
+            $randomXuxemon = Xuxemon::with(['type', 'attack1.statusEffect', 'attack2.statusEffect'])->inRandomOrder()->first();
             if (! $randomXuxemon) {
                 return response()->json(['message' => 'No Xuxemons available'], 404);
             }
@@ -77,14 +84,18 @@ class XuxemonController extends Controller
                 'xuxemon_id' => $randomXuxemon->id,
                 'level' => 1,
                 'experience' => 0,
-                'bonus_hp' => rand(1, 40),
+                'bonus_hp' => rand(1, 100),
                 'bonus_attack' => rand(1, 20),
                 'bonus_defense' => rand(1, 20),
             ]);
+            $maxHp = $adquired->hp;
+            $adquired->update(['current_hp' => $maxHp]);
 
-            $adquired->load('xuxemon.type');
+            $adquired->load('xuxemon.type', 'xuxemon.attack1.statusEffect', 'xuxemon.attack2.statusEffect');
             $xuxemon = $adquired->xuxemon->toArray();
-            $xuxemon['hp'] = $adquired->hp;
+            $xuxemon['level'] = $adquired->level;
+            $xuxemon['hp'] = $maxHp;
+            $xuxemon['current_hp'] = $maxHp;
             $xuxemon['attack'] = $adquired->attack;
             $xuxemon['defense'] = $adquired->defense;
 
@@ -104,7 +115,7 @@ class XuxemonController extends Controller
 
             $adquired = AdquiredXuxemon::where('id', $id)
                 ->where('user_id', $userId)
-                ->with('xuxemon.type')
+                ->with('xuxemon.type', 'xuxemon.attack1.statusEffect', 'xuxemon.attack2.statusEffect')
                 ->first();
 
             if (! $adquired) {

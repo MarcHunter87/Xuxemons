@@ -61,12 +61,15 @@ export class Breadcrumb implements OnInit, OnDestroy {
         for (let i = 0; i < segments.length; i++) {
           const seg = segments[i];
           acc += `/${seg}`;
-          const label = this.labels[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1);
-          pathItems.push({ label, path: acc });
           if (seg === 'give-item-form' && i + 1 < segments.length) {
-            acc += `/${segments[i + 1]}`;
-            pathItems.push({ label: 'Give Item', path: acc });
+            const rawId = segments[i + 1];
+            acc += `/${rawId}`;
+            const idForLabel = this.decodeIdForBreadcrumb(rawId);
+            pathItems.push({ label: `Give Item ${idForLabel}`, path: acc });
             i++;
+          } else {
+            const label = this.labels[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1);
+            pathItems.push({ label, path: acc });
           }
         }
         this.items = pathItems;
@@ -76,5 +79,19 @@ export class Breadcrumb implements OnInit, OnDestroy {
 
   isLast(index: number): boolean {
     return index === this.items.length - 1;
+  }
+
+  private decodeIdForBreadcrumb(raw: string): string {
+    let s = raw;
+    for (let i = 0; i < 3; i++) {
+      try {
+        const d = decodeURIComponent(s);
+        if (d === s) break;
+        s = d;
+      } catch {
+        break;
+      }
+    }
+    return s;
   }
 }

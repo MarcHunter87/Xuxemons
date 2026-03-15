@@ -14,7 +14,7 @@
     <div class="row g-4">
       @for (xuxemon of paginatedMyXuxemons(); track xuxemon.id) {
       <article class="col-6 col-md-3 col-xl-2">
-        <app-xuxemon-card [xuxemon]="xuxemon" [showSizeBadge]="true"></app-xuxemon-card>
+        <app-xuxemon-card [xuxemon]="xuxemon" [showSizeBadge]="true" detailVariant="owned"></app-xuxemon-card>
       </article>
       } @empty {
       <p class="col-12 no-results">You haven't captured any Xuxemon yet.</p>
@@ -40,7 +40,7 @@
       @for (xuxemon of paginatedXuxemons(); track xuxemon.id) {
       <article class="col-6 col-md-3 col-xl-2">
           @if (isXuxemonCaptured(xuxemon.id)) {
-            <app-xuxemon-card [xuxemon]="xuxemon" [showSizeBadge]="true"></app-xuxemon-card>
+            <app-xuxemon-card [xuxemon]="xuxemon" [showSizeBadge]="true" detailVariant="xuxedex"></app-xuxemon-card>
           } @else {
             <div class="xuxemon-card-locked">
               <div class="locked-content">
