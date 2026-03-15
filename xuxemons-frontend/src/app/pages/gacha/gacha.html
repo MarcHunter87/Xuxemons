@@ -1,79 +1,121 @@
-<div>
-    <div class="page-header">
-        <h1 class="page-title">Gacha</h1>
-        <p class="page-subtitle">Try your luck and obtain new Xuxemons!</p>
+<div class="gacha-container">
+  <section class="page-hero" aria-labelledby="gacha-title">
+    <h1 id="gacha-title">
+      <span class="page-hero-title-black">Spin the</span>
+      <span class="page-hero-title-blue">Gacha</span>
+    </h1>
+    <p class="page-hero-desc">Try your luck and discover legendary creatures.</p>
+  </section>
+
+  @if (isDataLoaded() && rouletteItems().length === 0) {
+    <div class="empty-db-message">
+      <h2>No Xuxemons available</h2>
+    </div>
+  }
+
+  @if (rouletteItems().length > 0) {
+    <div class="roulette-box" #rouletteBox>
+      <div
+        class="roulette-track"
+        [class.spinning]="isSpinning()"
+        [class.no-transition]="noTransition()"
+        [style.transform]="trackTransform()"
+      >
+        @for (item of rouletteItems(); track $index) {
+          <div
+            class="roulette-item"
+            [style.background-color]="getTypeColor(item.type.name)"
+          >
+            <img [src]="item.image_url" [alt]="item.name" />
+            <span>{{ item.name }}</span>
+          </div>
+        }
+      </div>
+      <div class="roulette-pointer"></div>
     </div>
 
-    @if (isDataLoaded() && rouletteItems().length === 0) {
-        <div class="alert alert-info text-center">
-            <h2>No Xuxemons available</h2>
-        </div>
-    }
+    <button
+      type="button"
+      class="btn-primary spin-button"
+      [disabled]="isSpinning()"
+      (click)="spin()"
+    >
+      @if (!isSpinning()) {
+        <span>Spin</span>
+      } @else {
+        <div class="btn-loading-icon"></div>
+      }
+    </button>
 
-    @if (rouletteItems().length > 0) {
-        <div class="d-flex flex-column align-items-center mb-5">
-            <div class="roulette-box" #rouletteBox>
-                <div class="roulette-track" [class.spinning]="isSpinning()" [class.no-transition]="noTransition()" [style.transform]="trackTransform()">
-                    @for (item of rouletteItems(); track $index) {
-                        <div class="roulette-item" [style.background-color]="getTypeColor(item.type.name)">
-                            <img [src]="item.image_url" [alt]="item.name">
-                            <span>{{ item.name }}</span>
-                        </div>
-                    }
-                </div>
-                <div class="roulette-pointer"></div>
-            </div>
-
-            <button class="btn-primary spin-button" [disabled]="isSpinning()" (click)="spin()">
-                @if (!isSpinning()) {
-                    <span>Spin</span>
-                } @else {
-                    <div class="btn-loading-icon"></div>
+    @if (historyXuxemons().length > 0) {
+      <div class="recent-xuxemons-section">
+        <h2 class="recent-title">Recently obtained</h2>
+        <div class="recent-grid">
+          @for (xuxe of historyXuxemons(); track xuxe.id) {
+            <div class="recent-card">
+              <div
+                class="recent-image-box"
+                [style.background-color]="getTypeColor(xuxe.type.name)"
+              >
+                <img [src]="xuxe.image_url" [alt]="xuxe.name" class="img-fluid" />
+              </div>
+              <div class="recent-info">
+                <span class="recent-name">{{ xuxe.name }}</span>
+                @if (xuxe.adquired_at) {
+                  <span class="recent-date">{{ xuxe.adquired_at | date:'d/M/yy' }}</span>
                 }
-            </button>
-        </div>
-
-
-        @if (historyXuxemons().length > 0) {
-            <div class="recent-xuxemons-section bg-white p-4 rounded-5 border shadow-sm">
-                <h3 class="recent-title text-center mb-4">Obtained History</h3>
-                <div class="d-flex flex-wrap justify-content-center gap-4">
-                    @for (xuxe of historyXuxemons(); track xuxe.id) {
-                        <div class="recent-card text-center" style="width: 140px;">
-                            <div class="recent-image-box p-3 rounded-4 shadow-sm mb-2" [style.background-color]="getTypeColor(xuxe.type.name)">
-                                <img [src]="xuxe.image_url" [alt]="xuxe.name" class="img-fluid">
-                            </div>
-                            <div class="recent-info">
-                                <span class="fw-bold d-block text-dark">{{ xuxe.name }}</span>
-                                <span class="text-secondary small">{{ xuxe.adquired_at | date:'short' }}</span>
-                            </div>
-                        </div>
-                    }
-                </div>
+              </div>
             </div>
-        }
-    }
-
-
-    @if (showAward()) {
-        <div class="modal-overlay d-flex align-items-center justify-content-center">
-            <div class="modal-content p-5 text-center shadow-lg border-0 rounded-5 animate-pop" style="max-width: 500px;">
-                <h2 class="winner-title fw-black mb-4">Congratulations!</h2>
-                <div class="winner-display d-flex flex-column align-items-center gap-3">
-                    <div class="image-wrapper p-4 rounded-4 shadow mb-2" [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name || '')">
-                        <img [src]="awardedXuxemon()?.image_url" [alt]="awardedXuxemon()?.name" class="img-fluid animate-float">
-                    </div>
-                    <h3 class="winner-name fw-black h1 mb-0">{{ awardedXuxemon()?.name }}</h3>
-                    <span class="type-badge px-4 py-2 text-white rounded-pill fw-bold text-uppercase small" 
-                          [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name || '')">
-                        {{ awardedXuxemon()?.type?.name }}
-                    </span>
-                </div>
-                <div class="modal-actions d-flex gap-2 mt-4 pt-2">
-                    <button (click)="spinAgain()" class="btn-primary flex-grow-1 py-3 px-4 rounded-4">Spin Again</button>
-                    <button (click)="closeModal()" class="btn btn-light flex-grow-1 py-3 px-4 rounded-4 border">Close</button>
-                </div>
-            </div>
+          }
         </div>
+      </div>
     }
+  }
+
+  @if (showAward()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-content animate-pop" (click)="$event.stopPropagation()">
+        <h2 class="winner-title">Congratulations!</h2>
+        <div class="winner-display">
+          <div
+            class="image-wrapper"
+            [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+          >
+            <img
+              [src]="awardedXuxemon()?.image_url"
+              [alt]="awardedXuxemon()?.name"
+              class="animate-float"
+            />
+          </div>
+          <p class="winner-name">{{ awardedXuxemon()?.name }}</p>
+          <span
+            class="type-badge"
+            [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+          >
+            {{ awardedXuxemon()?.type?.name }}
+          </span>
+          @if (awardedXuxemon()?.hp != null && awardedXuxemon()?.attack != null && awardedXuxemon()?.defense != null) {
+            <div class="winner-stats">
+              <div class="stat stat-hp">
+                <span class="stat-label">HP</span>
+                <span class="stat-value">{{ awardedXuxemon()?.hp }}</span>
+              </div>
+              <div class="stat stat-attack">
+                <span class="stat-label">Attack</span>
+                <span class="stat-value">{{ awardedXuxemon()?.attack }}</span>
+              </div>
+              <div class="stat stat-defense">
+                <span class="stat-label">Defense</span>
+                <span class="stat-value">{{ awardedXuxemon()?.defense }}</span>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-actions">
+          <button type="button" (click)="spinAgain()" class="btn-primary">Spin Again</button>
+          <button type="button" (click)="closeModal()" class="btn-secondary">Close</button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

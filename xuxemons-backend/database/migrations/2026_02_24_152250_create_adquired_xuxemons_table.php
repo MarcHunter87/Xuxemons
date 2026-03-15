@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('user_id');
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreignId('xuxemon_id')->constrained('xuxemons');
+            $table->unsignedInteger('current_hp')->nullable();
             $table->unsignedInteger('level')->default(1);
             $table->unsignedInteger('experience')->default(0);
             $table->timestamps();

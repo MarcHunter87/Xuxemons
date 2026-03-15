@@ -23,4 +23,14 @@ class Xuxemon extends Model
     {
         return $this->belongsTo(Type::class);
     }
+
+    public function attack1()
+    {
+        return $this->belongsTo(Attack::class, 'attack_1_id');
+    }
+
+    public function attack2()
+    {
+        return $this->belongsTo(Attack::class, 'attack_2_id');
+    }
 }

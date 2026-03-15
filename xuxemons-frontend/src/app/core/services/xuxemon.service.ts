@@ -1,17 +1,12 @@
-import { Injectable, signal, inject, computed, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth';
+import type { Xuxemon } from '../interfaces';
 
-export interface Xuxemon {
-    id: number;
-    name: string;
-    type: { name: string };
-    size: 'Small' | 'Medium' | 'Large';
-    image_url: string;
-    adquired_at?: string;
-}
+export type { Xuxemon };
 
 @Injectable({
     providedIn: 'root'
@@ -22,31 +17,95 @@ export class XuxemonService {
     private apiUrl = isPlatformBrowser(this.platformId) ? 'http://localhost:8080/api' : 'http://backend/api';
     private auth = inject(AuthService);
 
-    public xuxemonsList = signal<Xuxemon[]>([]);
-    public myXuxemonsList = signal<Xuxemon[]>([]);
+    private readonly xuxemonsList$ = new BehaviorSubject<Xuxemon[]>([]);
+    private readonly myXuxemonsList$ = new BehaviorSubject<Xuxemon[]>([]);
+    private readonly typeInventory$ = new BehaviorSubject<string>('all');
+    private readonly typeXuxemon$ = new BehaviorSubject<string>('');
+    private readonly searchQuery$ = new BehaviorSubject<string>('');
 
-    public typeInventory = signal<string>('all');
-    public typeXuxemon = signal<string>('');
-    public searchQuery = signal<string>('');
+    readonly xuxemonsList: Observable<Xuxemon[]> = this.xuxemonsList$.asObservable();
+    readonly myXuxemonsList: Observable<Xuxemon[]> = this.myXuxemonsList$.asObservable();
+    readonly typeInventory: Observable<string> = this.typeInventory$.asObservable();
+    readonly typeXuxemon: Observable<string> = this.typeXuxemon$.asObservable();
+    readonly searchQuery: Observable<string> = this.searchQuery$.asObservable();
 
-    public displayXuxemons = computed(() => {
-        const typeInv = this.typeInventory();
-        const typeXuxe = this.typeXuxemon();
-        const query = (this.searchQuery() || '').toLowerCase().trim();
+    readonly displayXuxemons: Observable<Xuxemon[]> = combineLatest([
+        this.xuxemonsList$,
+        this.myXuxemonsList$,
+        this.typeInventory$,
+        this.typeXuxemon$,
+        this.searchQuery$
+    ]).pipe(
+        map(([list, myList, typeInv, typeXuxe, query]) => {
+            const baseList = typeInv === 'my' ? myList : list;
+            if (!baseList.length) return [];
+            const q = (query || '').toLowerCase().trim();
+            return baseList.filter(x => {
+                const xType = x.type?.name || '';
+                const matchesType = !typeXuxe || xType === typeXuxe;
+                const matchesQuery = !q || (x.name || '').toLowerCase().includes(q);
+                return matchesType && matchesQuery;
+            });
+        })
+    );
 
-        const baseList = typeInv === 'my' ? this.myXuxemonsList() : this.xuxemonsList();
+    getXuxemonsList(): Xuxemon[] {
+        return this.xuxemonsList$.getValue();
+    }
 
-        if (!baseList) return [];
+    getMyXuxemonsList(): Xuxemon[] {
+        return this.myXuxemonsList$.getValue();
+    }
 
+    getDisplayXuxemons(): Xuxemon[] {
+        const typeInv = this.typeInventory$.getValue();
+        const typeXuxe = this.typeXuxemon$.getValue();
+        const query = (this.searchQuery$.getValue() || '').toLowerCase().trim();
+        const baseList = typeInv === 'my' ? this.myXuxemonsList$.getValue() : this.xuxemonsList$.getValue();
+        if (!baseList.length) return [];
         return baseList.filter(x => {
             const xType = x.type?.name || '';
             const matchesType = !typeXuxe || xType === typeXuxe;
             const matchesQuery = !query || (x.name || '').toLowerCase().includes(query);
             return matchesType && matchesQuery;
         });
-    });
+    }
 
-    async loadAllXuxemons() {
+    setTypeInventory(value: string): void {
+        this.typeInventory$.next(value);
+    }
+
+    setTypeXuxemon(value: string): void {
+        this.typeXuxemon$.next(value);
+    }
+
+    setSearchQuery(value: string): void {
+        this.searchQuery$.next(value);
+    }
+
+    private mapStatusEffect(status: any): { name: string; icon_url: string } | undefined {
+        if (!status?.name || !status?.icon_path) return undefined;
+        return {
+            name: status.name,
+            icon_url: this.auth.getAssetUrl(`/${status.icon_path}`),
+        };
+    }
+
+    private mapAttacks(x: any): Xuxemon['attacks'] {
+        const a1 = x.attack1 ?? x.attack_1;
+        const a2 = x.attack2 ?? x.attack_2;
+        const xAttack = x.attack ?? 0;
+        return [a1, a2].filter(Boolean).map((atk: any) => ({
+            id: atk.id,
+            name: atk.name,
+            description: atk.description,
+            dmg: atk.dmg != null ? atk.dmg : xAttack,
+            status_chance: atk.status_chance ?? null,
+            statusEffect: this.mapStatusEffect(atk.statusEffect ?? atk.status_effect),
+        }));
+    }
+
+    async loadAllXuxemons(): Promise<void> {
         if (!isPlatformBrowser(this.platformId)) return;
         try {
             const raw = await firstValueFrom(this.http.get<any[]>(`${this.apiUrl}/xuxemons`));
@@ -55,16 +114,22 @@ export class XuxemonService {
                 name: x.name,
                 type: x.type,
                 size: x.size ?? 'Small',
-                image_url: this.auth.getAssetUrl(`/${x.icon_path || ''}`)
+                image_url: this.auth.getAssetUrl(`/${x.icon_path || ''}`),
+                description: x.description,
+                level: x.level,
+                hp: x.hp,
+                attack: x.attack,
+                defense: x.defense,
+                attacks: this.mapAttacks(x),
             })) as Xuxemon[];
-            this.xuxemonsList.set(data);
+            this.xuxemonsList$.next(data);
         } catch (error) {
             console.error('Error loading all xuxemons:', error);
-            this.xuxemonsList.set([]);
+            this.xuxemonsList$.next([]);
         }
     }
 
-    async loadMyXuxemons() {
+    async loadMyXuxemons(): Promise<void> {
         if (!isPlatformBrowser(this.platformId)) return;
         try {
             const raw = await firstValueFrom(this.http.get<any[]>(`${this.apiUrl}/xuxemons/me`));
@@ -74,12 +139,19 @@ export class XuxemonService {
                 type: x.type,
                 size: x.size ?? 'Small',
                 image_url: this.auth.getAssetUrl(`/${x.icon_path || ''}`),
-                adquired_at: x.adquired_at
+                statusEffect: this.mapStatusEffect(x.status_effect_applied),
+                description: x.description,
+                adquired_at: x.adquired_at ?? x.created_at,
+                hp: x.hp,
+                current_hp: x.current_hp ?? x.hp,
+                attack: x.attack,
+                defense: x.defense,
+                attacks: this.mapAttacks(x),
             })) as Xuxemon[];
-            this.myXuxemonsList.set(data);
+            this.myXuxemonsList$.next(data);
         } catch (error) {
             console.error('Error loading my xuxemons:', error);
-            this.myXuxemonsList.set([]);
+            this.myXuxemonsList$.next([]);
         }
     }
 
@@ -98,7 +170,6 @@ export class XuxemonService {
                 };
             }
         } catch {}
-        
         try {
             const [all, mine] = await Promise.all([
                 firstValueFrom(this.http.get<unknown[]>(`${this.apiUrl}/xuxemons`)),
@@ -125,7 +196,7 @@ export class XuxemonService {
         }
     }
 
-    async awardRandomXuxemon() {
+    async awardRandomXuxemon(): Promise<Xuxemon | null> {
         if (!isPlatformBrowser(this.platformId)) return null;
         try {
             const raw = await firstValueFrom(this.http.post<any>(`${this.apiUrl}/xuxemons/award-random`, {}));
@@ -134,7 +205,13 @@ export class XuxemonService {
                 name: raw?.name,
                 type: raw?.type,
                 size: raw?.size ?? 'Small',
-                image_url: this.auth.getAssetUrl(`/${raw?.icon_path || ''}`)
+                image_url: this.auth.getAssetUrl(`/${raw?.icon_path || ''}`),
+                description: raw?.description,
+                level: raw?.level,
+                hp: raw?.hp,
+                attack: raw?.attack,
+                defense: raw?.defense,
+                attacks: this.mapAttacks(raw ?? {}),
             };
             await this.loadMyXuxemons();
             return data;

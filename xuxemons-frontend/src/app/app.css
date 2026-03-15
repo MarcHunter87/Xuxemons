@@ -6,7 +6,7 @@
 .app-content {
   max-width: var(--layout-max-width);
   margin: 0 auto;
-  padding: 1rem 2rem 3rem;
+  padding: var(--page-content-padding-top) 2rem 3rem;
 }
 
 .app-content.profile-no-padding-bottom {

@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name', 128)->unique();
             $table->text('description')->nullable();
-            $table->unsignedInteger('dmg')->default(0);
+            $table->unsignedInteger('dmg')->nullable();
             $table->foreignId('status_effect_id')->nullable()->constrained('status_effects')->nullOnDelete();
             $table->unsignedInteger('status_chance')->nullable()->default(50);
         });

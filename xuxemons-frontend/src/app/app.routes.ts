@@ -8,8 +8,10 @@ import { Friends } from './pages/friends/friends';
 import { Profile } from './pages/profile/profile';
 import { EditProfile } from './pages/edit-profile/edit-profile';
 import { Admin } from './pages/admin/admin';
+import { GiveItemForm } from './pages/give-item-form/give-item-form';
 import { authGuard } from './guard/auth-guard';
 import { adminGuard } from './guard/admin-guard';
+import { giveItemFormGuard } from './guard/give-item-form.guard';
 import { Register } from './pages/auth/register/register';
 import { Login } from './pages/auth/login/login';
 
@@ -17,52 +19,56 @@ export const routes: Routes = [
   {
     path: '',
     component: Home,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'register',
-    component: Register
+    component: Register,
   },
   {
     path: 'login',
-    component: Login
+    component: Login,
   },
   {
     path: 'battle',
     component: Battle,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'gacha',
     component: Gacha,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'xuxedex',
     component: Xuxedex,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'inventory',
     component: Inventory,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'friends',
     component: Friends,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'profile',
     canActivate: [authGuard],
-    children: [
-      { path: '', component: Profile },
-      { path: 'edit', component: EditProfile }
-    ]
+    children: [{ path: '', component: Profile }, { path: 'edit', component: EditProfile }],
   },
   {
     path: 'admin',
-    component: Admin,
-    canActivate: [authGuard, adminGuard]
-  }
+    canActivate: [authGuard, adminGuard],
+    children: [
+      { path: '', component: Admin },
+      {
+        path: 'give-item-form/:userId',
+        component: GiveItemForm,
+        canActivate: [giveItemFormGuard],
+      },
+    ],
+  },
 ];

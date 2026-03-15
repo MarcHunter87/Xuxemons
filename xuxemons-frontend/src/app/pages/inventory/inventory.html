@@ -23,7 +23,7 @@
 
     <!-- Filter Section -->
     <div class="filter-section">
-      <label class="filter-label">Filter by Type:</label>
+      <h2 class="filter-label">Filter by Type</h2>
       <div class="filter-buttons">
         <button 
           class="filter-btn"
@@ -68,6 +68,7 @@
       <div class="col-lg-5">
         @if (selectedItem()) {
           <div class="item-details">
+            <h2 class="visually-hidden">Item details</h2>
             <div class="detail-card">
               <!-- Large Icon -->
               <div class="detail-icon-container" [ngClass]="getIconBackgroundClass()">
@@ -88,11 +89,11 @@
               <!-- Effect & Quantity -->
               <div class="row mt-4 mb-4">
                 <div class="col-6">
-                  <p class="text-muted small mb-1">Effect</p>
+                  <p class="text-muted mb-1">Effect</p>
                   <p class="effect-text">{{ selectedItem()!.effect }}</p>
                 </div>
                 <div class="col-6 text-end">
-                  <p class="text-muted small mb-1">Quantity</p>
+                  <p class="text-muted mb-1">Quantity</p>
                   <p class="quantity-text">{{ selectedItem()!.quantity }} units</p>
                 </div>
               </div>
@@ -123,7 +124,7 @@
           <div class="item-details">
             <div class="detail-card text-center empty-state">
               <div class="empty-icon">📦</div>
-              <h4 class="mt-3">No Item Selected</h4>
+              <h2 class="mt-3">No Item Selected</h2>
               <p class="text-muted">Select an item from your inventory to view details</p>
             </div>
           </div>

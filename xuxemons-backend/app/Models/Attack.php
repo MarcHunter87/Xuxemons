@@ -15,4 +15,9 @@ class Attack extends Model
         'status_effect_id',
         'status_chance',
     ];
+
+    public function statusEffect()
+    {
+        return $this->belongsTo(StatusEffect::class);
+    }
 }

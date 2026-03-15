@@ -113,10 +113,6 @@
 	display: block;
 }
 
-@keyframes spin {
-	to { transform: rotate(360deg); }
-}
-
 .avatar-center-wrap {
 	position: relative;
 	width: fit-content;

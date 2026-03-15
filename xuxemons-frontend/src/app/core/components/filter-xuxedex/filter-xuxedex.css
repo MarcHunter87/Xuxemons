@@ -36,7 +36,7 @@
     border-radius: 8px;
     border: 1px solid var(--light-gray-color);
     background-color: var(--white-color);
-    font-size: 0.95rem;
+    font-size: 1rem;
     transition: all 0.2s ease;
 }
 
@@ -55,7 +55,7 @@
     border: 1px solid var(--light-gray-color);
     background-color: var(--white-color);
     color: var(--text-color);
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 .select-box select:focus {
@@ -70,6 +70,6 @@
     }
 
     .search-label {
-        font-size: 0.95rem;
+        font-size: 1rem;
     }
 }

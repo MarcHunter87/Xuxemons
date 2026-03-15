@@ -12,12 +12,20 @@ class AdquiredXuxemon extends Model
         'level',
         'experience',
         'bonus_hp',
+        'bonus_attack',
         'bonus_defense',
+        'current_hp',
+        'status_effect_id',
     ];
 
     public function xuxemon()
     {
         return $this->belongsTo(Xuxemon::class);
+    }
+
+    public function statusEffect()
+    {
+        return $this->belongsTo(StatusEffect::class);
     }
 
     public function getHpAttribute(): int
@@ -29,7 +37,7 @@ class AdquiredXuxemon extends Model
     public function getAttackAttribute(): int
     {
         $base = $this->xuxemon?->attack ?? 1;
-        return $base + (int) round(($this->level - 1) * 1.2);
+        return $base + (int) round(($this->level - 1) * 1.2) + $this->bonus_attack;
     }
 
     public function getDefenseAttribute(): int

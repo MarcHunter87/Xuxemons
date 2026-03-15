@@ -1,21 +1,23 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { FilterXuxedex } from '../../core/components/filter-xuxedex/filter-xuxedex';
 import { Xuxemon, XuxemonService } from '../../core/services/xuxemon.service';
 import { XuxemonCard } from '../../core/components/xuxemon-card/xuxemon-card';
 import { AuthService } from '../../core/services/auth';
-import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-xuxedex',
-  imports: [FilterXuxedex, XuxemonCard, CommonModule],
+  imports: [FilterXuxedex, XuxemonCard],
   templateUrl: './xuxedex.html',
   styleUrl: './xuxedex.css',
 })
-export class Xuxedex implements OnInit {
+export class Xuxedex implements OnInit, OnDestroy {
   public xuxemonService = inject(XuxemonService);
   private authService = inject(AuthService);
-  xuxemons = this.xuxemonService.displayXuxemons;
-  myXuxemons = this.xuxemonService.myXuxemonsList;
+  private subs = new Subscription();
+
+  readonly displayXuxemons = signal<Xuxemon[]>([]);
+  readonly myXuxemons = signal<Xuxemon[]>([]);
   typeChartUrl = this.authService.getAssetUrl('/badges/Tabla De Tipos.png');
 
   myXuxemonsSortedByName = computed(() =>
@@ -24,7 +26,9 @@ export class Xuxedex implements OnInit {
 
   filteredMyXuxemons = signal<Xuxemon[]>([]);
 
-  private readonly itemsPerPage = 18; // 3 rows × 6 cols on desktop
+  private readonly itemsPerPage = 18;
+
+  xuxemons = computed(() => this.displayXuxemons());
 
   // Pagination for My Team
   myXuxemonsCurrentPage = signal(0);
@@ -58,7 +62,7 @@ export class Xuxedex implements OnInit {
       this.myXuxemonsCurrentPage.update(p => p - 1);
     }
   }
-  
+
   nextXuPage() {
     if (this.xuxemonsCurrentPage() < this.xuxemonsTotalPages() - 1) {
       this.xuxemonsCurrentPage.update(p => p + 1);
@@ -78,8 +82,14 @@ export class Xuxedex implements OnInit {
   }
 
   ngOnInit() {
-    this.xuxemonService.typeInventory.set('all');
+    this.xuxemonService.setTypeInventory('all');
     this.xuxemonService.loadAllXuxemons();
     this.xuxemonService.loadMyXuxemons();
+    this.subs.add(this.xuxemonService.displayXuxemons.subscribe(list => this.displayXuxemons.set(list)));
+    this.subs.add(this.xuxemonService.myXuxemonsList.subscribe(list => this.myXuxemons.set(list)));
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 }
