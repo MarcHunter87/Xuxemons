@@ -1,15 +1,16 @@
 import { Component, inject, Input } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { AuthService } from '../../services/auth';
-import { CommonModule } from '@angular/common';
+import type { Xuxemon } from '../../interfaces';
 
 @Component({
   selector: 'app-xuxemon-card',
-  imports: [CommonModule],
+  imports: [NgClass],
   templateUrl: './xuxemon-card.html',
   styleUrl: './xuxemon-card.css',
 })
 export class XuxemonCard {
-  @Input() xuxemon: any;
+  @Input() xuxemon: Xuxemon | null = null;
   private auth = inject(AuthService);
 
   getTypeBadge(): string {

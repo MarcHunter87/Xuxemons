@@ -3,14 +3,9 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth';
+import type { Xuxemon } from '../interfaces';
 
-export interface Xuxemon {
-    id: number;
-    name: string;
-    type: { name: string };
-    size: 'Small' | 'Medium' | 'Large';
-    image_url: string;
-}
+export type { Xuxemon };
 
 @Injectable({
     providedIn: 'root'

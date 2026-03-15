@@ -4,67 +4,19 @@ import { isPlatformBrowser } from '@angular/common';
 import { Observable, of, tap, BehaviorSubject } from 'rxjs';
 import { delay, catchError, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import type {
+  User,
+  RegisterPayload,
+  LoginPayload,
+  UpdatePersonalInfoPayload,
+  UpdatePasswordPayload,
+  AuthResponse,
+  UpdatePersonalInfoResponse,
+  UpdatePasswordResponse,
+  DeactivateAccountResponse,
+} from '../interfaces';
 
-export interface User {
-  id: string;
-  name: string;
-  surname: string;
-  email: string;
-  role: 'admin' | 'player';
-  icon_path?: string | null;
-  banner_path?: string | null;
-  updated_at?: string;
-  level?: number;
-  xp?: number;
-  win_streak?: number;
-  total_battles?: number;
-}
-
-export interface RegisterPayload {
-  id: string;
-  name: string;
-  surname: string;
-  email: string;
-  password: string;
-  password_confirmation: string;
-}
-
-export interface LoginPayload {
-  id: string;
-  password: string;
-}
-
-export interface UpdatePersonalInfoPayload {
-  name: string;
-  surname: string;
-  email: string;
-}
-
-export interface UpdatePasswordPayload {
-  current_password: string;
-  new_password: string;
-}
-
-interface AuthResponse {
-  access_token?: string;
-  user?: User;
-}
-
-interface UpdatePersonalInfoResponse {
-  message: string;
-  user: User;
-  errors?: Record<string, string[]>;
-}
-
-interface UpdatePasswordResponse {
-  message: string;
-  errors?: Record<string, string[]>;
-}
-
-interface DeactivateAccountResponse {
-  message: string;
-  errors?: Record<string, string[]>;
-}
+export type { User, RegisterPayload, LoginPayload, UpdatePersonalInfoPayload, UpdatePasswordPayload };
 
 @Injectable({
   providedIn: 'root'

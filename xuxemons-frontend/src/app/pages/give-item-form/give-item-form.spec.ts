@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MyxuxemonCard } from './myxuxemon-card';
+import { GiveItemForm } from './give-item-form';
 
-describe('MyxuxemonCard', () => {
-  let component: MyxuxemonCard;
-  let fixture: ComponentFixture<MyxuxemonCard>;
+describe('GiveItemForm', () => {
+  let component: GiveItemForm;
+  let fixture: ComponentFixture<GiveItemForm>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MyxuxemonCard]
+      imports: [GiveItemForm]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(MyxuxemonCard);
+    fixture = TestBed.createComponent(GiveItemForm);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

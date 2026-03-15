@@ -3,11 +3,7 @@ import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
-
-interface BreadcrumbItem {
-  label: string;
-  path: string;
-}
+import type { BreadcrumbItem } from '../../interfaces';
 
 @Component({
   selector: 'app-breadcrumb',
@@ -28,6 +24,7 @@ export class Breadcrumb implements OnInit, OnDestroy {
     'edit': 'Edit Profile',
     'friends': 'Friends',
     'admin': 'Admin',
+    'give-item-form': 'Give Item Form',
     'leaderboard': 'Leaderboard',
     'game-rules': 'Game Rules',
   };
@@ -62,10 +59,16 @@ export class Breadcrumb implements OnInit, OnDestroy {
       } else {
         let acc = '';
         const pathItems: BreadcrumbItem[] = [];
-        for (const seg of segments) {
+        for (let i = 0; i < segments.length; i++) {
+          const seg = segments[i];
           acc += `/${seg}`;
           const label = this.labels[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1);
           pathItems.push({ label, path: acc });
+          if (seg === 'give-item-form' && i + 1 < segments.length) {
+            acc += `/${segments[i + 1]}`;
+            pathItems.push({ label: 'Give Item', path: acc });
+            i++;
+          }
         }
         this.items = pathItems;
       }

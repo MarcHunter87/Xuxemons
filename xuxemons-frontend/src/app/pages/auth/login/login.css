@@ -182,50 +182,8 @@
   cursor: pointer;
 }
 
-.btn-primary {
-  height: 52px;
-  background-color: var(--accent-color);
-  color: var(--white-color);
-  border: none;
-  border-radius: 10px;
-  font-weight: 800;
-  font-size: 18px;
-  font-family: 'Poppins', sans-serif;
-  cursor: pointer;
-  transition: filter 0.2s, transform 0.1s;
+.login-card .btn-primary {
   margin-top: 0.25rem;
-}
-
-.btn-primary:hover:not(:disabled),
-.btn-primary:focus-visible:not(:disabled) {
-  filter: brightness(0.9);
-  transform: translateY(-1px);
-}
-
-.btn-primary:active:not(:disabled) {
-  transform: translateY(0) scale(0.98);
-  filter: brightness(0.85);
-}
-
-.btn-primary:disabled {
-  opacity: 0.9;
-  cursor: not-allowed;
-}
-
-.btn-loading-icon {
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  border: 3px solid var(--white-alpha-35);
-  border-top-color: var(--white-color);
-  border-radius: 50%;
-  animation: btn-spin 0.7s linear infinite;
-}
-
-@keyframes btn-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .register-link {

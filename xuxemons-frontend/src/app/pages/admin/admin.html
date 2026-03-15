@@ -1,1 +1,88 @@
-<p>admin works!</p>
+<section class="page-hero" aria-labelledby="admin-title">
+  <h1 id="admin-title">
+    <span class="page-hero-title-black">Admin Panel</span>
+  </h1>
+  <p class="page-hero-desc">Manage players and distribute items.</p>
+</section>
+
+@if (isLoading()) {
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p class="loading-text">Loading players...</p>
+  </div>
+}
+
+@if (errorMessage() && !isLoading()) {
+  <div class="error-state">
+    <p class="error-message" role="alert" aria-live="polite">
+      <i class="bi bi-exclamation-triangle"></i>
+      {{ errorMessage() }}
+    </p>
+  </div>
+}
+
+@if (hasContent()) {
+  <div class="players-section">
+    @if (users().length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-inbox" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+        <p>No players found</p>
+      </div>
+    }
+
+    @if (users().length > 0) {
+      <div class="players-table-wrapper">
+        <table class="players-table">
+          <thead>
+            <tr>
+              <th scope="col">User</th>
+              <th scope="col">Email</th>
+              <th scope="col">Bag status</th>
+              <th scope="col" class="actions-column">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of users(); track user.id) {
+              <tr>
+                <td>
+                  <div class="table-user">
+                    <span class="player-name">{{ getUserFullName(user) }}</span>
+                    <span class="player-id">{{ user.id }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="player-email">{{ user.email }}</span>
+                </td>
+                <td>
+                  @if (bagStatusMap()[user.id]) {
+                    <span class="slots-badge">
+                      <i class="bi bi-backpack2" style="margin-right: 0.25rem;"></i>
+                      {{ bagStatusMap()[user.id].used_slots }}/{{ bagStatusMap()[user.id].max_slots }} slots
+                    </span>
+                  } @else {
+                    <span class="status-pending" aria-live="polite">
+                      <span class="spinner-cell" aria-hidden="true"></span>
+                      <span class="visually-hidden">Loading bag status</span>
+                    </span>
+                  }
+                </td>
+                <td class="actions-column">
+                  <button
+                    class="give-item-btn"
+                    [disabled]="!canGiveItems(user.id)"
+                    [routerLink]="['/admin/give-item-form', getEncodedUserId(user.id)]"
+                    [title]="!canGiveItems(user.id) ? 'Bag is full or still loading' : 'Give item to player'"
+                    [attr.aria-label]="'Give item to ' + getUserFullName(user)"
+                  >
+                    <i class="bi bi-gift" style="margin-right: 0.375rem;"></i>
+                    Give Item
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}

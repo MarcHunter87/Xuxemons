@@ -64,6 +64,11 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
+    public function getIsAdminAttribute(): bool
+    {
+        return $this->role === 'admin';
+    }
+
     /**
      * Relación con la mochila del usuario
      */

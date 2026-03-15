@@ -1,11 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { XuxemonService, Xuxemon } from '../../core/services/xuxemon.service';
-import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-gacha',
     standalone: true,
-    imports: [CommonModule],
+    imports: [],
     templateUrl: './gacha.html',
     styleUrl: './gacha.css',
 })

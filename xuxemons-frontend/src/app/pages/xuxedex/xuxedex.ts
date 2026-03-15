@@ -2,11 +2,10 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { FilterXuxedex } from '../../core/components/filter-xuxedex/filter-xuxedex';
 import { Xuxemon, XuxemonService } from '../../core/services/xuxemon.service';
 import { XuxemonCard } from '../../core/components/xuxemon-card/xuxemon-card';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-xuxedex',
-  imports: [FilterXuxedex, XuxemonCard, CommonModule],
+  imports: [FilterXuxedex, XuxemonCard],
   templateUrl: './xuxedex.html',
   styleUrl: './xuxedex.css',
 })
@@ -21,7 +20,7 @@ export class Xuxedex implements OnInit {
 
   filteredMyXuxemons = signal<Xuxemon[]>([]);
 
-  private readonly itemsPerPage = 18; // 3 rows × 6 cols on desktop
+  private readonly itemsPerPage = 18;
 
   // Pagination for My Team
   myXuxemonsCurrentPage = signal(0);

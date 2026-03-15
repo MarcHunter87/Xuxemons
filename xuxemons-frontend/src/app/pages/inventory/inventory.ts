@@ -2,35 +2,7 @@ import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject, afterNex
 import { HttpClient } from '@angular/common/http';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface ApiInventoryItem {
-  id: string | number;
-  name: string;
-  description: string;
-  quantity: number;
-  icon_path: string;
-  effect_type: string;
-  effect_value: number;
-  is_stackable: boolean;
-  max_quantity: number;
-  bag_item_id?: number;
-}
-
-interface InventoryItem {
-  id: string | number;
-  name: string;
-  iconPath: string;
-  quantity: number;
-  category: string;
-  type: string;
-  description: string;
-  effect: string;
-  effect_type?: string;
-  effect_value?: number;
-  is_stackable?: boolean;
-  max_quantity?: number;
-  bag_item_id?: number;
-}
+import type { ApiInventoryItem, InventoryItem } from '../../core/interfaces';
 
 @Component({
   selector: 'app-inventory',

@@ -29,6 +29,17 @@
     --white-alpha-35: rgba(255, 255, 255, 0.35);
 
     --layout-max-width: 1400px;
+    --page-content-padding-top: 1rem;
+
+    --overlay-bg: rgba(0, 0, 0, 0.75);
+    --toast-bg: rgba(20, 20, 20, 0.9);
+    --white-alpha-10: rgba(255, 255, 255, 0.1);
+    --accent-border-alpha: rgba(13, 110, 253, 0.2);
+    --surface-light: #e9ecef;
+    --badge-muted-bg: #fce7f3;
+    --badge-muted-text: #be185d;
+    --badge-muted-border: #f472b6;
+    --text-shadow-dark: rgba(0, 0, 0, 0.5);
 }
 
 *,
@@ -146,4 +157,94 @@ a.btn-sm {
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading-state .spinner {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1rem;
+  border: 4px solid var(--accent-border-alpha);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-state .loading-text {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.page-hero {
+  margin-top: 0;
+  margin-bottom: 2rem;
+}
+
+.page-hero h1 {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2em;
+  margin: 0 0 1.25rem;
+  line-height: 1.1;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.page-hero--stacked h1 {
+  flex-direction: column;
+  gap: 0;
+}
+
+.page-hero-title-black {
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--black-color);
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.page-hero-title-blue {
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--accent-color);
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.page-hero-desc {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--black-color);
+  line-height: 1.7;
+  max-width: 520px;
+  margin: 0;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
