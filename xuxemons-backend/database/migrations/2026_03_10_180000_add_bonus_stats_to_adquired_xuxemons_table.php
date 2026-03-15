@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('adquired_xuxemons', function (Blueprint $table) {
             $table->integer('bonus_hp')->default(0);
+            $table->integer('bonus_attack')->default(0);
             $table->integer('bonus_defense')->default(0);
         });
     }
@@ -23,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('adquired_xuxemons', function (Blueprint $table) {
-            $table->dropColumn(['bonus_hp', 'bonus_defense']);
+            $table->dropColumn(['bonus_hp', 'bonus_attack', 'bonus_defense']);
         });
     }
 };

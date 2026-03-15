@@ -11,6 +11,7 @@ import type { Xuxemon } from '../../interfaces';
 })
 export class XuxemonCard {
   @Input() xuxemon: Xuxemon | null = null;
+  @Input() showSizeBadge = false;
   private auth = inject(AuthService);
 
   getTypeBadge(): string {

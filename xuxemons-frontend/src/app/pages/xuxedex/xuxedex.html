@@ -2,7 +2,7 @@
 <div class="container-fluid xuxedex-container">
   <section class="user-xuxemons-section">
     <div class="xuxedex-header">
-      <h2 class="xuxedex-title">My Xuxemons</h2>
+      <h1 class="xuxedex-title">My Xuxemons</h1>
       <p class="xuxedex-subtitle">The Xuxemons you've captured.</p>
     </div>
 
@@ -14,7 +14,7 @@
     <div class="row g-4">
       @for (xuxemon of paginatedMyXuxemons(); track xuxemon.id) {
       <article class="col-6 col-md-3 col-xl-2">
-        <app-xuxemon-card [xuxemon]="xuxemon"></app-xuxemon-card>
+        <app-xuxemon-card [xuxemon]="xuxemon" [showSizeBadge]="true"></app-xuxemon-card>
       </article>
       } @empty {
       <p class="col-12 no-results">You haven't captured any Xuxemon yet.</p>
@@ -32,7 +32,7 @@
 
   <section class="xuxedex-section">
     <div class="xuxedex-header">
-      <h1 class="xuxedex-title">Xuxedex</h1>
+      <h2 class="xuxedex-title">Xuxedex</h2>
       <p class="xuxedex-subtitle">Browse every Xuxemon discovered and explore the full collection.</p>
     </div>
 
@@ -40,7 +40,7 @@
       @for (xuxemon of paginatedXuxemons(); track xuxemon.id) {
       <article class="col-6 col-md-3 col-xl-2">
           @if (isXuxemonCaptured(xuxemon.id)) {
-            <app-xuxemon-card [xuxemon]="xuxemon"></app-xuxemon-card>
+            <app-xuxemon-card [xuxemon]="xuxemon" [showSizeBadge]="true"></app-xuxemon-card>
           } @else {
             <div class="xuxemon-card-locked">
               <div class="locked-content">
@@ -61,5 +61,33 @@
       <button (click)="nextXuPage()" [disabled]="xuxemonsCurrentPage() === xuxemonsTotalPages() - 1" class="btn-pagination">Next</button>
     </div>
     }
+  </section>
+
+  <section class="xuxedex-section pt-2">
+    <div class="type-chart-panel">
+      <div class="type-chart-media">
+        <div class="type-chart-card">
+          <img
+            [src]="typeChartUrl"
+            alt="Power, Speed and Technical type chart"
+            class="img-fluid rounded-4 type-chart-image"
+            loading="lazy"
+          >
+        </div>
+      </div>
+      <div class="type-chart-copy">
+        <span class="type-chart-kicker">Battle Guide</span>
+        <h3 class="type-chart-heading">Type Advantage Chart</h3>
+        <p class="type-chart-text">
+          Power beats Technical, Technical beats Speed, and Speed beats Power.
+          Keep this chart in mind to build stronger lineups and make better decisions during battles.
+        </p>
+        <div class="type-chart-rules" aria-label="Type matchup rules">
+          <span class="type-rule type-rule-power">Power > Technical</span>
+          <span class="type-rule type-rule-technical">Technical > Speed</span>
+          <span class="type-rule type-rule-speed">Speed > Power</span>
+        </div>
+      </div>
+    </div>
   </section>
 </div>

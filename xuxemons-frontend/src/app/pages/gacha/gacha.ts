@@ -1,15 +1,18 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ViewChild, ElementRef, computed } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { XuxemonService, Xuxemon } from '../../core/services/xuxemon.service';
 
 @Component({
     selector: 'app-gacha',
     standalone: true,
-    imports: [],
+    imports: [DatePipe],
     templateUrl: './gacha.html',
     styleUrl: './gacha.css',
 })
 export class Gacha implements OnInit {
     private xuxemonService = inject(XuxemonService);
+
+    @ViewChild('rouletteBox') rouletteBox!: ElementRef<HTMLElement>;
 
     public isSpinning = signal(false);
     public noTransition = signal(false);
@@ -18,9 +21,11 @@ export class Gacha implements OnInit {
     public rouletteItems = signal<Xuxemon[]>([]);
     public trackTransform = signal<string>('translateX(0)');
     public isDataLoaded = signal(false);
+    public historyXuxemons = computed(() => this.xuxemonService.myXuxemonsList().slice(0, 6));
 
     ngOnInit() {
         this.loadRoulette();
+        this.xuxemonService.loadMyXuxemons();
     }
 
     async loadRoulette() {
@@ -70,7 +75,7 @@ export class Gacha implements OnInit {
             this.noTransition.set(false);
             setTimeout(() => {
                 const itemWidth = 188;
-                const containerWidth = 1000;
+                const containerWidth = this.rouletteBox?.nativeElement?.offsetWidth ?? 1000;
                 const offset = -(80 * itemWidth) + (containerWidth / 2) - (itemWidth / 2);
                 this.trackTransform.set(`translateX(${offset}px)`);
             }, 20);
@@ -80,7 +85,13 @@ export class Gacha implements OnInit {
             this.isSpinning.set(false);
             this.awardedXuxemon.set(winner);
             this.showAward.set(true);
+            this.xuxemonService.loadMyXuxemons();
         }, 6200);
+    }
+
+    spinAgain() {
+        this.closeModal();
+        this.spin();
     }
 
     getTypeColor(typeName: string): string {

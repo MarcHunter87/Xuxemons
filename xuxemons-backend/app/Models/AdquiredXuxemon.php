@@ -12,6 +12,7 @@ class AdquiredXuxemon extends Model
         'level',
         'experience',
         'bonus_hp',
+        'bonus_attack',
         'bonus_defense',
     ];
 
@@ -29,7 +30,7 @@ class AdquiredXuxemon extends Model
     public function getAttackAttribute(): int
     {
         $base = $this->xuxemon?->attack ?? 1;
-        return $base + (int) round(($this->level - 1) * 1.2);
+        return $base + (int) round(($this->level - 1) * 1.2) + $this->bonus_attack;
     }
 
     public function getDefenseAttribute(): int

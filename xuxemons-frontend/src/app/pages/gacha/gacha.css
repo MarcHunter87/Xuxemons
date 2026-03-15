@@ -9,7 +9,7 @@
 
 .gacha-container .page-hero {
     align-self: flex-start;
-    margin-bottom: 1.5rem;
+    margin-bottom: 32px;
 }
 
 .roulette-box {
@@ -88,6 +88,19 @@
     cursor: not-allowed;
 }
 
+.btn-loading-icon {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--white-alpha-35);
+    border-top-color: var(--white-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 .toast {
     position: fixed;
     right: 24px;
@@ -124,20 +137,7 @@
     width: 250px;
     height: 250px;
     object-fit: contain;
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    animation: floatIcon 4s ease-in-out infinite;
-}
-
-@keyframes floatIcon {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-15px);
-    }
+    animation: pulse-scale 2.5s ease-in-out infinite;
 }
 
 .winner-name {
@@ -162,24 +162,264 @@
     min-width: 250px;
 }
 
-.award-inline-box {
-    margin-top: 1.25rem;
-    padding: 1.25rem;
-    border: 2px solid var(--light-gray-color);
-    border-radius: 10px;
-    text-align: center;
+.recent-xuxemons-section {
+    margin-top: 2.5rem;
+    padding: 1.5rem;
     background: var(--white-color);
+    border-radius: 16px;
+    border: 1px solid var(--light-gray-color);
+    box-shadow: 0 4px 12px var(--shadow-color);
+    width: 100%;
+    max-width: 1000px;
 }
 
-.award-inline-box h2 {
-    margin: 0 0 0.5rem;
-    font-size: 1.25rem;
+.recent-title {
+    font-size: 1.5rem;
+    font-weight: 800;
     color: var(--text-alt-color);
+    text-align: center;
+    margin: 0 0 1.5rem;
 }
 
-.award-inline-img {
-    width: 150px;
-    height: 150px;
-    margin: 0.5rem 0;
+.recent-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+.recent-card {
+    text-align: center;
+    width: 140px;
+}
+
+.recent-image-box {
+    padding: 0.75rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    margin-bottom: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.recent-card:hover .recent-image-box {
+    transform: translateY(-5px);
+}
+
+.recent-image-box img {
+    width: 80px;
+    height: 80px;
     object-fit: contain;
+}
+
+.recent-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.recent-name {
+    font-weight: 700;
+    color: var(--text-alt-color);
+    display: block;
+}
+
+.recent-date {
+    font-size: 1rem;
+    color: var(--text-alt-color);
+    opacity: 0.85;
+}
+
+/* Modal overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--modal-overlay-bg);
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: var(--white-color);
+    padding: 2rem 2.5rem;
+    text-align: center;
+    max-width: 500px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px var(--shadow-color);
+    position: relative;
+}
+
+.winner-title {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--text-alt-color);
+    margin: 0 0 1.5rem;
+}
+
+.winner-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.image-wrapper {
+    width: 250px;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.7rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px var(--shadow-color);
+}
+
+.image-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.animate-pop {
+    animation: modalPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-float {
+    animation: pulse-scale 2.5s ease-in-out infinite;
+}
+
+@keyframes modalPop {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse-scale {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+}
+
+.winner-name {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-alt-color);
+    margin: 0;
+}
+
+.modal-content .type-badge {
+    padding: 0.5rem 1.5rem;
+    color: var(--white-color);
+    border-radius: 999px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 1rem;
+}
+
+.winner-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(92px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    width: 100%;
+    max-width: 360px;
+}
+
+.winner-stats .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    min-height: 64px;
+    padding: 0.5rem 0.4rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+}
+
+.winner-stats .stat-hp {
+    background: var(--potion-heal);
+    color: var(--white-color);
+}
+
+.winner-stats .stat-hp .stat-label,
+.winner-stats .stat-hp .stat-value {
+    color: var(--white-color);
+}
+
+.winner-stats .stat-attack {
+    background: var(--potion-dmg);
+    color: var(--white-color);
+}
+
+.winner-stats .stat-attack .stat-label,
+.winner-stats .stat-attack .stat-value {
+    color: var(--white-color);
+}
+
+.winner-stats .stat-defense {
+    background: var(--potion-defense);
+    color: var(--white-color);
+}
+
+.winner-stats .stat-defense .stat-label,
+.winner-stats .stat-defense .stat-value {
+    color: var(--white-color);
+}
+
+.winner-stats .stat-label {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.winner-stats .stat-value {
+    font-size: 1.125rem;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+}
+
+.modal-actions .btn-primary,
+.modal-actions .btn-secondary {
+    flex: 1;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.modal-actions .btn-secondary {
+    background: var(--white-color);
+    color: var(--text-alt-color);
+    border: 2px solid var(--light-gray-color);
+}
+
+.modal-actions .btn-secondary:hover {
+    background: var(--light-gray-color);
+}
+
+@media (max-width: 640px) {
+    .modal-content {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+
+    .winner-name {
+        font-size: 1.5rem;
+    }
+
+    .winner-stats {
+        max-width: 100%;
+    }
 }

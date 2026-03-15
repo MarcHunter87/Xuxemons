@@ -14,7 +14,7 @@
   }
 
   @if (rouletteItems().length > 0) {
-    <div class="roulette-box">
+    <div class="roulette-box" #rouletteBox>
       <div
         class="roulette-track"
         [class.spinning]="isSpinning()"
@@ -40,20 +40,82 @@
       [disabled]="isSpinning()"
       (click)="spin()"
     >
-      Spin
+      @if (!isSpinning()) {
+        <span>Spin</span>
+      } @else {
+        <div class="btn-loading-icon"></div>
+      }
     </button>
+
+    @if (historyXuxemons().length > 0) {
+      <div class="recent-xuxemons-section">
+        <h2 class="recent-title">Recently obtained</h2>
+        <div class="recent-grid">
+          @for (xuxe of historyXuxemons(); track xuxe.id) {
+            <div class="recent-card">
+              <div
+                class="recent-image-box"
+                [style.background-color]="getTypeColor(xuxe.type.name)"
+              >
+                <img [src]="xuxe.image_url" [alt]="xuxe.name" class="img-fluid" />
+              </div>
+              <div class="recent-info">
+                <span class="recent-name">{{ xuxe.name }}</span>
+                @if (xuxe.adquired_at) {
+                  <span class="recent-date">{{ xuxe.adquired_at | date:'d/M/yy' }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
   }
 
   @if (showAward()) {
-    <div class="award-inline-box">
-      <h2>Has recibido: {{ awardedXuxemon()?.name }}</h2>
-      <img
-        [src]="awardedXuxemon()?.image_url"
-        [alt]="awardedXuxemon()?.name"
-        class="award-inline-img"
-      />
-      <br />
-      <button type="button" (click)="closeModal()" class="btn-primary">OK</button>
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-content animate-pop" (click)="$event.stopPropagation()">
+        <h2 class="winner-title">Congratulations!</h2>
+        <div class="winner-display">
+          <div
+            class="image-wrapper"
+            [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+          >
+            <img
+              [src]="awardedXuxemon()?.image_url"
+              [alt]="awardedXuxemon()?.name"
+              class="animate-float"
+            />
+          </div>
+          <p class="winner-name">{{ awardedXuxemon()?.name }}</p>
+          <span
+            class="type-badge"
+            [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+          >
+            {{ awardedXuxemon()?.type?.name }}
+          </span>
+          @if (awardedXuxemon()?.hp != null && awardedXuxemon()?.attack != null && awardedXuxemon()?.defense != null) {
+            <div class="winner-stats">
+              <div class="stat stat-hp">
+                <span class="stat-label">HP</span>
+                <span class="stat-value">{{ awardedXuxemon()?.hp }}</span>
+              </div>
+              <div class="stat stat-attack">
+                <span class="stat-label">Attack</span>
+                <span class="stat-value">{{ awardedXuxemon()?.attack }}</span>
+              </div>
+              <div class="stat stat-defense">
+                <span class="stat-label">Defense</span>
+                <span class="stat-value">{{ awardedXuxemon()?.defense }}</span>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-actions">
+          <button type="button" (click)="spinAgain()" class="btn-primary">Spin Again</button>
+          <button type="button" (click)="closeModal()" class="btn-secondary">Close</button>
+        </div>
+      </div>
     </div>
   }
 </div>

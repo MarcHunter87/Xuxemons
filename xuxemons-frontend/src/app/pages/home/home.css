@@ -11,7 +11,7 @@
 .stats-row {
   display: flex;
   gap: 1.5rem;
-  margin-top: 1.5rem;
+  margin-top: 0;
   width: 100%;
   align-items: stretch;
 }

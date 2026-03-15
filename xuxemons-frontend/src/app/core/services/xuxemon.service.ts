@@ -67,7 +67,8 @@ export class XuxemonService {
                 name: x.name,
                 type: x.type,
                 size: x.size ?? 'Small',
-                image_url: this.auth.getAssetUrl(`/${x.icon_path || ''}`)
+                image_url: this.auth.getAssetUrl(`/${x.icon_path || ''}`),
+                adquired_at: x.adquired_at ?? x.created_at
             })) as Xuxemon[];
             this.myXuxemonsList.set(data);
         } catch (error) {
@@ -127,7 +128,10 @@ export class XuxemonService {
                 name: raw?.name,
                 type: raw?.type,
                 size: raw?.size ?? 'Small',
-                image_url: this.auth.getAssetUrl(`/${raw?.icon_path || ''}`)
+                image_url: this.auth.getAssetUrl(`/${raw?.icon_path || ''}`),
+                hp: raw?.hp,
+                attack: raw?.attack,
+                defense: raw?.defense
             };
             await this.loadMyXuxemons();
             return data;

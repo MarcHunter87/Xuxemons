@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { FilterXuxedex } from '../../core/components/filter-xuxedex/filter-xuxedex';
 import { Xuxemon, XuxemonService } from '../../core/services/xuxemon.service';
 import { XuxemonCard } from '../../core/components/xuxemon-card/xuxemon-card';
+import { AuthService } from '../../core/services/auth';
 
 @Component({
   selector: 'app-xuxedex',
@@ -11,8 +12,10 @@ import { XuxemonCard } from '../../core/components/xuxemon-card/xuxemon-card';
 })
 export class Xuxedex implements OnInit {
   public xuxemonService = inject(XuxemonService);
+  private authService = inject(AuthService);
   xuxemons = this.xuxemonService.displayXuxemons;
   myXuxemons = this.xuxemonService.myXuxemonsList;
+  typeChartUrl = this.authService.getAssetUrl('/badges/Tabla De Tipos.png');
 
   myXuxemonsSortedByName = computed(() =>
     [...this.myXuxemons()].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))

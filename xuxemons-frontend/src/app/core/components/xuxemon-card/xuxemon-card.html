@@ -6,7 +6,10 @@
             </div>
         </div>
         <div class="card-footer d-flex justify-content-center align-items-center text-center">
-            <h4 class="mb-0 text-sm">{{ xuxemon?.name }}</h4>
+            <p class="mb-0 card-name">{{ xuxemon?.name }}</p>
+            @if (showSizeBadge && xuxemon?.size) {
+                <span class="size-label">{{ xuxemon?.size }}</span>
+            }
         </div>
     </div>
 </div>

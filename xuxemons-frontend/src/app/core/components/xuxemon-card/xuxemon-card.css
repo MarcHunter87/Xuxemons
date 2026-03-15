@@ -1,6 +1,10 @@
 
 
-.badge {
+.card-wrapper {
+    position: relative;
+}
+
+.size-badge {
     position: absolute;
     top: -24px;
     left: -24px;
@@ -10,16 +14,30 @@
     transition: transform 0.2s ease-in-out;
 }
 
+.size-label {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 12;
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--white-color);
+    background-color: var(--black-color);
+    border: 1px solid var(--light-gray-color);
+    border-radius: 9999px;
+}
+
 .xuxemon-card {
     border: 6px solid var(--danger-color);
-    background: linear-gradient(180deg, #ffffff 0%, #f6f7f9 100%);
+    background: linear-gradient(180deg, var(--white-color) 0%, var(--primary-color) 100%);
     border-radius: 20px;
     overflow: hidden;
     width: 100%;
     min-height: 250px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 8px 18px var(--shadow-card);
     transition: transform 0.2s ease-in-out, box-shadow 0.35s ease-in-out;
 }
 
@@ -66,7 +84,7 @@
     transform: translateY(-6px);
 }
 
-.card-wrapper:hover .badge {
+.card-wrapper:hover .size-badge {
     transform: scale(1.04);
 }
 
@@ -99,9 +117,11 @@
     height: 56px;
     flex: 0 0 56px;
     border: 0;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
 }
 
-.card-footer h4 {
+.card-footer .card-name {
     color: var(--white-color);
     font-size: 18px;
     margin: 0;
@@ -115,7 +135,7 @@
 }
 
 @media (max-width: 767.98px) {
-    .badge {
+    .size-badge {
         width: 72px;
         height: 72px;
         top: -18px;
@@ -126,9 +146,11 @@
         height: 54px;
         flex: 0 0 54px;
         padding: 6px 6px;
+        border-bottom-left-radius: 14px;
+        border-bottom-right-radius: 14px;
     }
 
-    .card-footer h4 {
+    .card-footer .card-name {
         font-size: 18px;
     }
 

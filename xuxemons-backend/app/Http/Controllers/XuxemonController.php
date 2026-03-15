@@ -18,7 +18,7 @@ class XuxemonController extends Controller
     public function collectionStats()
     {
         $userId = Auth::guard('api')->id();
-        if (!$userId) {
+        if (! $userId) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
@@ -42,8 +42,17 @@ class XuxemonController extends Controller
 
         $myXuxemons = AdquiredXuxemon::where('user_id', $userId)
             ->with(['xuxemon.type'])
+            ->orderBy('created_at', 'desc')
             ->get()
-            ->map(fn ($a) => $a->xuxemon)
+            ->map(function ($a) {
+                if (! $a->xuxemon) {
+                    return null;
+                }
+                $x = $a->xuxemon;
+                $x->adquired_at = $a->created_at;
+
+                return $x;
+            })
             ->filter()
             ->values();
 
@@ -63,16 +72,23 @@ class XuxemonController extends Controller
                 return response()->json(['message' => 'No Xuxemons available'], 404);
             }
 
-            AdquiredXuxemon::create([
+            $adquired = AdquiredXuxemon::create([
                 'user_id' => $userId,
                 'xuxemon_id' => $randomXuxemon->id,
                 'level' => 1,
                 'experience' => 0,
                 'bonus_hp' => rand(1, 40),
+                'bonus_attack' => rand(1, 20),
                 'bonus_defense' => rand(1, 20),
             ]);
 
-            return response()->json($randomXuxemon);
+            $adquired->load('xuxemon.type');
+            $xuxemon = $adquired->xuxemon->toArray();
+            $xuxemon['hp'] = $adquired->hp;
+            $xuxemon['attack'] = $adquired->attack;
+            $xuxemon['defense'] = $adquired->defense;
+
+            return response()->json($xuxemon);
         } catch (\Throwable $e) {
             return response()->json(['message' => 'Server error: '.$e->getMessage()], 500);
         }
@@ -95,7 +111,7 @@ class XuxemonController extends Controller
                 return response()->json(['message' => 'Xuxemon not found'], 404);
             }
 
-            $allowed = ['level', 'experience', 'bonus_hp', 'bonus_defense'];
+            $allowed = ['level', 'experience', 'bonus_hp', 'bonus_attack', 'bonus_defense'];
             foreach ($allowed as $field) {
                 if ($request->has($field)) {
                     $adquired->$field = $request->input($field);
