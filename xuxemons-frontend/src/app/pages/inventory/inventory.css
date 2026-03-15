@@ -156,6 +156,20 @@
   overflow: hidden;
 }
 
+button.item-slot {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+button.item-slot:focus {
+  outline: none;
+}
+
 .item-slot.filled {
   background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-on-light) 100%);
   border: 2px solid var(--white-alpha-30);
@@ -209,6 +223,20 @@
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px var(--accent-glow), 0 8px 20px var(--accent-glow);
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.item-slot.filled:focus-visible {
+  outline: none;
+  transform: translateY(-4px) scale(1.06);
+  box-shadow:
+    0 12px 24px var(--accent-glow),
+    0 0 0 2px var(--white-color),
+    0 0 0 5px var(--accent-color);
+  border-color: var(--white-alpha-60);
+}
+
+.item-slot.filled:focus-visible .item-icon {
+  transform: scale(1.1);
 }
 
 @keyframes pulse {
@@ -468,6 +496,29 @@
 /* Action Buttons */
 .action-buttons {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.action-buttons .btn-primary:focus-visible:not(:disabled) {
+  outline: none;
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 20px var(--accent-glow),
+    0 0 0 2px var(--white-color),
+    0 0 0 5px var(--accent-color);
+  background: linear-gradient(135deg, var(--accent-on-light) 0%, var(--accent-color) 100%);
+}
+
+.action-buttons .btn-danger:focus-visible:not(:disabled) {
+  outline: none;
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 20px var(--danger-glow),
+    0 0 0 2px var(--white-color),
+    0 0 0 5px var(--accent-color);
+  background: linear-gradient(135deg, var(--danger-color-2) 0%, var(--danger-color-2) 100%);
 }
 
 /* Discard quantity picker */

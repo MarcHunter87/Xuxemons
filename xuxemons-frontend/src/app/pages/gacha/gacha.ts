@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy, ViewChild, ElementRef, computed } from '@angular/core';
+import { Component, HostListener, inject, signal, OnInit, OnDestroy, ViewChild, ElementRef, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { XuxemonService, Xuxemon } from '../../core/services/xuxemon.service';
@@ -114,5 +114,10 @@ export class Gacha implements OnInit, OnDestroy {
     closeModal() {
         this.showAward.set(false);
         this.awardedXuxemon.set(null);
+    }
+
+    @HostListener('document:keydown.escape')
+    onEscape(): void {
+        if (this.showAward()) this.closeModal();
     }
 }

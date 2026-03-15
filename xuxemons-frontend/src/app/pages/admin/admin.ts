@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, HostListener, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -120,6 +120,11 @@ export class Admin implements OnInit {
     this.showAwardModal.set(false);
     this.awardedXuxemon.set(null);
     this.awardError.set(null);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.showAwardModal()) this.closeAwardModal();
   }
 
   dismissAwardError(): void {

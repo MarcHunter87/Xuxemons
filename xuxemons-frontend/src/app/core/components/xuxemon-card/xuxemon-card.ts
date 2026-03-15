@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, ElementRef, inject, Input, signal } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, inject, Input, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import type { Xuxemon } from '../../interfaces';
@@ -53,6 +53,11 @@ export class XuxemonCard implements AfterViewChecked {
 
   closeDetails(): void {
     this.showDetails.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.showDetails()) this.closeDetails();
   }
 
   isOwnedVariant(): boolean {

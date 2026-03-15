@@ -42,8 +42,13 @@
 
 .search-box input:focus {
     outline: none;
+}
+
+.search-box input:focus-visible {
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px var(--accent-glow);
+    box-shadow:
+        0 0 0 2px var(--white-color),
+        0 0 0 5px var(--accent-color);
 }
 
 .select-box select {
@@ -60,8 +65,13 @@
 
 .select-box select:focus {
     outline: none;
+}
+
+.select-box select:focus-visible {
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px var(--accent-glow);
+    box-shadow:
+        0 0 0 2px var(--white-color),
+        0 0 0 5px var(--accent-color);
 }
 
 @media (max-width: 767.98px) {

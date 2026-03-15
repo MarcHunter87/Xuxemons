@@ -1,6 +1,7 @@
 import {
     Component,
     ChangeDetectionStrategy,
+    HostListener,
     inject,
     afterNextRender,
     signal,
@@ -123,6 +124,11 @@ export class Inventory implements OnInit, OnDestroy {
 
     cancelDiscard(): void {
         this.inventoryService.cancelDiscard();
+    }
+
+    @HostListener('document:keydown.escape')
+    onEscape(): void {
+        if (this.discardMode()) this.cancelDiscard();
     }
 
     getSlotClass(item: InventoryItem): string {

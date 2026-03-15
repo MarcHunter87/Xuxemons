@@ -46,21 +46,26 @@
     <div class="row g-4">
       <!-- Left Section: Item Grid -->
       <div class="col-lg-7">
-        <div class="items-grid">
+        <div class="items-grid" role="grid" aria-label="Inventory slots">
           <!-- Actual Items -->
           @for (item of filteredItems(); track item.id) {
-            <div 
+            <button
+              type="button"
               class="item-slot filled"
               [ngClass]="[getSlotClass(item), selectedItem()?.id === item.id ? 'selected' : '']"
-              (click)="selectItem(item)">
+              (click)="selectItem(item)"
+              [attr.aria-label]="item.name + ', quantity ' + item.quantity"
+              [attr.aria-pressed]="selectedItem()?.id === item.id"
+              role="gridcell">
               <span class="item-badge">{{ item.quantity }}</span>
-              <img class="item-icon" [src]="item.iconPath" [alt]="item.name">
-            </div>
+              <img class="item-icon" [src]="item.iconPath" [alt]=""
+                 role="presentation">
+            </button>
           }
-          
+
           <!-- Empty Slots -->
           @for (slot of emptySlots(); track $index) {
-            <div class="item-slot empty"></div>
+            <div class="item-slot empty" role="gridcell" aria-hidden="true"></div>
           }
         </div>
       </div>
@@ -101,12 +106,14 @@
 
               <!-- Action Buttons -->
               <div class="action-buttons">
-                <button 
-                  class="btn btn-primary btn-lg w-100 mb-2"
+                <button
+                  type="button"
+                  class="btn btn-primary btn-lg w-100"
                   (click)="useItem()">
                   Use
                 </button>
-                <button 
+                <button
+                  type="button"
                   class="btn btn-danger btn-lg w-100"
                   (click)="discardItem()">
                   Discard
