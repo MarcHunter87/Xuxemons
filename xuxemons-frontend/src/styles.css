@@ -255,11 +255,11 @@ a.btn-sm {
 }
 
 .stat-card__label {
-  color: var(--dark-gray-color);
+  color: var(--black-color);
   font-size: 16px;
   font-weight: 500;
   text-transform: capitalize;
-  margin-bottom: var(--page-section-gap);
+  margin: 0 0 var(--page-section-gap);
 }
 
 .stat-card__value {

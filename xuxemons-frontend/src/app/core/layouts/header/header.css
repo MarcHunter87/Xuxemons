@@ -82,6 +82,10 @@ nav {
   transform: translateY(-1px);
 }
 
+.nav-links a:active {
+  transform: translateY(0) scale(0.98);
+}
+
 .nav-links a:focus-visible {
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
@@ -113,13 +117,17 @@ nav {
   border-radius: 8px;
   cursor: pointer;
   font-size: 20px;
-  transition: background-color 0.2s, color 0.2s;
+  transition: background-color 0.2s, color 0.2s, transform 0.1s;
 }
 
 .icon-btn:hover,
 .icon-btn:focus-visible {
   background-color: var(--white-color);
   color: var(--accent-color);
+}
+
+.icon-btn:active {
+  transform: scale(0.98);
 }
 
 .icon-btn:focus-visible {
@@ -351,6 +359,10 @@ nav {
   background-color: var(--white-color);
   color: var(--accent-color);
   transform: translateY(-1px);
+}
+
+.nav-links-mobile a:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .nav-links-mobile a:focus-visible {

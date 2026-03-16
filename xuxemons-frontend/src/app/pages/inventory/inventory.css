@@ -52,7 +52,7 @@
   background-color: var(--accent-alpha-10);
   color: var(--accent-color);
   border-color: var(--accent-on-light);
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
 }
 
 .filter-btn.active {
@@ -518,7 +518,7 @@ button.item-slot:focus {
 .inventory-subtitle {
   margin: 0;
   font-size: 1rem;
-  color: var(--text-muted);
+  color: var(--black-color);
 }
 
 .detail-card .mt-3 {
@@ -632,7 +632,7 @@ button.item-slot:focus {
 .use-item-modal-subtitle {
   margin: 0 0 1rem;
   font-size: 1rem;
-  color: var(--text-muted);
+  color: var(--black-color);
 }
 
 .use-item-search-wrap {
@@ -924,6 +924,10 @@ button.item-slot:focus {
   background: linear-gradient(135deg, var(--accent-on-light) 0%, var(--accent-color) 100%);
 }
 
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
 .btn-danger {
   background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-color-2) 100%);
   border: none;
@@ -939,6 +943,10 @@ button.item-slot:focus {
   transform: translateY(-3px);
   box-shadow: 0 8px 20px var(--danger-glow);
   background: linear-gradient(135deg, var(--danger-color-2) 0%, var(--danger-color-2) 100%);
+}
+
+.btn-danger:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
 }
 
 /* Info Message */

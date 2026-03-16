@@ -52,15 +52,15 @@
 
 .xuxedex-title {
   margin: 0 0 var(--page-header-title-desc-gap);
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 700;
+  font-size: 44px;
+  font-weight: 800;
   color: var(--black-color);
 }
 
 .xuxedex-subtitle {
   margin: 0;
   font-size: 1rem;
-  color: var(--text-muted);
+  color: var(--black-color);
 }
 
 .no-results {
@@ -103,7 +103,7 @@
 
 .btn-pagination:active:not(:disabled) {
   background-color: var(--accent-on-light);
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
 }
 
 .btn-pagination:disabled {

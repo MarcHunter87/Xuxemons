@@ -40,7 +40,7 @@
 .section-subtitle {
 	margin: 0 0 var(--page-header-bottom-gap);
 	font-size: 16px;
-	color: var(--dark-gray-color);
+	color: var(--black-color);
 }
 
 .form-section {

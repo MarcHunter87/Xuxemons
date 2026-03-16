@@ -8,6 +8,7 @@
 /* Misma caja que el resto de stat-card; XP abajo */
 .trainer-stat-card {
   justify-content: space-between;
+  min-height: 100%;
 }
 
 .level-text {
@@ -33,6 +34,7 @@
   background-color: var(--secondary-color);
   padding: 12px;
   border-radius: 12px;
+  border: 2px solid var(--accent-color);
   color: var(--accent-color);
   display: flex;
   align-items: center;

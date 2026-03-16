@@ -310,6 +310,10 @@
   transform: translateY(-2px);
 }
 
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
 .btn-primary:disabled {
   background-color: var(--light-gray-color);
   cursor: not-allowed;
@@ -328,6 +332,10 @@
   color: var(--white-color);
   filter: brightness(0.95);
   transform: translateY(-2px);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
 }
 
 .btn-loading-icon {
