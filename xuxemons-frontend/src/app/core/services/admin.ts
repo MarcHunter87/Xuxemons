@@ -29,6 +29,14 @@ export class AdminService {
     return this.http.get<any[]>(`${this.apiUrl}/xuxemons`);
   }
 
+  deleteItem(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/admin/items/${id}`);
+  }
+
+  deleteXuxemon(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/admin/xuxemons/${id}`);
+  }
+
   giveItemToUser(userId: string, itemId: number, quantity: number): Observable<any> {
     const encodedUserId = encodeURIComponent(userId);
     return this.http.post(`${this.apiUrl}/users/${encodedUserId}/give-item`, {

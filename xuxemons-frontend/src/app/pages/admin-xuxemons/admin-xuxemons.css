@@ -18,8 +18,9 @@
 .players-section {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--page-section-gap);
   width: 100%;
+  margin-bottom: var(--page-section-gap);
 }
 
 .players-table-wrapper {
@@ -43,8 +44,18 @@
   text-align: center;
 }
 
-.cell-actions {
-  color: var(--text-muted);
+.col-actions .btn.btn-danger.btn-sm {
+  gap: 0;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+.col-actions .btn.btn-danger.btn-sm .bi {
+  color: var(--white-color);
 }
 
 .players-table thead tr {

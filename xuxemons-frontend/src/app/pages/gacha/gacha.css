@@ -4,14 +4,14 @@
     width: 100%;
     max-width: var(--layout-max-width);
     margin: 0 auto;
-    padding: 0 0 2rem;
+    padding: 0 0 var(--page-section-gap);
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--text-alt-color);
 }
 
 .gacha-container .page-hero {
     width: 100%;
-    margin-bottom: 32px;
+    margin-bottom: 0;
 }
 
 .roulette-box {
@@ -22,7 +22,8 @@
     position: relative;
     overflow: hidden;
     background: var(--primary-color);
-    margin: 2rem 0;
+    margin-top: 0;
+    margin-bottom: var(--page-section-gap);
     box-shadow: 0 8px 18px var(--shadow-card);
 }
 
@@ -85,7 +86,7 @@
     font-weight: 800;
     border-radius: 12px;
     min-height: 52px;
-    margin: 0 auto;
+    margin: 0 auto var(--page-section-gap);
     display: block;
 }
 
@@ -163,12 +164,13 @@
 }
 
 .recoger-button {
-    margin-top: 3rem;
+    margin-top: var(--page-section-gap);
     min-width: 250px;
 }
 
 .recent-xuxemons-section {
-    margin-top: 2.5rem;
+    margin-top: 0;
+    margin-bottom: var(--page-section-gap);
     padding: 1.5rem;
     background: var(--primary-color);
     border-radius: 16px;

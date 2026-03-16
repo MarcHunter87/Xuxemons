@@ -14,6 +14,7 @@
 	width: 100%;
 	max-width: var(--layout-max-width);
 	margin: 0 auto;
+	padding-bottom: var(--page-section-gap);
 	box-sizing: border-box;
 }
 
@@ -29,21 +30,21 @@
 	line-height: 1.25;
 	font-weight: 700;
 	color: var(--black-color);
-	margin: 0 0 0.875rem;
+	margin: 0 0 var(--page-header-title-desc-gap);
 }
 
 .block-title-spaced {
-	margin-top: 2rem;
+	margin-top: var(--page-section-gap);
 }
 
 .section-subtitle {
-	margin: -0.25rem 0 1rem;
+	margin: 0 0 var(--page-header-bottom-gap);
 	font-size: 16px;
 	color: var(--dark-gray-color);
 }
 
 .form-section {
-	margin-top: 1.5rem;
+	margin-top: var(--page-section-gap);
 }
 
 .file-input {
@@ -72,7 +73,7 @@
 	justify-content: center;
 	color: var(--white-color);
 	font-size: 46px;
-	margin-bottom: 1.2rem;
+	margin-bottom: var(--page-section-gap);
 	cursor: pointer;
 	overflow: hidden;
 	transition: opacity 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
@@ -116,7 +117,7 @@
 .avatar-center-wrap {
 	position: relative;
 	width: fit-content;
-	margin: 0 auto 1.15rem;
+	margin: 0 auto var(--page-section-gap);
 	cursor: pointer;
 	border-radius: 50%;
 }
@@ -304,7 +305,7 @@
 .section-divider {
 	border: 0;
 	border-top: 1px solid var(--light-gray-color);
-	margin: 1rem 0;
+	margin: var(--page-section-gap) 0;
 }
 
 .security-title {
@@ -334,7 +335,7 @@
 }
 
 .danger-card {
-	margin-top: 1rem;
+	margin-top: var(--page-section-gap);
 	border: 1px solid var(--danger-border-alpha);
 	background: var(--danger-bg-alpha);
 	border-radius: 12px;

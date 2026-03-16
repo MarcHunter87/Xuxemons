@@ -1,7 +1,7 @@
 .admin-nav-buttons {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--page-section-gap);
   flex-wrap: wrap;
 }
 
@@ -47,6 +47,7 @@
   background-color: var(--white-color);
   border: 1px solid var(--light-gray-color);
   animation: slideInUp 0.4s ease-out;
+  margin-bottom: var(--page-section-gap);
 }
 
 .error-message {
@@ -58,7 +59,8 @@
 .players-section {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--page-section-gap);
+  margin-bottom: var(--page-section-gap);
 }
 
 .players-table-wrapper {

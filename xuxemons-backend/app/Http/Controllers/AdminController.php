@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdquiredXuxemon;
 use App\Models\Bag;
 use App\Models\BagItem;
 use App\Models\Item;
 use App\Models\User;
+use App\Models\Xuxemon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class AdminController extends Controller
@@ -218,5 +221,65 @@ class AdminController extends Controller
         }
 
         return $usedSlots;
+    }
+
+    public function deleteItemCascade(int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $item = Item::find($id);
+            if (! $item) {
+                return response()->json(['message' => 'Item not found'], 404);
+            }
+
+            DB::transaction(function () use ($id, $item) {
+                BagItem::where('item_id', $id)->delete();
+                $item->delete();
+            });
+
+            return response()->json(['message' => 'Item deleted']);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not delete item',
+                'errors' => [
+                    'server' => [$e->getMessage()],
+                ],
+            ], 500);
+        }
+    }
+
+    public function deleteXuxemonCascade(int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $xuxemon = Xuxemon::find($id);
+            if (! $xuxemon) {
+                return response()->json(['message' => 'Xuxemon not found'], 404);
+            }
+
+            DB::transaction(function () use ($id, $xuxemon) {
+                AdquiredXuxemon::where('xuxemon_id', $id)->delete();
+                $xuxemon->delete();
+            });
+
+            return response()->json(['message' => 'Xuxemon deleted']);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not delete Xuxemon',
+                'errors' => [
+                    'server' => [$e->getMessage()],
+                ],
+            ], 500);
+        }
     }
 }

@@ -19,6 +19,8 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/users/{userId}/bag-status', [AdminController::class, 'checkBagStatus']);
     Route::post('/users/{userId}/give-item', [AdminController::class, 'giveItemToUser']);
     Route::post('/users/{userId}/award-random', [XuxemonController::class, 'awardRandomXuxemonToUser']);
+    Route::delete('/admin/items/{id}', [AdminController::class, 'deleteItemCascade']);
+    Route::delete('/admin/xuxemons/{id}', [AdminController::class, 'deleteXuxemonCascade']);
     
     // Rutas de Profile
     Route::get('/user', [AuthController::class, 'me']);
