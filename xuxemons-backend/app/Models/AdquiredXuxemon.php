@@ -11,6 +11,7 @@ class AdquiredXuxemon extends Model
         'xuxemon_id',
         'level',
         'experience',
+        'size',
         'bonus_hp',
         'bonus_attack',
         'bonus_defense',

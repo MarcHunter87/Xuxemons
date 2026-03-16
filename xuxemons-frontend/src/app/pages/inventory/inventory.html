@@ -54,6 +54,7 @@
               class="item-slot filled"
               [ngClass]="[getSlotClass(item), selectedItem()?.id === item.id ? 'selected' : '']"
               (click)="selectItem(item)"
+              (keydown.enter)="onSlotEnter(item); $event.preventDefault()"
               [attr.aria-label]="item.name + ', quantity ' + item.quantity"
               [attr.aria-pressed]="selectedItem()?.id === item.id"
               role="gridcell">
@@ -109,7 +110,7 @@
                 <button
                   type="button"
                   class="btn btn-primary btn-lg w-100"
-                  (click)="useItem()">
+                  (click)="openUseModal()">
                   Use
                 </button>
                 <button
@@ -139,6 +140,69 @@
         }
       </div>
     </div>
+
+    @if (useModalOpen() && selectedItem()) {
+      <div class="use-item-modal-backdrop" (click)="closeUseModal()" role="dialog" aria-modal="true" aria-labelledby="use-item-modal-title">
+        <div class="use-item-modal" (click)="$event.stopPropagation()">
+          <h2 id="use-item-modal-title" class="use-item-modal-title">Use item on a Xuxemon</h2>
+          <p class="use-item-modal-subtitle">Select a Xuxemon to use {{ selectedItem()!.name }} on.</p>
+          <div class="use-item-search-wrap">
+            <label for="use-item-search" class="visually-hidden">Search your Xuxemons</label>
+            <input
+              id="use-item-search"
+              type="text"
+              class="use-item-search"
+              placeholder="Search by name..."
+              [ngModel]="useSearchQuery()"
+              (ngModelChange)="setUseSearchQuery($event)"
+            />
+          </div>
+          @if (selectedItem()?.name === 'Special Meat') {
+            <p class="use-item-hint">Special Meat evolves the Xuxemon increasing its size.</p>
+          }
+          <ul class="use-item-xuxemon-list" role="listbox" aria-label="Your Xuxemons">
+            @for (xu of useModalXuxemons(); track xu.adquired_id ?? xu.id) {
+              <li>
+                <button
+                  type="button"
+                  class="use-item-xuxemon-btn"
+                  [class.selected]="selectedXuxemonForUse()?.adquired_id === xu.adquired_id"
+                  (click)="selectXuxemonForUse(xu)">
+                  <img [src]="xu.image_url" [alt]="xu.name" class="use-item-xuxemon-img">
+                  <span class="use-item-xuxemon-name">{{ xu.name }}</span>
+                  @if (selectedItem()?.effect_type === 'Evolve') {
+                    <span class="use-item-xuxemon-size">{{ xu.size }}</span>
+                  }
+                </button>
+              </li>
+            } @empty {
+              <li class="use-item-empty">No Xuxemons match your search.</li>
+            }
+          </ul>
+          @if (useApiError()) {
+            <div class="use-item-api-error">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span>{{ useApiError() }}</span>
+            </div>
+          }
+          <div class="use-item-actions">
+            <button type="button" class="btn btn-secondary btn-lg" (click)="closeUseModal()">Cancel</button>
+            <button
+              type="button"
+              class="btn btn-primary btn-lg"
+              [disabled]="!selectedXuxemonForUse() || isUsing()"
+              [attr.aria-busy]="isUsing()"
+              (click)="confirmUseItem()">
+              @if (isUsing()) {
+                <span class="btn-loading-icon" aria-hidden="true"></span>
+              } @else {
+                Use Item
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
 
     @if (discardMode() && selectedItem()) {
       <div class="discard-modal-backdrop" (click)="cancelDiscard()">

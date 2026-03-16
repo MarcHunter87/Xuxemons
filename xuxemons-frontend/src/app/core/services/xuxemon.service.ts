@@ -153,6 +153,7 @@ export class XuxemonService {
                 name: x.name,
                 type: x.type,
                 size: x.size ?? 'Small',
+                adquired_id: x.adquired_id,
                 image_url: this.auth.getAssetUrl(`/${x.icon_path || ''}`),
                 statusEffect: this.mapStatusEffect(x.status_effect_applied),
                 description: x.description,

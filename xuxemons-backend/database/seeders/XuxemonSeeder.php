@@ -105,7 +105,6 @@ class XuxemonSeeder extends Seeder
                 [
                     'description'   => $xuxemon['description'],
                     'type_id'       => $xuxemon['type_id'],
-                    'size'          => 'Small',
                     'attack_1_id'   => $xuxemon['attack_1_id'],
                     'attack_2_id'   => $xuxemon['attack_2_id'],
                     'hp'            => $xuxemon['hp'],

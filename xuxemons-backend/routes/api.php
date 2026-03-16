@@ -35,9 +35,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/inventory/item', [InventoryController::class, 'addItem']);
     Route::put('/inventory/item/{bagItemId}', [InventoryController::class, 'updateItem']);
     Route::delete('/inventory/item/{bagItemId}', [InventoryController::class, 'discardItem']);
+    Route::post('/inventory/use', [InventoryController::class, 'useItem']);
 
     // Rutas de Admin
     Route::get('/users', [AdminController::class, 'getAllUsers']);
     Route::get('/users/{userId}/bag-status', [AdminController::class, 'checkBagStatus']);
+    Route::post('/users/{userId}/give-item', [AdminController::class, 'giveItemToUser']);
     Route::post('/users/{userId}/award-random', [XuxemonController::class, 'awardRandomXuxemonToUser']);
 });

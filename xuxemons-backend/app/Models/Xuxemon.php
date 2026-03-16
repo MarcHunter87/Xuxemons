@@ -10,7 +10,6 @@ class Xuxemon extends Model
         'name',
         'description',
         'type_id',
-        'size',
         'attack_1_id',
         'attack_2_id',
         'hp',

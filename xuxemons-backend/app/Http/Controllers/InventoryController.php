@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdquiredXuxemon;
 use App\Models\Bag;
 use App\Models\BagItem;
 use App\Models\Item;
@@ -470,6 +471,72 @@ class InventoryController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function useItem(Request $request): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if (! $user) {
+                return response()->json(['message' => 'User not authenticated'], 401);
+            }
+
+            $bagItemId = (int) $request->input('bag_item_id');
+            $adquiredXuxemonId = (int) $request->input('adquired_xuxemon_id');
+            if (! $bagItemId || ! $adquiredXuxemonId) {
+                return response()->json(['message' => 'bag_item_id and adquired_xuxemon_id are required'], 422);
+            }
+
+            $bag = Bag::where('user_id', $user->id)->first();
+            if (! $bag) {
+                return response()->json(['message' => 'User does not have a bag'], 404);
+            }
+
+            $bagItem = BagItem::where('id', $bagItemId)
+                ->where('bag_id', $bag->id)
+                ->with('item')
+                ->first();
+            if (! $bagItem) {
+                return response()->json(['message' => 'Item not found in inventory'], 404);
+            }
+
+            $adquired = AdquiredXuxemon::where('id', $adquiredXuxemonId)
+                ->where('user_id', $user->id)
+                ->first();
+            if (! $adquired) {
+                return response()->json(['message' => 'Xuxemon not found'], 404);
+            }
+
+            $item = $bagItem->item;
+
+            if ($item->effect_type === 'Evolve') {
+                $data = $this->useSpecialMeat($bagItem, $adquired);
+            } else {
+                return response()->json(['message' => 'This item cannot be used yet'], 400);
+            }
+
+            return response()->json([
+                'message' => 'Item used successfully',
+                'data' => $data,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error using item', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    private function useSpecialMeat(BagItem $bagItem, AdquiredXuxemon $adquired): array
+    {
+        $currentSize = $adquired->size ?? 'Small';
+        $newSize = $currentSize === 'Small' ? 'Medium' : 'Large';
+        $adquired->size = $newSize;
+        $adquired->save();
+
+        $bagItem->reduceQuantity(1);
+
+        return [
+            'xuxemon_size' => $newSize,
+            'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
+        ];
     }
 
     public function getAllItems(): JsonResponse

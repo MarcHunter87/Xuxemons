@@ -227,4 +227,27 @@ export class InventoryService {
                 },
             });
     }
+
+    useItem(
+        bagItemId: number,
+        adquiredXuxemonId: number,
+        onSuccess?: () => void,
+        onError?: (message: string) => void,
+    ): void {
+        this.http
+            .post<{ message: string; data?: { xuxemon_size: string; remaining_quantity: number } }>(
+                `${this.apiUrl}/inventory/use`,
+                { bag_item_id: bagItemId, adquired_xuxemon_id: adquiredXuxemonId },
+            )
+            .subscribe({
+                next: () => {
+                    this.loadInventory();
+                    onSuccess?.();
+                },
+                error: (err) => {
+                    const msg = err?.error?.message ?? err?.message ?? 'Failed to use item.';
+                    onError?.(msg);
+                },
+            });
+    }
 }

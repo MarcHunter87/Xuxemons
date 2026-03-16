@@ -4,6 +4,7 @@ export interface Xuxemon {
   type: { name: string };
   size: 'Small' | 'Medium' | 'Large';
   image_url: string;
+  adquired_id?: number;
   statusEffect?: {
     name: string;
     icon_url: string;

@@ -26,7 +26,8 @@ export class AdminService {
   }
 
   giveItemToUser(userId: string, itemId: number, quantity: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/inventory/item`, {
+    const encodedUserId = encodeURIComponent(userId);
+    return this.http.post(`${this.apiUrl}/users/${encodedUserId}/give-item`, {
       item_id: itemId,
       quantity: quantity,
     });

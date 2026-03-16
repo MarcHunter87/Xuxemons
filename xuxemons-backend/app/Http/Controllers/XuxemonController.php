@@ -17,11 +17,9 @@ class XuxemonController extends Controller
         if ($request->filled('type')) {
             $query->whereHas('type', fn ($q) => $q->where('name', $request->input('type')));
         }
-        if ($request->filled('size')) {
-            $query->where('size', $request->input('size'));
-        }
 
-        return response()->json($query->get());
+        $list = $query->get();
+        return response()->json($list->map(fn ($x) => array_merge($x->toArray(), ['size' => 'Small'])));
     }
 
     public function collectionStats()
@@ -42,30 +40,40 @@ class XuxemonController extends Controller
         ]);
     }
 
-    public function myXuxemons()
+    public function myXuxemons(Request $request)
     {
         $userId = Auth::guard('api')->id();
         if (! $userId) {
             return response()->json([], 401);
         }
 
-        $myXuxemons = AdquiredXuxemon::where('user_id', $userId)
-            ->with(['xuxemon.type', 'xuxemon.attack1.statusEffect', 'xuxemon.attack2.statusEffect', 'statusEffect'])
-            ->orderBy('created_at', 'desc')
+        $query = AdquiredXuxemon::where('user_id', $userId)
+            ->with(['xuxemon.type', 'xuxemon.attack1.statusEffect', 'xuxemon.attack2.statusEffect', 'statusEffect']);
+
+        if ($request->filled('type')) {
+            $query->whereHas('xuxemon.type', fn ($q) => $q->where('name', $request->input('type')));
+        }
+        if ($request->filled('size')) {
+            $query->where('size', $request->input('size'));
+        }
+
+        $myXuxemons = $query->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($a) {
                 if (! $a->xuxemon) {
                     return null;
                 }
-                $x = $a->xuxemon;
-                $x->adquired_at = $a->created_at;
-                $x->level = $a->level;
+                $x = $a->xuxemon->toArray();
                 $maxHp = $a->hp;
-                $x->hp = $maxHp;
-                $x->current_hp = $a->getAttribute('current_hp') !== null ? (int) $a->current_hp : $maxHp;
-                $x->attack = $a->attack;
-                $x->defense = $a->defense;
-                $x->status_effect_applied = $a->statusEffect;
+                $x['adquired_at'] = $a->created_at;
+                $x['level'] = $a->level;
+                $x['hp'] = $maxHp;
+                $x['current_hp'] = $a->getAttribute('current_hp') !== null ? (int) $a->current_hp : $maxHp;
+                $x['attack'] = $a->attack;
+                $x['defense'] = $a->defense;
+                $x['size'] = $a->size ?? 'Small';
+                $x['adquired_id'] = $a->id;
+                $x['status_effect_applied'] = $a->statusEffect;
 
                 return $x;
             })
@@ -101,6 +109,7 @@ class XuxemonController extends Controller
         $xuxemon['current_hp'] = $maxHp;
         $xuxemon['attack'] = $adquired->attack;
         $xuxemon['defense'] = $adquired->defense;
+        $xuxemon['size'] = $adquired->size ?? 'Small';
 
         return $xuxemon;
     }
