@@ -138,6 +138,12 @@
   transition: box-shadow 0.3s ease;
   flex: 1;
   animation: fadeInUp 0.5s ease;
+  list-style: none;
+  margin: 0;
+}
+
+.inventory-slot-li {
+  display: contents;
 }
 
 .items-grid:hover {
@@ -154,6 +160,20 @@
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   cursor: pointer;
   overflow: hidden;
+}
+
+button.item-slot {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+button.item-slot:focus {
+  outline: none;
 }
 
 .item-slot.filled {
@@ -209,6 +229,20 @@
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px var(--accent-glow), 0 8px 20px var(--accent-glow);
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.item-slot.filled:focus-visible {
+  outline: none;
+  transform: translateY(-4px) scale(1.06);
+  box-shadow:
+    0 12px 24px var(--accent-glow),
+    0 0 0 2px var(--white-color),
+    0 0 0 5px var(--accent-color);
+  border-color: var(--white-alpha-60);
+}
+
+.item-slot.filled:focus-visible .item-icon {
+  transform: scale(1.1);
 }
 
 @keyframes pulse {
@@ -464,6 +498,29 @@
 /* Action Buttons */
 .action-buttons {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.action-buttons .btn-primary:focus-visible:not(:disabled) {
+  outline: none;
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 20px var(--accent-glow),
+    0 0 0 2px var(--white-color),
+    0 0 0 5px var(--accent-color);
+  background: linear-gradient(135deg, var(--accent-on-light) 0%, var(--accent-color) 100%);
+}
+
+.action-buttons .btn-danger:focus-visible:not(:disabled) {
+  outline: none;
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 20px var(--danger-glow),
+    0 0 0 2px var(--white-color),
+    0 0 0 5px var(--accent-color);
+  background: linear-gradient(135deg, var(--danger-color-2) 0%, var(--danger-color-2) 100%);
 }
 
 /* Discard quantity picker */
@@ -497,6 +554,185 @@
   box-shadow: 0 20px 45px var(--shadow-modal);
   border-color: var(--danger-border-alpha-35);
   background: linear-gradient(135deg, var(--modal-content-bg-start) 0%, var(--modal-content-bg-end) 100%);
+}
+
+.use-item-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-bg, rgba(0, 0, 0, 0.6));
+  backdrop-filter: blur(2px);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeInOverlay 0.2s ease;
+}
+
+.use-item-modal {
+  width: min(480px, 100%);
+  max-height: 85vh;
+  overflow: auto;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--white-color) 100%);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 45px var(--shadow-color);
+  border: 1px solid var(--black-alpha-05);
+  animation: popupIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.use-item-modal-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-alt-color);
+}
+
+.use-item-modal-subtitle {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.use-item-search-wrap {
+  margin-bottom: 1rem;
+}
+
+.use-item-search {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--light-gray-color);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.use-item-search:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow:
+    0 0 0 2px var(--white-color),
+    0 0 0 5px var(--accent-color);
+}
+
+.use-item-search:focus-visible {
+  border-color: var(--accent-color);
+  box-shadow:
+    0 0 0 2px var(--white-color),
+    0 0 0 5px var(--accent-color);
+}
+
+.use-item-hint {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.use-item-xuxemon-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--light-gray-color);
+  border-radius: 10px;
+  background: var(--white-color);
+}
+
+.use-item-xuxemon-list li {
+  border-bottom: 1px solid var(--light-gray-color);
+}
+
+.use-item-xuxemon-list li:last-child {
+  border-bottom: none;
+}
+
+.use-item-xuxemon-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s ease;
+}
+
+.use-item-xuxemon-btn:hover {
+  background: var(--accent-alpha-10);
+}
+
+.use-item-xuxemon-btn.selected {
+  background: var(--accent-alpha-10);
+  box-shadow: inset 0 0 0 2px var(--accent-color);
+}
+
+.use-item-xuxemon-btn:focus {
+  outline: none;
+}
+
+.use-item-xuxemon-btn:focus-visible {
+  background: var(--accent-alpha-10);
+  box-shadow:
+    0 0 0 2px var(--white-color),
+    0 0 0 5px var(--accent-color);
+}
+
+.use-item-xuxemon-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.use-item-xuxemon-name {
+  flex: 1;
+  font-weight: 600;
+  color: var(--text-alt-color);
+}
+
+.use-item-xuxemon-size {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.use-item-empty {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.use-item-api-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+  background: var(--danger-bg-alpha);
+  border-radius: 8px;
+  color: var(--danger-color);
+  font-size: 1rem;
+}
+
+.use-item-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.use-item-actions .btn:focus {
+  outline: none;
+}
+
+.use-item-actions .btn-primary:focus-visible:not(:disabled),
+.use-item-actions .btn-secondary:focus-visible:not(:disabled) {
+  box-shadow:
+    0 0 0 2px var(--white-color),
+    0 0 0 5px var(--accent-color);
 }
 
 @keyframes fadeInOverlay {

@@ -1,3 +1,43 @@
+.admin-nav-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.admin-nav-btn-xuxemons {
+  background-color: var(--success-color, #28a745);
+  color: var(--white-color);
+}
+
+.admin-nav-btn-xuxemons:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+}
+
+.admin-nav-btn-items {
+  background-color: var(--accent-color);
+  color: var(--white-color);
+}
+
+.admin-nav-btn-items:hover {
+  background-color: var(--accent-on-light);
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
 .loading-state,
 .error-state,
 .empty-state {
@@ -37,14 +77,14 @@
 }
 
 .players-table thead tr {
-  background-color: color-mix(in srgb, var(--accent-glow) 40%, var(--white-color));
+  background-color: var(--accent-color);
 }
 
 .players-table th {
   text-align: left;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text-alt-color);
+  color: var(--white-color);
   letter-spacing: 0.01em;
   padding: 0.9rem 1rem;
   border-bottom: 1px solid var(--light-gray-color);
@@ -115,10 +155,12 @@
   border: 0;
 }
 
-.actions-column {
+.col-items,
+.col-xuxemons {
   width: 1%;
   white-space: nowrap;
-  text-align: right;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .slots-badge {
@@ -133,24 +175,35 @@
   border: 1px solid var(--accent-color);
 }
 
-.give-item-btn {
-  padding: 0.75rem 1.5rem;
-  background-color: var(--accent-color);
-  color: var(--white-color);
+.table-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
   font-size: 1rem;
   font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.table-action-btn .bi {
+  font-size: 1rem;
+}
+
+.give-item-btn {
+  background-color: var(--accent-color);
+  color: var(--white-color);
 }
 
 .give-item-btn:hover:not(:disabled) {
   background-color: var(--accent-on-light);
-  box-shadow: 0 4px 12px var(--accent-glow);
-  transform: translateY(-2px);
+  box-shadow: 0 2px 8px var(--accent-glow);
+  transform: translateY(-1px);
 }
 
 .give-item-btn:disabled {
@@ -160,13 +213,232 @@
   color: var(--white-color);
 }
 
+.give-xuxemon-btn {
+  background-color: var(--success-color, #28a745);
+  color: var(--white-color);
+}
+
+.give-xuxemon-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+  transform: translateY(-1px);
+}
+
+.give-xuxemon-btn:disabled {
+  background-color: var(--medium-gray-color);
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.btn-loading-icon {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--white-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Award modal (gacha-style, no spin again) */
+.award-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--modal-overlay-bg, rgba(0, 0, 0, 0.5));
+  backdrop-filter: blur(10px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.award-modal-content {
+  background: linear-gradient(180deg, var(--white-color) 0%, var(--primary-color) 100%);
+  padding: 2rem 2.5rem;
+  text-align: center;
+  max-width: 500px;
+  border-radius: 20px;
+  border: 2px solid var(--light-gray-color);
+  box-shadow: 0 20px 40px var(--shadow-color);
+  position: relative;
+}
+
+.animate-pop {
+  animation: awardModalPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes awardModalPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.award-modal-title {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--text-alt-color);
+  margin: 0 0 1.5rem;
+}
+
+.award-modal-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.award-modal-image-wrapper {
+  width: 250px;
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.7rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px var(--shadow-color);
+}
+
+.award-modal-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  animation: awardFloat 2.5s ease-in-out infinite;
+}
+
+@keyframes awardFloat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+.award-modal-name {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-alt-color);
+  margin: 0;
+}
+
+.award-modal-type-badge {
+  padding: 0.5rem 1.5rem;
+  color: var(--white-color);
+  border-radius: 999px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+
+.award-modal-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(92px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  width: 100%;
+  max-width: 360px;
+}
+
+.award-modal-stats .award-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  min-height: 64px;
+  padding: 0.5rem 0.4rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px var(--shadow-color);
+}
+
+.award-modal-stats .stat-hp {
+  background: var(--potion-heal, #d0181b);
+  color: var(--white-color);
+}
+
+.award-modal-stats .stat-attack {
+  background: var(--potion-dmg, #0d6efd);
+  color: var(--white-color);
+}
+
+.award-modal-stats .stat-defense {
+  background: var(--potion-defense, #28a745);
+  color: var(--white-color);
+}
+
+.award-modal-stats .stat-label,
+.award-modal-stats .stat-value {
+  color: var(--white-color);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.award-modal-stats .stat-value {
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.award-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  justify-content: center;
+}
+
+.award-modal-actions .btn-secondary {
+  padding: 0.75rem 2rem;
+  border-radius: 12px;
+  font-weight: 700;
+  background: var(--white-color);
+  color: var(--accent-color);
+  border: 2px solid var(--accent-color);
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+}
+
+.award-modal-actions .btn-secondary:hover {
+  background: var(--accent-alpha-10, rgba(13, 110, 253, 0.1));
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+.award-error-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--danger-color);
+  color: var(--white-color);
+  border-radius: 12px;
+  font-weight: 600;
+  z-index: 2100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.award-error-toast button {
+  background: none;
+  border: none;
+  color: var(--white-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
 @media (max-width: 860px) {
   .players-table {
     min-width: 680px;
   }
 
-  .give-item-btn {
-    padding: 0.65rem 1rem;
+  .table-action-btn {
+    padding: 0.4rem 0.7rem;
     font-size: 1rem;
   }
 }

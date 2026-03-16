@@ -69,6 +69,7 @@
 
 .pagination-controls {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   gap: 1.5rem;
@@ -119,6 +120,17 @@
   font-size: 1.1rem;
 }
 
+@media (max-width: 571px) {
+  .pagination-info {
+    width: 100%;
+    order: 3;
+  }
+
+  .pagination-controls .btn-pagination {
+    order: 0;
+  }
+}
+
 .type-chart-panel {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -142,7 +154,7 @@
   border-radius: 999px;
   background: #e7edf5;
   color: #4d627a;
-  font-size: 0.78rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -177,7 +189,7 @@
   padding: 0.55rem 0.95rem;
   border-radius: 999px;
   border: 1px solid transparent;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
@@ -244,7 +256,7 @@
   }
 
   .type-chart-text {
-    font-size: 0.98rem;
+    font-size: 1rem;
   }
 
   .type-chart-image {

@@ -1,6 +1,9 @@
 import {
     Component,
     ChangeDetectionStrategy,
+    HostListener,
+    AfterViewChecked,
+    ElementRef,
     inject,
     afterNextRender,
     signal,
@@ -12,7 +15,9 @@ import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import type { InventoryItem } from '../../core/interfaces';
+import type { Xuxemon } from '../../core/interfaces';
 import { InventoryService } from '../../core/services/inventory.service';
+import { XuxemonService } from '../../core/services/xuxemon.service';
 
 @Component({
     selector: 'app-inventory',
@@ -21,11 +26,20 @@ import { InventoryService } from '../../core/services/inventory.service';
     styleUrl: './inventory.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Inventory implements OnInit, OnDestroy {
+export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     private inventoryService = inject(InventoryService);
+    private xuxemonService = inject(XuxemonService);
+    private elementRef = inject(ElementRef<HTMLElement>);
     private subs = new Subscription();
+    private focusUseItemSearch = false;
 
     readonly items = signal<InventoryItem[]>([]);
+    readonly myXuxemons = signal<Xuxemon[]>([]);
+    readonly useModalOpen = signal(false);
+    readonly useSearchQuery = signal('');
+    readonly selectedXuxemonForUse = signal<Xuxemon | null>(null);
+    readonly useApiError = signal<string | null>(null);
+    readonly isUsing = signal(false);
     readonly filteredItems = signal<InventoryItem[]>([]);
     readonly selectedItem = signal<InventoryItem | null>(null);
     readonly isLoading = signal(true);
@@ -46,6 +60,26 @@ export class Inventory implements OnInit, OnDestroy {
         const remaining = this.maxSlots - this.filteredItems().length;
         return Array(Math.max(0, remaining)).fill(0);
     });
+
+    readonly inventorySlots = computed(() => {
+        const items = this.filteredItems();
+        const total = this.maxSlots;
+        const slots: { slotNumber: number; item?: InventoryItem }[] = [];
+        for (let i = 0; i < total; i++) {
+            slots.push({
+                slotNumber: i + 1,
+                item: items[i],
+            });
+        }
+        return slots;
+    });
+
+    getSlotAriaLabel(slot: { slotNumber: number; item?: InventoryItem }): string {
+        if (slot.item) {
+            return `Slot ${slot.slotNumber} - ${slot.item.quantity} ${slot.item.name}`;
+        }
+        return `Slot ${slot.slotNumber} - empty`;
+    }
 
     readonly usedCapacity = computed(() =>
         this.usedSlotsFromBackend() > 0 ? this.usedSlotsFromBackend() : this.items().length,
@@ -84,7 +118,24 @@ export class Inventory implements OnInit, OnDestroy {
         this.subs.add(this.inventoryService.discardError.subscribe((v) => this.discardError.set(v)));
         this.subs.add(this.inventoryService.discardApiError.subscribe((v) => this.discardApiError.set(v)));
         this.subs.add(this.inventoryService.isDiscarding.subscribe((v) => this.isDiscarding.set(v)));
+        this.subs.add(this.xuxemonService.myXuxemonsList.subscribe((v) => this.myXuxemons.set(v)));
     }
+
+    readonly useModalXuxemons = computed(() => {
+        const list = this.myXuxemons();
+        const q = this.useSearchQuery().toLowerCase().trim();
+        const item = this.selectedItem();
+        const isSpecialMeat = item?.name === 'Special Meat';
+        let filtered = list.filter(
+            (x) =>
+                (x.name ?? '').toLowerCase().includes(q) &&
+                (x.adquired_id != null),
+        );
+        if (isSpecialMeat) {
+            filtered = filtered.filter((x) => x.size !== 'Large');
+        }
+        return filtered;
+    });
 
     ngOnDestroy(): void {
         this.subs.unsubscribe();
@@ -102,11 +153,63 @@ export class Inventory implements OnInit, OnDestroy {
         this.inventoryService.selectItem(item);
     }
 
-    useItem(): void {
-        const item = this.selectedItem();
-        if (item && item.quantity > 0) {
-            // Implement use logic here
+    onSlotEnter(item: InventoryItem): void {
+        this.selectItem(item);
+        this.openUseModal();
+    }
+
+    openUseModal(): void {
+        this.useApiError.set(null);
+        this.selectedXuxemonForUse.set(null);
+        this.useSearchQuery.set('');
+        this.xuxemonService.loadMyXuxemons();
+        this.useModalOpen.set(true);
+        this.focusUseItemSearch = true;
+    }
+
+    ngAfterViewChecked(): void {
+        if (!this.focusUseItemSearch) return;
+        const input = this.elementRef.nativeElement.querySelector('.use-item-search');
+        if (input instanceof HTMLInputElement) {
+            setTimeout(() => input.focus(), 0);
+            this.focusUseItemSearch = false;
         }
+    }
+
+    closeUseModal(): void {
+        this.useModalOpen.set(false);
+        this.selectedXuxemonForUse.set(null);
+        this.useApiError.set(null);
+    }
+
+    setUseSearchQuery(value: string): void {
+        this.useSearchQuery.set(value);
+    }
+
+    selectXuxemonForUse(xuxemon: Xuxemon): void {
+        this.selectedXuxemonForUse.set(xuxemon);
+        this.useApiError.set(null);
+    }
+
+    confirmUseItem(): void {
+        const item = this.selectedItem();
+        const xuxemon = this.selectedXuxemonForUse();
+        if (!item?.bag_item_id || !xuxemon?.adquired_id) return;
+        this.isUsing.set(true);
+        this.useApiError.set(null);
+        this.inventoryService.useItem(
+            item.bag_item_id,
+            xuxemon.adquired_id,
+            () => {
+                this.isUsing.set(false);
+                this.closeUseModal();
+                this.xuxemonService.loadMyXuxemons();
+            },
+            (msg) => {
+                this.useApiError.set(msg);
+                this.isUsing.set(false);
+            },
+        );
     }
 
     discardItem(): void {
@@ -123,6 +226,12 @@ export class Inventory implements OnInit, OnDestroy {
 
     cancelDiscard(): void {
         this.inventoryService.cancelDiscard();
+    }
+
+    @HostListener('document:keydown.escape')
+    onEscape(): void {
+        if (this.useModalOpen()) this.closeUseModal();
+        else if (this.discardMode()) this.cancelDiscard();
     }
 
     getSlotClass(item: InventoryItem): string {

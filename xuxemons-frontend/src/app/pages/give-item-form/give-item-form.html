@@ -5,6 +5,13 @@
   <p class="page-hero-desc">Select an item and quantity to distribute.</p>
 </section>
 
+@if (isLoading()) {
+  <div class="loading-state" aria-busy="true" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="loading-text">Loading items...</p>
+  </div>
+}
+
 @if (errorMessage() || successMessage()) {
   <div class="message-section" aria-live="polite" aria-atomic="true">
     @if (errorMessage()) {
@@ -22,49 +29,44 @@
   </div>
 }
 
+@if (!isLoading()) {
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="give-item-form">
   <div class="form-group">
     <label for="give-item-item-trigger" class="label">Select Item</label>
     <div class="item-select-wrapper">
-      @if (isLoading()) {
-        <div id="give-item-item-trigger" class="item-select-trigger" aria-busy="true" aria-disabled="true">
-          <span class="item-select-placeholder">Loading items...</span>
-        </div>
-      } @else {
-        <button
-          type="button"
-          id="give-item-item-trigger"
-          class="item-select-trigger"
-          [class.input-error]="isFieldInvalid('itemId')"
-          [attr.aria-expanded]="dropdownOpen()"
-          [attr.aria-haspopup]="'listbox'"
-          [attr.aria-describedby]="isFieldInvalid('itemId') ? 'give-item-itemId-error' : null"
-          [attr.aria-invalid]="isFieldInvalid('itemId')"
-          (click)="dropdownOpen.set(!dropdownOpen())"
-        >
-          @if (getSelectedItem(); as selected) {
-            <img [src]="getItemImageUrl(selected)" [alt]="selected.name" class="item-select-img" width="28" height="28" />
-            <span>{{ selected.name }}</span>
-          } @else {
-            <span class="item-select-placeholder">Choose an item...</span>
-          }
-        </button>
-        @if (dropdownOpen()) {
-          <div class="item-select-backdrop" (click)="closeDropdown()" aria-hidden="true"></div>
-          <ul class="item-select-dropdown" role="listbox" aria-labelledby="give-item-item-trigger">
-            @for (item of items(); track item.id) {
-              <li
-                role="option"
-                [attr.aria-selected]="getSelectedItem()?.id === item.id"
-                class="item-select-option"
-                (click)="selectItem(item)"
-              >
-                <img [src]="getItemImageUrl(item)" [alt]="item.name" class="item-select-img" width="28" height="28" />
-                <span>{{ item.name }}</span>
-              </li>
-            }
-          </ul>
+      <button
+        type="button"
+        id="give-item-item-trigger"
+        class="item-select-trigger"
+        [class.input-error]="isFieldInvalid('itemId')"
+        [attr.aria-expanded]="dropdownOpen()"
+        [attr.aria-haspopup]="'listbox'"
+        [attr.aria-describedby]="isFieldInvalid('itemId') ? 'give-item-itemId-error' : null"
+        [attr.aria-invalid]="isFieldInvalid('itemId')"
+        (click)="dropdownOpen.set(!dropdownOpen())"
+      >
+        @if (getSelectedItem(); as selected) {
+          <img [src]="getItemImageUrl(selected)" [alt]="selected.name" class="item-select-img" width="28" height="28" />
+          <span>{{ selected.name }}</span>
+        } @else {
+          <span class="item-select-placeholder">Choose an item...</span>
         }
+      </button>
+      @if (dropdownOpen()) {
+        <div class="item-select-backdrop" (click)="closeDropdown()" aria-hidden="true"></div>
+        <ul class="item-select-dropdown" role="listbox" aria-labelledby="give-item-item-trigger">
+          @for (item of items(); track item.id) {
+            <li
+              role="option"
+              [attr.aria-selected]="getSelectedItem()?.id === item.id"
+              class="item-select-option"
+              (click)="selectItem(item)"
+            >
+              <img [src]="getItemImageUrl(item)" [alt]="item.name" class="item-select-img" width="28" height="28" />
+              <span>{{ item.name }}</span>
+            </li>
+          }
+        </ul>
       }
     </div>
     @if (isFieldInvalid('itemId')) {
@@ -82,6 +84,12 @@
       <div class="item-details-body">
         <p class="item-details-name">{{ selected.name }}</p>
         <p class="item-description">{{ selected.description }}</p>
+        @if (selected.effect_type || selected.effect_value != null) {
+          <p class="item-effect">
+            <span class="item-effect-label">Effect:</span>
+            {{ getEffectLabel(selected) }}
+          </p>
+        }
       </div>
     </div>
   }
@@ -106,12 +114,13 @@
     </div>
 
   <div class="form-actions">
+    <button type="button" class="btn btn-secondary" routerLink="/admin">Cancel</button>
     <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting()" [attr.aria-busy]="isSubmitting()">
       @if (isSubmitting()) {
         <span class="btn-loading-icon" aria-hidden="true"></span>
       }
       Give Item
     </button>
-    <button type="button" class="btn btn-secondary" routerLink="/admin">Cancel</button>
   </div>
 </form>
+}

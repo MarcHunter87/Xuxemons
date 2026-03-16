@@ -12,6 +12,48 @@
     background: transparent;
     text-align: left;
     cursor: pointer;
+    border-radius: 20px;
+}
+
+.card-button:focus {
+    outline: none;
+}
+
+.card-button:focus-visible .xuxemon-card {
+    transform: translateY(-6px);
+    box-shadow:
+        0 8px 18px var(--shadow-card),
+        0 0 0 2px var(--white-color),
+        0 0 0 5px var(--accent-color);
+}
+
+.card-wrapper.power .card-button:focus-visible .xuxemon-card {
+    box-shadow:
+        0 0 45px var(--danger-glow),
+        0 0 0 2px var(--white-color),
+        0 0 0 5px var(--accent-color);
+}
+
+.card-wrapper.speed .card-button:focus-visible .xuxemon-card {
+    box-shadow:
+        0 0 45px var(--accent-glow),
+        0 0 0 2px var(--white-color),
+        0 0 0 5px var(--accent-color);
+}
+
+.card-wrapper.technical .card-button:focus-visible .xuxemon-card {
+    box-shadow:
+        0 0 45px var(--success-glow),
+        0 0 0 2px var(--white-color),
+        0 0 0 5px var(--accent-color);
+}
+
+.card-button:focus-visible .size-badge {
+    transform: scale(1.04);
+}
+
+.card-button:focus-visible .card-creature-image {
+    transform: scale(1.03);
 }
 
 .size-badge {
@@ -175,6 +217,18 @@
 
 .card-button:hover .card-creature-image {
     transform: scale(1.03);
+}
+
+.card-button:active .xuxemon-card {
+    transform: translateY(-2px) scale(0.98);
+}
+
+.card-button:active .size-badge {
+    transform: scale(1);
+}
+
+.card-button:active .card-creature-image {
+    transform: scale(1.01);
 }
 
 .card-footer {

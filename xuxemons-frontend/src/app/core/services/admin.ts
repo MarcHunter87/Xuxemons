@@ -24,11 +24,21 @@ export class AdminService {
   getAllItems(): Observable<{ data: Item[] }> {
     return this.http.get<{ data: Item[] }>(`${this.apiUrl}/items`);
   }
+  
+  getAllXuxemons(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/xuxemons`);
+  }
 
   giveItemToUser(userId: string, itemId: number, quantity: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/inventory/item`, {
+    const encodedUserId = encodeURIComponent(userId);
+    return this.http.post(`${this.apiUrl}/users/${encodedUserId}/give-item`, {
       item_id: itemId,
       quantity: quantity,
     });
+  }
+
+  awardRandomXuxemonToUser(userId: string): Observable<any> {
+    const encoded = encodeURIComponent(userId);
+    return this.http.post<any>(`${this.apiUrl}/users/${encoded}/award-random`, {});
   }
 }
