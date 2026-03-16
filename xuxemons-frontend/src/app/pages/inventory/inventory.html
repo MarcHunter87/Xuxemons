@@ -46,28 +46,36 @@
     <div class="row g-4">
       <!-- Left Section: Item Grid -->
       <div class="col-lg-7">
-        <ul class="items-grid" aria-label="Inventory, {{ maxSlots }} slots" role="list">
-          @for (slot of inventorySlots(); track slot.slotNumber) {
-            <li [attr.aria-label]="getSlotAriaLabel(slot)" class="inventory-slot-li">
-              @if (slot.item) {
-                <button
-                  type="button"
-                  class="item-slot filled"
-                  [ngClass]="[getSlotClass(slot.item), selectedItem()?.id === slot.item.id ? 'selected' : '']"
-                  (click)="selectItem(slot.item)"
-                  (keydown.enter)="onSlotEnter(slot.item); $event.preventDefault()"
-                  [attr.aria-label]="slot.item.name + ', quantity ' + slot.item.quantity"
-                  [attr.aria-pressed]="selectedItem()?.id === slot.item.id">
-                  <span class="item-badge">{{ slot.item.quantity }}</span>
-                  <img class="item-icon" [src]="slot.item.iconPath" [alt]=""
-                     role="presentation">
-                </button>
-              } @else {
-                <div class="item-slot empty" aria-hidden="true"></div>
-              }
-            </li>
-          }
-        </ul>
+        <div
+          class="items-grid"
+          role="grid"
+          [attr.aria-label]="'Inventory, ' + maxSlots + ' slots'">
+          <div class="grid-row" role="row">
+            @for (slot of inventorySlots(); track slot.slotNumber) {
+              <div
+                class="grid-cell"
+                role="gridcell"
+                [attr.aria-label]="getSlotAriaLabel(slot)">
+                @if (slot.item) {
+                  <button
+                    type="button"
+                    class="item-slot filled"
+                    [ngClass]="[getSlotClass(slot.item), selectedItem()?.id === slot.item.id ? 'selected' : '']"
+                    (click)="selectItem(slot.item)"
+                    (keydown.enter)="onSlotEnter(slot.item); $event.preventDefault()"
+                    [attr.aria-label]="slot.item.name + ', quantity ' + slot.item.quantity"
+                    [attr.aria-pressed]="selectedItem()?.id === slot.item.id">
+                    <span class="item-badge">{{ slot.item.quantity }}</span>
+                    <img class="item-icon" [src]="slot.item.iconPath" [alt]=""
+                       role="presentation">
+                  </button>
+                } @else {
+                  <div class="item-slot empty" aria-hidden="true"></div>
+                }
+              </div>
+            }
+          </div>
+        </div>
       </div>
 
       <!-- Right Section: Item Details -->
