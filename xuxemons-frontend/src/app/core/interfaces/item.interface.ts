@@ -2,9 +2,11 @@ export interface Item {
   id: number;
   name: string;
   description: string;
-  is_stackable: boolean;
-  max_quantity: number;
-  icon_path: string;
   effect_type: string;
   effect_value?: number;
+  is_stackable: boolean;
+  max_quantity: number;
+  status_effect_id?: number | null;
+  status_effect?: { name: string } | null;
+  icon_path: string;
 }

@@ -101,6 +101,15 @@ export class GiveItemForm implements OnInit {
     return this.authService.getAssetUrl(path);
   }
 
+  getEffectLabel(item: Item): string {
+    const type = item.effect_type || '';
+    const value = item.effect_value;
+    if (type && value != null) return `${type} (${value})`;
+    if (type) return type;
+    if (value != null) return String(value);
+    return '';
+  }
+
   selectItem(item: Item): void {
     this.form.get('itemId')?.setValue(String(item.id));
     this.onItemChange();

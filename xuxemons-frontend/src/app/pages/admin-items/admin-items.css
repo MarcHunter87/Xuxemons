@@ -1,0 +1,139 @@
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  background-color: var(--white-color);
+  border: 1px solid var(--light-gray-color);
+  animation: slideInUp 0.4s ease-out;
+}
+
+.error-message {
+  color: var(--danger-color);
+  font-weight: 500;
+  margin: 0;
+}
+
+.players-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.players-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+  background-color: var(--white-color);
+  border: 1px solid var(--light-gray-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--shadow-color);
+  animation: slideInUp 0.4s ease-out;
+}
+
+.players-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.players-table th.col-actions,
+.players-table td.col-actions {
+  white-space: nowrap;
+  text-align: center;
+}
+
+.cell-actions {
+  color: var(--text-muted);
+}
+
+.players-table thead tr {
+  background-color: var(--accent-color);
+}
+
+.players-table th {
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--white-color);
+  letter-spacing: 0.01em;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--light-gray-color);
+}
+
+.players-table td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--light-gray-color);
+  vertical-align: middle;
+}
+
+.players-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.players-table tbody tr:hover {
+  background-color: color-mix(in srgb, var(--accent-glow) 20%, var(--white-color));
+}
+
+.item-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.no-icon {
+  color: var(--text-muted);
+}
+
+.cell-id,
+.cell-num {
+  font-variant-numeric: tabular-nums;
+  color: var(--dark-gray-color);
+}
+
+.cell-name {
+  font-weight: 600;
+  color: var(--text-alt-color);
+}
+
+.cell-desc {
+  color: var(--dark-gray-color);
+  display: block;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.cell-bool,
+.cell-text {
+  color: var(--dark-gray-color);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  border: 3px solid var(--accent-border-alpha);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

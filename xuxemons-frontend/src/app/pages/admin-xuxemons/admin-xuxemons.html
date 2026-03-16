@@ -1,0 +1,80 @@
+<section class="page-hero" aria-labelledby="admin-xuxemons-title">
+  <h1 id="admin-xuxemons-title">
+    <span class="page-hero-title-black">All Xuxemons</span>
+  </h1>
+  <p class="page-hero-desc">Catalog of all Xuxemons.</p>
+</section>
+
+@if (isLoading()) {
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p class="loading-text">Loading Xuxemons...</p>
+  </div>
+}
+
+@if (errorMessage() && !isLoading()) {
+  <div class="error-state">
+    <p class="error-message" role="alert" aria-live="polite">
+      <i class="bi bi-exclamation-triangle"></i>
+      {{ errorMessage() }}
+    </p>
+  </div>
+}
+
+@if (hasContent()) {
+  <div class="players-section">
+    @if (xuxemons().length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-inbox" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+        <p>No Xuxemons found</p>
+      </div>
+    }
+
+    @if (xuxemons().length > 0) {
+      <div class="players-table-wrapper">
+        <table class="players-table">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Image</th>
+              <th scope="col">Name</th>
+              <th scope="col">Description</th>
+              <th scope="col">Type</th>
+              <th scope="col">Attack 1</th>
+              <th scope="col">Attack 2</th>
+              <th scope="col" class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (x of xuxemons(); track x.id) {
+              <tr>
+                <td><span class="cell-id">{{ x.id }}</span></td>
+                <td>
+                  <div
+                    class="xuxemon-image-wrapper"
+                    [style.background-color]="getTypeColor(x.type?.name ?? '')"
+                  >
+                    <img [src]="x.image_url" [alt]="x.name" class="xuxemon-image" />
+                  </div>
+                </td>
+                <td><span class="cell-name">{{ x.name }}</span></td>
+                <td><span class="cell-desc">{{ x.description || '—' }}</span></td>
+                <td>
+                  <span
+                    class="type-badge"
+                    [style.background-color]="getTypeColor(x.type?.name ?? '')"
+                  >
+                    {{ x.type?.name ?? '—' }}
+                  </span>
+                </td>
+                <td><span class="cell-text">{{ x.attack1_name }}</span></td>
+                <td><span class="cell-text">{{ x.attack2_name }}</span></td>
+                <td class="col-actions"><span class="cell-actions">—</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}

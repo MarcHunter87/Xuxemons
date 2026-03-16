@@ -1,3 +1,43 @@
+.admin-nav-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.admin-nav-btn-xuxemons {
+  background-color: var(--success-color, #28a745);
+  color: var(--white-color);
+}
+
+.admin-nav-btn-xuxemons:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+}
+
+.admin-nav-btn-items {
+  background-color: var(--accent-color);
+  color: var(--white-color);
+}
+
+.admin-nav-btn-items:hover {
+  background-color: var(--accent-on-light);
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
 .loading-state,
 .error-state,
 .empty-state {
@@ -37,14 +77,14 @@
 }
 
 .players-table thead tr {
-  background-color: color-mix(in srgb, var(--accent-glow) 40%, var(--white-color));
+  background-color: var(--accent-color);
 }
 
 .players-table th {
   text-align: left;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text-alt-color);
+  color: var(--white-color);
   letter-spacing: 0.01em;
   padding: 0.9rem 1rem;
   border-bottom: 1px solid var(--light-gray-color);
@@ -144,7 +184,7 @@
   border: none;
   border-radius: 6px;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-family: 'Poppins', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -399,6 +439,6 @@
 
   .table-action-btn {
     padding: 0.4rem 0.7rem;
-    font-size: 0.8125rem;
+    font-size: 1rem;
   }
 }

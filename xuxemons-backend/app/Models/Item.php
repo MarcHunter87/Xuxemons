@@ -16,4 +16,9 @@ class Item extends Model
         'status_effect_id',
         'icon_path',
     ];
+
+    public function statusEffect()
+    {
+        return $this->belongsTo(StatusEffect::class);
+    }
 }

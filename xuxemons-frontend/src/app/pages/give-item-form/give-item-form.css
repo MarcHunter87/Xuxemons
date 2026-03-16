@@ -5,6 +5,27 @@
   border: 1px solid var(--light-gray-color);
   border-radius: 12px;
   color: var(--dark-gray-color);
+  animation: slideInUp 0.4s ease-out;
+}
+
+.loading-state .spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  border: 3px solid var(--accent-border-alpha);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-state .loading-text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .message-section {
@@ -240,6 +261,19 @@
   color: var(--text-alt-color);
   margin: 0;
   line-height: 1.6;
+}
+
+.item-effect {
+  font-size: 1rem;
+  color: var(--text-alt-color);
+  margin: 0.5rem 0 0;
+  line-height: 1.5;
+}
+
+.item-effect-label {
+  font-weight: 600;
+  color: var(--accent-color);
+  margin-right: 0.35rem;
 }
 
 .form-actions {

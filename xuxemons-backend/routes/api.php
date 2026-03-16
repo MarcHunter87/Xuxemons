@@ -14,12 +14,14 @@ Route::get('/xuxemons', [XuxemonController::class, 'index']);
 Route::get('/items', [InventoryController::class, 'getAllItems']);
 
 Route::middleware('auth:api')->group(function () {
+    // Rutas de Admin
+    Route::get('/users', [AdminController::class, 'getAllUsers']);
+    Route::get('/users/{userId}/bag-status', [AdminController::class, 'checkBagStatus']);
+    Route::post('/users/{userId}/give-item', [AdminController::class, 'giveItemToUser']);
+    Route::post('/users/{userId}/award-random', [XuxemonController::class, 'awardRandomXuxemonToUser']);
+    
+    // Rutas de Profile
     Route::get('/user', [AuthController::class, 'me']);
-    Route::get('/xuxemons/collection-stats', [XuxemonController::class, 'collectionStats']);
-    Route::get('/xuxemons/me', [XuxemonController::class, 'myXuxemons']);
-    Route::post('/xuxemons/award-random', [XuxemonController::class, 'awardRandomXuxemon']);
-    Route::put('/xuxemons/{id}', [XuxemonController::class, 'update']);
-    Route::delete('/xuxemons/{id}', [XuxemonController::class, 'delete']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::put('/profile/personalinfo', [UserController::class, 'updatePersonalInfo']);
@@ -29,17 +31,18 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/profile/upload-icon', [UserController::class, 'uploadIcon']);
     Route::delete('/profile', [AuthController::class, 'deleteAccount']);
 
-    // Rutas de Inventario
+    // Rutas de Xuxemons
+    Route::get('/xuxemons/collection-stats', [XuxemonController::class, 'collectionStats']);
+    Route::get('/xuxemons/me', [XuxemonController::class, 'myXuxemons']);
+    Route::post('/xuxemons/award-random', [XuxemonController::class, 'awardRandomXuxemon']);
+    Route::put('/xuxemons/{id}', [XuxemonController::class, 'update']);
+    Route::delete('/xuxemons/{id}', [XuxemonController::class, 'delete']);
+
+    // Rutas de Inventory
     Route::get('/inventory', [InventoryController::class, 'getInventory']);
     Route::get('/inventory/item/{itemId}', [InventoryController::class, 'getInventoryItem']);
     Route::post('/inventory/item', [InventoryController::class, 'addItem']);
     Route::put('/inventory/item/{bagItemId}', [InventoryController::class, 'updateItem']);
     Route::delete('/inventory/item/{bagItemId}', [InventoryController::class, 'discardItem']);
     Route::post('/inventory/use', [InventoryController::class, 'useItem']);
-
-    // Rutas de Admin
-    Route::get('/users', [AdminController::class, 'getAllUsers']);
-    Route::get('/users/{userId}/bag-status', [AdminController::class, 'checkBagStatus']);
-    Route::post('/users/{userId}/give-item', [AdminController::class, 'giveItemToUser']);
-    Route::post('/users/{userId}/award-random', [XuxemonController::class, 'awardRandomXuxemonToUser']);
 });

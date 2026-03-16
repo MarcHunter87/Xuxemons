@@ -1,12 +1,11 @@
-<header class="navbar" role="banner">
+<header class="navbar" [class.navbar-dropdown-open]="menuOpen()" role="banner">
   <div class="navbar-inner">
-
-    <a class="brand" routerLink="/" aria-label="Xuxemons Home">
+    <a class="brand" routerLink="/" aria-label="Xuxemons Home" (click)="closeMenu()">
       <img src="/icons/logo%20v2.svg" alt="Xuxemons logo">
       <span class="brand-name">XUXEMONS</span>
     </a>
 
-    <nav aria-label="Main navigation">
+    <nav class="nav-desktop" aria-label="Main navigation">
       <ul class="nav-links" role="list">
         <li>
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
@@ -18,7 +17,7 @@
       </ul>
     </nav>
 
-    <div class="navbar-right">
+    <div class="navbar-right nav-desktop">
       @if (isAdmin) {
       <a routerLink="/admin" class="icon-btn" aria-label="Admin panel">
         <i class="bi bi-shield-fill-check"></i>
@@ -42,5 +41,63 @@
       </a>
     </div>
 
+    <button
+      type="button"
+      class="hamburger"
+      [attr.aria-label]="menuOpen() ? 'Close menu' : 'Open menu'"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="nav-mobile-panel"
+      (click)="toggleMenu()">
+      <span class="hamburger-icon" [class.open]="menuOpen()" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </button>
+  </div>
+
+  <div
+    id="nav-mobile-panel"
+    class="nav-mobile-panel"
+    [class.open]="menuOpen()"
+    [attr.aria-hidden]="!menuOpen()"
+    role="navigation"
+    aria-label="Main menu">
+    <div class="nav-mobile-row">
+      <nav aria-label="Main navigation">
+        <ul class="nav-links nav-links-mobile" role="list">
+          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Home</a></li>
+          <li><a routerLink="/battle" routerLinkActive="active" (click)="closeMenu()">Battle</a></li>
+          <li><a routerLink="/xuxedex" routerLinkActive="active" (click)="closeMenu()">Xuxedex</a></li>
+          <li><a routerLink="/inventory" routerLinkActive="active" (click)="closeMenu()">Inventory</a></li>
+          <li><a routerLink="/gacha" routerLinkActive="active" (click)="closeMenu()">Gacha</a></li>
+        </ul>
+      </nav>
+      <div class="nav-mobile-bottom">
+        <a routerLink="/profile" routerLinkActive="active" class="profile-link" aria-label="My Profile" (click)="closeMenu()">
+          <div class="avatar" aria-hidden="true">
+            @if (iconUrl && !iconLoadError) {
+            <img [src]="iconUrl" alt="Profile icon" (error)="iconLoadError = true">
+            } @else {
+            <i class="bi bi-person-fill"></i>
+            }
+          </div>
+          <div class="profile-info">
+            <span class="profile-name">{{ displayName }}</span>
+            <span class="profile-sub">My Profile</span>
+          </div>
+        </a>
+        <div class="nav-mobile-icons">
+          @if (isAdmin) {
+          <a routerLink="/admin" class="icon-btn" aria-label="Admin panel" (click)="closeMenu()">
+            <i class="bi bi-shield-fill-check"></i>
+          </a>
+          }
+          <a routerLink="/friends" class="icon-btn" aria-label="Friends" (click)="closeMenu()">
+            <i class="bi bi-people-fill"></i>
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </header>

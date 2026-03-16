@@ -61,6 +61,26 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return Array(Math.max(0, remaining)).fill(0);
     });
 
+    readonly inventorySlots = computed(() => {
+        const items = this.filteredItems();
+        const total = this.maxSlots;
+        const slots: { slotNumber: number; item?: InventoryItem }[] = [];
+        for (let i = 0; i < total; i++) {
+            slots.push({
+                slotNumber: i + 1,
+                item: items[i],
+            });
+        }
+        return slots;
+    });
+
+    getSlotAriaLabel(slot: { slotNumber: number; item?: InventoryItem }): string {
+        if (slot.item) {
+            return `Slot ${slot.slotNumber} - ${slot.item.quantity} ${slot.item.name}`;
+        }
+        return `Slot ${slot.slotNumber} - empty`;
+    }
+
     readonly usedCapacity = computed(() =>
         this.usedSlotsFromBackend() > 0 ? this.usedSlotsFromBackend() : this.items().length,
     );

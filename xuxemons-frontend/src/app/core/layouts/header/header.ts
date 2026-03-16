@@ -1,7 +1,17 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  OnInit,
+  OnDestroy,
+  inject,
+  signal,
+} from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { AuthService, User } from '../../services/auth';
 
 @Component({
@@ -13,12 +23,15 @@ import { AuthService, User } from '../../services/auth';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Header implements OnInit, OnDestroy {
+  readonly menuOpen = signal(false);
+
   user: User | null = null;
   isAdmin = false;
   iconLoadError = false;
   iconUrl: string | null = null;
   displayName = 'Unknown';
   private sub!: Subscription;
+  private router = inject(Router);
 
   constructor(
     private authService: AuthService,
@@ -36,10 +49,27 @@ export class Header implements OnInit, OnDestroy {
         : null;
       this.cdr.markForCheck();
     });
+
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(() => this.menuOpen.set(false));
   }
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
+  }
+
+  toggleMenu(): void {
+    this.menuOpen.update((v) => !v);
+  }
+
+  closeMenu(): void {
+    this.menuOpen.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.menuOpen.set(false);
   }
 
   logout(): void {

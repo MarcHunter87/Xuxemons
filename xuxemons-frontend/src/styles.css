@@ -117,6 +117,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: 16px;
 }
@@ -131,6 +132,8 @@ app-root {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
 }
 
 a:focus-visible,

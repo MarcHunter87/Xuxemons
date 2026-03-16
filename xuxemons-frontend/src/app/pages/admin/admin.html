@@ -5,6 +5,17 @@
   <p class="page-hero-desc">Manage players and distribute items.</p>
 </section>
 
+<div class="admin-nav-buttons">
+  <a [routerLink]="['/admin/xuxemons']" class="admin-nav-btn admin-nav-btn-xuxemons">
+    <i class="bi bi-dice-5" aria-hidden="true"></i>
+    All Xuxemons
+  </a>
+  <a [routerLink]="['/admin/items']" class="admin-nav-btn admin-nav-btn-items">
+    <i class="bi bi-gift" aria-hidden="true"></i>
+    All Items
+  </a>
+</div>
+
 @if (isLoading()) {
   <div class="loading-state">
     <div class="spinner"></div>

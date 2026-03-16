@@ -542,7 +542,8 @@ class InventoryController extends Controller
     public function getAllItems(): JsonResponse
     {
         try {
-            $items = Item::select('id', 'name', 'description', 'is_stackable', 'max_quantity', 'icon_path', 'effect_type', 'effect_value')
+            $items = Item::with('statusEffect')
+                ->select('id', 'name', 'description', 'effect_type', 'effect_value', 'is_stackable', 'max_quantity', 'status_effect_id', 'icon_path')
                 ->orderBy('name')
                 ->get();
 

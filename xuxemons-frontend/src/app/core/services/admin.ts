@@ -24,6 +24,10 @@ export class AdminService {
   getAllItems(): Observable<{ data: Item[] }> {
     return this.http.get<{ data: Item[] }>(`${this.apiUrl}/items`);
   }
+  
+  getAllXuxemons(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/xuxemons`);
+  }
 
   giveItemToUser(userId: string, itemId: number, quantity: number): Observable<any> {
     const encodedUserId = encodeURIComponent(userId);

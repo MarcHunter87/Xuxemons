@@ -8,6 +8,8 @@ import { Friends } from './pages/friends/friends';
 import { Profile } from './pages/profile/profile';
 import { EditProfile } from './pages/edit-profile/edit-profile';
 import { Admin } from './pages/admin/admin';
+import { AdminItems } from './pages/admin-items/admin-items';
+import { AdminXuxemons } from './pages/admin-xuxemons/admin-xuxemons';
 import { GiveItemForm } from './pages/give-item-form/give-item-form';
 import { authGuard } from './guard/auth-guard';
 import { adminGuard } from './guard/admin-guard';
@@ -64,6 +66,8 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard],
     children: [
       { path: '', component: Admin },
+      { path: 'items', component: AdminItems },
+      { path: 'xuxemons', component: AdminXuxemons },
       {
         path: 'give-item-form/:userId',
         component: GiveItemForm,

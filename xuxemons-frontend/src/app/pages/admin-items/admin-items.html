@@ -1,0 +1,70 @@
+<section class="page-hero" aria-labelledby="admin-items-title">
+  <h1 id="admin-items-title">
+    <span class="page-hero-title-black">All Items</span>
+  </h1>
+  <p class="page-hero-desc">Catalog of all items.</p>
+</section>
+
+@if (isLoading()) {
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p class="loading-text">Loading items...</p>
+  </div>
+}
+
+@if (errorMessage() && !isLoading()) {
+  <div class="error-state">
+    <p class="error-message" role="alert" aria-live="polite">
+      <i class="bi bi-exclamation-triangle"></i>
+      {{ errorMessage() }}
+    </p>
+  </div>
+}
+
+@if (hasContent()) {
+  <div class="players-section">
+    @if (items().length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-inbox" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+        <p>No items found</p>
+      </div>
+    }
+
+    @if (items().length > 0) {
+      <div class="players-table-wrapper">
+        <table class="players-table">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Icon</th>
+              <th scope="col">Name</th>
+              <th scope="col">Description</th>
+              <th scope="col">Effect type</th>
+              <th scope="col">Effect value</th>
+              <th scope="col" class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items(); track item.id) {
+              <tr>
+                <td><span class="cell-id">{{ item.id }}</span></td>
+                <td>
+                  @if (item.icon_path) {
+                    <img [src]="getIconUrl(item.icon_path)" [alt]="item.name" class="item-icon" />
+                  } @else {
+                    <span class="no-icon">—</span>
+                  }
+                </td>
+                <td><span class="cell-name">{{ item.name }}</span></td>
+                <td><span class="cell-desc">{{ item.description || '—' }}</span></td>
+                <td><span class="cell-text">{{ item.effect_type || '—' }}</span></td>
+                <td><span class="cell-num">{{ item.effect_value ?? '—' }}</span></td>
+                <td class="col-actions"><span class="cell-actions">—</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}
