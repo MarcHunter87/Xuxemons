@@ -178,7 +178,7 @@
     @if (form.get('is_stackable')?.value) {
       <label class="field field-full">
         <span>Max quantity</span>
-        <input id="admin-new-item-max_quantity" type="text" inputmode="numeric" pattern="[0-9]*" formControlName="max_quantity" placeholder="1" [attr.aria-invalid]="isFieldInvalid('max_quantity')" [attr.aria-describedby]="getErrorMessage('max_quantity') ? 'admin-new-item-max_quantity-error' : null" />
+        <input id="admin-new-item-max_quantity" type="number" min="1" max="5" step="1" inputmode="numeric" formControlName="max_quantity" placeholder="1" [attr.aria-invalid]="isFieldInvalid('max_quantity')" [attr.aria-describedby]="getErrorMessage('max_quantity') ? 'admin-new-item-max_quantity-error' : null" />
         @if (getErrorMessage('max_quantity')) {
           <p id="admin-new-item-max_quantity-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('max_quantity') }}</p>
         }
