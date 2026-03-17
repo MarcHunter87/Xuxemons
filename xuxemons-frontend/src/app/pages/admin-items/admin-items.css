@@ -15,6 +15,14 @@
   margin: 0;
 }
 
+.admin-actions {
+  margin: 0 0 var(--page-section-gap);
+}
+
+.admin-actions .btn-primary {
+  text-decoration: none;
+}
+
 .players-section {
   display: flex;
   flex-direction: column;
@@ -41,9 +49,17 @@
 .players-table th.col-actions,
 .players-table td.col-actions {
   white-space: nowrap;
-  text-align: center;
+  text-align: left;
 }
 
+.col-actions-btns {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.col-actions .btn.btn-edit.btn-sm,
 .col-actions .btn.btn-danger.btn-sm {
   gap: 0;
   width: 40px;
@@ -52,9 +68,27 @@
   min-height: 40px;
   padding: 0;
   border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
+.col-actions .btn.btn-edit.btn-sm {
+  background-color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+  color: var(--white-color);
+}
+
+.col-actions .btn.btn-edit.btn-sm:hover {
+  background-color: var(--accent-hover, color-mix(in srgb, var(--accent-color) 85%, black));
+  border-color: var(--accent-hover, color-mix(in srgb, var(--accent-color) 85%, black));
+  color: var(--white-color);
+}
+
+.col-actions .btn.btn-edit.btn-sm .bi,
 .col-actions .btn.btn-danger.btn-sm .bi {
+  font-size: 1.2rem;
   color: var(--white-color);
 }
 

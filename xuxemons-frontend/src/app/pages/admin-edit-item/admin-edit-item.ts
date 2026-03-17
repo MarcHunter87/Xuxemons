@@ -1,24 +1,26 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AdminDropdownOption } from '../../core/interfaces';
+import { switchMap } from 'rxjs/operators';
+import { AdminDropdownOption, Item } from '../../core/interfaces';
 import { AdminService } from '../../core/services/admin';
 import { AuthService } from '../../core/services/auth';
 
 @Component({
-  selector: 'app-admin-new-item',
+  selector: 'app-admin-edit-item',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './admin-new-item.html',
-  styleUrl: './admin-new-item.css',
+  templateUrl: './admin-edit-item.html',
+  styleUrl: './admin-edit-item.css',
 })
-export class AdminNewItem implements OnInit {
+export class AdminEditItem implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly adminService = inject(AdminService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly effectTypes = [
     'Heal',
@@ -39,12 +41,14 @@ export class AdminNewItem implements OnInit {
   readonly imagePreview = signal<string | null>(null);
   readonly selectedImage = signal<File | null>(null);
   readonly iconPathPreview = signal('items/new_item.png');
+  readonly isLoadingItem = signal(true);
+  readonly itemId = signal<number | null>(null);
 
   readonly form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(255)]],
     description: ['', [Validators.required]],
     effect_type: ['', [Validators.required]],
-    effect_value: ['', [Validators.required, Validators.pattern(/^\d+$/), Validators.min(0)]],
+    effect_value: [null as number | null, [Validators.min(0), Validators.pattern(/^\d*$/)]],
     is_stackable: [false, [Validators.required]],
     max_quantity: [{ value: '1', disabled: true }, [Validators.required, Validators.pattern(/^\d+$/), Validators.min(1), Validators.max(5)]],
     status_effect_id: [null as number | null],
@@ -52,23 +56,61 @@ export class AdminNewItem implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadMetadata();
     this.bindFormLogic();
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const id = idParam ? parseInt(idParam, 10) : NaN;
+    if (!Number.isFinite(id)) {
+      this.errorMessage.set('Invalid item ID.');
+      this.isLoadingItem.set(false);
+      return;
+    }
+    this.itemId.set(id);
+    this.isLoadingMeta.set(true);
+    this.isLoadingItem.set(true);
+    this.errorMessage.set(null);
+    this.adminService.getCreationMeta().pipe(
+      finalize(() => this.isLoadingMeta.set(false)),
+      switchMap((metaRes) => {
+        this.statusEffects.set(metaRes?.data?.status_effects ?? []);
+        return this.adminService.getItem(id);
+      }),
+      finalize(() => this.isLoadingItem.set(false)),
+    ).subscribe({
+      next: (res) => {
+        const item = res?.data;
+        if (!item) {
+          this.errorMessage.set('Item not found.');
+          return;
+        }
+        this.patchFormWithItem(item);
+      },
+      error: (err) => {
+        if (this.errorMessage()) return;
+        this.errorMessage.set(err?.error?.message ?? 'Could not load item.');
+      },
+    });
   }
 
-  private loadMetadata(): void {
-    this.isLoadingMeta.set(true);
-    this.errorMessage.set(null);
-    this.adminService.getCreationMeta()
-      .pipe(finalize(() => this.isLoadingMeta.set(false)))
-      .subscribe({
-        next: (res) => {
-          this.statusEffects.set(res?.data?.status_effects ?? []);
-        },
-        error: (err) => {
-          this.errorMessage.set(err?.error?.message ?? 'Could not load form metadata.');
-        },
-      });
+  private patchFormWithItem(item: Item): void {
+    this.form.patchValue({
+      name: item.name,
+      description: item.description ?? '',
+      effect_type: item.effect_type ?? '',
+      effect_value: item.effect_value ?? null,
+      is_stackable: item.is_stackable ?? false,
+      max_quantity: item.is_stackable ? String(item.max_quantity ?? 1) : '1',
+      status_effect_id: item.status_effect_id ?? null,
+      icon_path: item.icon_path ?? this.iconPathPreview(),
+    }, { emitEvent: false });
+    if (item.is_stackable) {
+      this.form.controls.max_quantity.enable({ emitEvent: false });
+    } else {
+      this.form.controls.max_quantity.disable({ emitEvent: false });
+    }
+    this.updateStatusEffectValidators();
+    this.iconPathPreview.set(item.icon_path ?? 'items/new_item.png');
+    const url = item.icon_path ? this.auth.getAssetUrl(item.icon_path.startsWith('/') ? item.icon_path : `/${item.icon_path}`) : null;
+    this.imagePreview.set(url);
   }
 
   private bindFormLogic(): void {
@@ -219,22 +261,20 @@ export class AdminNewItem implements OnInit {
       return;
     }
 
-    const icon = this.selectedImage();
-    if (!icon) {
-      this.errorMessage.set('Please choose an image for the item.');
+    const id = this.itemId();
+    if (id == null) {
+      this.errorMessage.set('Invalid item.');
       return;
     }
 
     const raw = this.form.getRawValue();
-    const fileName = this.buildFileName(raw.name ?? 'new_item', icon.name);
     const effectValue = raw.effect_value;
     const formData = new FormData();
     formData.append('name', (raw.name ?? '').trim());
     formData.append('description', (raw.description ?? '').trim());
     formData.append('effect_type', raw.effect_type ?? '');
-    const effectValueStr = String(effectValue ?? '').trim();
-    if (effectValueStr !== '') {
-      formData.append('effect_value', effectValueStr);
+    if (effectValue !== null && effectValue !== undefined && String(effectValue).trim() !== '') {
+      formData.append('effect_value', String(effectValue));
     }
     formData.append('is_stackable', raw.is_stackable ? '1' : '0');
     const maxQty = raw.is_stackable ? (Number(raw.max_quantity) || 1) : 1;
@@ -242,18 +282,22 @@ export class AdminNewItem implements OnInit {
     if (raw.status_effect_id) {
       formData.append('status_effect_id', String(raw.status_effect_id));
     }
-    formData.append('icon', icon, fileName);
+    const icon = this.selectedImage();
+    if (icon) {
+      const fileName = this.buildFileName(raw.name ?? 'new_item', icon.name);
+      formData.append('icon', icon, fileName);
+    }
 
     this.isSaving.set(true);
-    this.adminService.createItem(formData)
+    this.adminService.updateItem(id, formData)
       .pipe(finalize(() => this.isSaving.set(false)))
       .subscribe({
         next: () => {
-          this.successMessage.set('Item created successfully.');
+          this.successMessage.set('Item updated successfully.');
           this.router.navigateByUrl('/admin/items');
         },
         error: (err) => {
-          this.errorMessage.set(err?.error?.message ?? "Couldn't create item.");
+          this.errorMessage.set(err?.error?.message ?? "Couldn't update item.");
         },
       });
   }

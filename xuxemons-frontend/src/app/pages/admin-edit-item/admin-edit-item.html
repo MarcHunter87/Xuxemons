@@ -1,10 +1,18 @@
-<section class="page-hero" aria-labelledby="admin-new-item-title">
-  <h1 id="admin-new-item-title">
-    <span class="page-hero-title-black">New Item</span>
+<section class="page-hero" aria-labelledby="admin-edit-item-title">
+  <h1 id="admin-edit-item-title">
+    <span class="page-hero-title-black">Edit Item</span>
   </h1>
-  <p class="page-hero-desc">Create a new item.</p>
+  <p class="page-hero-desc">Edit the item.</p>
 </section>
 
+@if (isLoadingItem()) {
+  <div class="loading-state">
+    <span class="stat-card__spinner" aria-hidden="true"></span>
+    <p class="loading-text">Loading item...</p>
+  </div>
+}
+
+@if (!isLoadingItem()) {
 <section class="form-card">
   @if (errorMessage()) {
     <p id="admin-new-item-error" class="error-message" role="alert" aria-live="polite">{{ errorMessage() }}</p>
@@ -90,7 +98,7 @@
 
     <label class="field">
       <span>Effect value</span>
-      <input id="admin-new-item-effect_value" type="text" inputmode="numeric" pattern="[0-9]*" formControlName="effect_value" placeholder="0" [attr.aria-invalid]="isFieldInvalid('effect_value')" [attr.aria-describedby]="getErrorMessage('effect_value') ? 'admin-new-item-effect_value-error' : null" />
+      <input id="admin-new-item-effect_value" type="number" min="0" step="1" inputmode="numeric" formControlName="effect_value" [attr.aria-invalid]="isFieldInvalid('effect_value')" [attr.aria-describedby]="getErrorMessage('effect_value') ? 'admin-new-item-effect_value-error' : null" />
       @if (getErrorMessage('effect_value')) {
         <p id="admin-new-item-effect_value-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('effect_value') }}</p>
       }
@@ -199,9 +207,10 @@
         @if (isSaving()) {
           <span class="btn-loading-icon" aria-hidden="true"></span>
         } @else {
-          Create Item
+          Save changes
         }
       </button>
     </div>
   </form>
 </section>
+}

@@ -10,10 +10,14 @@ import { EditProfile } from './pages/edit-profile/edit-profile';
 import { Admin } from './pages/admin/admin';
 import { AdminItems } from './pages/admin-items/admin-items';
 import { AdminXuxemons } from './pages/admin-xuxemons/admin-xuxemons';
-import { GiveItemForm } from './pages/give-item-form/give-item-form';
+import { AdminNewItem } from './pages/admin-new-item/admin-new-item';
+import { AdminNewXuxemon } from './pages/admin-new-xuxemon/admin-new-xuxemon';
+import { AdminEditItem } from './pages/admin-edit-item/admin-edit-item';
+import { AdminEditXuxemon } from './pages/admin-edit-xuxemon/admin-edit-xuxemon';
+import { AdminGiveItem } from './pages/admin-give-item/admin-give-item';
 import { authGuard } from './guard/auth-guard';
 import { adminGuard } from './guard/admin-guard';
-import { giveItemFormGuard } from './guard/give-item-form.guard';
+import { adminGiveItemGuard } from './guard/admin-give-item.guard';
 import { Register } from './pages/auth/register/register';
 import { Login } from './pages/auth/login/login';
 
@@ -66,12 +70,26 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard],
     children: [
       { path: '', component: Admin },
-      { path: 'items', component: AdminItems },
-      { path: 'xuxemons', component: AdminXuxemons },
       {
-        path: 'give-item-form/:userId',
-        component: GiveItemForm,
-        canActivate: [giveItemFormGuard],
+        path: 'items',
+        children: [
+          { path: '', component: AdminItems },
+          { path: 'new-item', component: AdminNewItem },
+          { path: 'edit-item/:id', component: AdminEditItem },
+        ],
+      },
+      {
+        path: 'xuxemons',
+        children: [
+          { path: '', component: AdminXuxemons },
+          { path: 'new-xuxemon', component: AdminNewXuxemon },
+          { path: 'edit-xuxemon/:id', component: AdminEditXuxemon },
+        ],
+      },
+      {
+        path: 'give-item/:userId',
+        component: AdminGiveItem,
+        canActivate: [adminGiveItemGuard],
       },
     ],
   },

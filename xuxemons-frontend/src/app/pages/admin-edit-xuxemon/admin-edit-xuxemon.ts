@@ -1,24 +1,26 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { AdminDropdownOption } from '../../core/interfaces';
 import { AdminService } from '../../core/services/admin';
 import { AuthService } from '../../core/services/auth';
 
 @Component({
-  selector: 'app-admin-new-xuxemon',
+  selector: 'app-admin-edit-xuxemon',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './admin-new-xuxemon.html',
-  styleUrl: './admin-new-xuxemon.css',
+  templateUrl: './admin-edit-xuxemon.html',
+  styleUrl: './admin-edit-xuxemon.css',
 })
-export class AdminNewXuxemon implements OnInit {
+export class AdminEditXuxemon implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly adminService = inject(AdminService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly types = signal<AdminDropdownOption[]>([]);
   readonly attacks = signal<AdminDropdownOption[]>([]);
@@ -32,6 +34,8 @@ export class AdminNewXuxemon implements OnInit {
   readonly attack1Label = signal('Select type first');
   readonly typeDropdownOpen = signal(false);
   readonly attack2DropdownOpen = signal(false);
+  readonly isLoadingXuxemon = signal(true);
+  readonly xuxemonId = signal<number | null>(null);
 
   readonly form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(128)]],
@@ -45,31 +49,80 @@ export class AdminNewXuxemon implements OnInit {
     icon_path: [{ value: this.iconPathPreview(), disabled: true }],
   });
 
+  readonly canSubmit = computed(() =>
+    !this.isSaving() && !this.isLoadingMeta() && !this.isLoadingXuxemon() && this.form.valid
+  );
+
   readonly attack2Options = computed(() =>
     this.attacks().filter((a) => !['Power Attack', 'Speed Attack', 'Technical Attack'].includes(a.name))
   );
 
   ngOnInit(): void {
-    this.loadMetadata();
     this.form.controls.name.valueChanges.subscribe(() => this.refreshIconPathPreview());
     this.form.controls.type_id.valueChanges.subscribe(() => this.updateAttack1ForSelectedType());
+
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const id = idParam ? parseInt(idParam, 10) : NaN;
+    if (!Number.isFinite(id)) {
+      this.errorMessage.set('Invalid Xuxemon ID.');
+      this.isLoadingXuxemon.set(false);
+      return;
+    }
+    this.xuxemonId.set(id);
+    this.isLoadingMeta.set(true);
+    this.isLoadingXuxemon.set(true);
+    this.errorMessage.set(null);
+    this.adminService.getCreationMeta().pipe(
+      finalize(() => this.isLoadingMeta.set(false)),
+      switchMap((metaRes) => {
+        this.types.set(metaRes?.data?.types ?? []);
+        this.attacks.set(metaRes?.data?.attacks ?? []);
+        return this.adminService.getXuxemon(id);
+      }),
+      finalize(() => this.isLoadingXuxemon.set(false)),
+    ).subscribe({
+      next: (res) => {
+        const x = res?.data;
+        if (!x) {
+          this.errorMessage.set('Xuxemon not found.');
+          return;
+        }
+        this.patchFormWithXuxemon(x);
+      },
+      error: (err) => {
+        if (this.errorMessage()) return;
+        this.errorMessage.set(err?.error?.message ?? 'Could not load Xuxemon.');
+      },
+    });
   }
 
-  private loadMetadata(): void {
-    this.isLoadingMeta.set(true);
-    this.errorMessage.set(null);
-    this.adminService.getCreationMeta()
-      .pipe(finalize(() => this.isLoadingMeta.set(false)))
-      .subscribe({
-        next: (res) => {
-          this.types.set(res?.data?.types ?? []);
-          this.attacks.set(res?.data?.attacks ?? []);
-          this.updateAttack1ForSelectedType();
-        },
-        error: (err) => {
-          this.errorMessage.set(err?.error?.message ?? 'Could not load form metadata.');
-        },
-      });
+  private patchFormWithXuxemon(x: {
+    name: string;
+    description?: string | null;
+    type_id: number;
+    attack_1_id: number;
+    attack_2_id: number;
+    hp: number;
+    attack: number;
+    defense: number;
+    icon_path: string;
+    attack1?: { name: string } | null;
+  }): void {
+    this.form.patchValue({
+      name: x.name,
+      description: x.description ?? '',
+      type_id: x.type_id,
+      attack_1_id: x.attack_1_id,
+      attack_2_id: x.attack_2_id,
+      hp: x.hp ?? 1,
+      attack: x.attack ?? 1,
+      defense: x.defense ?? 1,
+      icon_path: x.icon_path ?? this.iconPathPreview(),
+    }, { emitEvent: false });
+    this.attack1Label.set(x.attack1?.name ?? 'Select type first');
+    this.iconPathPreview.set(x.icon_path ?? 'xuxemons/new_xuxemon.png');
+    const url = x.icon_path ? this.auth.getAssetUrl(x.icon_path.startsWith('/') ? x.icon_path : `/${x.icon_path}`) : null;
+    this.imagePreview.set(url);
   }
 
   onImageSelected(event: Event): void {
@@ -119,9 +172,9 @@ export class AdminNewXuxemon implements OnInit {
       return;
     }
 
-    const image = this.selectedImage();
-    if (!image) {
-      this.errorMessage.set('Please choose an image for the Xuxemon.');
+    const id = this.xuxemonId();
+    if (id == null) {
+      this.errorMessage.set('Invalid Xuxemon.');
       return;
     }
 
@@ -137,7 +190,6 @@ export class AdminNewXuxemon implements OnInit {
       return;
     }
 
-    const fileName = this.buildFileName(raw.name ?? 'new_xuxemon', image.name);
     const formData = new FormData();
     formData.append('name', (raw.name ?? '').trim());
     formData.append('description', (raw.description ?? '').trim());
@@ -147,14 +199,18 @@ export class AdminNewXuxemon implements OnInit {
     formData.append('hp', String(raw.hp ?? 1));
     formData.append('attack', String(raw.attack ?? 1));
     formData.append('defense', String(raw.defense ?? 1));
-    formData.append('icon', image, fileName);
+    const image = this.selectedImage();
+    if (image) {
+      const fileName = this.buildFileName(raw.name ?? 'new_xuxemon', image.name);
+      formData.append('icon', image, fileName);
+    }
 
     this.isSaving.set(true);
-    this.adminService.createXuxemon(formData)
+    this.adminService.updateXuxemon(id, formData)
       .pipe(finalize(() => this.isSaving.set(false)))
       .subscribe({
         next: () => {
-          this.successMessage.set('Xuxemon created successfully.');
+          this.successMessage.set('Xuxemon updated successfully.');
           this.router.navigateByUrl('/admin/xuxemons');
         },
         error: (err) => {
@@ -162,7 +218,7 @@ export class AdminNewXuxemon implements OnInit {
           this.errorMessage.set(
             this.getFirstBackendError(errors, ['name', 'type_id', 'attack_1_id', 'attack_2_id', 'hp', 'attack', 'defense', 'icon'])
             ?? err?.error?.message
-            ?? 'Could not create Xuxemon.'
+            ?? 'Could not update Xuxemon.'
           );
         },
       });

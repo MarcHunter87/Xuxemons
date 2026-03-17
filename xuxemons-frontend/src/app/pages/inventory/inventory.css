@@ -983,9 +983,11 @@ button.item-slot:focus {
 }
 
 .empty-icon {
-  font-size: 5rem;
-  opacity: 0.3;
-  line-height: 1;
+  width: 250px;
+  height: auto;
+  max-height: 340px;
+  object-fit: contain;
+  opacity: 0.85;
 }
 
 .empty-state h4 {

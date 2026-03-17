@@ -21,6 +21,13 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/users/{userId}/award-random', [XuxemonController::class, 'awardRandomXuxemonToUser']);
     Route::delete('/admin/items/{id}', [AdminController::class, 'deleteItemCascade']);
     Route::delete('/admin/xuxemons/{id}', [AdminController::class, 'deleteXuxemonCascade']);
+    Route::get('/admin/meta', [AdminController::class, 'getCreationMeta']); // Get types, attacks, status effects
+    Route::get('/admin/items/{id}', [AdminController::class, 'getItem']);
+    Route::get('/admin/xuxemons/{id}', [AdminController::class, 'getXuxemon']);
+    Route::post('/admin/items', [AdminController::class, 'createItem']);
+    Route::put('/admin/items/{id}', [AdminController::class, 'updateItem']);
+    Route::post('/admin/xuxemons', [AdminController::class, 'createXuxemon']);
+    Route::put('/admin/xuxemons/{id}', [AdminController::class, 'updateXuxemon']);
     
     // Rutas de Profile
     Route::get('/user', [AuthController::class, 'me']);

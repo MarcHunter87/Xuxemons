@@ -4,7 +4,7 @@ import { AdminService } from '../core/services/admin';
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
-export const giveItemFormGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
+export const adminGiveItemGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const adminService = inject(AdminService);
   const router = inject(Router);
 

@@ -5,6 +5,10 @@
   <p class="page-hero-desc">Catalog of all Xuxemons.</p>
 </section>
 
+<div class="admin-actions">
+  <a routerLink="/admin/xuxemons/new-xuxemon" class="btn-primary">New Xuxemon</a>
+</div>
+
 @if (isLoading()) {
   <div class="loading-state">
     <div class="spinner"></div>
@@ -70,13 +74,21 @@
                 <td><span class="cell-text">{{ x.attack1_name }}</span></td>
                 <td><span class="cell-text">{{ x.attack2_name }}</span></td>
                 <td class="col-actions">
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    (click)="onDeleteXuxemon(x)"
-                    [attr.aria-label]="'Delete Xuxemon ' + x.name">
-                    <i class="bi bi-trash" aria-hidden="true"></i>
-                  </button>
+                  <div class="col-actions-btns">
+                    <a
+                      [routerLink]="['/admin/xuxemons/edit-xuxemon', x.id]"
+                      class="btn btn-edit btn-sm"
+                      [attr.aria-label]="'Edit Xuxemon ' + x.name">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </a>
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm"
+                      (click)="onDeleteXuxemon(x)"
+                      [attr.aria-label]="'Delete Xuxemon ' + x.name">
+                      <i class="bi bi-trash" aria-hidden="true"></i>
+                    </button>
+                  </div>
                 </td>
               </tr>
             }

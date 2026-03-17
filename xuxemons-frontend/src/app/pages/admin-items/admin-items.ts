@@ -35,7 +35,8 @@ export class AdminItems implements OnInit {
       .subscribe({
         next: (res) => {
           const data = res?.data;
-          this.items.set(Array.isArray(data) ? data : []);
+          const list = Array.isArray(data) ? [...data].sort((a, b) => a.id - b.id) : [];
+          this.items.set(list);
           if (!Array.isArray(data)) {
             this.errorMessage.set('Unexpected response while loading items');
           }
