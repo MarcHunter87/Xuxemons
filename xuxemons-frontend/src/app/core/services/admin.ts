@@ -2,7 +2,7 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
-import { AdminUser, BagStatus, Item } from '../interfaces';
+import { AdminCreationMeta, AdminUser, BagStatus, Item } from '../interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -27,6 +27,42 @@ export class AdminService {
   
   getAllXuxemons(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/xuxemons`);
+  }
+
+  getCreationMeta(): Observable<{ data: AdminCreationMeta }> {
+    return this.http.get<{ data: AdminCreationMeta }>(`${this.apiUrl}/admin/meta`);
+  }
+
+  deleteItem(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/admin/items/${id}`);
+  }
+
+  deleteXuxemon(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/admin/xuxemons/${id}`);
+  }
+
+  getItem(id: number): Observable<{ data: Item }> {
+    return this.http.get<{ data: Item }>(`${this.apiUrl}/admin/items/${id}`);
+  }
+
+  getXuxemon(id: number): Observable<{ data: any }> {
+    return this.http.get<{ data: any }>(`${this.apiUrl}/admin/xuxemons/${id}`);
+  }
+
+  createItem(formData: FormData): Observable<{ message: string; data: Item }> {
+    return this.http.post<{ message: string; data: Item }>(`${this.apiUrl}/admin/items`, formData);
+  }
+
+  updateItem(id: number, formData: FormData): Observable<{ message: string; data: Item }> {
+    return this.http.put<{ message: string; data: Item }>(`${this.apiUrl}/admin/items/${id}`, formData);
+  }
+
+  createXuxemon(formData: FormData): Observable<{ message: string; data: any }> {
+    return this.http.post<{ message: string; data: any }>(`${this.apiUrl}/admin/xuxemons`, formData);
+  }
+
+  updateXuxemon(id: number, formData: FormData): Observable<{ message: string; data: any }> {
+    return this.http.put<{ message: string; data: any }>(`${this.apiUrl}/admin/xuxemons/${id}`, formData);
   }
 
   giveItemToUser(userId: string, itemId: number, quantity: number): Observable<any> {

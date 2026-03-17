@@ -75,4 +75,16 @@ export class AdminXuxemons implements OnInit {
       default: return 'var(--dark-gray-color)';
     }
   }
+
+  onDeleteXuxemon(row: XuxemonRow): void {
+    if (!confirm(`Delete Xuxemon "${row.name}"? This action cannot be undone.`)) return;
+    this.adminService.deleteXuxemon(row.id).subscribe({
+      next: () => {
+        this.xuxemons.set(this.xuxemons().filter((x) => x.id !== row.id));
+      },
+      error: (err) => {
+        this.errorMessage.set(err?.error?.message ?? 'Failed to delete Xuxemon');
+      },
+    });
+  }
 }

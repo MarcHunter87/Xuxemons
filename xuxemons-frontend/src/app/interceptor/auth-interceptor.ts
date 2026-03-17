@@ -6,9 +6,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = authService.getToken();
 
-  console.log('Interceptor - getToken() returned:', token ? `"${token.substring(0, 20)}..."` : 'null');
-  console.log('Interceptor - URL:', req.url);
-
   if (token) {
     if (typeof ngDevMode === 'undefined' || ngDevMode) {
       console.log('JWT present in request:', req.method, req.url);

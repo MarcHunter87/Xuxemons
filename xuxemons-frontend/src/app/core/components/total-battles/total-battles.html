@@ -1,11 +1,11 @@
 <div class="stat-card" [attr.aria-busy]="!statsReady()">
   <span class="stat-card__label">Total Battles</span>
-  <p class="stat-card__value">
+  <h2 class="stat-card__value">
     @if (!statsReady()) {
       <span class="stat-card__spinner" aria-hidden="true"></span>
       <span class="visually-hidden">Cargando</span>
     } @else if (user$ | async; as user) {
       {{ user.total_battles ?? 0 }}
     }
-  </p>
+  </h2>
 </div>

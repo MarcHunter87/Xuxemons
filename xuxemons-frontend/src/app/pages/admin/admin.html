@@ -82,7 +82,7 @@
                   <button
                     class="table-action-btn give-item-btn"
                     [disabled]="!canGiveItems(user.id)"
-                    [routerLink]="['/admin/give-item-form', getEncodedUserId(user.id)]"
+                    [routerLink]="['/admin/give-item', getEncodedUserId(user.id)]"
                     [title]="!canGiveItems(user.id) ? 'Bag is full or still loading' : 'Give item to player'"
                     [attr.aria-label]="'Give item to ' + getUserFullName(user)"
                   >
@@ -156,7 +156,7 @@
         }
       </div>
       <div class="award-modal-actions">
-        <button type="button" (click)="closeAwardModal()" class="btn-secondary">Close</button>
+        <button type="button" (click)="closeAwardModal()" class="btn btn-primary">Close</button>
       </div>
     </div>
   </div>

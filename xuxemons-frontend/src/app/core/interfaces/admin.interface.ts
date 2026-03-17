@@ -11,3 +11,15 @@ export interface BagStatus {
   used_slots: number;
   available_slots: number;
 }
+
+export interface AdminDropdownOption {
+  id: number;
+  name: string;
+  icon_path?: string;
+}
+
+export interface AdminCreationMeta {
+  types: AdminDropdownOption[];
+  attacks: AdminDropdownOption[];
+  status_effects: AdminDropdownOption[];
+}

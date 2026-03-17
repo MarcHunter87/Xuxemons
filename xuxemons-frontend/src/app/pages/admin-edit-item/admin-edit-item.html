@@ -1,0 +1,216 @@
+<section class="page-hero" aria-labelledby="admin-edit-item-title">
+  <h1 id="admin-edit-item-title">
+    <span class="page-hero-title-black">Edit Item</span>
+  </h1>
+  <p class="page-hero-desc">Edit the item.</p>
+</section>
+
+@if (isLoadingItem()) {
+  <div class="loading-state">
+    <span class="stat-card__spinner" aria-hidden="true"></span>
+    <p class="loading-text">Loading item...</p>
+  </div>
+}
+
+@if (!isLoadingItem()) {
+<section class="form-card">
+  @if (errorMessage()) {
+    <p id="admin-new-item-error" class="error-message" role="alert" aria-live="polite">{{ errorMessage() }}</p>
+  }
+  @if (successMessage()) {
+    <p id="admin-new-item-success" class="success-message" role="status" aria-live="polite">{{ successMessage() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+    <label class="field">
+      <span>Name</span>
+      <input id="admin-new-item-name" type="text" formControlName="name" maxlength="255" [attr.aria-invalid]="isFieldInvalid('name')" [attr.aria-describedby]="getErrorMessage('name') ? 'admin-new-item-name-error' : null" />
+      @if (getErrorMessage('name')) {
+        <p id="admin-new-item-name-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('name') }}</p>
+      }
+    </label>
+
+    <label class="field field-full">
+      <span>Description</span>
+      <textarea id="admin-new-item-description" rows="4" formControlName="description" [attr.aria-invalid]="isFieldInvalid('description')" [attr.aria-describedby]="getErrorMessage('description') ? 'admin-new-item-description-error' : null"></textarea>
+      @if (getErrorMessage('description')) {
+        <p id="admin-new-item-description-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('description') }}</p>
+      }
+    </label>
+
+    <div class="field">
+      <span>Effect type</span>
+      <div class="custom-select-wrapper" (focusout)="onEffectTypeFocusOut($event)">
+          <button
+            type="button"
+            id="admin-new-item-effect_type"
+            class="custom-select-trigger"
+            [class.input-error]="isFieldInvalid('effect_type')"
+            [attr.aria-expanded]="effectTypeDropdownOpen()"
+            [attr.aria-haspopup]="'listbox'"
+            [attr.aria-describedby]="getErrorMessage('effect_type') ? 'admin-new-item-effect_type-error' : null"
+            [attr.aria-invalid]="isFieldInvalid('effect_type')"
+            (click)="effectTypeDropdownOpen.set(!effectTypeDropdownOpen())"
+          >
+            <span class="custom-select-trigger-label">
+              @if (getSelectedEffectType()) {
+                <span>{{ getSelectedEffectType() }}</span>
+              } @else {
+                <span class="custom-select-placeholder">Select effect type</span>
+              }
+            </span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+        @if (effectTypeDropdownOpen()) {
+          <div class="custom-select-backdrop" (click)="closeEffectTypeDropdown()" aria-hidden="true"></div>
+          <ul class="custom-select-dropdown" role="listbox" aria-labelledby="admin-new-item-effect_type">
+            <li
+              role="option"
+              tabindex="0"
+              [attr.aria-selected]="!getSelectedEffectType()"
+              class="custom-select-option"
+              (click)="selectEffectType('')"
+              (keydown.enter)="selectEffectType(''); $event.preventDefault()"
+              (keydown.space)="selectEffectType(''); $event.preventDefault()"
+            >
+              <span class="custom-select-placeholder">Select effect type</span>
+            </li>
+            @for (effectType of effectTypes; track effectType) {
+              <li
+                role="option"
+                tabindex="0"
+                [attr.aria-selected]="getSelectedEffectType() === effectType"
+                class="custom-select-option"
+                (click)="selectEffectType(effectType)"
+                (keydown.enter)="selectEffectType(effectType); $event.preventDefault()"
+                (keydown.space)="selectEffectType(effectType); $event.preventDefault()"
+              >
+                <span>{{ effectType }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+      @if (getErrorMessage('effect_type')) {
+        <p id="admin-new-item-effect_type-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('effect_type') }}</p>
+      }
+    </div>
+
+    <label class="field">
+      <span>Effect value</span>
+      <input id="admin-new-item-effect_value" type="number" min="0" step="1" inputmode="numeric" formControlName="effect_value" [attr.aria-invalid]="isFieldInvalid('effect_value')" [attr.aria-describedby]="getErrorMessage('effect_value') ? 'admin-new-item-effect_value-error' : null" />
+      @if (getErrorMessage('effect_value')) {
+        <p id="admin-new-item-effect_value-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('effect_value') }}</p>
+      }
+    </label>
+
+    @if (form.get('effect_type')?.value === 'Apply Status Effects') {
+      <div class="field">
+        <span class="field-label">Status effect</span>
+        <div class="custom-select-wrapper" (focusout)="onStatusEffectFocusOut($event)">
+          <button
+            type="button"
+            id="admin-new-item-status_effect_id"
+            class="custom-select-trigger"
+            [class.input-error]="isFieldInvalid('status_effect_id')"
+            [attr.aria-expanded]="statusEffectDropdownOpen()"
+            [attr.aria-haspopup]="'listbox'"
+            [attr.aria-describedby]="getErrorMessage('status_effect_id') ? 'admin-new-item-status_effect_id-error' : null"
+            [attr.aria-invalid]="isFieldInvalid('status_effect_id')"
+            (click)="statusEffectDropdownOpen.set(!statusEffectDropdownOpen())"
+          >
+            <span class="custom-select-trigger-label">
+              @if (getSelectedStatusEffect(); as selected) {
+                @if (getStatusEffectIconUrl(selected.icon_path); as iconUrl) {
+                  <img [src]="iconUrl" [alt]="selected.name" class="custom-select-option-icon" width="22" height="22" />
+                }
+                <span>{{ selected.name }}</span>
+              } @else {
+                <span class="custom-select-placeholder">Select status effect</span>
+              }
+            </span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </button>
+          @if (statusEffectDropdownOpen()) {
+            <div class="custom-select-backdrop" (click)="closeStatusEffectDropdown()" aria-hidden="true"></div>
+            <ul class="custom-select-dropdown" role="listbox" aria-labelledby="admin-new-item-status_effect_id">
+              <li
+                role="option"
+                tabindex="0"
+                [attr.aria-selected]="!form.get('status_effect_id')?.value"
+                class="custom-select-option"
+                (click)="selectStatusEffect(null)"
+                (keydown.enter)="selectStatusEffect(null); $event.preventDefault()"
+                (keydown.space)="selectStatusEffect(null); $event.preventDefault()"
+              >
+                <span class="custom-select-placeholder">Select status effect</span>
+              </li>
+              @for (effect of statusEffects(); track effect.id) {
+                <li
+                  role="option"
+                  tabindex="0"
+                  [attr.aria-selected]="form.get('status_effect_id')?.value === effect.id"
+                  class="custom-select-option"
+                  (click)="selectStatusEffect(effect)"
+                  (keydown.enter)="selectStatusEffect(effect); $event.preventDefault()"
+                  (keydown.space)="selectStatusEffect(effect); $event.preventDefault()"
+                >
+                @if (getStatusEffectIconUrl(effect.icon_path); as iconUrl) {
+                  <img [src]="iconUrl" [alt]="effect.name" class="custom-select-option-icon" width="22" height="22" />
+                }
+                  <span>{{ effect.name }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+        @if (getErrorMessage('status_effect_id')) {
+          <p id="admin-new-item-status_effect_id-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('status_effect_id') }}</p>
+        }
+      </div>
+    }
+
+    <label class="field field-inline field-full">
+      <input type="checkbox" formControlName="is_stackable" />
+      <span>Stackable</span>
+    </label>
+
+    @if (form.get('is_stackable')?.value) {
+      <label class="field field-full">
+        <span>Max quantity</span>
+        <input id="admin-new-item-max_quantity" type="text" inputmode="numeric" pattern="[0-9]*" formControlName="max_quantity" placeholder="1" [attr.aria-invalid]="isFieldInvalid('max_quantity')" [attr.aria-describedby]="getErrorMessage('max_quantity') ? 'admin-new-item-max_quantity-error' : null" />
+        @if (getErrorMessage('max_quantity')) {
+          <p id="admin-new-item-max_quantity-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('max_quantity') }}</p>
+        }
+      </label>
+    }
+
+    <label class="field field-full field-hidden" aria-hidden="true">
+      <span>Icon path (auto)</span>
+      <input type="text" formControlName="icon_path" readonly tabindex="-1" />
+    </label>
+
+    <label class="field field-full">
+      <span>Icon image</span>
+      <input type="file" accept="image/*" (change)="onImageSelected($event)" />
+    </label>
+
+    @if (imagePreview()) {
+      <div class="image-preview">
+        <img [src]="imagePreview()" alt="Item icon preview" />
+      </div>
+    }
+
+    <div class="actions field-full">
+      <button type="button" class="btn-secondary" (click)="goBack()">Cancel</button>
+      <button type="submit" class="btn-primary">
+        @if (isSaving()) {
+          <span class="btn-loading-icon" aria-hidden="true"></span>
+        } @else {
+          Save changes
+        }
+      </button>
+    </div>
+  </form>
+</section>
+}
