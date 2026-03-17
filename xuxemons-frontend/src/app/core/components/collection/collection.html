@@ -1,11 +1,11 @@
 <div class="stat-card" [attr.aria-busy]="loading() || loadError()">
   <span class="stat-card__label">Collection</span>
-  <p class="stat-card__value">
+  <h2 class="stat-card__value">
     @if (loading() || loadError()) {
       <span class="stat-card__spinner" aria-hidden="true"></span>
       <span class="visually-hidden">Cargando</span>
     } @else {
       {{ acquired() }}/{{ total() }}
     }
-  </p>
+  </h2>
 </div>

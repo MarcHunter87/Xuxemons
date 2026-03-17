@@ -8,13 +8,13 @@ import { AuthService } from '../../core/services/auth';
 import { Item } from '../../core/interfaces';
 
 @Component({
-  selector: 'app-give-item-form',
+  selector: 'app-admin-give-item',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './give-item-form.html',
-  styleUrl: './give-item-form.css',
+  templateUrl: './admin-give-item.html',
+  styleUrl: './admin-give-item.css',
 })
-export class GiveItemForm implements OnInit {
+export class AdminGiveItem implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly adminService = inject(AdminService);
   private readonly authService = inject(AuthService);

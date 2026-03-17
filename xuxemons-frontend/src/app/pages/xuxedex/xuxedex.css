@@ -39,28 +39,28 @@
   }
 }
 .user-xuxemons-section {
-  margin-bottom: 3rem;
+  margin-bottom: var(--page-section-gap);
 }
 
 .xuxedex-section {
-  margin-bottom: 3rem;
+  margin-bottom: var(--page-section-gap);
 }
 
 .xuxedex-header {
-  padding: 0 0 1.5rem;
+  padding: 0 0 var(--page-header-bottom-gap);
 }
 
 .xuxedex-title {
-  margin: 0;
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 700;
+  margin: 0 0 var(--page-header-title-desc-gap);
+  font-size: 44px;
+  font-weight: 800;
   color: var(--black-color);
 }
 
 .xuxedex-subtitle {
-  margin: 0.5rem 0 0;
+  margin: 0;
   font-size: 1rem;
-  color: var(--text-muted);
+  color: var(--black-color);
 }
 
 .no-results {
@@ -73,8 +73,8 @@
   justify-content: center;
   align-items: center;
   gap: 1.5rem;
-  margin-top: 3rem;
-  padding: 2rem 0;
+  margin-top: var(--page-section-gap);
+  padding: var(--page-section-gap) 0;
   border-top: 2px solid var(--light-gray-color);
 }
 
@@ -103,7 +103,7 @@
 
 .btn-pagination:active:not(:disabled) {
   background-color: var(--accent-on-light);
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
 }
 
 .btn-pagination:disabled {

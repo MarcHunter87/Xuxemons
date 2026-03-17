@@ -1,5 +1,5 @@
-<section class="page-hero" aria-labelledby="give-item-title">
-  <h1 id="give-item-title">
+<section class="page-hero" aria-labelledby="admin-give-item-title">
+  <h1 id="admin-give-item-title">
     <span class="page-hero-title-black">Give Item to Player</span>
   </h1>
   <p class="page-hero-desc">Select an item and quantity to distribute.</p>
@@ -15,13 +15,13 @@
 @if (errorMessage() || successMessage()) {
   <div class="message-section" aria-live="polite" aria-atomic="true">
     @if (errorMessage()) {
-      <div id="give-item-form-error" class="error-message" role="alert">
+      <div id="admin-give-item-error" class="error-message" role="alert">
         <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
         {{ errorMessage() }}
       </div>
     }
     @if (successMessage()) {
-      <div id="give-item-form-success" class="success-message" role="alert">
+      <div id="admin-give-item-success" class="success-message" role="alert">
         <i class="bi bi-check-circle" aria-hidden="true"></i>
         {{ successMessage() }}
       </div>
@@ -30,18 +30,18 @@
 }
 
 @if (!isLoading()) {
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="give-item-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="admin-give-item">
   <div class="form-group">
-    <label for="give-item-item-trigger" class="label">Select Item</label>
+    <label for="admin-give-item-item-trigger" class="label">Select Item</label>
     <div class="item-select-wrapper">
       <button
         type="button"
-        id="give-item-item-trigger"
+        id="admin-give-item-item-trigger"
         class="item-select-trigger"
         [class.input-error]="isFieldInvalid('itemId')"
         [attr.aria-expanded]="dropdownOpen()"
         [attr.aria-haspopup]="'listbox'"
-        [attr.aria-describedby]="isFieldInvalid('itemId') ? 'give-item-itemId-error' : null"
+        [attr.aria-describedby]="isFieldInvalid('itemId') ? 'admin-give-item-itemId-error' : null"
         [attr.aria-invalid]="isFieldInvalid('itemId')"
         (click)="dropdownOpen.set(!dropdownOpen())"
       >
@@ -54,7 +54,7 @@
       </button>
       @if (dropdownOpen()) {
         <div class="item-select-backdrop" (click)="closeDropdown()" aria-hidden="true"></div>
-        <ul class="item-select-dropdown" role="listbox" aria-labelledby="give-item-item-trigger">
+        <ul class="item-select-dropdown" role="listbox" aria-labelledby="admin-give-item-item-trigger">
           @for (item of items(); track item.id) {
             <li
               role="option"
@@ -70,7 +70,7 @@
       }
     </div>
     @if (isFieldInvalid('itemId')) {
-      <span id="give-item-itemId-error" class="error-text" aria-live="polite" role="alert">
+      <span id="admin-give-item-itemId-error" class="error-text" aria-live="polite" role="alert">
         {{ getErrorMessage('itemId') }}
       </span>
     }
@@ -95,19 +95,19 @@
   }
 
   <div class="form-group">
-    <label for="give-item-quantity" class="label">Quantity</label>
+    <label for="admin-give-item-quantity" class="label">Quantity</label>
       <input
         type="number"
-        id="give-item-quantity"
+        id="admin-give-item-quantity"
         formControlName="quantity"
         class="form-control"
         min="1"
         [class.input-error]="isFieldInvalid('quantity')"
-        [attr.aria-describedby]="isFieldInvalid('quantity') ? 'give-item-quantity-error' : null"
+        [attr.aria-describedby]="isFieldInvalid('quantity') ? 'admin-give-item-quantity-error' : null"
         [attr.aria-invalid]="isFieldInvalid('quantity')"
       />
       @if (isFieldInvalid('quantity')) {
-        <span id="give-item-quantity-error" class="error-text" aria-live="polite" role="alert">
+        <span id="admin-give-item-quantity-error" class="error-text" aria-live="polite" role="alert">
           {{ getErrorMessage('quantity') }}
         </span>
       }

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GiveItemForm } from './give-item-form';
+import { AdminNewItem } from './admin-new-item';
 
-describe('GiveItemForm', () => {
-  let component: GiveItemForm;
-  let fixture: ComponentFixture<GiveItemForm>;
+describe('AdminNewItem', () => {
+  let component: AdminNewItem;
+  let fixture: ComponentFixture<AdminNewItem>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GiveItemForm]
+      imports: [AdminNewItem]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(GiveItemForm);
+    fixture = TestBed.createComponent(AdminNewItem);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

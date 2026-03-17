@@ -4,14 +4,14 @@
     width: 100%;
     max-width: var(--layout-max-width);
     margin: 0 auto;
-    padding: 0 0 2rem;
+    padding: 0 0 var(--page-section-gap);
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--text-alt-color);
 }
 
 .gacha-container .page-hero {
     width: 100%;
-    margin-bottom: 32px;
+    margin-bottom: 0;
 }
 
 .roulette-box {
@@ -22,7 +22,8 @@
     position: relative;
     overflow: hidden;
     background: var(--primary-color);
-    margin: 2rem 0;
+    margin-top: 0;
+    margin-bottom: var(--page-section-gap);
     box-shadow: 0 8px 18px var(--shadow-card);
 }
 
@@ -85,8 +86,12 @@
     font-weight: 800;
     border-radius: 12px;
     min-height: 52px;
-    margin: 0 auto;
+    margin: 0 auto var(--page-section-gap);
     display: block;
+}
+
+.spin-button:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
 }
 
 .spin-button:disabled {
@@ -163,12 +168,13 @@
 }
 
 .recoger-button {
-    margin-top: 3rem;
+    margin-top: var(--page-section-gap);
     min-width: 250px;
 }
 
 .recent-xuxemons-section {
-    margin-top: 2.5rem;
+    margin-top: 0;
+    margin-bottom: var(--page-section-gap);
     padding: 1.5rem;
     background: var(--primary-color);
     border-radius: 16px;
@@ -250,9 +256,10 @@
 
 .modal-content {
     background: linear-gradient(180deg, var(--white-color) 0%, var(--primary-color) 100%);
-    padding: 2rem 2.5rem;
+    padding: var(--page-section-gap) 2.5rem var(--page-section-gap);
     text-align: center;
-    max-width: 500px;
+    width: min(520px, 92vw);
+    max-width: 520px;
     border-radius: 20px;
     border: 2px solid var(--light-gray-color);
     box-shadow: 0 20px 40px var(--shadow-color);
@@ -263,14 +270,14 @@
     font-size: 2rem;
     font-weight: 900;
     color: var(--text-alt-color);
-    margin: 0 0 1.5rem;
+    margin: 0 0 var(--page-section-gap);
 }
 
 .winner-display {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: var(--page-section-gap);
 }
 
 .image-wrapper {
@@ -328,9 +335,9 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(92px, 1fr));
     gap: 0.75rem;
-    margin-top: 0.75rem;
     width: 100%;
     max-width: 360px;
+    padding-top: 0;
 }
 
 .winner-stats .stat {
@@ -392,8 +399,8 @@
 .modal-actions {
     display: flex;
     gap: 0.75rem;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
+    margin-top: var(--page-section-gap);
+    padding-top: 0;
     justify-content: flex-end;
 }
 
@@ -425,9 +432,14 @@
     transform: translateY(-2px);
 }
 
+.modal-actions .btn-primary:active:not(:disabled),
+.modal-actions .btn-secondary:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+}
+
 @media (max-width: 640px) {
     .modal-content {
-        padding: 1.5rem;
+        padding: var(--page-section-gap) 1.5rem;
         margin: 1rem;
     }
 

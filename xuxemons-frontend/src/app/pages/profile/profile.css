@@ -37,14 +37,15 @@
 }
 
 .profile-content .btn-danger {
-  margin-top: 2.5rem;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .profile-content {
   position: relative;
   max-width: var(--layout-max-width);
   margin: 0 auto;
-  padding: 0 2rem 2.5rem;
+  padding: 0 2rem var(--page-section-gap);
   width: 100%;
   box-sizing: border-box;
 }
@@ -53,7 +54,7 @@
   display: flex;
   align-items: flex-end;
   gap: 1.5rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: var(--page-section-gap);
 }
 
 .profile-avatar-wrap {
@@ -91,7 +92,8 @@
   font-size: 32px;
   font-weight: 700;
   color: var(--black-color);
-  margin: 0 0 0.25rem 0;
+  margin-top: 10px;
+  margin-bottom: 0;
 }
 
 .profile-meta {
@@ -102,34 +104,35 @@
 
 .profile-section {
   margin-top: 0;
-  margin-bottom: 2.5rem;
+  margin-bottom: 0;
 }
 
 .profile-section-title {
   font-size: 28px;
   font-weight: 700;
   color: var(--black-color);
-  margin: 0 0 1.25rem 0;
+  margin: 12px 0 0;
 }
 
 .profile-section-label {
   font-size: 16px;
   color: var(--dark-gray-color);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--page-section-gap);
 }
 
 .profile-card {
   background-color: var(--white-color);
   border-radius: 8px;
   box-shadow: 0 4px 8px var(--shadow-color);
-  padding: 1.25rem;
+  padding: var(--page-section-gap) 1.25rem;
 }
 
 .profile-stats-row {
   display: flex;
   align-items: stretch;
   gap: 1rem;
-  margin-bottom: 2.5rem;
+  margin-top: 12px;
+  margin-bottom: var(--page-section-gap);
   width: 100%;
 }
 
@@ -201,7 +204,7 @@
   grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
   max-width: 1800px;
   margin: auto;
-  gap: 25px;
-  padding: 35px;
+  gap: var(--page-section-gap);
+  padding: var(--page-section-gap);
   justify-items: center;
 }

@@ -2,13 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdquiredXuxemon;
+use App\Models\Attack;
 use App\Models\Bag;
 use App\Models\BagItem;
 use App\Models\Item;
+use App\Models\StatusEffect;
+use App\Models\Type;
 use App\Models\User;
+use App\Models\Xuxemon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class AdminController extends Controller
@@ -204,6 +212,357 @@ class AdminController extends Controller
         }
     }
 
+    public function getCreationMeta(): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $types = Type::query()->select('id', 'name', 'icon_path')->orderBy('name')->get();
+            $attacks = Attack::query()
+                ->with('statusEffect:id,name,icon_path')
+                ->get()
+                ->sortBy(fn (Attack $a) => ($a->statusEffect?->name ?? "\u{FFFF}") . ' ' . $a->name)
+                ->values()
+                ->map(fn (Attack $a) => [
+                    'id' => $a->id,
+                    'name' => $a->name,
+                    'icon_path' => $a->statusEffect?->icon_path,
+                ]);
+            $statusEffects = StatusEffect::query()->select('id', 'name', 'icon_path')->orderBy('name')->get();
+
+            return response()->json([
+                'data' => [
+                    'types' => $types,
+                    'attacks' => $attacks,
+                    'status_effects' => $statusEffects,
+                ],
+            ]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not retrieve creation metadata',
+                'errors' => [
+                    'server' => [$e->getMessage()],
+                ],
+            ], 500);
+        }
+    }
+
+    public function createItem(Request $request): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:items,name',
+                'description' => 'required|string',
+                'effect_type' => 'required|in:Heal,DMG Up,Defense Up,Revive,Remove Status Effects,Apply Status Effects,Evolve',
+                'effect_value' => 'nullable|integer|min:0',
+                'is_stackable' => 'required|boolean',
+                'max_quantity' => 'required|integer|min:1|max:5',
+                'status_effect_id' => 'nullable|exists:status_effects,id',
+                'icon' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            ]);
+
+            $name = trim((string) $validated['name']);
+            $isStackable = (bool) $validated['is_stackable'];
+            $maxQuantity = $isStackable ? min(5, max(1, (int) $validated['max_quantity'])) : 1;
+
+            $iconFile = $request->file('icon');
+            $ext = $iconFile->getClientOriginalExtension();
+            $filename = Str::slug($name, '_').'.'.$ext;
+            $publicPath = public_path('items');
+            if (! file_exists($publicPath)) {
+                mkdir($publicPath, 0755, true);
+            }
+            $iconFile->move($publicPath, $filename);
+
+            $item = Item::create([
+                'name' => $name,
+                'description' => trim((string) $validated['description']),
+                'effect_type' => $validated['effect_type'],
+                'effect_value' => $validated['effect_value'] ?? null,
+                'is_stackable' => $isStackable,
+                'max_quantity' => $maxQuantity,
+                'status_effect_id' => $validated['status_effect_id'] ?? null,
+                'icon_path' => 'items/'.$filename,
+            ]);
+
+            return response()->json([
+                'message' => 'Item created successfully',
+                'data' => $item->load('statusEffect'),
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not create item',
+                'errors' => [
+                    'server' => [$e->getMessage()],
+                ],
+            ], 500);
+        }
+    }
+
+    public function createXuxemon(Request $request): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:128|unique:xuxemons,name',
+                'description' => 'nullable|string',
+                'type_id' => 'required|exists:types,id',
+                'attack_1_id' => 'required|exists:attacks,id|different:attack_2_id',
+                'attack_2_id' => 'required|exists:attacks,id|different:attack_1_id',
+                'hp' => 'required|integer|min:1',
+                'attack' => 'required|integer|min:1',
+                'defense' => 'required|integer|min:1',
+                'icon' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            ]);
+
+            $name = trim((string) $validated['name']);
+            $iconFile = $request->file('icon');
+            $ext = $iconFile->getClientOriginalExtension();
+            $filename = Str::slug($name, '_').'.'.$ext;
+            $publicPath = public_path('xuxemons');
+            if (! file_exists($publicPath)) {
+                mkdir($publicPath, 0755, true);
+            }
+            $iconFile->move($publicPath, $filename);
+
+            $xuxemon = Xuxemon::create([
+                'name' => $name,
+                'description' => $validated['description'] ? trim((string) $validated['description']) : null,
+                'type_id' => (int) $validated['type_id'],
+                'attack_1_id' => (int) $validated['attack_1_id'],
+                'attack_2_id' => (int) $validated['attack_2_id'],
+                'hp' => (int) $validated['hp'],
+                'attack' => (int) $validated['attack'],
+                'defense' => (int) $validated['defense'],
+                'icon_path' => 'xuxemons/'.$filename,
+            ]);
+
+            return response()->json([
+                'message' => 'Xuxemon created successfully',
+                'data' => $xuxemon->load(['type', 'attack1', 'attack2']),
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not create Xuxemon',
+                'errors' => [
+                    'server' => [$e->getMessage()],
+                ],
+            ], 500);
+        }
+    }
+
+    public function getItem(int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $item = Item::with('statusEffect')->find($id);
+            if (! $item) {
+                return response()->json(['message' => 'Item not found'], 404);
+            }
+
+            return response()->json(['data' => $item]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not retrieve item',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function getXuxemon(int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $xuxemon = Xuxemon::with(['type', 'attack1', 'attack2'])->find($id);
+            if (! $xuxemon) {
+                return response()->json(['message' => 'Xuxemon not found'], 404);
+            }
+
+            return response()->json(['data' => $xuxemon]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not retrieve Xuxemon',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function updateItem(Request $request, int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $item = Item::find($id);
+            if (! $item) {
+                return response()->json(['message' => 'Item not found'], 404);
+            }
+
+            $rules = [
+                'name' => 'required|string|max:255|unique:items,name,'.$id,
+                'description' => 'required|string',
+                'effect_type' => 'required|in:Heal,DMG Up,Defense Up,Revive,Remove Status Effects,Apply Status Effects,Evolve',
+                'effect_value' => 'nullable|integer|min:0',
+                'is_stackable' => 'required|boolean',
+                'max_quantity' => 'required|integer|min:1|max:5',
+                'status_effect_id' => 'nullable|exists:status_effects,id',
+                'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            ];
+            $validated = $request->validate($rules);
+
+            $name = trim((string) $validated['name']);
+            $isStackable = (bool) $validated['is_stackable'];
+            $maxQuantity = $isStackable ? min(5, max(1, (int) $validated['max_quantity'])) : 1;
+
+            $update = [
+                'name' => $name,
+                'description' => trim((string) $validated['description']),
+                'effect_type' => $validated['effect_type'],
+                'effect_value' => $validated['effect_value'] ?? null,
+                'is_stackable' => $isStackable,
+                'max_quantity' => $maxQuantity,
+                'status_effect_id' => $validated['status_effect_id'] ?? null,
+            ];
+
+            $iconFile = $request->file('icon');
+            if ($iconFile) {
+                $ext = $iconFile->getClientOriginalExtension();
+                $filename = Str::slug($name, '_').'_'.Str::lower(Str::random(8)).'.'.$ext;
+                $publicPath = public_path('items');
+                if (! file_exists($publicPath)) {
+                    mkdir($publicPath, 0755, true);
+                }
+                $iconFile->move($publicPath, $filename);
+                $update['icon_path'] = 'items/'.$filename;
+            }
+
+            $item->update($update);
+
+            return response()->json([
+                'message' => 'Item updated successfully',
+                'data' => $item->fresh()->load('statusEffect'),
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not update item',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function updateXuxemon(Request $request, int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $xuxemon = Xuxemon::find($id);
+            if (! $xuxemon) {
+                return response()->json(['message' => 'Xuxemon not found'], 404);
+            }
+
+            $rules = [
+                'name' => 'required|string|max:128|unique:xuxemons,name,'.$id,
+                'description' => 'nullable|string',
+                'type_id' => 'required|exists:types,id',
+                'attack_1_id' => 'required|exists:attacks,id|different:attack_2_id',
+                'attack_2_id' => 'required|exists:attacks,id|different:attack_1_id',
+                'hp' => 'required|integer|min:1',
+                'attack' => 'required|integer|min:1',
+                'defense' => 'required|integer|min:1',
+                'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            ];
+            $validated = $request->validate($rules);
+
+            $name = trim((string) $validated['name']);
+            $update = [
+                'name' => $name,
+                'description' => $validated['description'] ? trim((string) $validated['description']) : null,
+                'type_id' => (int) $validated['type_id'],
+                'attack_1_id' => (int) $validated['attack_1_id'],
+                'attack_2_id' => (int) $validated['attack_2_id'],
+                'hp' => (int) $validated['hp'],
+                'attack' => (int) $validated['attack'],
+                'defense' => (int) $validated['defense'],
+            ];
+
+            $iconFile = $request->file('icon');
+            if ($iconFile) {
+                $ext = $iconFile->getClientOriginalExtension();
+                $filename = Str::slug($name, '_').'_'.Str::lower(Str::random(8)).'.'.$ext;
+                $publicPath = public_path('xuxemons');
+                if (! file_exists($publicPath)) {
+                    mkdir($publicPath, 0755, true);
+                }
+                $iconFile->move($publicPath, $filename);
+                $update['icon_path'] = 'xuxemons/'.$filename;
+            }
+
+            $xuxemon->update($update);
+
+            return response()->json([
+                'message' => 'Xuxemon updated successfully',
+                'data' => $xuxemon->fresh()->load(['type', 'attack1', 'attack2']),
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not update Xuxemon',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
     private function calculateUsedSlots($bagItems): int
     {
         $usedSlots = 0;
@@ -218,5 +577,65 @@ class AdminController extends Controller
         }
 
         return $usedSlots;
+    }
+
+    public function deleteItemCascade(int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $item = Item::find($id);
+            if (! $item) {
+                return response()->json(['message' => 'Item not found'], 404);
+            }
+
+            DB::transaction(function () use ($id, $item) {
+                BagItem::where('item_id', $id)->delete();
+                $item->delete();
+            });
+
+            return response()->json(['message' => 'Item deleted']);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not delete item',
+                'errors' => [
+                    'server' => [$e->getMessage()],
+                ],
+            ], 500);
+        }
+    }
+
+    public function deleteXuxemonCascade(int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $xuxemon = Xuxemon::find($id);
+            if (! $xuxemon) {
+                return response()->json(['message' => 'Xuxemon not found'], 404);
+            }
+
+            DB::transaction(function () use ($id, $xuxemon) {
+                AdquiredXuxemon::where('xuxemon_id', $id)->delete();
+                $xuxemon->delete();
+            });
+
+            return response()->json(['message' => 'Xuxemon deleted']);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not delete Xuxemon',
+                'errors' => [
+                    'server' => [$e->getMessage()],
+                ],
+            ], 500);
+        }
     }
 }

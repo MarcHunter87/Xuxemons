@@ -35,7 +35,8 @@ export class AdminItems implements OnInit {
       .subscribe({
         next: (res) => {
           const data = res?.data;
-          this.items.set(Array.isArray(data) ? data : []);
+          const list = Array.isArray(data) ? [...data].sort((a, b) => a.id - b.id) : [];
+          this.items.set(list);
           if (!Array.isArray(data)) {
             this.errorMessage.set('Unexpected response while loading items');
           }
@@ -49,5 +50,17 @@ export class AdminItems implements OnInit {
   getIconUrl(iconPath: string): string {
     const path = iconPath.startsWith('/') ? iconPath : `/${iconPath}`;
     return this.auth.getAssetUrl(path);
+  }
+
+  onDeleteItem(item: Item): void {
+    if (!confirm(`Delete item "${item.name}"? This action cannot be undone.`)) return;
+    this.adminService.deleteItem(item.id).subscribe({
+      next: () => {
+        this.items.set(this.items().filter((i) => i.id !== item.id));
+      },
+      error: (err) => {
+        this.errorMessage.set(err?.error?.message ?? 'Failed to delete item');
+      },
+    });
   }
 }

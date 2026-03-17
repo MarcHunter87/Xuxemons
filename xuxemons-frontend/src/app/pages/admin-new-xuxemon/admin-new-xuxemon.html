@@ -1,0 +1,217 @@
+<section class="page-hero" aria-labelledby="admin-new-xuxemon-title">
+  <h1 id="admin-new-xuxemon-title">
+    <span class="page-hero-title-black">New Xuxemon</span>
+  </h1>
+  <p class="page-hero-desc">Create a new Xuxemon.</p>
+</section>
+
+<section class="form-card">
+  @if (errorMessage()) {
+    <p id="admin-new-xuxemon-error" class="error-message" role="alert" aria-live="polite">{{ errorMessage() }}</p>
+  }
+  @if (successMessage()) {
+    <p id="admin-new-xuxemon-success" class="success-message" role="status" aria-live="polite">{{ successMessage() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+    <label class="field">
+      <span>Name</span>
+      <input id="admin-new-xuxemon-name" type="text" formControlName="name" maxlength="128" [attr.aria-invalid]="isFieldInvalid('name')" [attr.aria-describedby]="getErrorMessage('name') ? 'admin-new-xuxemon-name-error' : null" />
+      @if (getErrorMessage('name')) {
+        <p id="admin-new-xuxemon-name-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('name') }}</p>
+      }
+    </label>
+
+    <div class="field">
+      <span>Type</span>
+      <div class="custom-select-wrapper" (focusout)="onTypeFocusOut($event)">
+        <button
+          type="button"
+          id="admin-new-xuxemon-type_id"
+          class="custom-select-trigger"
+          [class.input-error]="isFieldInvalid('type_id')"
+          [attr.aria-expanded]="typeDropdownOpen()"
+          [attr.aria-haspopup]="'listbox'"
+          [attr.aria-describedby]="getErrorMessage('type_id') ? 'admin-new-xuxemon-type_id-error' : null"
+          [attr.aria-invalid]="isFieldInvalid('type_id')"
+          (click)="typeDropdownOpen.set(!typeDropdownOpen())"
+        >
+          <span class="custom-select-trigger-label">
+            @if (getSelectedType(); as selected) {
+              @if (getTypeIconUrl(selected.icon_path); as iconUrl) {
+                <img [src]="iconUrl" [alt]="selected.name" class="custom-select-option-icon" width="22" height="22" />
+              }
+              <span>{{ selected.name }}</span>
+            } @else {
+              <span class="custom-select-placeholder">Select type</span>
+            }
+          </span>
+          <i class="bi bi-chevron-down" aria-hidden="true"></i>
+        </button>
+        @if (typeDropdownOpen()) {
+          <div class="custom-select-backdrop" (click)="closeTypeDropdown()" aria-hidden="true"></div>
+          <ul class="custom-select-dropdown" role="listbox" aria-labelledby="admin-new-xuxemon-type_id">
+            <li
+              role="option"
+              tabindex="0"
+              [attr.aria-selected]="!getSelectedType()"
+              class="custom-select-option"
+              (click)="selectType(null)"
+              (keydown.enter)="selectType(null); $event.preventDefault()"
+              (keydown.space)="selectType(null); $event.preventDefault()"
+            >
+              <span class="custom-select-placeholder">Select type</span>
+            </li>
+            @for (type of types(); track type.id) {
+              <li
+                role="option"
+                tabindex="0"
+                [attr.aria-selected]="getSelectedType()?.id === type.id"
+                class="custom-select-option"
+                (click)="selectType(type)"
+                (keydown.enter)="selectType(type); $event.preventDefault()"
+                (keydown.space)="selectType(type); $event.preventDefault()"
+              >
+                @if (getTypeIconUrl(type.icon_path); as iconUrl) {
+                  <img [src]="iconUrl" [alt]="type.name" class="custom-select-option-icon" width="22" height="22" />
+                }
+                <span>{{ type.name }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+      @if (getErrorMessage('type_id')) {
+        <p id="admin-new-xuxemon-type_id-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('type_id') }}</p>
+      }
+    </div>
+
+    <label class="field field-full">
+      <span>Description</span>
+      <textarea rows="4" formControlName="description"></textarea>
+    </label>
+
+    <label class="field">
+      <span>Attack 1</span>
+      <input id="admin-new-xuxemon-attack_1_id" type="text" [value]="attack1Label()" readonly [attr.aria-invalid]="isFieldInvalid('attack_1_id')" [attr.aria-describedby]="getErrorMessage('attack_1_id') ? 'admin-new-xuxemon-attack_1_id-error' : null" />
+      @if (getErrorMessage('attack_1_id')) {
+        <p id="admin-new-xuxemon-attack_1_id-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('attack_1_id') }}</p>
+      }
+    </label>
+
+    <div class="field">
+      <span>Attack 2</span>
+      <div class="custom-select-wrapper" (focusout)="onAttack2FocusOut($event)">
+        <button
+          type="button"
+          id="admin-new-xuxemon-attack_2_id"
+          class="custom-select-trigger"
+          [class.input-error]="isFieldInvalid('attack_2_id')"
+          [attr.aria-expanded]="attack2DropdownOpen()"
+          [attr.aria-haspopup]="'listbox'"
+          [attr.aria-describedby]="getErrorMessage('attack_2_id') ? 'admin-new-xuxemon-attack_2_id-error' : null"
+          [attr.aria-invalid]="isFieldInvalid('attack_2_id')"
+          (click)="attack2DropdownOpen.set(!attack2DropdownOpen())"
+        >
+          <span class="custom-select-trigger-label">
+            @if (getSelectedAttack2(); as selected) {
+              @if (getTypeIconUrl(selected.icon_path); as iconUrl) {
+                <img [src]="iconUrl" [alt]="selected.name" class="custom-select-option-icon" width="22" height="22" />
+              }
+              <span>{{ selected.name }}</span>
+            } @else {
+              <span class="custom-select-placeholder">Select attack</span>
+            }
+          </span>
+          <i class="bi bi-chevron-down" aria-hidden="true"></i>
+        </button>
+        @if (attack2DropdownOpen()) {
+          <div class="custom-select-backdrop" (click)="closeAttack2Dropdown()" aria-hidden="true"></div>
+          <ul class="custom-select-dropdown" role="listbox" aria-labelledby="admin-new-xuxemon-attack_2_id">
+            <li
+              role="option"
+              tabindex="0"
+              [attr.aria-selected]="!getSelectedAttack2()"
+              class="custom-select-option"
+              (click)="selectAttack2(null)"
+              (keydown.enter)="selectAttack2(null); $event.preventDefault()"
+              (keydown.space)="selectAttack2(null); $event.preventDefault()"
+            >
+              <span class="custom-select-placeholder">Select attack</span>
+            </li>
+            @for (attackItem of attack2Options(); track attackItem.id) {
+              <li
+                role="option"
+                tabindex="0"
+                [attr.aria-selected]="getSelectedAttack2()?.id === attackItem.id"
+                class="custom-select-option"
+                (click)="selectAttack2(attackItem)"
+                (keydown.enter)="selectAttack2(attackItem); $event.preventDefault()"
+                (keydown.space)="selectAttack2(attackItem); $event.preventDefault()"
+              >
+                @if (getTypeIconUrl(attackItem.icon_path); as iconUrl) {
+                  <img [src]="iconUrl" [alt]="attackItem.name" class="custom-select-option-icon" width="22" height="22" />
+                }
+                <span>{{ attackItem.name }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+      @if (getErrorMessage('attack_2_id')) {
+        <p id="admin-new-xuxemon-attack_2_id-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('attack_2_id') }}</p>
+      }
+    </div>
+
+    <label class="field">
+      <span>HP</span>
+      <input id="admin-new-xuxemon-hp" type="number" min="1" formControlName="hp" [attr.aria-invalid]="isFieldInvalid('hp')" [attr.aria-describedby]="getErrorMessage('hp') ? 'admin-new-xuxemon-hp-error' : null" />
+      @if (getErrorMessage('hp')) {
+        <p id="admin-new-xuxemon-hp-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('hp') }}</p>
+      }
+    </label>
+
+    <label class="field">
+      <span>Attack</span>
+      <input id="admin-new-xuxemon-attack" type="number" min="1" formControlName="attack" [attr.aria-invalid]="isFieldInvalid('attack')" [attr.aria-describedby]="getErrorMessage('attack') ? 'admin-new-xuxemon-attack-error' : null" />
+      @if (getErrorMessage('attack')) {
+        <p id="admin-new-xuxemon-attack-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('attack') }}</p>
+      }
+    </label>
+
+    <label class="field">
+      <span>Defense</span>
+      <input id="admin-new-xuxemon-defense" type="number" min="1" formControlName="defense" [attr.aria-invalid]="isFieldInvalid('defense')" [attr.aria-describedby]="getErrorMessage('defense') ? 'admin-new-xuxemon-defense-error' : null" />
+      @if (getErrorMessage('defense')) {
+        <p id="admin-new-xuxemon-defense-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('defense') }}</p>
+      }
+    </label>
+
+    <label class="field field-full field-hidden" aria-hidden="true">
+      <span>Image path (auto)</span>
+      <input type="text" formControlName="icon_path" readonly tabindex="-1" />
+    </label>
+
+    <label class="field field-full">
+      <span>Image</span>
+      <input type="file" accept="image/*" (change)="onImageSelected($event)" />
+    </label>
+
+    @if (imagePreview()) {
+      <div class="image-preview">
+        <img [src]="imagePreview()" alt="Xuxemon image preview" />
+      </div>
+    }
+
+    <div class="actions field-full">
+      <button type="button" class="btn-secondary" (click)="goBack()">Cancel</button>
+      <button type="submit" class="btn-primary">
+        @if (isSaving()) {
+          <span class="btn-loading-icon" aria-hidden="true"></span>
+        } @else {
+          Create Xuxemon
+        }
+      </button>
+    </div>
+  </form>
+</section>

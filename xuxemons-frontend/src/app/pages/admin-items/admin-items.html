@@ -5,6 +5,10 @@
   <p class="page-hero-desc">Catalog of all items.</p>
 </section>
 
+<div class="admin-actions">
+  <a routerLink="/admin/items/new-item" class="btn-primary">New Item</a>
+</div>
+
 @if (isLoading()) {
   <div class="loading-state">
     <div class="spinner"></div>
@@ -59,7 +63,23 @@
                 <td><span class="cell-desc">{{ item.description || '—' }}</span></td>
                 <td><span class="cell-text">{{ item.effect_type || '—' }}</span></td>
                 <td><span class="cell-num">{{ item.effect_value ?? '—' }}</span></td>
-                <td class="col-actions"><span class="cell-actions">—</span></td>
+                <td class="col-actions">
+                  <div class="col-actions-btns">
+                    <a
+                      [routerLink]="['/admin/items/edit-item', item.id]"
+                      class="btn btn-edit btn-sm"
+                      [attr.aria-label]="'Edit item ' + item.name">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </a>
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm"
+                      (click)="onDeleteItem(item)"
+                      [attr.aria-label]="'Delete item ' + item.name">
+                      <i class="bi bi-trash" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </td>
               </tr>
             }
           </tbody>
