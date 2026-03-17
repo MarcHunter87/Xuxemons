@@ -24,14 +24,20 @@ export class Breadcrumb implements OnInit, OnDestroy {
     'edit': 'Edit Profile',
     'friends': 'Friends',
     'admin': 'Admin',
-    'give-item-form': 'Give Item Form',
+    'items': 'Items',
+    'xuxemons': 'Xuxemons',
+    'new-item': 'New Item',
+    'new-xuxemon': 'New Xuxemon',
+    'edit-item': 'Edit Item',
+    'edit-xuxemon': 'Edit Xuxemon',
+    'give-item': 'Give Item',
     'leaderboard': 'Leaderboard',
   };
 
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.buildBreadcrumb(this.router.url);
+    queueMicrotask(() => this.buildBreadcrumb(this.router.url));
     this.sub = this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(e => this.buildBreadcrumb(e.urlAfterRedirects));
@@ -61,11 +67,18 @@ export class Breadcrumb implements OnInit, OnDestroy {
         for (let i = 0; i < segments.length; i++) {
           const seg = segments[i];
           acc += `/${seg}`;
-          if (seg === 'give-item-form' && i + 1 < segments.length) {
+          if (seg === 'give-item' && i + 1 < segments.length) {
             const rawId = segments[i + 1];
             acc += `/${rawId}`;
             const idForLabel = this.decodeIdForBreadcrumb(rawId);
             pathItems.push({ label: `Give Item ${idForLabel}`, path: acc });
+            i++;
+          } else if ((seg === 'edit-item' || seg === 'edit-xuxemon') && i + 1 < segments.length) {
+            const rawId = segments[i + 1];
+            acc += `/${rawId}`;
+            const idForLabel = this.decodeIdForBreadcrumb(rawId);
+            const baseLabel = this.labels[seg] ?? seg;
+            pathItems.push({ label: `${baseLabel} ${idForLabel}`, path: acc });
             i++;
           } else {
             const label = this.labels[seg] ?? seg.charAt(0).toUpperCase() + seg.slice(1);
@@ -83,13 +96,14 @@ export class Breadcrumb implements OnInit, OnDestroy {
 
   private decodeIdForBreadcrumb(raw: string): string {
     let s = raw;
-    for (let i = 0; i < 3; i++) {
+    let stop = false;
+    for (let i = 0; i < 3 && !stop; i++) {
       try {
         const d = decodeURIComponent(s);
-        if (d === s) break;
+        stop = (d === s);
         s = d;
       } catch {
-        break;
+        stop = true;
       }
     }
     return s;

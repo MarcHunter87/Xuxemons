@@ -8,7 +8,7 @@
   max-width: var(--layout-max-width);
   width: 100%;
   margin: 0 auto;
-  padding: var(--page-content-padding-top) 2rem 3rem;
+  padding: 0 2rem 3rem;
   box-sizing: border-box;
 }
 
@@ -16,7 +16,7 @@
   max-width: none;
   width: 100%;
   margin: 0;
-  padding: 0 0 3rem;
+  padding: 0;
   box-sizing: border-box;
 }
 

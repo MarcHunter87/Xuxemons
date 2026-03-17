@@ -1,19 +1,27 @@
-.xuxedex-search {
+.filter-section {
     width: 100%;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--page-section-gap);
+    padding: 1.5rem;
+    background-color: var(--primary-color);
+    border-radius: 15px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    border: 1px solid var(--light-gray-color);
+}
+
+.filter-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-alt-color);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .filter-controls {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 180px 180px;
     gap: 0.75rem;
-}
-
-.search-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--text-color);
-    font-weight: 600;
 }
 
 .search-box {
@@ -75,11 +83,11 @@
 }
 
 @media (max-width: 767.98px) {
-    .filter-controls {
-        grid-template-columns: 1fr;
+    .filter-section {
+        padding: 1.25rem 1.5rem;
     }
 
-    .search-label {
-        font-size: 1rem;
+    .filter-controls {
+        grid-template-columns: 1fr;
     }
 }

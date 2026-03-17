@@ -8,6 +8,7 @@
 /* Misma caja que el resto de stat-card; XP abajo */
 .trainer-stat-card {
   justify-content: space-between;
+  min-height: 100%;
 }
 
 .level-text {
@@ -21,7 +22,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: var(--page-section-gap);
 }
 
 .header-info {
@@ -33,6 +34,7 @@
   background-color: var(--secondary-color);
   padding: 12px;
   border-radius: 12px;
+  border: 2px solid var(--accent-color);
   color: var(--accent-color);
   display: flex;
   align-items: center;
@@ -49,7 +51,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: var(--page-section-gap);
 }
 
 .xp-numbers {
