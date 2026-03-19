@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             AttackSeeder::class,
             XuxemonSeeder::class,
             AdquiredXuxemonSeeder::class,
+            SizeSeeder::class,
         ]);
     }
 }

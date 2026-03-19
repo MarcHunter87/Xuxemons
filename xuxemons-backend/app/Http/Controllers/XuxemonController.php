@@ -54,7 +54,8 @@ class XuxemonController extends Controller
             $query->whereHas('xuxemon.type', fn ($q) => $q->where('name', $request->input('type')));
         }
         if ($request->filled('size')) {
-            $query->where('size', $request->input('size'));
+            $sizeId = DB::table('sizes')->where('size', $request->input('size'))->value('id');
+            $query->where('size_id', $sizeId);
         }
 
         $myXuxemons = $query->orderBy('created_at', 'desc')
@@ -71,7 +72,7 @@ class XuxemonController extends Controller
                 $x['current_hp'] = $a->getAttribute('current_hp') !== null ? (int) $a->current_hp : $maxHp;
                 $x['attack'] = $a->attack;
                 $x['defense'] = $a->defense;
-                $x['size'] = $a->size ?? 'Small';
+                $x['size'] = $a->size;
                 $x['adquired_id'] = $a->id;
                 $x['status_effect_applied'] = $a->statusEffect;
 
@@ -109,7 +110,7 @@ class XuxemonController extends Controller
         $xuxemon['current_hp'] = $maxHp;
         $xuxemon['attack'] = $adquired->attack;
         $xuxemon['defense'] = $adquired->defense;
-        $xuxemon['size'] = $adquired->size ?? 'Small';
+        $xuxemon['size'] = $adquired->size;
 
         return $xuxemon;
     }
