@@ -19,7 +19,8 @@ return new class extends Migration
             $table->unsignedInteger('current_hp')->nullable();
             $table->unsignedInteger('level')->default(1);
             $table->unsignedInteger('experience')->default(0);
-            $table->enum('size', ['Small', 'Medium', 'Large'])->default('Small');
+            $table->unsignedBigInteger('size_id')->default(1);
+            $table->unsignedInteger('requirement_progress')->default(0);
             $table->timestamps();
         });
     }
