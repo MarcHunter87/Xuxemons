@@ -33,7 +33,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
         ], [
             'email.unique' => 'This email is already in use.',
-            'id.unique' => 'This ID is already taken. Please refresh the page to get a new one.',
+            'id.unique' => 'Server error. Please try again later.',
             'id.regex' => 'Invalid ID format. It must be #Name plus 4 digits.',
         ]);
 

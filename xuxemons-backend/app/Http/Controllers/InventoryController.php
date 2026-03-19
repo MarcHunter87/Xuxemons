@@ -9,6 +9,7 @@ use App\Models\Item;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class InventoryController extends Controller
@@ -526,15 +527,23 @@ class InventoryController extends Controller
 
     private function useSpecialMeat(BagItem $bagItem, AdquiredXuxemon $adquired): array
     {
-        $currentSize = $adquired->size ?? 'Small';
-        $newSize = $currentSize === 'Small' ? 'Medium' : 'Large';
-        $adquired->size = $newSize;
+        $progress = ((int) $adquired->requirement_progress) + 1;
+        $newSize = DB::table('sizes')
+            ->where('requirement_progress', '<=', $progress)
+            ->orderByDesc('requirement_progress')
+            ->first();
+
+        $adquired->requirement_progress = $progress;
+        if ($newSize) {
+            $adquired->size_id = $newSize->id;
+        }
         $adquired->save();
 
         $bagItem->reduceQuantity(1);
 
         return [
-            'xuxemon_size' => $newSize,
+            'xuxemon_size' => $newSize?->size ?? 'Small',
+            'requirement_progress' => $adquired->requirement_progress,
             'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
         ];
     }

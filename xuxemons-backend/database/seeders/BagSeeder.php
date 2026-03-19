@@ -33,8 +33,14 @@ class BagSeeder extends Seeder
             }
 
             foreach ($items as $index => $item) {
-                if (strtolower($item->effect_type) === 'revive') {
+                $effectType = strtolower($item->effect_type ?? '');
+
+                if ($effectType === 'revive') {
                     $quantity = 1;
+                } else if ($effectType === 'evolve') {
+                    $quantity = 9;
+                } else if ($effectType === 'remove status effects') {
+                    $quantity = 2;
                 } elseif ($index === 0) {
                     $quantity = 6;
                 } else {

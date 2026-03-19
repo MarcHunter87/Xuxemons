@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class AdquiredXuxemon extends Model
 {
@@ -11,7 +12,8 @@ class AdquiredXuxemon extends Model
         'xuxemon_id',
         'level',
         'experience',
-        'size',
+        'size_id',
+        'requirement_progress',
         'bonus_hp',
         'bonus_attack',
         'bonus_defense',
@@ -27,6 +29,13 @@ class AdquiredXuxemon extends Model
     public function statusEffect()
     {
         return $this->belongsTo(StatusEffect::class);
+    }
+
+    public function getSizeAttribute(): string
+    {
+        $sizeId = $this->attributes['size_id'] ?? 1;
+
+        return DB::table('sizes')->where('id', $sizeId)->value('size') ?? 'Small';
     }
 
     public function getHpAttribute(): int
