@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { AdminXuxemons } from './admin-xuxemons';
-import { AdminService } from '../../core/services/admin';
-import { AuthService } from '../../core/services/auth';
+import { AdminItems } from './admin-items';
+import { AdminService } from '../../../core/services/admin';
+import { AuthService } from '../../../core/services/auth';
 
-describe('AdminXuxemons', () => {
-  let component: AdminXuxemons;
-  let fixture: ComponentFixture<AdminXuxemons>;
+describe('AdminItems', () => {
+  let component: AdminItems;
+  let fixture: ComponentFixture<AdminItems>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminXuxemons],
+      imports: [AdminItems],
       providers: [
         provideHttpClient(),
         AdminService,
@@ -18,7 +18,7 @@ describe('AdminXuxemons', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AdminXuxemons);
+    fixture = TestBed.createComponent(AdminItems);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

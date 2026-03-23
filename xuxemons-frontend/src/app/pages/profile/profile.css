@@ -32,8 +32,9 @@
 }
 
 .profile-edit-btn:focus-visible {
-  outline: 2px solid var(--white-color);
+  outline: 3px solid var(--accent-color);
   outline-offset: 2px;
+  box-shadow: none;
 }
 
 .profile-content .btn-danger {

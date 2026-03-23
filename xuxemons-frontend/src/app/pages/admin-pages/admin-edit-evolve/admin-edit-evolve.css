@@ -1,0 +1,118 @@
+.page-hero-desc {
+  max-width: none;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  background-color: var(--white-color);
+  border: 1px solid var(--light-gray-color);
+}
+
+.loading-state .stat-card__spinner {
+  display: block;
+  margin: 0 auto 1rem;
+}
+
+.loading-state .loading-text {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.form-card {
+    background: var(--white-color);
+    border: 1px solid var(--light-gray-color);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    padding: var(--page-section-gap);
+    margin-bottom: var(--page-section-gap);
+  }
+  
+  .form-grid {
+    display: grid;
+    gap: var(--page-section-gap);
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+  
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--page-section-gap) / 3);
+  }
+  
+  .field-full {
+    grid-column: 1 / -1;
+  }
+  
+  .field span {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-alt-color);
+  }
+  
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--light-gray-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  
+  .field input:focus-visible,
+  .field select:focus-visible,
+  .field textarea:focus-visible {
+    outline: 3px solid var(--accent-color);
+    outline-offset: 2px;
+  }
+
+  .field-error {
+    margin: 0;
+    color: var(--danger-color);
+    font-size: 1rem;
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--page-section-gap);
+  }
+
+  .error-message {
+    color: var(--danger-color);
+    margin: 0 0 var(--page-section-gap);
+    font-size: 1rem;
+  }
+  
+  .success-message {
+    color: var(--success-color);
+    margin: 0 0 var(--page-section-gap);
+    font-size: 1rem;
+  }
+
+  .btn-loading-icon {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 0.5rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  @media (max-width: 860px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }

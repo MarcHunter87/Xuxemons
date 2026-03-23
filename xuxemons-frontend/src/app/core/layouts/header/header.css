@@ -105,6 +105,65 @@ nav {
   flex-shrink: 0;
 }
 
+.gacha-ticket-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 0.2rem 0.55rem 0.2rem 0.4rem;
+  min-height: 40px;
+  background-color: var(--text-alt-color);
+  color: var(--white-color);
+  border: 2px solid transparent;
+  box-sizing: border-box;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.gacha-ticket-badge-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.gacha-ticket-icon {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.gacha-ticket-count {
+  font-size: 1rem;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  min-width: 1ch;
+  text-align: center;
+  line-height: 1;
+}
+
+.gacha-ticket-badge:hover,
+.gacha-ticket-badge:focus-visible {
+  background-color: var(--white-color);
+  color: var(--accent-color);
+}
+
+.gacha-ticket-badge:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.gacha-ticket-badge:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.gacha-ticket-badge.active {
+  background-color: var(--white-color);
+  color: var(--accent-color);
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
 .icon-btn {
   display: flex;
   align-items: center;

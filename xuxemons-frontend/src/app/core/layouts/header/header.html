@@ -1,4 +1,4 @@
-<header class="navbar" [class.navbar-dropdown-open]="menuOpen()" role="banner">
+<header class="navbar" [class.navbar-dropdown-open]="menuOpen" role="banner">
   <div class="navbar-inner">
     <a class="brand" routerLink="/" aria-label="Xuxemons Home" (click)="closeMenu()">
       <img src="/icons/logo%20v2.svg" alt="Xuxemons logo">
@@ -18,7 +18,7 @@
     </nav>
 
     <div class="navbar-right nav-desktop">
-      @if (isAdmin) {
+      @if (user?.role === 'admin') {
       <a routerLink="/admin" class="icon-btn" aria-label="Admin panel">
         <i class="bi bi-shield-fill-check"></i>
       </a>
@@ -26,6 +26,18 @@
       <a routerLink="/friends" class="icon-btn" aria-label="Friends">
         <i class="bi bi-people-fill"></i>
       </a>
+      @if (user) {
+      <a
+        routerLink="/gacha"
+        routerLinkActive="active"
+        class="gacha-ticket-badge"
+        [attr.aria-label]="'Gacha (' + auth.gachaTicketCount() + ')'">
+        <span class="gacha-ticket-badge-inner">
+          <img [src]="auth.getAssetUrl('items/gacha_ticket.png')" alt="" width="22" height="22" class="gacha-ticket-icon" />
+          <span class="gacha-ticket-count">{{ auth.gachaTicketCount() }}</span>
+        </span>
+      </a>
+      }
       <a routerLink="/profile" routerLinkActive="active" class="profile-link" aria-label="My Profile">
         <div class="avatar" aria-hidden="true">
           @if (iconUrl && !iconLoadError) {
@@ -44,11 +56,11 @@
     <button
       type="button"
       class="hamburger"
-      [attr.aria-label]="menuOpen() ? 'Close menu' : 'Open menu'"
-      [attr.aria-expanded]="menuOpen()"
+      [attr.aria-label]="menuOpen ? 'Close menu' : 'Open menu'"
+      [attr.aria-expanded]="menuOpen"
       aria-controls="nav-mobile-panel"
       (click)="toggleMenu()">
-      <span class="hamburger-icon" [class.open]="menuOpen()" aria-hidden="true">
+      <span class="hamburger-icon" [class.open]="menuOpen" aria-hidden="true">
         <span></span>
         <span></span>
         <span></span>
@@ -59,8 +71,8 @@
   <div
     id="nav-mobile-panel"
     class="nav-mobile-panel"
-    [class.open]="menuOpen()"
-    [attr.aria-hidden]="!menuOpen()"
+    [class.open]="menuOpen"
+    [attr.aria-hidden]="!menuOpen"
     role="navigation"
     aria-label="Main menu">
     <div class="nav-mobile-row">
@@ -88,7 +100,7 @@
           </div>
         </a>
         <div class="nav-mobile-icons">
-          @if (isAdmin) {
+          @if (user?.role === 'admin') {
           <a routerLink="/admin" class="icon-btn" aria-label="Admin panel" (click)="closeMenu()">
             <i class="bi bi-shield-fill-check"></i>
           </a>
@@ -96,6 +108,19 @@
           <a routerLink="/friends" class="icon-btn" aria-label="Friends" (click)="closeMenu()">
             <i class="bi bi-people-fill"></i>
           </a>
+          @if (user) {
+          <a
+            routerLink="/gacha"
+            routerLinkActive="active"
+            class="gacha-ticket-badge"
+            [attr.aria-label]="'Gacha (' + auth.gachaTicketCount() + ')'"
+            (click)="closeMenu()">
+            <span class="gacha-ticket-badge-inner">
+              <img [src]="auth.getAssetUrl('items/gacha_ticket.png')" alt="" width="22" height="22" class="gacha-ticket-icon" />
+              <span class="gacha-ticket-count">{{ auth.gachaTicketCount() }}</span>
+            </span>
+          </a>
+          }
         </div>
       </div>
     </div>

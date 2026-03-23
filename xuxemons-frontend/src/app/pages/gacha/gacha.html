@@ -37,11 +37,18 @@
     <button
       type="button"
       class="btn-primary spin-button"
-      [disabled]="isSpinning()"
+      [disabled]="isSpinning() || auth.gachaTicketCount() < 1"
       (click)="spin()"
+      [attr.aria-label]="'Spin the gacha (costs 1 ticket, you have ' + auth.gachaTicketCount() + ')'"
     >
       @if (!isSpinning()) {
-        <span>Spin</span>
+        <span class="spin-button-inner">
+          <span class="spin-button-label">Spin</span>
+          <span class="spin-button-cost" aria-hidden="true">
+            <img [src]="auth.getAssetUrl('items/gacha_ticket.png')" alt="" width="26" height="26" class="spin-cost-icon" />
+            <span class="spin-cost-amount">1</span>
+          </span>
+        </span>
       } @else {
         <div class="btn-loading-icon"></div>
       }
@@ -70,6 +77,24 @@
         </div>
       </div>
     }
+  }
+
+  @if (spinError()) {
+    <div
+      class="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="gacha-spin-error-title"
+      (click)="closeSpinError()"
+    >
+      <div class="modal-content gacha-spin-error-dialog animate-pop" (click)="$event.stopPropagation()">
+        <h2 id="gacha-spin-error-title" class="winner-title">Spin failed</h2>
+        <p class="gacha-spin-error-text">{{ spinError() }}</p>
+        <div class="modal-actions">
+          <button type="button" (click)="closeSpinError()" class="btn-primary">OK</button>
+        </div>
+      </div>
+    </div>
   }
 
   @if (showAward()) {
@@ -113,7 +138,14 @@
         </div>
         <div class="modal-actions">
           <button type="button" (click)="closeModal()" class="btn-secondary">Close</button>
-          <button type="button" (click)="spinAgain()" class="btn-primary">Spin Again</button>
+          <button
+            type="button"
+            (click)="spinAgain()"
+            class="btn-primary"
+            [disabled]="auth.gachaTicketCount() < 1"
+          >
+            Spin Again
+          </button>
         </div>
       </div>
     </div>

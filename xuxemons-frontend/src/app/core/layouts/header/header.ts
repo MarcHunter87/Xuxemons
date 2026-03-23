@@ -1,16 +1,8 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  HostListener,
-  OnInit,
-  OnDestroy,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 import { AuthService, User } from '../../services/auth';
 
@@ -20,59 +12,49 @@ import { AuthService, User } from '../../services/auth';
   imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './header.html',
   styleUrl: './header.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Default,
 })
-export class Header implements OnInit, OnDestroy {
-  readonly menuOpen = signal(false);
-
+export class Header {
+  menuOpen = false;
   user: User | null = null;
-  isAdmin = false;
   iconLoadError = false;
   iconUrl: string | null = null;
   displayName = 'Unknown';
-  private sub!: Subscription;
-  private router = inject(Router);
 
-  constructor(
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef,
-  ) {}
+  readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
-  ngOnInit(): void {
-    this.sub = this.authService.user$.subscribe((user: User | null) => {
-      this.user = user;
-      this.isAdmin = user?.role === 'admin';
+  constructor() {
+    this.auth.user$.pipe(takeUntilDestroyed()).subscribe((u) => {
+      this.user = u;
       this.iconLoadError = false;
-      this.displayName = user?.id ?? 'Unknown';
-      this.iconUrl = user?.icon_path
-        ? this.authService.getAssetUrl(user.icon_path, user.updated_at)
-        : null;
-      this.cdr.markForCheck();
+      this.displayName = u?.id ?? 'Unknown';
+      this.iconUrl = u?.icon_path ? this.auth.getAssetUrl(u.icon_path, u.updated_at) : null;
+      if (this.isBrowser) {
+        if (u) this.auth.refreshGachaTickets();
+        else this.auth.setGachaTicketCount(0);
+      }
     });
 
     this.router.events
-      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-      .subscribe(() => this.menuOpen.set(false));
-  }
-
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd), takeUntilDestroyed())
+      .subscribe(() => {
+        this.menuOpen = false;
+        if (this.isBrowser && this.user) this.auth.refreshGachaTickets();
+      });
   }
 
   toggleMenu(): void {
-    this.menuOpen.update((v) => !v);
+    this.menuOpen = !this.menuOpen;
   }
 
   closeMenu(): void {
-    this.menuOpen.set(false);
+    this.menuOpen = false;
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    this.menuOpen.set(false);
-  }
-
-  logout(): void {
-    this.authService.logout();
+    this.menuOpen = false;
   }
 }

@@ -2,6 +2,7 @@ import { Component, HostListener, inject, signal, OnInit, OnDestroy, ViewChild, 
 import { Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { XuxemonService, Xuxemon } from '../../core/services/xuxemon.service';
+import { AuthService } from '../../core/services/auth';
 
 @Component({
     selector: 'app-gacha',
@@ -12,6 +13,7 @@ import { XuxemonService, Xuxemon } from '../../core/services/xuxemon.service';
 })
 export class Gacha implements OnInit, OnDestroy {
     private xuxemonService = inject(XuxemonService);
+    readonly auth = inject(AuthService);
     private subs = new Subscription();
 
     @ViewChild('rouletteBox') rouletteBox!: ElementRef<HTMLElement>;
@@ -20,6 +22,7 @@ export class Gacha implements OnInit, OnDestroy {
     public noTransition = signal(false);
     public awardedXuxemon = signal<Xuxemon | null>(null);
     public showAward = signal(false);
+    public spinError = signal<string | null>(null);
     public rouletteItems = signal<Xuxemon[]>([]);
     public trackTransform = signal<string>('translateX(0)');
     public isDataLoaded = signal(false);
@@ -27,6 +30,7 @@ export class Gacha implements OnInit, OnDestroy {
     private myXuxemonsList = signal<Xuxemon[]>([]);
 
     ngOnInit() {
+        this.auth.refreshGachaTickets();
         this.loadRoulette();
         this.xuxemonService.loadMyXuxemons();
         this.subs.add(this.xuxemonService.myXuxemonsList.subscribe(list => this.myXuxemonsList.set(list)));
@@ -53,23 +57,25 @@ export class Gacha implements OnInit, OnDestroy {
 
     async spin() {
         if (this.isSpinning()) return;
+        if (this.auth.gachaTicketCount() < 1) return;
 
         this.showAward.set(false);
         this.awardedXuxemon.set(null);
+        this.spinError.set(null);
         this.isSpinning.set(true);
 
         this.noTransition.set(true);
         this.trackTransform.set('translateX(0)');
         this.initRoulette();
 
-        const winnerPromise = this.xuxemonService.awardRandomXuxemon();
-
-        const winner = await winnerPromise;
+        const winner = await this.xuxemonService.awardRandomXuxemon();
 
         if (!winner) {
             this.isSpinning.set(false);
             this.noTransition.set(false);
-            alert('Session expired or error. Please log out and log in again.');
+            this.spinError.set(
+                "Couldn't complete the spin. Make sure you have tickets and your session is still active."
+            );
             return;
         }
 
@@ -116,8 +122,16 @@ export class Gacha implements OnInit, OnDestroy {
         this.awardedXuxemon.set(null);
     }
 
+    closeSpinError(): void {
+        this.spinError.set(null);
+    }
+
     @HostListener('document:keydown.escape')
     onEscape(): void {
+        if (this.spinError()) {
+            this.closeSpinError();
+            return;
+        }
         if (this.showAward()) this.closeModal();
     }
 }

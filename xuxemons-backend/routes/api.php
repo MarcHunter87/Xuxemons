@@ -28,6 +28,9 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/admin/items/{id}', [AdminController::class, 'updateItem']);
     Route::post('/admin/xuxemons', [AdminController::class, 'createXuxemon']);
     Route::put('/admin/xuxemons/{id}', [AdminController::class, 'updateXuxemon']);
+    Route::get('/admin/sizes', [AdminController::class, 'getAllSizes']);
+    Route::get('/admin/sizes/{id}', [AdminController::class, 'getSize']);
+    Route::put('/admin/sizes/{id}', [AdminController::class, 'updateSize']);
     
     // Rutas de Profile
     Route::get('/user', [AuthController::class, 'me']);
@@ -54,4 +57,5 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/inventory/item/{bagItemId}', [InventoryController::class, 'updateItem']);
     Route::delete('/inventory/item/{bagItemId}', [InventoryController::class, 'discardItem']);
     Route::post('/inventory/use', [InventoryController::class, 'useItem']);
+    Route::get('/inventory/gacha-tickets', [InventoryController::class, 'getGachaTicketCount']);
 });

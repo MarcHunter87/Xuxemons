@@ -14,6 +14,17 @@ class ItemSeeder extends Seeder
     public function run(): void
     {
         Item::create([
+            'name' => 'Gacha Ticket',
+            'description' => 'A ticket that allows you to spin the Gacha Machine.',
+            'effect_type' => 'Gacha Ticket',
+            'effect_value' => null,
+            'is_stackable' => false,
+            'max_quantity' => 99,
+            'status_effect_id' => null,
+            'icon_path' => 'items/gacha_ticket.png',
+        ]);
+        
+        Item::create([
             'name' => 'Healing Potion',
             'description' => 'A glowing green potion that restores a portion of your Xuxemon\'s health points during battle.',
             'effect_type' => 'Heal',
@@ -66,17 +77,6 @@ class ItemSeeder extends Seeder
             'max_quantity' => 5,
             'status_effect_id' => null,
             'icon_path' => 'items/defense_potion.png',
-        ]);
-
-        Item::create([
-            'name' => 'Revive',
-            'description' => 'A precious crystalline orb that brings a fainted Xuxemon back to consciousness with full vigor.',
-            'effect_type' => 'Revive',
-            'effect_value' => 100,
-            'is_stackable' => false,
-            'max_quantity' => 1,
-            'status_effect_id' => null,
-            'icon_path' => 'items/revive.png',
         ]);
 
         Item::create([

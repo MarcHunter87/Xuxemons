@@ -21,4 +21,9 @@ class Item extends Model
     {
         return $this->belongsTo(StatusEffect::class);
     }
+
+    public function excludedFromPlayerInventory(): bool
+    {
+        return $this->effect_type === 'Gacha Ticket';
+    }
 }

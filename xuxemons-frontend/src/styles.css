@@ -8,6 +8,9 @@
     --text-alt-color: #2A2B2B;
 
     --success-color: #28A745;
+    /* Admin nav "Evolution sizes" y acentos de evolución */
+    --evolve-color: #6F42C1;
+    --evolve-glow: rgba(111, 66, 193, 0.45);
     --danger-color: #D0181B;
     --danger-color-2: #9E0B0B;
     --warning-color: #FFC107;
@@ -179,10 +182,19 @@ textarea:focus-visible,
   color: var(--white-color);
 }
 
-.btn-secondary:hover:not(:disabled),
-.btn-secondary:focus-visible:not(:disabled) {
+.btn-secondary:hover:not(:disabled) {
   filter: brightness(0.9);
   transform: translateY(-1px);
+}
+
+.btn-secondary:focus-visible:not(:disabled) {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+  background-color: var(--dark-gray-color);
+  color: var(--white-color);
 }
 
 .btn-secondary:active:not(:disabled) {
@@ -190,10 +202,19 @@ textarea:focus-visible,
   filter: brightness(0.85);
 }
 
-.btn-primary:hover:not(:disabled),
-.btn-primary:focus-visible:not(:disabled) {
+.btn-primary:hover:not(:disabled) {
   filter: brightness(0.9);
   transform: translateY(-1px);
+}
+
+.btn-primary:focus-visible:not(:disabled) {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+  background-color: var(--accent-color);
+  color: var(--white-color);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -206,15 +227,40 @@ textarea:focus-visible,
   color: var(--white-color);
 }
 
-.btn-danger:hover:not(:disabled),
+.btn-danger:hover:not(:disabled) {
+  filter: none;
+  transform: none;
+  box-shadow: 0 0 0 3px var(--accent-color);
+}
+
 .btn-danger:focus-visible:not(:disabled) {
-  filter: brightness(0.9);
-  transform: translateY(-1px);
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+  background-color: var(--danger-color);
+  color: var(--white-color);
 }
 
 .btn-danger:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
-  filter: brightness(0.85);
+  filter: none;
+  box-shadow: none;
+}
+
+a.btn:focus-visible,
+button.btn:focus-visible:not(:disabled),
+input.btn:focus-visible:not(:disabled) {
+  outline: 3px solid var(--accent-color) !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
+a.btn.btn-edit:focus-visible {
+  background-color: var(--accent-color);
+  color: var(--white-color);
+  border-color: var(--accent-color);
 }
 
 button.btn-primary:disabled,

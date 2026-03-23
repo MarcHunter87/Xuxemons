@@ -78,24 +78,75 @@
     box-shadow: 0 0 15px var(--white-alpha-35);
 }
 
-.spin-button {
+button.btn-primary.spin-button {
     width: 100%;
     max-width: 320px;
-    padding: 1rem 2rem;
-    font-size: 1.25rem;
-    font-weight: 800;
+    padding: 0.75rem 1.25rem;
+    font-size: 20px !important;
+    font-weight: 800 !important;
     border-radius: 12px;
     min-height: 52px;
     margin: 0 auto var(--page-section-gap);
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.spin-button:active:not(:disabled) {
+.spin-button-inner {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    line-height: 1;
+    flex-wrap: nowrap;
+}
+
+.spin-button-label {
+    display: inline-block;
+}
+
+.spin-button-cost {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.2rem;
+    opacity: 0.95;
+}
+
+.spin-cost-icon {
+    display: block;
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    flex-shrink: 0;
+    filter: drop-shadow(0 1px 2px var(--shadow-color));
+}
+
+.spin-cost-amount {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: 1;
+}
+
+button.btn-primary.spin-button:active:not(:disabled) {
     transform: translateY(0) scale(0.98);
 }
 
-.spin-button:disabled {
-    cursor: not-allowed;
+button.btn-primary.spin-button:disabled,
+button.btn-primary.spin-button:disabled:hover,
+button.btn-primary.spin-button:disabled:focus-visible {
+    cursor: not-allowed !important;
+    opacity: 0.68 !important;
+    filter: brightness(0.9) saturate(0.88) !important;
+    transform: none !important;
+    box-shadow: none !important;
+    background-color: var(--accent-color) !important;
+    color: var(--white-color) !important;
+}
+
+button.btn-primary.spin-button:disabled .spin-button-cost {
+    opacity: 0.92;
 }
 
 .btn-loading-icon {
@@ -266,6 +317,19 @@
     position: relative;
 }
 
+.gacha-spin-error-dialog .winner-title {
+    margin-bottom: 1rem;
+}
+
+.gacha-spin-error-text {
+    margin: 0 0 var(--page-section-gap);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-alt-color);
+    line-height: 1.5;
+    text-align: center;
+}
+
 .winner-title {
     font-size: 2rem;
     font-weight: 900;
@@ -412,11 +476,22 @@
     font-weight: 700;
 }
 
-.modal-actions .btn-primary:hover:not(:disabled),
-.modal-actions .btn-primary:focus-visible:not(:disabled) {
+.modal-actions .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.modal-actions .btn-primary:hover:not(:disabled) {
     background-color: var(--accent-on-light);
     box-shadow: 0 4px 12px var(--accent-glow);
     transform: translateY(-2px);
+}
+
+.modal-actions .btn-primary:focus-visible:not(:disabled) {
+    background-color: var(--accent-color);
+    box-shadow: none;
+    transform: none;
 }
 
 .modal-actions .btn-secondary {
@@ -425,11 +500,16 @@
     border: 2px solid var(--accent-color);
 }
 
-.modal-actions .btn-secondary:hover:not(:disabled),
-.modal-actions .btn-secondary:focus-visible:not(:disabled) {
+.modal-actions .btn-secondary:hover:not(:disabled) {
     background: var(--accent-alpha-10);
     box-shadow: 0 0 0 3px var(--accent-glow);
     transform: translateY(-2px);
+}
+
+.modal-actions .btn-secondary:focus-visible:not(:disabled) {
+    background: var(--white-color);
+    box-shadow: none;
+    transform: none;
 }
 
 .modal-actions .btn-primary:active:not(:disabled),

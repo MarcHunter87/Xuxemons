@@ -4,9 +4,9 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { AdminDropdownOption } from '../../core/interfaces';
-import { AdminService } from '../../core/services/admin';
-import { AuthService } from '../../core/services/auth';
+import { AdminDropdownOption } from '../../../core/interfaces';
+import { AdminService } from '../../../core/services/admin';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-admin-edit-xuxemon',

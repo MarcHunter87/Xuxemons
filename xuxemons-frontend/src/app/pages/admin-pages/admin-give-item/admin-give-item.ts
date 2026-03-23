@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
-import { AdminService } from '../../core/services/admin';
-import { AuthService } from '../../core/services/auth';
-import { Item } from '../../core/interfaces';
+import { AdminService } from '../../../core/services/admin';
+import { AuthService } from '../../../core/services/auth';
+import { Item } from '../../../core/interfaces';
 
 @Component({
   selector: 'app-admin-give-item',
@@ -60,7 +60,9 @@ export class AdminGiveItem implements OnInit {
       .subscribe({
         next: (response) => {
           const data = response?.data;
-          this.items.set(Array.isArray(data) ? data : []);
+          this.items.set(
+            Array.isArray(data) ? data.filter((i) => i.effect_type !== 'Gacha Ticket') : [],
+          );
           if (!Array.isArray(data)) {
             this.errorMessage.set('Unexpected response while loading items');
           }
