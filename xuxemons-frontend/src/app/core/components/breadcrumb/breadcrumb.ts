@@ -30,6 +30,8 @@ export class Breadcrumb implements OnInit, OnDestroy {
     'new-xuxemon': 'New Xuxemon',
     'edit-item': 'Edit Item',
     'edit-xuxemon': 'Edit Xuxemon',
+    'evolve': 'Evolution sizes',
+    'edit-evolve': 'Edit evolution',
     'give-item': 'Give Item',
     'leaderboard': 'Leaderboard',
   };
@@ -73,7 +75,7 @@ export class Breadcrumb implements OnInit, OnDestroy {
             const idForLabel = this.decodeIdForBreadcrumb(rawId);
             pathItems.push({ label: `Give Item ${idForLabel}`, path: acc });
             i++;
-          } else if ((seg === 'edit-item' || seg === 'edit-xuxemon') && i + 1 < segments.length) {
+          } else if ((seg === 'edit-item' || seg === 'edit-xuxemon' || seg === 'edit-evolve') && i + 1 < segments.length) {
             const rawId = segments[i + 1];
             acc += `/${rawId}`;
             const idForLabel = this.decodeIdForBreadcrumb(rawId);

@@ -2,9 +2,9 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AdminService } from '../../core/services/admin';
-import { AuthService } from '../../core/services/auth';
-import { Item } from '../../core/interfaces';
+import { AdminService } from '../../../core/services/admin';
+import { AuthService } from '../../../core/services/auth';
+import { Item } from '../../../core/interfaces';
 
 @Component({
   selector: 'app-admin-items',

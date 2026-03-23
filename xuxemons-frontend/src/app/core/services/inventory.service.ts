@@ -127,7 +127,10 @@ export class InventoryService {
         this.errorMessage$.next(null);
         this.http.get<InventoryApiResponse>(`${this.apiUrl}/inventory`).subscribe({
             next: (response) => {
-                const transformed = this.transformApiItems(response.data.items ?? []).sort((a, b) =>
+                const visibleItems = (response.data.items ?? []).filter(
+                    (row) => row.effect_type !== 'Gacha Ticket',
+                );
+                const transformed = this.transformApiItems(visibleItems).sort((a, b) =>
                     (a.effect_type ?? '').localeCompare(b.effect_type ?? ''),
                 );
                 this.items$.next(transformed);

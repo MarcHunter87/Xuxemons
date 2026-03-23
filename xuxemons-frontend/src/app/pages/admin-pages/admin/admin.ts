@@ -2,9 +2,9 @@ import { Component, HostListener, OnInit, inject, signal, computed } from '@angu
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AdminService } from '../../core/services/admin';
-import { AuthService } from '../../core/services/auth';
-import { AdminUser, BagStatus } from '../../core/interfaces';
+import { AdminService } from '../../../core/services/admin';
+import { AuthService } from '../../../core/services/auth';
+import { AdminUser, BagStatus } from '../../../core/interfaces';
 
 export interface AwardedXuxemonDisplay {
   id: number;
@@ -124,7 +124,11 @@ export class Admin implements OnInit {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.showAwardModal()) this.closeAwardModal();
+    if (this.showAwardModal()) {
+      this.closeAwardModal();
+      return;
+    }
+    if (this.awardError()) this.dismissAwardError();
   }
 
   dismissAwardError(): void {

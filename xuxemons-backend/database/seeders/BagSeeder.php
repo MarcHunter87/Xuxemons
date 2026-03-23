@@ -33,11 +33,13 @@ class BagSeeder extends Seeder
             }
 
             foreach ($items as $index => $item) {
+                if ($item->excludedFromPlayerInventory()) {
+                    continue;
+                }
+
                 $effectType = strtolower($item->effect_type ?? '');
 
-                if ($effectType === 'revive') {
-                    $quantity = 1;
-                } else if ($effectType === 'evolve') {
+                if ($effectType === 'evolve') {
                     $quantity = 9;
                 } else if ($effectType === 'remove status effects') {
                     $quantity = 2;
@@ -51,6 +53,15 @@ class BagSeeder extends Seeder
                     'bag_id' => $bag->id,
                     'item_id' => $item->id,
                     'quantity' => $quantity,
+                ]);
+            }
+
+            $gachaTicket = Item::query()->where('effect_type', 'Gacha Ticket')->first();
+            if ($gachaTicket) {
+                BagItem::create([
+                    'bag_id' => $bag->id,
+                    'item_id' => $gachaTicket->id,
+                    'quantity' => 10,
                 ]);
             }
         }

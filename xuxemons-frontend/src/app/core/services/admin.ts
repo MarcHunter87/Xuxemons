@@ -77,4 +77,18 @@ export class AdminService {
     const encoded = encodeURIComponent(userId);
     return this.http.post<any>(`${this.apiUrl}/users/${encoded}/award-random`, {});
   }
+
+  getAllSizes(): Observable<{ data: Array<{ id: number; size: string; requirement_progress: number }> }> {
+    return this.http.get<{ data: Array<{ id: number; size: string; requirement_progress: number }> }>(
+      `${this.apiUrl}/admin/sizes`,
+    );
+  }
+
+  getSize(id: number): Observable<{ data: any }> {
+    return this.http.get<{ data: any }>(`${this.apiUrl}/admin/sizes/${id}`);
+  }
+
+  updateSize(id: number, data: any): Observable<{ message: string; data: any }> {
+    return this.http.put<{ message: string; data: any }>(`${this.apiUrl}/admin/sizes/${id}`, data);
+  }
 }

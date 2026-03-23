@@ -7,6 +7,7 @@ use App\Models\Attack;
 use App\Models\Bag;
 use App\Models\BagItem;
 use App\Models\Item;
+use App\Models\Size;
 use App\Models\StatusEffect;
 use App\Models\Type;
 use App\Models\User;
@@ -263,7 +264,7 @@ class AdminController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255|unique:items,name',
                 'description' => 'required|string',
-                'effect_type' => 'required|in:Heal,DMG Up,Defense Up,Revive,Remove Status Effects,Apply Status Effects,Evolve',
+                'effect_type' => 'required|in:Heal,DMG Up,Defense Up,Gacha Ticket,Remove Status Effects,Apply Status Effects,Evolve',
                 'effect_value' => 'nullable|integer|min:0',
                 'is_stackable' => 'required|boolean',
                 'max_quantity' => 'required|integer|min:1|max:5',
@@ -439,7 +440,7 @@ class AdminController extends Controller
             $rules = [
                 'name' => 'required|string|max:255|unique:items,name,'.$id,
                 'description' => 'required|string',
-                'effect_type' => 'required|in:Heal,DMG Up,Defense Up,Revive,Remove Status Effects,Apply Status Effects,Evolve',
+                'effect_type' => 'required|in:Heal,DMG Up,Defense Up,Gacha Ticket,Remove Status Effects,Apply Status Effects,Evolve',
                 'effect_value' => 'nullable|integer|min:0',
                 'is_stackable' => 'required|boolean',
                 'max_quantity' => 'required|integer|min:1|max:5',
@@ -567,6 +568,9 @@ class AdminController extends Controller
     {
         $usedSlots = 0;
         foreach ($bagItems as $bagItem) {
+            if (! $bagItem->item || $bagItem->item->excludedFromPlayerInventory()) {
+                continue;
+            }
             if ($bagItem->item->is_stackable) {
                 $maxQty = $bagItem->item->max_quantity ?? 1;
                 $slots = ceil($bagItem->quantity / $maxQty);
@@ -635,6 +639,97 @@ class AdminController extends Controller
                 'errors' => [
                     'server' => [$e->getMessage()],
                 ],
+            ], 500);
+        }
+    }
+
+    public function getAllSizes(): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $sizes = Size::orderBy('id')->get();
+
+            return response()->json(['data' => $sizes]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not retrieve sizes',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function getSize(int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $size = Size::find($id);
+            if (! $size) {
+                return response()->json(['message' => 'Size not found'], 404);
+            }
+
+            return response()->json(['data' => $size]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not retrieve size',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function updateSize(Request $request, int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $size = Size::find($id);
+            if (! $size) {
+                return response()->json(['message' => 'Size not found'], 404);
+            }
+
+            if ($size->size === 'Small') {
+                return response()->json(['message' => 'The Small size cannot be edited.'], 403);
+            }
+
+            $validated = $request->validate([
+                'requirement_progress' => 'required|integer|min:0',
+            ]);
+
+            DB::transaction(function () use ($size, $validated) {
+                $size->update([
+                    'requirement_progress' => (int) $validated['requirement_progress'],
+                ]);
+                Size::reconcileAllAdquiredXuxemonSizes();
+            });
+
+            $size->refresh();
+
+            return response()->json([
+                'message' => 'Size updated successfully',
+                'data' => $size,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not update size',
+                'errors' => ['server' => [$e->getMessage()]],
             ], 500);
         }
     }

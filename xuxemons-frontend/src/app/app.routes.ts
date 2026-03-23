@@ -7,14 +7,16 @@ import { Inventory } from './pages/inventory/inventory';
 import { Friends } from './pages/friends/friends';
 import { Profile } from './pages/profile/profile';
 import { EditProfile } from './pages/edit-profile/edit-profile';
-import { Admin } from './pages/admin/admin';
-import { AdminItems } from './pages/admin-items/admin-items';
-import { AdminXuxemons } from './pages/admin-xuxemons/admin-xuxemons';
-import { AdminNewItem } from './pages/admin-new-item/admin-new-item';
-import { AdminNewXuxemon } from './pages/admin-new-xuxemon/admin-new-xuxemon';
-import { AdminEditItem } from './pages/admin-edit-item/admin-edit-item';
-import { AdminEditXuxemon } from './pages/admin-edit-xuxemon/admin-edit-xuxemon';
-import { AdminGiveItem } from './pages/admin-give-item/admin-give-item';
+import { Admin } from './pages/admin-pages/admin/admin';
+import { AdminItems } from './pages/admin-pages/admin-items/admin-items';
+import { AdminXuxemons } from './pages/admin-pages/admin-xuxemons/admin-xuxemons';
+import { AdminNewItem } from './pages/admin-pages/admin-new-item/admin-new-item';
+import { AdminNewXuxemon } from './pages/admin-pages/admin-new-xuxemon/admin-new-xuxemon';
+import { AdminEditItem } from './pages/admin-pages/admin-edit-item/admin-edit-item';
+import { AdminEditXuxemon } from './pages/admin-pages/admin-edit-xuxemon/admin-edit-xuxemon';
+import { AdminEvolve } from './pages/admin-pages/admin-evolve/admin-evolve';
+import { AdminEditEvolve } from './pages/admin-pages/admin-edit-evolve/admin-edit-evolve';
+import { AdminGiveItem } from './pages/admin-pages/admin-give-item/admin-give-item';
 import { authGuard } from './guard/auth-guard';
 import { adminGuard } from './guard/admin-guard';
 import { adminGiveItemGuard } from './guard/admin-give-item.guard';
@@ -90,6 +92,13 @@ export const routes: Routes = [
         path: 'give-item/:userId',
         component: AdminGiveItem,
         canActivate: [adminGiveItemGuard],
+      },
+      {
+        path: 'evolve',
+        children: [
+          { path: '', component: AdminEvolve },
+          { path: 'edit-evolve/:id', component: AdminEditEvolve },
+        ],
       },
     ],
   },

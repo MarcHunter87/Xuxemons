@@ -46,6 +46,20 @@
   transform: translateY(0) scale(0.98);
 }
 
+.admin-nav-btn-evolve {
+  background-color: var(--evolve-color);
+  color: var(--white-color);
+}
+
+.admin-nav-btn-evolve:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px var(--evolve-glow);
+}
+
+.admin-nav-btn-evolve:active {
+  transform: translateY(0) scale(0.98);
+}
+
 .loading-state,
 .error-state,
 .empty-state {
