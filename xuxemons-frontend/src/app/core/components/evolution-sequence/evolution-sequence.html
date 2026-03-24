@@ -1,24 +1,15 @@
 <div class="evolution-overlay" role="dialog" aria-modal="true" [attr.aria-label]="'Evolución de ' + spriteName">
-  <video
-    class="evolution-video"
-    [src]="videoSrc"
-    autoplay
-    muted
-    loop
-    playsinline>
+  <video class="evolution-video" src="http://localhost:8080/FondoEvolucion.mp4" autoplay muted loop playsinline>
   </video>
 
-  <div class="evolution-video-tint"></div>
+  <audio #evolutionAudio src="http://localhost:8080/Xuxemon_evolving.mp3" preload="auto"></audio>
 
   <div class="gacha-shake-wrapper">
-    <div
-      class="evolution-stage"
-      [style.--from-scale]="fromScale"
-      [style.--to-scale]="toScale">
-      
+    <div class="evolution-stage" [style.--from-scale]="fromScale" [style.--to-scale]="toScale">
+
       <div class="gacha-magic-circle-1"></div>
       <div class="gacha-magic-circle-2"></div>
-      
+
       <div class="gacha-beams"></div>
 
       <div class="energy-ball-container">
@@ -27,6 +18,8 @@
         <div class="energy-ball-glow"></div>
         <div class="energy-ball-arcs energy-ball-arcs-1"></div>
         <div class="energy-ball-arcs energy-ball-arcs-2"></div>
+        <div class="energy-ball-arcs energy-ball-arcs-3"></div>
+        <div class="energy-ball-arcs energy-ball-arcs-4"></div>
       </div>
 
       <div class="gacha-shockwave-1"></div>
@@ -34,21 +27,19 @@
       <div class="gacha-shockwave-3"></div>
 
       <div class="evolution-particles">
-        @for (i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]; track i) {
-          <div class="particle"></div>
+        @for (i of
+        [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];
+        track i) {
+        <div class="particle"></div>
         }
       </div>
 
       <div class="evolution-flash"></div>
 
       <div class="sprite-centering-container">
-        <img
-          class="evolution-sprite"
-          [src]="spriteUrl"
-          [alt]="spriteName" />
+        <img class="evolution-sprite" [src]="spriteUrl" [alt]="spriteName" />
       </div>
 
     </div>
   </div>
 </div>
-

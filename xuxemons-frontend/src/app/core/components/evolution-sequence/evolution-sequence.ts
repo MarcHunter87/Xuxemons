@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { XuxemonSize } from '../../interfaces';
 
 @Component({
@@ -7,18 +7,26 @@ import { XuxemonSize } from '../../interfaces';
     templateUrl: './evolution-sequence.html',
     styleUrl: './evolution-sequence.css',
 })
-export class EvolutionSequence implements OnInit, OnDestroy {
+export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
     @Input({ required: true }) spriteUrl = '';
     @Input({ required: true }) spriteName = '';
     @Input({ required: true }) fromSize: XuxemonSize = 'Small';
     @Input({ required: true }) toSize: XuxemonSize = 'Medium';
-    @Input() videoSrc = 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4';
     @Output() finished = new EventEmitter<void>();
+
+    @ViewChild('evolutionAudio') audioEl!: ElementRef<HTMLAudioElement>;
 
     private finishTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
     ngOnInit(): void {
-        this.finishTimeoutId = setTimeout(() => this.finish(), 9800);
+        this.finishTimeoutId = setTimeout(() => this.finish(), 10000);
+    }
+
+    ngAfterViewInit(): void {
+        if (this.audioEl && this.audioEl.nativeElement) {
+            this.audioEl.nativeElement.volume = 0.6;
+            this.audioEl.nativeElement.play().catch(e => console.warn('Audio playback prevented by browser policy', e));
+        }
     }
 
     ngOnDestroy(): void {
