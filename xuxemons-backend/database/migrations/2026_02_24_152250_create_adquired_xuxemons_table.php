@@ -21,6 +21,10 @@ return new class extends Migration
             $table->unsignedInteger('experience')->default(0);
             $table->unsignedBigInteger('size_id')->default(1);
             $table->unsignedInteger('requirement_progress')->default(0);
+            $table->integer('bonus_hp')->default(0);
+            $table->integer('bonus_attack')->default(0);
+            $table->integer('bonus_defense')->default(0);
+            $table->foreignId('status_effect_id')->nullable()->constrained('status_effects')->nullOnDelete();
             $table->timestamps();
         });
     }

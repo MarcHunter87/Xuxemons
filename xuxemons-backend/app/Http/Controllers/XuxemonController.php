@@ -103,14 +103,13 @@ class XuxemonController extends Controller
             'bonus_attack' => rand(1, 20),
             'bonus_defense' => rand(1, 20),
         ]);
-        $maxHp = $adquired->hp;
-        $adquired->update(['current_hp' => $maxHp]);
 
         $adquired->load('xuxemon.type', 'xuxemon.attack1.statusEffect', 'xuxemon.attack2.statusEffect');
         $xuxemon = $adquired->xuxemon->toArray();
+        $maxHp = $adquired->hp;
         $xuxemon['level'] = $adquired->level;
         $xuxemon['hp'] = $maxHp;
-        $xuxemon['current_hp'] = $maxHp;
+        $xuxemon['current_hp'] = (int) $adquired->current_hp;
         $xuxemon['attack'] = $adquired->attack;
         $xuxemon['defense'] = $adquired->defense;
         $xuxemon['size'] = $adquired->size;

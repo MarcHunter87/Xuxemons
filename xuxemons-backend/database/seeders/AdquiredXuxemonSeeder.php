@@ -27,9 +27,9 @@ class AdquiredXuxemonSeeder extends Seeder
                 [
                     'level' => 1,
                     'experience' => 0,
-                    'bonus_hp' => 0,
-                    'bonus_attack' => 0,
-                    'bonus_defense' => 0,
+                    'bonus_hp' => 7,
+                    'bonus_attack' => 7,
+                    'bonus_defense' => 7,
                     'status_effect_id' => $paralysisId,
                     'created_at' => now(),
                     'updated_at' => now(),
