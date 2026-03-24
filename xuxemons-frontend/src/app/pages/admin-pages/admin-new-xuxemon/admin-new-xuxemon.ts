@@ -3,9 +3,9 @@ import { Component, HostListener, OnInit, computed, inject, signal } from '@angu
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AdminDropdownOption } from '../../core/interfaces';
-import { AdminService } from '../../core/services/admin';
-import { AuthService } from '../../core/services/auth';
+import { AdminDropdownOption } from '../../../core/interfaces';
+import { AdminService } from '../../../core/services/admin';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-admin-new-xuxemon',

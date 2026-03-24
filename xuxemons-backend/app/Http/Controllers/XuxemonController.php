@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdquiredXuxemon;
+use App\Models\Bag;
+use App\Models\BagItem;
+use App\Models\Item;
 use App\Models\Xuxemon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,7 +57,8 @@ class XuxemonController extends Controller
             $query->whereHas('xuxemon.type', fn ($q) => $q->where('name', $request->input('type')));
         }
         if ($request->filled('size')) {
-            $query->where('size', $request->input('size'));
+            $sizeId = DB::table('sizes')->where('size', $request->input('size'))->value('id');
+            $query->where('size_id', $sizeId);
         }
 
         $myXuxemons = $query->orderBy('created_at', 'desc')
@@ -71,7 +75,7 @@ class XuxemonController extends Controller
                 $x['current_hp'] = $a->getAttribute('current_hp') !== null ? (int) $a->current_hp : $maxHp;
                 $x['attack'] = $a->attack;
                 $x['defense'] = $a->defense;
-                $x['size'] = $a->size ?? 'Small';
+                $x['size'] = $a->size;
                 $x['adquired_id'] = $a->id;
                 $x['status_effect_applied'] = $a->statusEffect;
 
@@ -109,7 +113,7 @@ class XuxemonController extends Controller
         $xuxemon['current_hp'] = $maxHp;
         $xuxemon['attack'] = $adquired->attack;
         $xuxemon['defense'] = $adquired->defense;
-        $xuxemon['size'] = $adquired->size ?? 'Small';
+        $xuxemon['size'] = $adquired->size;
 
         return $xuxemon;
     }
@@ -122,12 +126,56 @@ class XuxemonController extends Controller
                 return response()->json(['message' => 'Unauthorized'], 401);
             }
 
-            $xuxemon = $this->getRandomXuxemon($userId);
-            if ($xuxemon === null) {
+            if (! Xuxemon::query()->exists()) {
                 return response()->json(['message' => 'No Xuxemons available'], 404);
             }
 
-            return response()->json($xuxemon);
+            $payload = DB::transaction(function () use ($userId) {
+                $bag = Bag::where('user_id', $userId)->first();
+                if (! $bag) {
+                    return ['error' => 'no_bag'];
+                }
+
+                $ticketId = Item::where('effect_type', 'Gacha Ticket')->value('id');
+                if (! $ticketId) {
+                    return ['error' => 'config'];
+                }
+
+                $bagItem = BagItem::where('bag_id', $bag->id)->where('item_id', $ticketId)->first();
+                if (! $bagItem || $bagItem->quantity < 1) {
+                    return ['error' => 'no_tickets'];
+                }
+
+                $bagItem->reduceQuantity(1);
+
+                $remaining = (int) (BagItem::where('bag_id', $bag->id)->where('item_id', $ticketId)->value('quantity') ?? 0);
+
+                $xuxemon = $this->getRandomXuxemon($userId);
+                if ($xuxemon === null) {
+                    return ['error' => 'no_xuxemon'];
+                }
+
+                return ['xuxemon' => $xuxemon, 'remaining' => $remaining];
+            });
+
+            if (isset($payload['error'])) {
+                if ($payload['error'] === 'no_tickets') {
+                    return response()->json(['message' => 'Not enough gacha tickets'], 402);
+                }
+                if ($payload['error'] === 'no_xuxemon') {
+                    return response()->json(['message' => 'No Xuxemons available'], 404);
+                }
+                if ($payload['error'] === 'no_bag') {
+                    return response()->json(['message' => 'No bag found'], 500);
+                }
+                if ($payload['error'] === 'config') {
+                    return response()->json(['message' => 'Gacha ticket item not configured'], 500);
+                }
+            }
+
+            return response()->json(array_merge($payload['xuxemon'], [
+                'gacha_tickets_remaining' => $payload['remaining'],
+            ]));
         } catch (\Throwable $e) {
             return response()->json(['message' => 'Server error: '.$e->getMessage()], 500);
         }

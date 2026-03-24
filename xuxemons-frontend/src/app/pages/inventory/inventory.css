@@ -545,23 +545,15 @@ button.item-slot:focus {
 }
 
 .action-buttons .btn-primary:focus-visible:not(:disabled) {
-  outline: none;
-  transform: translateY(-3px);
-  box-shadow:
-    0 8px 20px var(--accent-glow),
-    0 0 0 2px var(--white-color),
-    0 0 0 5px var(--accent-color);
-  background: linear-gradient(135deg, var(--accent-on-light) 0%, var(--accent-color) 100%);
+  transform: none;
+  background: var(--accent-color);
+  background-image: none;
 }
 
 .action-buttons .btn-danger:focus-visible:not(:disabled) {
-  outline: none;
-  transform: translateY(-3px);
-  box-shadow:
-    0 8px 20px var(--danger-glow),
-    0 0 0 2px var(--white-color),
-    0 0 0 5px var(--accent-color);
-  background: linear-gradient(135deg, var(--danger-color-2) 0%, var(--danger-color-2) 100%);
+  transform: none;
+  background: var(--danger-color);
+  background-image: none;
 }
 
 /* Discard quantity picker */
@@ -712,15 +704,14 @@ button.item-slot:focus {
   box-shadow: inset 0 0 0 2px var(--accent-color);
 }
 
-.use-item-xuxemon-btn:focus {
+.use-item-xuxemon-btn:focus:not(:focus-visible) {
   outline: none;
 }
 
 .use-item-xuxemon-btn:focus-visible {
-  background: var(--accent-alpha-10);
-  box-shadow:
-    0 0 0 2px var(--white-color),
-    0 0 0 5px var(--accent-color);
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 .use-item-xuxemon-img {
@@ -765,15 +756,8 @@ button.item-slot:focus {
   justify-content: flex-end;
 }
 
-.use-item-actions .btn:focus {
+.use-item-actions .btn:focus:not(:focus-visible) {
   outline: none;
-}
-
-.use-item-actions .btn-primary:focus-visible:not(:disabled),
-.use-item-actions .btn-secondary:focus-visible:not(:disabled) {
-  box-shadow:
-    0 0 0 2px var(--white-color),
-    0 0 0 5px var(--accent-color);
 }
 
 @keyframes fadeInOverlay {

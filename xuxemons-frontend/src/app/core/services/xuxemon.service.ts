@@ -1,6 +1,6 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth';
@@ -213,9 +213,14 @@ export class XuxemonService {
     }
 
     async awardRandomXuxemon(): Promise<Xuxemon | null> {
-        if (!isPlatformBrowser(this.platformId)) return null;
+        if (!isPlatformBrowser(this.platformId)) {
+            return null;
+        }
         try {
             const raw = await firstValueFrom(this.http.post<any>(`${this.apiUrl}/xuxemons/award-random`, {}));
+            if (typeof raw?.gacha_tickets_remaining === 'number') {
+                this.auth.setGachaTicketCount(raw.gacha_tickets_remaining);
+            }
             const data: Xuxemon = {
                 id: raw?.id,
                 name: raw?.name,
@@ -232,6 +237,9 @@ export class XuxemonService {
             await this.loadMyXuxemons();
             return data;
         } catch (error) {
+            if (error instanceof HttpErrorResponse && error.status === 402) {
+                this.auth.refreshGachaTickets();
+            }
             console.error('Error awarding random xuxemon:', error);
             return null;
         }

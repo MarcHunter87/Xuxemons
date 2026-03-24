@@ -6,9 +6,11 @@ use App\Models\AdquiredXuxemon;
 use App\Models\Bag;
 use App\Models\BagItem;
 use App\Models\Item;
+use App\Models\Size;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class InventoryController extends Controller
@@ -22,6 +24,9 @@ class InventoryController extends Controller
     {
         $usedSlots = 0;
         foreach ($bagItems as $bagItem) {
+            if (! $bagItem->item || $bagItem->item->excludedFromPlayerInventory()) {
+                continue;
+            }
             if ($bagItem->item->is_stackable) {
                 // Items stackeables: dividir por max_quantity
                 $maxQty = $bagItem->item->max_quantity ?? 1;
@@ -34,6 +39,38 @@ class InventoryController extends Controller
         }
 
         return $usedSlots;
+    }
+
+    public function getGachaTicketCount(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if (! $user) {
+                return response()->json(['message' => 'User not authenticated'], 401);
+            }
+
+            $bag = Bag::where('user_id', $user->id)->first();
+            if (! $bag) {
+                return response()->json(['data' => ['quantity' => 0]]);
+            }
+
+            $ticketItemId = Item::query()->where('effect_type', 'Gacha Ticket')->value('id');
+            if (! $ticketItemId) {
+                return response()->json(['data' => ['quantity' => 0]]);
+            }
+
+            $quantity = (int) (BagItem::query()
+                ->where('bag_id', $bag->id)
+                ->where('item_id', $ticketItemId)
+                ->value('quantity') ?? 0);
+
+            return response()->json(['data' => ['quantity' => $quantity]]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error retrieving gacha tickets',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -76,6 +113,9 @@ class InventoryController extends Controller
             // Si item stackeable tiene más de max_quantity, se divide en múltiples items
             $inventory = [];
             foreach ($bagItems as $bagItem) {
+                if (! $bagItem->item || $bagItem->item->excludedFromPlayerInventory()) {
+                    continue;
+                }
                 if ($bagItem->item->is_stackable) {
                     $maxQty = $bagItem->item->max_quantity ?? 1;
                     $remaining = $bagItem->quantity;
@@ -168,6 +208,13 @@ class InventoryController extends Controller
                 ->first();
 
             if (! $bagItem) {
+                return response()->json([
+                    'message' => 'Item not found in inventory',
+                    'data' => null,
+                ], 404);
+            }
+
+            if ($bagItem->item->excludedFromPlayerInventory()) {
                 return response()->json([
                     'message' => 'Item not found in inventory',
                     'data' => null,
@@ -526,15 +573,20 @@ class InventoryController extends Controller
 
     private function useSpecialMeat(BagItem $bagItem, AdquiredXuxemon $adquired): array
     {
-        $currentSize = $adquired->size ?? 'Small';
-        $newSize = $currentSize === 'Small' ? 'Medium' : 'Large';
-        $adquired->size = $newSize;
+        $progress = ((int) $adquired->requirement_progress) + 1;
+        $newSize = Size::resolveForProgress($progress);
+
+        $adquired->requirement_progress = $progress;
+        if ($newSize) {
+            $adquired->size_id = $newSize->id;
+        }
         $adquired->save();
 
         $bagItem->reduceQuantity(1);
 
         return [
-            'xuxemon_size' => $newSize,
+            'xuxemon_size' => $newSize?->size ?? 'Small',
+            'requirement_progress' => $adquired->requirement_progress,
             'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
         ];
     }

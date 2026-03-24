@@ -1,4 +1,4 @@
-import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, of, tap, BehaviorSubject } from 'rxjs';
@@ -29,6 +29,23 @@ export class AuthService {
 
   private readonly userSubject = new BehaviorSubject<User | null>(this.getStoredUser());
   user$ = this.userSubject.pipe(delay(0));
+
+  readonly gachaTicketCount = signal(0);
+
+  setGachaTicketCount(n: number): void {
+    this.gachaTicketCount.set(Math.max(0, Math.floor(n)));
+  }
+
+  refreshGachaTickets(): void {
+    if (!this.isBrowser || !this.getToken()) {
+      this.gachaTicketCount.set(0);
+      return;
+    }
+    this.http.get<{ data: { quantity: number } }>(`${this.apiUrl}/inventory/gacha-tickets`).subscribe({
+      next: (r) => this.gachaTicketCount.set(r.data?.quantity ?? 0),
+      error: () => this.gachaTicketCount.set(0),
+    });
+  }
 
   private getStorage(): Storage | null {
     return this.isBrowser ? localStorage : null;
@@ -86,6 +103,7 @@ export class AuthService {
     this.getStorage()?.removeItem('token');
     this.getStorage()?.removeItem('user');
     this.userSubject.next(null);
+    this.gachaTicketCount.set(0);
     this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 

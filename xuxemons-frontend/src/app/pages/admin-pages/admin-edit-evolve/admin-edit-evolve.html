@@ -1,0 +1,56 @@
+<section class="page-hero" aria-labelledby="admin-edit-evolve-title">
+  <h1 id="admin-edit-evolve-title">
+    <span class="page-hero-title-black">Edit evolution requirement</span>
+  </h1>
+  <p class="page-hero-desc">Adjust the progress required to reach this size when using Evolve items.</p>
+</section>
+
+@if (isLoadingSize()) {
+  <div class="loading-state">
+    <span class="stat-card__spinner" aria-hidden="true"></span>
+    <p class="loading-text">Loading size...</p>
+  </div>
+}
+
+@if (!isLoadingSize()) {
+<section class="form-card">
+  @if (errorMessage()) {
+    <p id="admin-edit-evolve-error" class="error-message" role="alert" aria-live="polite">{{ errorMessage() }}</p>
+  }
+  @if (successMessage()) {
+    <p id="admin-edit-evolve-success" class="success-message" role="status" aria-live="polite">{{ successMessage() }}</p>
+  }
+
+  @if (!notEditable()) {
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+      <label class="field">
+        <span>Size</span>
+        <input id="admin-edit-evolve-size-name" type="text" [value]="size()" readonly />
+      </label>
+
+      <label class="field">
+        <span>Requirement Progress</span>
+        <input id="admin-edit-evolve-progress" type="number" min="0" step="1" inputmode="numeric" formControlName="requirement_progress" [attr.aria-invalid]="isFieldInvalid('requirement_progress')" [attr.aria-describedby]="getErrorMessage('requirement_progress') ? 'admin-edit-evolve-progress-error' : null" />
+        @if (getErrorMessage('requirement_progress')) {
+          <p id="admin-edit-evolve-progress-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('requirement_progress') }}</p>
+        }
+      </label>
+
+      <div class="actions field-full">
+        <button type="button" class="btn-secondary" (click)="goBack()">Cancel</button>
+        <button type="submit" class="btn-primary">
+          @if (isSaving()) {
+            <span class="btn-loading-icon" aria-hidden="true"></span>
+          } @else {
+            Save changes
+          }
+        </button>
+      </div>
+    </form>
+  } @else {
+    <div class="actions field-full">
+      <button type="button" class="btn-secondary" (click)="goBack()">Back</button>
+    </div>
+  }
+</section>
+}
