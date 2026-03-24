@@ -107,16 +107,23 @@
       <div class="modal-content animate-pop" (click)="$event.stopPropagation()">
         <h2 class="winner-title">Congratulations!</h2>
         <div class="winner-display">
-          <div
-            class="image-wrapper"
-            [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+          <button
+            type="button"
+            class="winner-image-button"
+            (click)="goToXuxemonDetailsFromRecent(awardedXuxemon()!.id)"
+            [attr.aria-label]="'View ' + (awardedXuxemon()?.name ?? 'Xuxemon') + ' in My Xuxemons'"
           >
-            <img
-              [src]="awardedXuxemon()?.image_url"
-              [alt]="awardedXuxemon()?.name"
-              class="animate-float"
-            />
-          </div>
+            <div
+              class="image-wrapper"
+              [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+            >
+              <img
+                [src]="awardedXuxemon()?.image_url"
+                [alt]="awardedXuxemon()?.name"
+                class="animate-float"
+              />
+            </div>
+          </button>
           <p class="winner-name">{{ awardedXuxemon()?.name }}</p>
           <span
             class="type-badge"
