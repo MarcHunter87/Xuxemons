@@ -14,14 +14,14 @@ import {
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import type { InventoryItem } from '../../core/interfaces';
-import type { Xuxemon } from '../../core/interfaces';
+import { EvolutionSequence } from '../../core/components/evolution-sequence/evolution-sequence';
+import type { InventoryItem, UseItemResponseData, Xuxemon, XuxemonSize } from '../../core/interfaces';
 import { InventoryService } from '../../core/services/inventory.service';
 import { XuxemonService } from '../../core/services/xuxemon.service';
 
 @Component({
     selector: 'app-inventory',
-    imports: [NgClass, FormsModule],
+    imports: [NgClass, FormsModule, EvolutionSequence],
     templateUrl: './inventory.html',
     styleUrl: './inventory.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,6 +53,12 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     readonly discardError = signal<string | null>(null);
     readonly discardApiError = signal<string | null>(null);
     readonly isDiscarding = signal(false);
+    readonly evolutionAnimation = signal<{
+        spriteUrl: string;
+        spriteName: string;
+        fromSize: XuxemonSize;
+        toSize: XuxemonSize;
+    } | null>(null);
 
     readonly maxSlots = this.inventoryService.maxSlots;
 
@@ -208,9 +214,12 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         this.inventoryService.useItem(
             item.bag_item_id,
             xuxemon.adquired_id,
-            () => {
+            (data) => {
                 this.isUsing.set(false);
                 this.closeUseModal();
+                if (item.effect_type === 'Evolve') {
+                    this.openEvolutionAnimation(xuxemon, data);
+                }
                 this.xuxemonService.loadMyXuxemons();
             },
             (msg) => {
@@ -234,6 +243,10 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
 
     cancelDiscard(): void {
         this.inventoryService.cancelDiscard();
+    }
+
+    closeEvolutionAnimation(): void {
+        this.evolutionAnimation.set(null);
     }
 
     @HostListener('document:keydown.escape')
@@ -278,5 +291,23 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         const current = stat === 'attack' ? (xu.attack ?? 0) : (xu.defense ?? 0);
         const gain = Math.round((current * pct) / 100);
         return { boosted: current + gain };
+    }
+    
+    private openEvolutionAnimation(xuxemon: Xuxemon, data?: UseItemResponseData): void {
+        const fromSize = this.normalizeSize(xuxemon.size);
+        const toSize = this.normalizeSize(data?.xuxemon_size, fromSize);
+        this.evolutionAnimation.set({
+            spriteUrl: xuxemon.image_url,
+            spriteName: xuxemon.name ?? 'Xuxemon',
+            fromSize,
+            toSize,
+        });
+    }
+
+    private normalizeSize(value?: string, fallback: XuxemonSize = 'Small'): XuxemonSize {
+        if (value === 'Small' || value === 'Medium' || value === 'Large') {
+            return value;
+        }
+        return fallback;
     }
 }

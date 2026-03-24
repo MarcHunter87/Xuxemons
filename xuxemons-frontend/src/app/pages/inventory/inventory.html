@@ -298,4 +298,13 @@
         </div>
       </div>
     }
+
+    @if (evolutionAnimation(); as animation) {
+      <app-evolution-sequence
+        [spriteUrl]="animation.spriteUrl"
+        [spriteName]="animation.spriteName"
+        [fromSize]="animation.fromSize"
+        [toSize]="animation.toSize"
+        (finished)="closeEvolutionAnimation()" />
+    }
   }

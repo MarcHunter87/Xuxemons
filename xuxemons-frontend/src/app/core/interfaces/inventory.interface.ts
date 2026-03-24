@@ -26,3 +26,12 @@ export interface InventoryItem {
   max_quantity?: number;
   bag_item_id?: number;
 }
+
+export type XuxemonSize = 'Small' | 'Medium' | 'Large';
+
+export interface UseItemResponseData {
+  previous_size?: XuxemonSize;
+  xuxemon_size?: XuxemonSize;
+  requirement_progress: number;
+  remaining_quantity: number;
+}
