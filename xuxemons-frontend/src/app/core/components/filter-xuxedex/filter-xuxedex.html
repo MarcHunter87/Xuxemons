@@ -11,27 +11,111 @@
         type="text"
         placeholder="Search by name..."
         aria-labelledby="xuxedex-search-heading"
-        [ngModel]="searchQuery"
-        (ngModelChange)="onSearchChange($event)"
+        [(ngModel)]="searchInput"
+        (keydown.enter)="applySearchOnEnter(); $event.preventDefault()"
       >
     </div>
 
     <div class="select-box">
-      <select [ngModel]="selectedType" (ngModelChange)="onTypeChange($event)">
-        <option value="">All Types</option>
-        @for (type of typeOptions; track type) {
-        <option [value]="type">{{ type }}</option>
+      <div class="custom-select" (focusout)="onPanelFocusOut($event, 'type')">
+        <button
+          type="button"
+          id="xuxedex-filter-type"
+          class="custom-select-trigger"
+          [attr.aria-expanded]="openPanel() === 'type'"
+          aria-haspopup="listbox"
+          aria-label="Filter by type"
+          (click)="togglePanel('type')"
+          (focus)="openTypeOnFocus()"
+        >
+          <span class="custom-select-label">
+            @if (!appliedType) {
+              <span class="custom-select-placeholder">All Types</span>
+            } @else {
+              <span>{{ appliedType }}</span>
+            }
+          </span>
+          <i class="bi bi-chevron-down" aria-hidden="true"></i>
+        </button>
+        @if (openPanel() === 'type') {
+          <div class="custom-select-backdrop" (click)="closePanels()" aria-hidden="true"></div>
+          <ul class="custom-select-list" role="listbox" aria-labelledby="xuxedex-filter-type">
+            <li
+              role="option"
+              tabindex="0"
+              [attr.aria-selected]="!appliedType"
+              class="custom-select-option"
+              (keydown.enter)="commitTypeAndClose(''); $event.preventDefault()"
+              (click)="commitTypeAndClose('')"
+            >
+              <span>All Types</span>
+            </li>
+            @for (type of typeOptions; track type) {
+              <li
+                role="option"
+                tabindex="0"
+                [attr.aria-selected]="appliedType === type"
+                class="custom-select-option"
+                (keydown.enter)="commitTypeAndClose(type); $event.preventDefault()"
+                (click)="commitTypeAndClose(type)"
+              >
+                <span>{{ type }}</span>
+              </li>
+            }
+          </ul>
         }
-      </select>
+      </div>
     </div>
 
     <div class="select-box">
-      <select [ngModel]="selectedSize" (ngModelChange)="onSizeChange($event)">
-        <option value="">All Sizes</option>
-        @for (size of sizeOptions; track size) {
-        <option [value]="size">{{ size }}</option>
+      <div class="custom-select" (focusout)="onPanelFocusOut($event, 'size')">
+        <button
+          type="button"
+          id="xuxedex-filter-size"
+          class="custom-select-trigger"
+          [attr.aria-expanded]="openPanel() === 'size'"
+          aria-haspopup="listbox"
+          aria-label="Filter by size"
+          (click)="togglePanel('size')"
+          (focus)="openSizeOnFocus()"
+        >
+          <span class="custom-select-label">
+            @if (!appliedSize) {
+              <span class="custom-select-placeholder">All Sizes</span>
+            } @else {
+              <span>{{ appliedSize }}</span>
+            }
+          </span>
+          <i class="bi bi-chevron-down" aria-hidden="true"></i>
+        </button>
+        @if (openPanel() === 'size') {
+          <div class="custom-select-backdrop" (click)="closePanels()" aria-hidden="true"></div>
+          <ul class="custom-select-list" role="listbox" aria-labelledby="xuxedex-filter-size">
+            <li
+              role="option"
+              tabindex="0"
+              [attr.aria-selected]="!appliedSize"
+              class="custom-select-option"
+              (keydown.enter)="commitSizeAndClose(''); $event.preventDefault()"
+              (click)="commitSizeAndClose('')"
+            >
+              <span>All Sizes</span>
+            </li>
+            @for (size of sizeOptions; track size) {
+              <li
+                role="option"
+                tabindex="0"
+                [attr.aria-selected]="appliedSize === size"
+                class="custom-select-option"
+                (keydown.enter)="commitSizeAndClose(size); $event.preventDefault()"
+                (click)="commitSizeAndClose(size)"
+              >
+                <span>{{ size }}</span>
+              </li>
+            }
+          </ul>
         }
-      </select>
+      </div>
     </div>
   </div>
 </div>
