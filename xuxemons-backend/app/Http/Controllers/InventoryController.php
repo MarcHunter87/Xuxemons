@@ -555,9 +555,11 @@ class InventoryController extends Controller
             }
 
             $item = $bagItem->item;
-
+            
             if ($item->effect_type === 'Evolve') {
                 $data = $this->useSpecialMeat($bagItem, $adquired);
+            } else if ($item->effect_type === 'Heal') {
+                $data = $this->applyHealing($bagItem, $adquired);   
             } else {
                 return response()->json(['message' => 'This item cannot be used yet'], 400);
             }
@@ -569,6 +571,43 @@ class InventoryController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error using item', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    private function applyHealing(BagItem $bagItem, AdquiredXuxemon $adquired): array
+    {
+        $item = $bagItem->item;
+
+        // Asegurar que la relación xuxemon esté cargada (necesaria para getHpAttribute)
+        if (! $adquired->relationLoaded('xuxemon')) {
+            $adquired->load('xuxemon');
+        }
+
+        // effect_value es el % de curación sobre la vida máxima
+        $percentage = max(0, (int) $item->effect_value);
+
+        // max_hp = xuxemon->hp (base) + bonus_hp + bonus por nivel (via accessor del modelo)
+        $maxHp      = $adquired->hp;
+        $currentHp  = (int) $adquired->current_hp;
+
+        // Calcular cantidad curada (redondeado al entero más cercano)
+        $healAmount = (int) round($maxHp * $percentage / 100);
+
+        // Aplicar curación sin superar el máximo
+        $newHp = min($currentHp + $healAmount, $maxHp);
+
+        $adquired->current_hp = $newHp;
+        $adquired->save();
+
+        // Consumir 1 unidad del ítem
+        $bagItem->reduceQuantity(1);
+
+        return [
+            'previous_hp'        => $currentHp,
+            'healed_amount'      => $newHp - $currentHp,
+            'current_hp'         => $newHp,
+            'max_hp'             => $maxHp,
+            'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
+        ];
     }
 
     private function useSpecialMeat(BagItem $bagItem, AdquiredXuxemon $adquired): array

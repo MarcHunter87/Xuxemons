@@ -20,7 +20,6 @@ return new class extends Migration
             $table->boolean('is_stackable')->default(true);
             $table->unsignedInteger('max_quantity')->default(5);
             $table->foreignId('status_effect_id')->nullable()->constrained('status_effects')->nullOnDelete();
-            $table->string('icon_path');
             $table->timestamps();
         });
     }

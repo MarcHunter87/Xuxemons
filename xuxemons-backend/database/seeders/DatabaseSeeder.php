@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             TypeSeeder::class,
             BagSeeder::class,
             StatusEffectSeeder::class,
+            SideEffectSeeder::class,
             AttackSeeder::class,
             XuxemonSeeder::class,
             AdquiredXuxemonSeeder::class,
