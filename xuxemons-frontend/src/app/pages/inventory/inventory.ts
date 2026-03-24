@@ -256,4 +256,15 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         const effectType = (item.effect_type || 'default').toLowerCase().trim().replace(/ /g, '-');
         return `icon-bg-${effectType}`;
     }
+
+    /** Devuelve { healed, newHp } para mostrar el preview de curación en el modal */
+    getHealPreview(xu: Xuxemon): { healed: number; newHp: number } {
+        const item = this.selectedItem();
+        const maxHp = xu.hp ?? 0;
+        const currentHp = xu.current_hp ?? maxHp;
+        const pct = item?.effect_value ?? 0;
+        const healed = Math.round(maxHp * pct / 100);
+        const newHp = Math.min(currentHp + healed, maxHp);
+        return { healed, newHp };
+    }
 }
