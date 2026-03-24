@@ -175,10 +175,24 @@
                   [class.selected]="selectedXuxemonForUse()?.adquired_id === xu.adquired_id"
                   (click)="selectXuxemonForUse(xu)">
                   <img [src]="xu.image_url" [alt]="xu.name" class="use-item-xuxemon-img">
-                  <span class="use-item-xuxemon-name">{{ xu.name }}</span>
-                  @if (selectedItem()?.effect_type === 'Evolve') {
-                    <span class="use-item-xuxemon-size">{{ xu.size }}</span>
-                  }
+                  <div class="use-item-xuxemon-info">
+                    <span class="use-item-xuxemon-name">{{ xu.name }}</span>
+                    @if (selectedItem()?.effect_type === 'Evolve') {
+                      <span class="use-item-xuxemon-size">{{ xu.size }}</span>
+                    }
+                    <div class="use-item-xuxemon-stats">
+                      @if (selectedItem()?.effect_type === 'Heal') {
+                        <span class="stat-hp">
+                          ❤️ {{ xu.current_hp ?? xu.hp }}/{{ xu.hp }}
+                          <span class="stat-preview">+{{ getHealPreview(xu).healed }} → {{ getHealPreview(xu).newHp }}</span>
+                        </span>
+                      } @else {
+                        <span class="stat-hp">❤️ {{ xu.hp }}</span>
+                      }
+                      <span class="stat-atk">⚔️ {{ xu.attack }}</span>
+                      <span class="stat-def">🛡️ {{ xu.defense }}</span>
+                    </div>
+                  </div>
                 </button>
               </li>
             } @empty {
