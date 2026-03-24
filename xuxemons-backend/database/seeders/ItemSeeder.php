@@ -28,7 +28,7 @@ class ItemSeeder extends Seeder
             'name' => 'Healing Potion',
             'description' => 'A glowing green potion that restores a portion of your Xuxemon\'s health points during battle.',
             'effect_type' => 'Heal',
-            'effect_value' => 20,
+            'effect_value' => 45,
             'is_stackable' => true,
             'max_quantity' => 5,
             'status_effect_id' => null,

@@ -180,18 +180,54 @@
                     @if (selectedItem()?.effect_type === 'Evolve') {
                       <span class="use-item-xuxemon-size">{{ xu.size }}</span>
                     }
-                    <div class="use-item-xuxemon-stats">
-                      @if (selectedItem()?.effect_type === 'Heal') {
-                        <span class="stat-hp">
-                          ❤️ {{ xu.current_hp ?? xu.hp }}/{{ xu.hp }}
-                          <span class="stat-preview">+{{ getHealPreview(xu).healed }} → {{ getHealPreview(xu).newHp }}</span>
-                        </span>
-                      } @else {
-                        <span class="stat-hp">❤️ {{ xu.hp }}</span>
-                      }
-                      <span class="stat-atk">⚔️ {{ xu.attack }}</span>
-                      <span class="stat-def">🛡️ {{ xu.defense }}</span>
-                    </div>
+                    @if (selectedItem()?.effect_type === 'Remove Status Effects') {
+                      <div class="use-item-status-block" role="group" [attr.aria-label]="'Status effects on ' + xu.name">
+                        @if (xu.statusEffect?.name) {
+                          <div class="use-item-status-chips">
+                            <span class="use-item-status-chip" [title]="xu.statusEffect!.name">
+                              @if (xu.statusEffect?.icon_url) {
+                                <img
+                                  [src]="xu.statusEffect!.icon_url"
+                                  [alt]="xu.statusEffect!.name"
+                                  class="use-item-status-icon"
+                                  width="20"
+                                  height="20"
+                                />
+                              }
+                              <span class="use-item-status-name">{{ xu.statusEffect!.name }}</span>
+                            </span>
+                          </div>
+                        } @else {
+                          <span class="use-item-status-none">None</span>
+                        }
+                      </div>
+                    }
+                    @if (
+                      selectedItem()?.effect_type === 'Heal' ||
+                      selectedItem()?.effect_type === 'DMG Up' ||
+                      selectedItem()?.effect_type === 'Defense Up'
+                    ) {
+                      <div class="use-item-xuxemon-stats">
+                        @if (selectedItem()?.effect_type === 'Heal') {
+                          <span class="stat-hp">
+                            ❤️ {{ xu.current_hp ?? xu.hp }}/{{ xu.hp }}
+                            <span class="stat-preview stat-preview-heal">→ {{ getHealPreview(xu).newHp }}/{{ xu.hp }}</span>
+                          </span>
+                        }
+                        @if (selectedItem()?.effect_type === 'DMG Up') {
+                          <span class="stat-atk">
+                            ⚔️ {{ xu.attack }}
+                            <span class="stat-preview stat-preview-atk">→ {{ getStatBuffPreview(xu, 'attack').boosted }}</span>
+                          </span>
+                        }
+                        @if (selectedItem()?.effect_type === 'Defense Up') {
+                          <span class="stat-def">
+                            🛡️ {{ xu.defense }}
+                            <span class="stat-preview stat-preview-def">→ {{ getStatBuffPreview(xu, 'defense').boosted }}</span>
+                          </span>
+                        }
+                      </div>
+                    }
                   </div>
                 </button>
               </li>

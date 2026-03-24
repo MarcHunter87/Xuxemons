@@ -127,6 +127,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         const item = this.selectedItem();
         const isSpecialMeat = item?.name === 'Special Meat';
         const isHealingItem = item?.effect_type === 'Heal';
+        const isRemoveStatusItem = item?.effect_type === 'Remove Status Effects';
         let filtered = list.filter(
             (x) =>
                 (x.name ?? '').toLowerCase().includes(q) &&
@@ -137,6 +138,9 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         }
         if (isHealingItem) {
             filtered = filtered.filter((x) => (x.current_hp ?? x.hp!) < x.hp!);
+        }
+        if (isRemoveStatusItem) {
+            filtered = filtered.filter((x) => Boolean(x.statusEffect?.name));
         }
         return filtered;
     });
@@ -266,5 +270,13 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         const healed = Math.round(maxHp * pct / 100);
         const newHp = Math.min(currentHp + healed, maxHp);
         return { healed, newHp };
+    }
+
+    getStatBuffPreview(xu: Xuxemon, stat: 'attack' | 'defense'): { boosted: number } {
+        const item = this.selectedItem();
+        const pct = item?.effect_value ?? 0;
+        const current = stat === 'attack' ? (xu.attack ?? 0) : (xu.defense ?? 0);
+        const gain = Math.round((current * pct) / 100);
+        return { boosted: current + gain };
     }
 }
