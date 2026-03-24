@@ -55,6 +55,7 @@
               <th scope="col">Bag status</th>
               <th scope="col" class="col-items">Items</th>
               <th scope="col" class="col-xuxemons">Xuxemons</th>
+              <th scope="col" class="col-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -108,6 +109,23 @@
                     } @else {
                       <i class="bi bi-dice-5" aria-hidden="true"></i>
                       Random
+                    }
+                  </button>
+                </td>
+                <td class="col-actions">
+                  <button
+                    type="button"
+                    class="table-action-btn ban-user-btn"
+                    [disabled]="banLoadingUserId() !== null || awardLoadingUserId() !== null"
+                    (click)="banUser(user)"
+                    [title]="'Ban ' + getUserFullName(user)"
+                    [attr.aria-label]="'Ban ' + getUserFullName(user)"
+                  >
+                    @if (banLoadingUserId() === user.id) {
+                      <span class="btn-loading-icon" aria-hidden="true"></span>
+                    } @else {
+                      <i class="bi bi-person-fill-slash" aria-hidden="true"></i>
+                      Ban
                     }
                   </button>
                 </td>

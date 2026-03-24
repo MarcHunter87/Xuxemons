@@ -18,7 +18,7 @@ class ItemSeeder extends Seeder
             'description' => 'A ticket that allows you to spin the Gacha Machine.',
             'effect_type' => 'Gacha Ticket',
             'effect_value' => null,
-            'is_stackable' => false,
+            'is_stackable' => true,
             'max_quantity' => 99,
             'status_effect_id' => null,
             'icon_path' => 'items/gacha_ticket.png',

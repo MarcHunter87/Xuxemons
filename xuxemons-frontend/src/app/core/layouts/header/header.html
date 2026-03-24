@@ -29,7 +29,6 @@
       @if (user) {
       <a
         routerLink="/gacha"
-        routerLinkActive="active"
         class="gacha-ticket-badge"
         [attr.aria-label]="'Gacha (' + auth.gachaTicketCount() + ')'">
         <span class="gacha-ticket-badge-inner">
@@ -111,7 +110,6 @@
           @if (user) {
           <a
             routerLink="/gacha"
-            routerLinkActive="active"
             class="gacha-ticket-badge"
             [attr.aria-label]="'Gacha (' + auth.gachaTicketCount() + ')'"
             (click)="closeMenu()">

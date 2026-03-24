@@ -16,6 +16,8 @@ import { AuthService } from '../../../core/services/auth';
   styleUrl: './admin-edit-item.css',
 })
 export class AdminEditItem implements OnInit {
+  private readonly defaultMaxQuantityLimit = 5;
+  private readonly gachaTicketMaxQuantityLimit = 99;
   private readonly fb = inject(FormBuilder);
   private readonly adminService = inject(AdminService);
   private readonly auth = inject(AuthService);
@@ -50,7 +52,7 @@ export class AdminEditItem implements OnInit {
     effect_type: ['', [Validators.required]],
     effect_value: [null as number | null, [Validators.min(0), Validators.pattern(/^\d*$/)]],
     is_stackable: [false, [Validators.required]],
-    max_quantity: [{ value: '1', disabled: true }, [Validators.required, Validators.pattern(/^\d+$/), Validators.min(1), Validators.max(5)]],
+    max_quantity: [{ value: '1', disabled: true }, [Validators.required, Validators.pattern(/^\d+$/), Validators.min(1), Validators.max(this.defaultMaxQuantityLimit)]],
     status_effect_id: [null as number | null],
     icon_path: [{ value: this.iconPathPreview(), disabled: true }],
   });
@@ -107,6 +109,7 @@ export class AdminEditItem implements OnInit {
     } else {
       this.form.controls.max_quantity.disable({ emitEvent: false });
     }
+    this.updateMaxQuantityControl(this.form.controls.is_stackable.value);
     this.updateStatusEffectValidators();
     this.iconPathPreview.set(item.icon_path ?? 'items/new_item.png');
     const url = item.icon_path ? this.auth.getAssetUrl(item.icon_path.startsWith('/') ? item.icon_path : `/${item.icon_path}`) : null;
@@ -115,15 +118,7 @@ export class AdminEditItem implements OnInit {
 
   private bindFormLogic(): void {
     this.form.controls.is_stackable.valueChanges.subscribe((stackable) => {
-      const maxQuantityCtrl = this.form.controls.max_quantity;
-      if (stackable) {
-        maxQuantityCtrl.enable({ emitEvent: false });
-        const num = Math.min(5, Math.max(1, Number(maxQuantityCtrl.value ?? 1) || 1));
-        maxQuantityCtrl.setValue(String(num), { emitEvent: false });
-      } else {
-        maxQuantityCtrl.setValue('1', { emitEvent: false });
-        maxQuantityCtrl.disable({ emitEvent: false });
-      }
+      this.updateMaxQuantityControl(stackable);
     });
 
     this.form.controls.effect_type.valueChanges.subscribe((effectType) => {
@@ -135,6 +130,7 @@ export class AdminEditItem implements OnInit {
         statusCtrl.setValue(null, { emitEvent: false });
       }
       statusCtrl.updateValueAndValidity({ emitEvent: false });
+      this.updateMaxQuantityControl(this.form.controls.is_stackable.value);
     });
 
     this.updateStatusEffectValidators();
@@ -196,6 +192,12 @@ export class AdminEditItem implements OnInit {
 
   getSelectedEffectType(): string {
     return this.form.controls.effect_type.value ?? '';
+  }
+
+  getMaxQuantityLimit(): number {
+    return this.getSelectedEffectType() === 'Gacha Ticket'
+      ? this.gachaTicketMaxQuantityLimit
+      : this.defaultMaxQuantityLimit;
   }
 
   selectEffectType(effectType: string): void {
@@ -278,7 +280,7 @@ export class AdminEditItem implements OnInit {
     }
     formData.append('is_stackable', raw.is_stackable ? '1' : '0');
     const maxQty = raw.is_stackable ? (Number(raw.max_quantity) || 1) : 1;
-    formData.append('max_quantity', String(Math.min(5, Math.max(1, maxQty))));
+    formData.append('max_quantity', String(Math.min(this.getMaxQuantityLimit(), Math.max(1, maxQty))));
     if (raw.status_effect_id) {
       formData.append('status_effect_id', String(raw.status_effect_id));
     }
@@ -322,5 +324,21 @@ export class AdminEditItem implements OnInit {
       .replace(/^_+|_+$/g, '') || 'new_item';
     const ext = (originalName?.split('.').pop()?.toLowerCase() ?? 'png').replace(/[^a-z0-9]/g, '') || 'png';
     return `${safeBase}.${ext}`;
+  }
+
+  private updateMaxQuantityControl(stackable: boolean | null): void {
+    const maxQuantityCtrl = this.form.controls.max_quantity;
+    const limit = this.getMaxQuantityLimit();
+    maxQuantityCtrl.setValidators([Validators.required, Validators.pattern(/^\d+$/), Validators.min(1), Validators.max(limit)]);
+
+    if (stackable) {
+      maxQuantityCtrl.enable({ emitEvent: false });
+      const num = Math.min(limit, Math.max(1, Number(maxQuantityCtrl.value ?? 1) || 1));
+      maxQuantityCtrl.setValue(String(num), { emitEvent: false });
+    } else {
+      maxQuantityCtrl.setValue('1', { emitEvent: false });
+      maxQuantityCtrl.disable({ emitEvent: false });
+    }
+    maxQuantityCtrl.updateValueAndValidity({ emitEvent: false });
   }
 }

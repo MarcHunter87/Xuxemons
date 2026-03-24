@@ -21,6 +21,11 @@ export class AdminService {
     return this.http.get<{ data: BagStatus }>(`${this.apiUrl}/users/${encodedUserId}/bag-status`);
   }
 
+  banUser(userId: string): Observable<{ message: string }> {
+    const encodedUserId = encodeURIComponent(userId);
+    return this.http.put<{ message: string }>(`${this.apiUrl}/users/${encodedUserId}/ban`, {});
+  }
+
   getAllItems(): Observable<{ data: Item[] }> {
     return this.http.get<{ data: Item[] }>(`${this.apiUrl}/items`);
   }

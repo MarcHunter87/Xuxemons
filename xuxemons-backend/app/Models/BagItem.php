@@ -59,11 +59,7 @@ class BagItem extends Model
     {
         if ($this->quantity >= $amount) {
             $this->quantity -= $amount;
-            if ($this->quantity === 0) {
-                $this->delete();
-            } else {
-                $this->save();
-            }
+            $this->save();
             return true;
         }
         return false;

@@ -98,6 +98,41 @@ class AdminController extends Controller
         }
     }
 
+    public function banUser(string $userId): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $targetUser = User::where('id', $userId)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $targetUser) {
+                return response()->json(['message' => 'User not found'], 404);
+            }
+
+            $targetUser->update([
+                'is_active' => false,
+                'email' => '',
+            ]);
+
+            return response()->json([
+                'message' => 'User banned successfully.',
+            ]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => "Couldn't ban user.",
+                'errors' => [
+                    'server' => [$e->getMessage()],
+                ],
+            ], 500);
+        }
+    }
+
     public function giveItemToUser(Request $request, string $userId): JsonResponse
     {
         try {
@@ -267,14 +302,15 @@ class AdminController extends Controller
                 'effect_type' => 'required|in:Heal,DMG Up,Defense Up,Gacha Ticket,Remove Status Effects,Apply Status Effects,Evolve',
                 'effect_value' => 'nullable|integer|min:0',
                 'is_stackable' => 'required|boolean',
-                'max_quantity' => 'required|integer|min:1|max:5',
+                'max_quantity' => 'required|integer|min:1|max:99',
                 'status_effect_id' => 'nullable|exists:status_effects,id',
                 'icon' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             ]);
 
             $name = trim((string) $validated['name']);
             $isStackable = (bool) $validated['is_stackable'];
-            $maxQuantity = $isStackable ? min(5, max(1, (int) $validated['max_quantity'])) : 1;
+            $maxLimit = $validated['effect_type'] === 'Gacha Ticket' ? 99 : 5;
+            $maxQuantity = $isStackable ? min($maxLimit, max(1, (int) $validated['max_quantity'])) : 1;
 
             $iconFile = $request->file('icon');
             $ext = $iconFile->getClientOriginalExtension();
@@ -443,7 +479,7 @@ class AdminController extends Controller
                 'effect_type' => 'required|in:Heal,DMG Up,Defense Up,Gacha Ticket,Remove Status Effects,Apply Status Effects,Evolve',
                 'effect_value' => 'nullable|integer|min:0',
                 'is_stackable' => 'required|boolean',
-                'max_quantity' => 'required|integer|min:1|max:5',
+                'max_quantity' => 'required|integer|min:1|max:99',
                 'status_effect_id' => 'nullable|exists:status_effects,id',
                 'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             ];
@@ -451,7 +487,8 @@ class AdminController extends Controller
 
             $name = trim((string) $validated['name']);
             $isStackable = (bool) $validated['is_stackable'];
-            $maxQuantity = $isStackable ? min(5, max(1, (int) $validated['max_quantity'])) : 1;
+            $maxLimit = $validated['effect_type'] === 'Gacha Ticket' ? 99 : 5;
+            $maxQuantity = $isStackable ? min($maxLimit, max(1, (int) $validated['max_quantity'])) : 1;
 
             $update = [
                 'name' => $name,

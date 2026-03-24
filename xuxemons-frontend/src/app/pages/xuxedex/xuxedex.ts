@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FilterXuxedex } from '../../core/components/filter-xuxedex/filter-xuxedex';
 import { Xuxemon, XuxemonService } from '../../core/services/xuxemon.service';
 import { XuxemonCard } from '../../core/components/xuxemon-card/xuxemon-card';
@@ -14,7 +15,11 @@ import { Subscription } from 'rxjs';
 export class Xuxedex implements OnInit, OnDestroy {
   public xuxemonService = inject(XuxemonService);
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private subs = new Subscription();
+  private hasInitializedFiltered = false;
+  private pendingOpenXuxemonId = signal<number | null>(null);
 
   readonly displayXuxemons = signal<Xuxemon[]>([]);
   readonly myXuxemons = signal<Xuxemon[]>([]);
@@ -49,6 +54,8 @@ export class Xuxedex implements OnInit, OnDestroy {
   onMyXuxemonsFilteredChange(xuxemons: Xuxemon[]): void {
     this.filteredMyXuxemons.set(xuxemons);
     this.myXuxemonsCurrentPage.set(0);
+    this.hasInitializedFiltered = true;
+    this.tryOpenPendingXuxemon();
   }
 
   nextMyXuPage() {
@@ -86,10 +93,50 @@ export class Xuxedex implements OnInit, OnDestroy {
     this.xuxemonService.loadAllXuxemons();
     this.xuxemonService.loadMyXuxemons();
     this.subs.add(this.xuxemonService.displayXuxemons.subscribe(list => this.displayXuxemons.set(list)));
-    this.subs.add(this.xuxemonService.myXuxemonsList.subscribe(list => this.myXuxemons.set(list)));
+    this.subs.add(this.xuxemonService.myXuxemonsList.subscribe(list => {
+      this.myXuxemons.set(list);
+      if (!this.hasInitializedFiltered) {
+        this.filteredMyXuxemons.set([...list].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')));
+      }
+      this.tryOpenPendingXuxemon();
+    }));
+    this.subs.add(this.route.queryParamMap.subscribe(params => {
+      const raw = params.get('openXuxemonId');
+      const parsed = raw ? Number(raw) : NaN;
+      this.pendingOpenXuxemonId.set(Number.isFinite(parsed) ? parsed : null);
+      this.tryOpenPendingXuxemon();
+    }));
   }
 
   ngOnDestroy() {
     this.subs.unsubscribe();
+  }
+
+  private tryOpenPendingXuxemon(): void {
+    const targetId = this.pendingOpenXuxemonId();
+    if (!targetId) return;
+
+    const list = this.filteredMyXuxemons();
+    const targetIndex = list.findIndex(x => x.id === targetId);
+    if (targetIndex < 0) return;
+
+    const targetPage = Math.floor(targetIndex / this.itemsPerPage);
+    if (this.myXuxemonsCurrentPage() !== targetPage) {
+      this.myXuxemonsCurrentPage.set(targetPage);
+    }
+
+    setTimeout(() => {
+      const trigger = document.querySelector(`[data-my-xuxemon-id="${targetId}"] .card-button`) as HTMLElement | null;
+      if (!trigger) return;
+
+      trigger.click();
+      this.pendingOpenXuxemonId.set(null);
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { openXuxemonId: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }, 0);
   }
 }

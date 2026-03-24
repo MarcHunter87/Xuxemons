@@ -7,6 +7,18 @@ use Illuminate\Support\Facades\DB;
 
 class AdquiredXuxemon extends Model
 {
+    protected $casts = [
+        'current_hp' => 'integer',
+        'level' => 'integer',
+        'experience' => 'integer',
+        'size_id' => 'integer',
+        'requirement_progress' => 'integer',
+        'bonus_hp' => 'integer',
+        'bonus_attack' => 'integer',
+        'bonus_defense' => 'integer',
+        'status_effect_id' => 'integer',
+    ];
+
     protected $fillable = [
         'user_id',
         'xuxemon_id',
@@ -20,6 +32,21 @@ class AdquiredXuxemon extends Model
         'current_hp',
         'status_effect_id',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (AdquiredXuxemon $model): void {
+            if (! $model->xuxemon_id) {
+                return;
+            }
+            $model->loadMissing('xuxemon');
+            $maxHp = $model->hp;
+            $raw = $model->getAttributes()['current_hp'] ?? null;
+            $model->current_hp = ($raw === null || $raw === '')
+                ? $maxHp
+                : min((int) $raw, $maxHp);
+        });
+    }
 
     public function xuxemon()
     {
