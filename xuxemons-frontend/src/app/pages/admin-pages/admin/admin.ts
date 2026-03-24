@@ -34,6 +34,7 @@ export class Admin implements OnInit {
   readonly showAwardModal = signal(false);
   readonly awardedXuxemon = signal<AwardedXuxemonDisplay | null>(null);
   readonly awardLoadingUserId = signal<string | null>(null);
+  readonly banLoadingUserId = signal<string | null>(null);
   readonly awardError = signal<string | null>(null);
 
   readonly hasContent = computed(() => !this.isLoading() && !this.errorMessage());
@@ -114,6 +115,32 @@ export class Admin implements OnInit {
         this.awardError.set(err?.error?.message ?? 'Failed to award random Xuxemon');
       },
     });
+  }
+
+  banUser(user: AdminUser): void {
+    const confirmed = window.confirm(`Are you sure you want to ban ${this.getUserFullName(user)}?`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.errorMessage.set(null);
+    this.banLoadingUserId.set(user.id);
+    this.adminService
+      .banUser(user.id)
+      .pipe(finalize(() => this.banLoadingUserId.set(null)))
+      .subscribe({
+        next: () => {
+          this.users.update((list) => list.filter((u) => u.id !== user.id));
+          this.bagStatusMap.update((map) => {
+            const next = { ...map };
+            delete next[user.id];
+            return next;
+          });
+        },
+        error: (err) => {
+          this.errorMessage.set(err?.error?.message ?? 'Failed to ban user');
+        },
+      });
   }
 
   closeAwardModal(): void {

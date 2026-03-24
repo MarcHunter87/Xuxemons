@@ -59,7 +59,12 @@
         <h2 class="recent-title">Recently obtained</h2>
         <div class="recent-grid">
           @for (xuxe of historyXuxemons(); track xuxe.id) {
-            <div class="recent-card">
+            <button
+              type="button"
+              class="recent-card"
+              (click)="goToXuxemonDetailsFromRecent(xuxe.id)"
+              [attr.aria-label]="'Open details for ' + xuxe.name"
+            >
               <div
                 class="recent-image-box"
                 [style.background-color]="getTypeColor(xuxe.type.name)"
@@ -72,7 +77,7 @@
                   <span class="recent-date">{{ xuxe.adquired_at | date:'d/M/yy' }}</span>
                 }
               </div>
-            </div>
+            </button>
           }
         </div>
       </div>

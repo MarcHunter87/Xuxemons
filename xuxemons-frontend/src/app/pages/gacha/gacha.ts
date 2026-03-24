@@ -1,6 +1,7 @@
 import { Component, HostListener, inject, signal, OnInit, OnDestroy, ViewChild, ElementRef, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { XuxemonService, Xuxemon } from '../../core/services/xuxemon.service';
 import { AuthService } from '../../core/services/auth';
 
@@ -12,7 +13,9 @@ import { AuthService } from '../../core/services/auth';
     styleUrl: './gacha.css',
 })
 export class Gacha implements OnInit, OnDestroy {
+    private readonly winnerIndex = 80;
     private xuxemonService = inject(XuxemonService);
+    private router = inject(Router);
     readonly auth = inject(AuthService);
     private subs = new Subscription();
 
@@ -55,6 +58,20 @@ export class Gacha implements OnInit, OnDestroy {
         }
     }
 
+    private getWinnerOffsetResponsive(index: number): number {
+        const box = this.rouletteBox?.nativeElement;
+        if (!box) return 0;
+
+        const track = box.querySelector('.roulette-track') as HTMLElement | null;
+        const items = box.querySelectorAll('.roulette-item');
+        const winnerItem = items.item(index) as HTMLElement | null;
+        if (!track || !winnerItem) return 0;
+
+        const containerWidth = box.offsetWidth;
+        const winnerCenter = winnerItem.offsetLeft + (winnerItem.offsetWidth / 2);
+        return (containerWidth / 2) - winnerCenter;
+    }
+
     async spin() {
         if (this.isSpinning()) return;
         if (this.auth.gachaTicketCount() < 1) return;
@@ -68,7 +85,7 @@ export class Gacha implements OnInit, OnDestroy {
         this.trackTransform.set('translateX(0)');
         this.initRoulette();
 
-        const winner = await this.xuxemonService.awardRandomXuxemon();
+        const winner = await this.xuxemonService.awardRandomXuxemonGacha();
 
         if (!winner) {
             this.isSpinning.set(false);
@@ -81,16 +98,14 @@ export class Gacha implements OnInit, OnDestroy {
 
         this.rouletteItems.update(items => {
             const newItems = [...items];
-            newItems[80] = winner;
+            newItems[this.winnerIndex] = winner;
             return newItems;
         });
 
         setTimeout(() => {
             this.noTransition.set(false);
             setTimeout(() => {
-                const itemWidth = 188;
-                const containerWidth = this.rouletteBox?.nativeElement?.offsetWidth ?? 1000;
-                const offset = -(80 * itemWidth) + (containerWidth / 2) - (itemWidth / 2);
+                const offset = this.getWinnerOffsetResponsive(this.winnerIndex);
                 this.trackTransform.set(`translateX(${offset}px)`);
             }, 20);
         }, 50);
@@ -99,7 +114,6 @@ export class Gacha implements OnInit, OnDestroy {
             this.isSpinning.set(false);
             this.awardedXuxemon.set(winner);
             this.showAward.set(true);
-            this.xuxemonService.loadMyXuxemons();
         }, 6200);
     }
 
@@ -117,9 +131,16 @@ export class Gacha implements OnInit, OnDestroy {
         }
     }
 
+    goToXuxemonDetailsFromRecent(xuxemonId: number): void {
+        this.router.navigate(['/xuxedex'], {
+            queryParams: { openXuxemonId: xuxemonId },
+        });
+    }
+
     closeModal() {
         this.showAward.set(false);
         this.awardedXuxemon.set(null);
+        this.xuxemonService.loadMyXuxemons();
     }
 
     closeSpinError(): void {

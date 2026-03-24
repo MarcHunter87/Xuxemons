@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bag;
+use App\Models\BagItem;
+use App\Models\Item;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,6 +51,16 @@ class AuthController extends Controller
             'role' => $isFirstUser ? 'admin' : 'player',
         ]);
 
+        $bag = Bag::firstOrCreate(['user_id' => $user->id]);
+
+        $ticketId = Item::where('effect_type', 'Gacha Ticket')->value('id');
+        if ($ticketId) {
+            BagItem::updateOrCreate(
+                ['bag_id' => $bag->id, 'item_id' => $ticketId],
+                ['quantity' => 6]
+            );
+        }
+
         $token = JWTAuth::fromUser($user);
 
         return response()->json([
@@ -78,7 +91,7 @@ class AuthController extends Controller
         if (!$user->is_active) {
             Auth::guard('api')->logout();
             return response()->json([
-                'message' => 'This account has been deleted.'
+                'message' => 'This account no longer exists.'
             ], 401);
         }
 

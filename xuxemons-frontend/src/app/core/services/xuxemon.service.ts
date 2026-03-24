@@ -212,7 +212,7 @@ export class XuxemonService {
         }
     }
 
-    async awardRandomXuxemon(): Promise<Xuxemon | null> {
+    async awardRandomXuxemonGacha(): Promise<Xuxemon | null> {
         if (!isPlatformBrowser(this.platformId)) {
             return null;
         }
@@ -234,7 +234,6 @@ export class XuxemonService {
                 defense: raw?.defense,
                 attacks: this.mapAttacks(raw ?? {}),
             };
-            await this.loadMyXuxemons();
             return data;
         } catch (error) {
             if (error instanceof HttpErrorResponse && error.status === 402) {

@@ -673,3 +673,24 @@
         padding: 0.55rem 0.6rem;
     }
 }
+
+@media (max-width: 480px) {
+    .modal-stats {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .modal-stat {
+        padding: 0.55rem 0.5rem;
+        border-radius: 14px;
+    }
+
+    .modal-stats .modal-stat:last-child {
+        width: 100%;
+    }
+
+    .stat-label,
+    .stat-value {
+        font-size: 1.35rem;
+    }
+}

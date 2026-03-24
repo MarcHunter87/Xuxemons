@@ -13,7 +13,7 @@
 
     <div class="row g-4">
       @for (xuxemon of paginatedMyXuxemons(); track xuxemon.id) {
-      <article class="col-6 col-md-3 col-xl-2">
+      <article class="col-6 col-md-3 col-xl-2" [attr.data-my-xuxemon-id]="xuxemon.id">
         <app-xuxemon-card [xuxemon]="xuxemon" [showSizeBadge]="true" detailVariant="owned"></app-xuxemon-card>
       </article>
       } @empty {
