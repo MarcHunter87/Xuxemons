@@ -2,7 +2,7 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import type { ApiInventoryItem, InventoryItem } from '../interfaces';
+import type { ApiInventoryItem, InventoryItem, UseItemResponseData } from '../interfaces';
 import { AuthService } from './auth';
 
 export type { ApiInventoryItem, InventoryItem };
@@ -231,18 +231,18 @@ export class InventoryService {
     useItem(
         bagItemId: number,
         adquiredXuxemonId: number,
-        onSuccess?: () => void,
+        onSuccess?: (data?: UseItemResponseData) => void,
         onError?: (message: string) => void,
     ): void {
         this.http
-            .post<{ message: string; data?: { xuxemon_size: string; remaining_quantity: number } }>(
+            .post<{ message: string; data?: UseItemResponseData }>(
                 `${this.apiUrl}/inventory/use`,
                 { bag_item_id: bagItemId, adquired_xuxemon_id: adquiredXuxemonId },
             )
             .subscribe({
-                next: () => {
+                next: (response) => {
                     this.loadInventory();
-                    onSuccess?.();
+                    onSuccess?.(response.data);
                 },
                 error: (err) => {
                     const msg = err?.error?.message ?? err?.message ?? 'Failed to use item.';
