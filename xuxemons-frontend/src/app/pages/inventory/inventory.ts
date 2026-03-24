@@ -126,6 +126,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         const q = this.useSearchQuery().toLowerCase().trim();
         const item = this.selectedItem();
         const isSpecialMeat = item?.name === 'Special Meat';
+        const isHealingItem = item?.effect_type === 'Heal';
         let filtered = list.filter(
             (x) =>
                 (x.name ?? '').toLowerCase().includes(q) &&
@@ -133,6 +134,9 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         );
         if (isSpecialMeat) {
             filtered = filtered.filter((x) => x.size !== 'Large');
+        }
+        if (isHealingItem) {
+            filtered = filtered.filter((x) => (x.current_hp ?? x.hp!) < x.hp!);
         }
         return filtered;
     });
