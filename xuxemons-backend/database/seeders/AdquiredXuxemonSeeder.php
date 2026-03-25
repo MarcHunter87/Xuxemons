@@ -30,6 +30,7 @@ class AdquiredXuxemonSeeder extends Seeder
                     'bonus_hp' => 7,
                     'bonus_attack' => 7,
                     'bonus_defense' => 7,
+                    'current_hp' => 123,
                     'status_effect_id' => $paralysisId,
                     'created_at' => now(),
                     'updated_at' => now(),

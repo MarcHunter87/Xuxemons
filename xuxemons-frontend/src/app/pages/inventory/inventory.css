@@ -625,14 +625,14 @@ button.item-slot:focus {
 
 .use-item-modal-title {
   margin: 0 0 0.25rem;
-  font-size: 1.35rem;
+  font-size: max(1.25rem, 18px);
   font-weight: 700;
   color: var(--text-alt-color);
 }
 
 .use-item-modal-subtitle {
   margin: 0 0 1rem;
-  font-size: 1rem;
+  font-size: max(1rem, 16px);
   color: var(--black-color);
 }
 
@@ -645,7 +645,7 @@ button.item-slot:focus {
   padding: 0.6rem 0.75rem;
   border-radius: 8px;
   border: 1px solid var(--light-gray-color);
-  font-size: 1rem;
+  font-size: max(1rem, 16px);
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -667,7 +667,7 @@ button.item-slot:focus {
 
 .use-item-hint {
   margin: 0 0 0.75rem;
-  font-size: 1rem;
+  font-size: max(1rem, 16px);
   color: var(--text-muted);
 }
 
@@ -733,13 +733,63 @@ button.item-slot:focus {
 
 .use-item-xuxemon-name {
   font-weight: 700;
-  font-size: 1rem;
+  font-size: max(1rem, 16px);
   color: var(--text-alt-color);
 }
 
 .use-item-xuxemon-size {
-  font-size: 1rem;
+  font-size: max(1rem, 16px);
   color: var(--text-muted);
+}
+
+.use-item-status-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.use-item-status-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.use-item-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  min-height: 2.25rem;
+  max-width: 100%;
+  border-radius: 6px;
+  line-height: 1.25;
+  border: 1px solid #6d28d9;
+  box-shadow: 0 2px 8px var(--purple-shadow);
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 55%, #e9d5ff 100%);
+  color: #5b21b6;
+}
+
+.use-item-status-icon {
+  flex-shrink: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  min-width: 1.2rem;
+  min-height: 1.2rem;
+  object-fit: contain;
+}
+
+.use-item-status-name {
+  font-size: max(1rem, 16px);
+  font-weight: 700;
+  color: #5b21b6;
+}
+
+.use-item-status-none {
+  font-size: max(1rem, 16px);
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 /* Stats block inside xuxemon modal row */
@@ -758,7 +808,7 @@ button.item-slot:focus {
 }
 
 .use-item-xuxemon-stats span {
-  font-size: 1rem;
+  font-size: max(1rem, 16px);
   font-weight: 600;
   padding: 0.25rem 0.6rem;
   border-radius: 6px;
@@ -775,16 +825,29 @@ button.item-slot:focus {
 .stat-preview {
   margin-left: 0.3rem;
   font-weight: 700;
-  color: #16a34a !important;
+  font-size: max(1rem, 16px);
   border: none !important;
   background: none !important;
   padding: 0 !important;
+}
+
+.stat-preview-heal {
+  color: var(--potion-heal) !important;
+}
+
+.stat-preview-atk {
+  color: var(--potion-dmg-light) !important;
+}
+
+.stat-preview-def {
+  color: var(--potion-defense-light) !important;
 }
 
 .use-item-empty {
   padding: 1rem;
   text-align: center;
   color: var(--text-muted);
+  font-size: max(1rem, 16px);
 }
 
 .use-item-api-error {
@@ -796,13 +859,17 @@ button.item-slot:focus {
   background: var(--danger-bg-alpha);
   border-radius: 8px;
   color: var(--danger-color);
-  font-size: 1rem;
+  font-size: max(1rem, 16px);
 }
 
 .use-item-actions {
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
+}
+
+.use-item-modal .use-item-actions .btn {
+  font-size: max(16px, 1rem);
 }
 
 .use-item-actions .btn:focus:not(:focus-visible) {
