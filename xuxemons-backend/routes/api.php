@@ -32,6 +32,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/admin/sizes', [AdminController::class, 'getAllSizes']);
     Route::get('/admin/sizes/{id}', [AdminController::class, 'getSize']);
     Route::put('/admin/sizes/{id}', [AdminController::class, 'updateSize']);
+    Route::get('/admin/daily-rewards', [AdminController::class, 'getAllDailyRewards']);
+    Route::get('/admin/daily-rewards/{id}', [AdminController::class, 'getDailyReward']);
+    Route::put('/admin/daily-rewards/{id}', [AdminController::class, 'updateDailyReward']);
     
     // Rutas de Profile
     Route::get('/user', [AuthController::class, 'me']);

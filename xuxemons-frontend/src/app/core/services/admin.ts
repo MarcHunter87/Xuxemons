@@ -2,7 +2,7 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
-import { AdminCreationMeta, AdminUser, BagStatus, Item } from '../interfaces';
+import { AdminCreationMeta, AdminUser, BagStatus, DailyReward, Item } from '../interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -95,5 +95,17 @@ export class AdminService {
 
   updateSize(id: number, data: any): Observable<{ message: string; data: any }> {
     return this.http.put<{ message: string; data: any }>(`${this.apiUrl}/admin/sizes/${id}`, data);
+  }
+
+  getAllDailyRewards(): Observable<{ data: DailyReward[] }> {
+    return this.http.get<{ data: DailyReward[] }>(`${this.apiUrl}/admin/daily-rewards`);
+  }
+
+  getDailyReward(id: number): Observable<{ data: DailyReward }> {
+    return this.http.get<{ data: DailyReward }>(`${this.apiUrl}/admin/daily-rewards/${id}`);
+  }
+
+  updateDailyReward(id: number, data: { time: string; quantity: number }): Observable<{ message: string; data: DailyReward }> {
+    return this.http.put<{ message: string; data: DailyReward }>(`${this.apiUrl}/admin/daily-rewards/${id}`, data);
   }
 }

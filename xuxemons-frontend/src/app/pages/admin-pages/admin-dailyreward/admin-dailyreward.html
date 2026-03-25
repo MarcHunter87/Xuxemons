@@ -1,0 +1,75 @@
+<section class="page-hero" aria-labelledby="admin-dailyreward-title">
+  <h1 id="admin-dailyreward-title">
+    <span class="page-hero-title-black">Daily rewards</span>
+  </h1>
+  <p class="page-hero-desc">Configure when daily rewards are distributed and how many are granted.</p>
+</section>
+
+@if (isLoading()) {
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p class="loading-text">Loading daily rewards...</p>
+  </div>
+}
+
+@if (errorMessage() && !isLoading()) {
+  <div class="error-state">
+    <p class="error-message" role="alert" aria-live="polite">
+      <i class="bi bi-exclamation-triangle"></i>
+      {{ errorMessage() }}
+    </p>
+  </div>
+}
+
+@if (hasContent()) {
+  <div class="players-section">
+    @if (rewards().length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-inbox" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+        <p>No daily rewards found</p>
+      </div>
+    }
+
+    @if (rewards().length > 0) {
+      <div class="players-table-wrapper">
+        <table class="players-table">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Time</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Item</th>
+              <th scope="col" class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (reward of rewards(); track reward.id) {
+              <tr>
+                <td><span class="cell-id">{{ reward.id }}</span></td>
+                <td><span class="cell-name">{{ reward.time }}</span></td>
+                <td><span class="cell-num">{{ reward.quantity }}</span></td>
+                <td>
+                  @if (reward.item_name) {
+                    <span class="cell-name">{{ reward.item_name }}</span>
+                  } @else {
+                    <span class="cell-name">-</span>
+                  }
+                </td>
+                <td class="col-actions">
+                  <div class="col-actions-btns">
+                    <a
+                      [routerLink]="['/admin/daily-rewards/edit', reward.id]"
+                      class="btn btn-edit btn-sm"
+                      [attr.aria-label]="'Edit daily reward ' + reward.id">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}

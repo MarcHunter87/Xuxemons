@@ -23,3 +23,11 @@ export interface AdminCreationMeta {
   attacks: AdminDropdownOption[];
   status_effects: AdminDropdownOption[];
 }
+
+export interface DailyReward {
+  id: number;
+  time: string;
+  quantity: number;
+  item_id: number | null;
+  item_name?: string | null;
+}

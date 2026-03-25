@@ -60,6 +60,20 @@
   transform: translateY(0) scale(0.98);
 }
 
+.admin-nav-btn-daily-rewards {
+  background-color: var(--warning-dark, #c43e00);
+  color: var(--white-color);
+}
+
+.admin-nav-btn-daily-rewards:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--warning-dark, #c43e00) 45%, transparent);
+}
+
+.admin-nav-btn-daily-rewards:active {
+  transform: translateY(0) scale(0.98);
+}
+
 .loading-state,
 .error-state,
 .empty-state {

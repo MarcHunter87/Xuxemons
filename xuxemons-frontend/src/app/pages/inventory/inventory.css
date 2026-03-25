@@ -611,6 +611,21 @@ button.item-slot:focus {
   animation: fadeInOverlay 0.2s ease;
 }
 
+.use-item-modal-backdrop.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.use-item-modal-backdrop.modal .modal-dialog {
+  margin: 0;
+  width: auto;
+  max-width: none;
+  pointer-events: auto;
+}
+
 .use-item-modal {
   width: min(480px, 100%);
   max-height: 85vh;
@@ -621,6 +636,11 @@ button.item-slot:focus {
   box-shadow: 0 20px 45px var(--shadow-color);
   border: 1px solid var(--black-alpha-05);
   animation: popupIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.use-item-modal.modal-content {
+  /* Evitar que Bootstrap cambie el box-model */
+  border: 1px solid var(--black-alpha-05);
 }
 
 .use-item-modal-title {
@@ -719,6 +739,7 @@ button.item-slot:focus {
 }
 
 .use-item-xuxemon-btn:focus-visible {
+  background: var(--accent-alpha-10);
   outline: 3px solid var(--accent-color);
   outline-offset: 2px;
   box-shadow: none;

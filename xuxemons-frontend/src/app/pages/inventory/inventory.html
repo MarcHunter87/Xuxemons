@@ -148,8 +148,16 @@
     </div>
 
     @if (useModalOpen() && selectedItem()) {
-      <div class="use-item-modal-backdrop" (click)="closeUseModal()" role="dialog" aria-modal="true" aria-labelledby="use-item-modal-title">
-        <div class="use-item-modal" (click)="$event.stopPropagation()">
+      <div
+        class="use-item-modal-backdrop modal"
+        tabindex="-1"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="use-item-modal-title"
+        (click)="closeUseModal()"
+      >
+        <div class="modal-dialog" role="document" (click)="$event.stopPropagation()">
+          <div class="use-item-modal modal-content">
           <h2 id="use-item-modal-title" class="use-item-modal-title">Use item on a Xuxemon</h2>
           <p class="use-item-modal-subtitle">Select a Xuxemon to use {{ selectedItem()!.name }} on.</p>
           <div class="use-item-search-wrap">
@@ -262,6 +270,7 @@
                 Use Item
               }
             </button>
+          </div>
           </div>
         </div>
       </div>

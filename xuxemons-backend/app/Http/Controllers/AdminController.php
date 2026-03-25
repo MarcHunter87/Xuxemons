@@ -6,6 +6,7 @@ use App\Models\AdquiredXuxemon;
 use App\Models\Attack;
 use App\Models\Bag;
 use App\Models\BagItem;
+use App\Models\DailyReward;
 use App\Models\Item;
 use App\Models\Size;
 use App\Models\StatusEffect;
@@ -22,6 +23,117 @@ use Throwable;
 
 class AdminController extends Controller
 {
+    public function getAllDailyRewards(): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $rewards = DailyReward::query()
+                ->with('item:id,name')
+                ->orderBy('id')
+                ->get(['id', 'time', 'quantity', 'item_id'])
+                ->map(fn (DailyReward $reward) => [
+                    'id' => $reward->id,
+                    'time' => $reward->time,
+                    'quantity' => (int) $reward->quantity,
+                    'item_id' => $reward->item_id,
+                    'item_name' => $reward->item?->name,
+                ]);
+
+            return response()->json(['data' => $rewards]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not retrieve daily rewards',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function getDailyReward(int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $reward = DailyReward::query()
+                ->with('item:id,name')
+                ->find($id);
+            if (! $reward) {
+                return response()->json(['message' => 'Daily reward not found'], 404);
+            }
+
+            return response()->json([
+                'data' => [
+                    'id' => $reward->id,
+                    'time' => $reward->time,
+                    'quantity' => (int) $reward->quantity,
+                    'item_id' => $reward->item_id,
+                    'item_name' => $reward->item?->name,
+                ],
+            ]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not retrieve daily reward',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function updateDailyReward(Request $request, int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $reward = DailyReward::query()->find($id);
+            if (! $reward) {
+                return response()->json(['message' => 'Daily reward not found'], 404);
+            }
+
+            $validated = $request->validate([
+                'time' => 'required|date_format:H:i',
+                'quantity' => 'required|integer|min:1',
+            ]);
+
+            $reward->update([
+                'time' => $validated['time'].':00',
+                'quantity' => (int) $validated['quantity'],
+            ]);
+            $reward->loadMissing('item:id,name');
+
+            return response()->json([
+                'message' => 'Daily reward updated successfully',
+                'data' => [
+                    'id' => $reward->id,
+                    'time' => $reward->time,
+                    'quantity' => (int) $reward->quantity,
+                    'item_id' => $reward->item_id,
+                    'item_name' => $reward->item?->name,
+                ],
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not update daily reward',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
     public function getAllUsers(): JsonResponse
     {
         try {

@@ -1,0 +1,73 @@
+<section class="page-hero" aria-labelledby="admin-edit-dailyreward-title">
+  <h1 id="admin-edit-dailyreward-title">
+    <span class="page-hero-title-black">Edit daily reward</span>
+  </h1>
+  <p class="page-hero-desc">Update distribution time and amount for this daily reward.</p>
+</section>
+
+@if (isLoadingReward()) {
+  <div class="loading-state">
+    <span class="stat-card__spinner" aria-hidden="true"></span>
+    <p class="loading-text">Loading daily reward...</p>
+  </div>
+}
+
+@if (!isLoadingReward()) {
+  <section class="form-card card">
+    @if (errorMessage()) {
+      <p id="admin-edit-dailyreward-error" class="error-message" role="alert" aria-live="polite">{{ errorMessage() }}</p>
+    }
+    @if (successMessage()) {
+      <p id="admin-edit-dailyreward-success" class="success-message" role="status" aria-live="polite">{{ successMessage() }}</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+      <label class="field">
+        <span>Time</span>
+        <input
+          id="admin-edit-dailyreward-time"
+          type="time"
+          formControlName="time"
+          [attr.aria-invalid]="isFieldInvalid('time')"
+          [attr.aria-describedby]="getErrorMessage('time') ? 'admin-edit-dailyreward-time-error' : null" />
+        @if (getErrorMessage('time')) {
+          <p id="admin-edit-dailyreward-time-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('time') }}</p>
+        }
+      </label>
+
+      <label class="field">
+        <span>Quantity</span>
+        <input
+          id="admin-edit-dailyreward-quantity"
+          type="number"
+          min="1"
+          step="1"
+          inputmode="numeric"
+          formControlName="quantity"
+          [attr.aria-invalid]="isFieldInvalid('quantity')"
+          [attr.aria-describedby]="getErrorMessage('quantity') ? 'admin-edit-dailyreward-quantity-error' : null" />
+        @if (getErrorMessage('quantity')) {
+          <p id="admin-edit-dailyreward-quantity-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('quantity') }}</p>
+        }
+      </label>
+
+      @if (rewardItemId() !== null) {
+        <label class="field field-full">
+          <span>Item</span>
+          <input type="text" [value]="rewardItemName() || rewardItemId()" readonly />
+        </label>
+      }
+
+      <div class="actions field-full">
+        <button type="button" class="btn-secondary" (click)="goBack()">Cancel</button>
+        <button type="submit" class="btn-primary">
+          @if (isSaving()) {
+            <span class="btn-loading-icon" aria-hidden="true"></span>
+          } @else {
+            Save changes
+          }
+        </button>
+      </div>
+    </form>
+  </section>
+}
