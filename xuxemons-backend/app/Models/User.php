@@ -38,6 +38,8 @@ class User extends Authenticatable implements JWTSubject
         'last_seen_at',
         'win_streak',
         'total_battles',
+        'view_animations',
+        'theme',
     ];
 
     /**

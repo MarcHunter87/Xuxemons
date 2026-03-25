@@ -22,6 +22,8 @@ class UserController extends Controller
                 'name' => 'sometimes|string|max:30',
                 'surname' => 'sometimes|string|max:30',
                 'email' => 'sometimes|string|email|max:120|unique:users,email,'.$user->id,
+                'view_animations' => 'sometimes|boolean',
+                'theme' => 'sometimes|string|in:light,dark',
             ], [
                 'email.unique' => 'This email is already being used by another account.',
                 'email.email' => 'Please provide a valid email address.',

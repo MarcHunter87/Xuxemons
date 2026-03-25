@@ -33,6 +33,10 @@ export class EditProfile {
   };
   personalInfoForm: FormGroup;
   passwordForm: FormGroup;
+  settingsForm: FormGroup;
+  settingsError = signal('');
+  settingsSuccess = signal('');
+  isSavingSettings = signal(false);
 
   constructor(
     private authService: AuthService,
@@ -50,6 +54,11 @@ export class EditProfile {
       new_password: ['', [Validators.required, Validators.minLength(6)]],
       confirm_password: ['', [Validators.required, Validators.minLength(6)]],
     });
+    
+    this.settingsForm = this.fb.group({
+      view_animations: [true],
+      theme: ['light'],
+    });
 
     this.user = this.authService.getUser();
 
@@ -57,6 +66,11 @@ export class EditProfile {
       name: this.user?.name ?? '',
       surname: this.user?.surname ?? '',
       email: this.user?.email ?? '',
+    });
+
+    this.settingsForm.patchValue({
+      view_animations: this.user?.view_animations ?? true,
+      theme: this.user?.theme ?? 'light',
     });
 
     if (this.user?.banner_path) {
@@ -107,6 +121,33 @@ export class EditProfile {
           ?? err?.error?.message
           ?? 'Could not update personal information.'
         );
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  updateSettings(): void {
+    this.settingsError.set('');
+    this.settingsSuccess.set('');
+    this.isSavingSettings.set(true);
+
+    const { view_animations, theme } = this.settingsForm.getRawValue();
+
+    this.authService.updatePersonalInfo({
+      view_animations: !!view_animations,
+      theme: theme || 'light',
+    }).subscribe({
+      next: ({ user }) => {
+        this.isSavingSettings.set(false);
+        this.user = user;
+        this.settingsSuccess.set('Settings updated successfully.');
+        this.cdr.detectChanges();
+        // Clear success message after 3 seconds
+        setTimeout(() => this.settingsSuccess.set(''), 3000);
+      },
+      error: err => {
+        this.isSavingSettings.set(false);
+        this.settingsError.set(err?.error?.message || 'Could not update settings.');
         this.cdr.detectChanges();
       }
     });

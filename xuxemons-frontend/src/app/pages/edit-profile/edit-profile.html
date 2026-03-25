@@ -180,6 +180,45 @@
 			</form>
 		</section>
 
+		<section class="form-section" aria-labelledby="settings-title">
+			<h2 id="settings-title" class="block-title">Settings</h2>
+			<p class="section-subtitle">Manage your account preferences.</p>
+			
+			<form class="settings-card" [formGroup]="settingsForm" (ngSubmit)="updateSettings()">
+				<div class="settings-item">
+					<div class="settings-info">
+						<h3>Evolution animations</h3>
+						<p>Enable or disable the animation sequence when a Xuxemon evolves.</p>
+					</div>
+					<label class="switch">
+						<input type="checkbox" formControlName="view_animations">
+						<span class="slider"></span>
+					</label>
+				</div>
+
+				@if (settingsError()) {
+					<p class="form-message form-message-error" role="status" aria-live="polite">{{ settingsError() }}</p>
+				}
+				@if (settingsSuccess()) {
+					<p class="form-message form-message-success" role="status" aria-live="polite">{{ settingsSuccess() }}</p>
+				}
+
+				<hr class="section-divider">
+
+				<div class="actions-row">
+					<button type="submit" class="btn-primary btn-sm" [disabled]="isSavingSettings()" [attr.aria-busy]="isSavingSettings()">
+						@if (isSavingSettings()) {
+							<span class="btn-loading-icon" aria-hidden="true"></span>
+						} @else {
+							Save settings
+						}
+					</button>
+				</div>
+			</form>
+		</section>
+
+		<hr class="section-divider">
+
 		<h2 class="block-title block-title-spaced">Danger Zone</h2>
 		<p class="section-subtitle">Actions here are permanent and cannot be undone.</p>
 		<section class="danger-card" aria-labelledby="danger-title">
