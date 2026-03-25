@@ -82,9 +82,31 @@ export class InventoryService {
         return this.usedSlotsFromBackend$.getValue();
     }
 
-    private getEffectString(effectType: string, effectValue?: number): string {
-        if (!effectValue) return 'Cure all status effects';
+    private getEffectString(effectType: string, effectValue?: number, itemName?: string): string {
+        // Items whose effect does not depend on a numeric value
+        const noValueEffectMap: Record<string, string> = {
+            'Evolve': "Evolve your Xuxemon",
+            'Remove Status Effects': 'Cure all status effects',
+        };
+        if (!effectValue) {
+            if (effectType === 'Remove Status Effects' && itemName) {
+                const name = itemName.toLowerCase();
+                if (name.includes('nulberry')) {
+                    return noValueEffectMap[effectType] ?? `${effectType} effect`;
+                }
+                if (name.includes('red mushroom') || name.includes('redmushroom')) {
+                    return 'Cure Starving';
+                }
+                if (name.includes('yellow mushroom') || name.includes('yellowmushroom')) {
+                    return 'Cure Gluttony';
+                }
+            }
+            return noValueEffectMap[effectType] ?? `${effectType} effect`;
+        }
         const effectMap: Record<string, string> = {
+            Heal: `+${effectValue}% HP`,
+            'DMG Up': `+${effectValue}% ATK`,
+            'Defense Up': `+${effectValue} DEF`,
             healing: `+${effectValue}% HP`,
             mana: `+${effectValue}% Mana`,
             xp: `+${effectValue}% XP`,
@@ -102,7 +124,7 @@ export class InventoryService {
                 category: item.effect_type,
                 type: item.effect_type,
                 description: item.description,
-                effect: this.getEffectString(item.effect_type, item.effect_value),
+                effect: this.getEffectString(item.effect_type, item.effect_value, item.name),
                 effect_type: item.effect_type,
                 effect_value: item.effect_value,
                 is_stackable: item.is_stackable,

@@ -23,7 +23,7 @@ class ItemSeeder extends Seeder
             'status_effect_id' => null,
             'icon_path' => 'items/gacha_ticket.png',
         ]);
-        
+
         Item::create([
             'name' => 'Healing Potion',
             'description' => 'A glowing green potion that restores a portion of your Xuxemon\'s health points during battle.',
@@ -91,6 +91,28 @@ class ItemSeeder extends Seeder
         ]);
 
         Item::create([
+            'name' => 'Red Mushroom',
+            'description' => 'A mystical red mushroom that instantly purges the Starving effect.',
+            'effect_type' => 'Remove Status Effects',
+            'effect_value' => null,
+            'is_stackable' => false,
+            'max_quantity' => 1,
+            'status_effect_id' => null,
+            'icon_path' => 'items/starvingheal.webp',
+        ]);
+
+        Item::create([
+            'name' => 'Yellow Mushroom',
+            'description' => 'A mystical yellow mushroom that instantly purges the Gluttony effect.',
+            'effect_type' => 'Remove Status Effects',
+            'effect_value' => null,
+            'is_stackable' => false,
+            'max_quantity' => 1,
+            'status_effect_id' => null,
+            'icon_path' => 'items/gluttonyheal.webp',
+        ]);
+
+        Item::create([
             'name' => 'Flash',
             'description' => 'A blinding burst of light that obscures an opponent\'s vision and reduces their attack accuracy.',
             'effect_type' => 'Apply Status Effects',
@@ -124,9 +146,9 @@ class ItemSeeder extends Seeder
         ]);
         Item::create([
             'name' => 'Special Meat',
-            'description' => 'A rare delicacy that provides nourishment and mysterious enhancements to a Xuxemon\'s prowess.',
+            'description' => 'A rare delicacy that provides nourishment and mysterious enhancements to a Xuxemon\'s prowess. Size isn\'t everything, unless you\'re a Xuxemon.',
             'effect_type' => 'Evolve',
-            'effect_value' => 20,
+            'effect_value' => null,
             'is_stackable' => true,
             'max_quantity' => 5,
             'status_effect_id' => null,

@@ -17,6 +17,9 @@ class AdquiredXuxemon extends Model
         'bonus_attack' => 'integer',
         'bonus_defense' => 'integer',
         'status_effect_id' => 'integer',
+        'side_effect_id_1' => 'integer',
+        'side_effect_id_2' => 'integer',
+        'side_effect_id_3' => 'integer',
     ];
 
     protected $fillable = [
@@ -31,6 +34,9 @@ class AdquiredXuxemon extends Model
         'bonus_defense',
         'current_hp',
         'status_effect_id',
+        'side_effect_id_1',
+        'side_effect_id_2',
+        'side_effect_id_3',
     ];
 
     protected static function booted(): void

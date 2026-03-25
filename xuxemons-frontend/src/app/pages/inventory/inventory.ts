@@ -287,9 +287,14 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
 
     getStatBuffPreview(xu: Xuxemon, stat: 'attack' | 'defense'): { boosted: number } {
         const item = this.selectedItem();
-        const pct = item?.effect_value ?? 0;
+        const value = item?.effect_value ?? 0;
         const current = stat === 'attack' ? (xu.attack ?? 0) : (xu.defense ?? 0);
-        const gain = Math.round((current * pct) / 100);
+        if (stat === 'defense') {
+            // Defense Up adds flat points
+            return { boosted: current + value };
+        }
+        // DMG Up uses percentage
+        const gain = Math.round((current * value) / 100);
         return { boosted: current + gain };
     }
     

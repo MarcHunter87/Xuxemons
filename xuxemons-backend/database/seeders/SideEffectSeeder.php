@@ -11,9 +11,9 @@ class SideEffectSeeder extends Seeder
     {
         $effects = [
             [
-                'name'        => 'Sugar Drop',
+                'name'        => 'Starving',
                 'description' => 'Has a 5% chance of being applied when consuming an item. The Xuxemon requires 2 more Special Meat per level to grow.',
-                'icon_path'   => 'side effects/suggardrop.png',
+                'icon_path'   => 'side effects/starving.png',
                 'apply_chance' => 5,
             ],
             [
