@@ -12,6 +12,7 @@ export interface User {
   xp?: number;
   win_streak?: number;
   total_battles?: number;
+  theme?: 'light' | 'dark';
 }
 
 export interface RegisterPayload {
@@ -29,9 +30,11 @@ export interface LoginPayload {
 }
 
 export interface UpdatePersonalInfoPayload {
-  name: string;
-  surname: string;
-  email: string;
+  name?: string;
+  surname?: string;
+  email?: string;
+  view_animations?: boolean;
+  theme?: 'light' | 'dark';
 }
 
 export interface UpdatePasswordPayload {
