@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { EvolutionSequence } from '../../core/components/evolution-sequence/evolution-sequence';
 import type { InventoryItem, UseItemResponseData, Xuxemon, XuxemonSize } from '../../core/interfaces';
+import { AuthService } from '../../core/services/auth';
 import { InventoryService } from '../../core/services/inventory.service';
 import { XuxemonService } from '../../core/services/xuxemon.service';
 
@@ -27,6 +28,7 @@ import { XuxemonService } from '../../core/services/xuxemon.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
+    private auth = inject(AuthService);
     private inventoryService = inject(InventoryService);
     private xuxemonService = inject(XuxemonService);
     private elementRef = inject(ElementRef<HTMLElement>);
@@ -294,8 +296,15 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     }
     
     private openEvolutionAnimation(xuxemon: Xuxemon, data?: UseItemResponseData): void {
+        const viewAnimations = this.auth.getUser()?.view_animations ?? true;
+        if (!viewAnimations) {
+            return;
+        }
         const fromSize = this.normalizeSize(xuxemon.size);
         const toSize = this.normalizeSize(data?.xuxemon_size, fromSize);
+        if (toSize === fromSize) {
+            return;
+        }
         this.evolutionAnimation.set({
             spriteUrl: xuxemon.image_url,
             spriteName: xuxemon.name ?? 'Xuxemon',

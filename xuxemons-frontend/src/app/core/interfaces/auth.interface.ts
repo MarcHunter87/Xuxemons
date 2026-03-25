@@ -6,6 +6,7 @@ export interface User {
   role: 'admin' | 'player';
   icon_path?: string | null;
   banner_path?: string | null;
+  view_animations?: boolean;
   updated_at?: string;
   level?: number;
   xp?: number;

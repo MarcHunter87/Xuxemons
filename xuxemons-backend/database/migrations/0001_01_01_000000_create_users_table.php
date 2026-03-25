@@ -28,6 +28,7 @@ return new class extends Migration
             $table->timestamp('last_seen_at')->nullable();
             $table->unsignedInteger('win_streak')->default(0);
             $table->unsignedInteger('total_battles')->default(0);
+            $table->boolean('view_animations')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });
