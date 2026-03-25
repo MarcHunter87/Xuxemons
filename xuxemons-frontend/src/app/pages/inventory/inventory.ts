@@ -319,4 +319,10 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         }
         return fallback;
     }
+
+    getEvolvePreview(xu: Xuxemon): { willEvolve: boolean; fromSize: XuxemonSize; toSize: XuxemonSize } {
+        const fromSize = this.normalizeSize(xu.size);
+        const toSize = this.normalizeSize(xu.next_size, fromSize);
+        return { willEvolve: Boolean(xu.will_evolve_next), fromSize, toSize };
+    }
 }

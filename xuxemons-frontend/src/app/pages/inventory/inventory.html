@@ -178,7 +178,14 @@
                   <div class="use-item-xuxemon-info">
                     <span class="use-item-xuxemon-name">{{ xu.name }}</span>
                     @if (selectedItem()?.effect_type === 'Evolve') {
-                      <span class="use-item-xuxemon-size">{{ xu.size }}</span>
+                      <div class="use-item-xuxemon-stats use-item-xuxemon-stats-evolve" aria-label="Evolution preview">
+                        <span class="stat-evolve">
+                          {{ getEvolvePreview(xu).fromSize }}
+                          @if (getEvolvePreview(xu).willEvolve) {
+                            <span class="stat-preview stat-preview-evolve">→ {{ getEvolvePreview(xu).toSize }}</span>
+                          }
+                        </span>
+                      </div>
                     }
                     @if (selectedItem()?.effect_type === 'Remove Status Effects') {
                       <div class="use-item-status-block" role="group" [attr.aria-label]="'Status effects on ' + xu.name">

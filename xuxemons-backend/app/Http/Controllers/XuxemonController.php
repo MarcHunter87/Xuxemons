@@ -6,6 +6,7 @@ use App\Models\AdquiredXuxemon;
 use App\Models\Bag;
 use App\Models\BagItem;
 use App\Models\Item;
+use App\Models\Size;
 use App\Models\Xuxemon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -77,6 +78,11 @@ class XuxemonController extends Controller
                 $x['defense'] = $a->defense;
                 $x['size'] = $a->size;
                 $x['adquired_id'] = $a->id;
+                $progress = (int) $a->requirement_progress;
+                $x['requirement_progress'] = $progress;
+                $nextSize = Size::resolveForProgress($progress + 1)?->size ?? $x['size'];
+                $x['next_size'] = $nextSize;
+                $x['will_evolve_next'] = $nextSize !== $x['size'];
                 $x['status_effect_applied'] = $a->statusEffect;
 
                 return $x;

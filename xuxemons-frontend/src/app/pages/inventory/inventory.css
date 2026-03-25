@@ -742,6 +742,10 @@ button.item-slot:focus {
   color: var(--text-muted);
 }
 
+.stat-preview-evolve {
+  color: var(--text-alt-color) !important;
+}
+
 .use-item-status-block {
   display: flex;
   flex-direction: column;
@@ -807,6 +811,10 @@ button.item-slot:focus {
   flex-wrap: wrap;
 }
 
+.use-item-xuxemon-stats-evolve {
+  margin-top: 0.15rem;
+}
+
 .use-item-xuxemon-stats span {
   font-size: max(1rem, 16px);
   font-weight: 600;
@@ -821,6 +829,11 @@ button.item-slot:focus {
 .stat-hp   { border-color: #f87171 !important; color: #dc2626 !important; }
 .stat-atk  { border-color: #fb923c !important; color: #ea580c !important; }
 .stat-def  { border-color: #60a5fa !important; color: #2563eb !important; }
+.stat-evolve {
+  border-color: var(--warning-color) !important;
+  color: var(--text-alt-color) !important;
+  background: linear-gradient(135deg, var(--warning-alpha-15) 0%, var(--warning-alpha-10) 100%) !important;
+}
 
 .stat-preview {
   margin-left: 0.3rem;
