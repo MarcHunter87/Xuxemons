@@ -32,6 +32,7 @@ export class Breadcrumb implements OnInit, OnDestroy {
     'edit-xuxemon': 'Edit Xuxemon',
     'evolve': 'Evolution sizes',
     'edit-evolve': 'Edit evolution',
+    'daily-rewards': 'Daily rewards',
     'give-item': 'Give Item',
     'leaderboard': 'Leaderboard',
   };
