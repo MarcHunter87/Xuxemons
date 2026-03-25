@@ -250,12 +250,23 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
 }
 
 .recent-card {
-    border: 0;
-    background: transparent;
-    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid var(--light-gray-color);
+    background: var(--white-color);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    padding: 0.65rem 0.5rem 0.75rem;
     text-align: center;
     width: 140px;
     cursor: pointer;
+    overflow: hidden;
+}
+
+.recent-card:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
 }
 
 .recent-image-box {
@@ -347,6 +358,29 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
     flex-direction: column;
     align-items: center;
     gap: var(--page-section-gap);
+}
+
+.winner-image-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    border-radius: 16px;
+}
+
+.winner-image-button:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 4px;
+}
+
+.winner-image-button:hover .image-wrapper {
+    filter: brightness(1.06);
 }
 
 .image-wrapper {

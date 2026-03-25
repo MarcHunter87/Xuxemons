@@ -132,6 +132,9 @@ export class Gacha implements OnInit, OnDestroy {
     }
 
     goToXuxemonDetailsFromRecent(xuxemonId: number): void {
+        if (!Number.isFinite(xuxemonId)) {
+            return;
+        }
         this.router.navigate(['/xuxedex'], {
             queryParams: { openXuxemonId: xuxemonId },
         });

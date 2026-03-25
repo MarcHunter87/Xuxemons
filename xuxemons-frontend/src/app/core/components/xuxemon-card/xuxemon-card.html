@@ -26,9 +26,16 @@
     </button>
 
     @if (showDetails() && xuxemon) {
-        <div class="xuxemon-modal-overlay" (click)="closeDetails()">
+        <div
+            class="xuxemon-modal-overlay"
+            appFocusTrap
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="xuxemon-card-detail-title"
+            (click)="closeDetails()"
+        >
             <article class="xuxemon-modal-card animate-pop" (click)="$event.stopPropagation()">
-                <button type="button" class="btn-primary btn-sm modal-close" #modalCloseBtn (click)="closeDetails(); $event.stopPropagation()" aria-label="Cerrar">
+                <button type="button" class="btn-primary btn-sm modal-close" (click)="closeDetails(); $event.stopPropagation()" aria-label="Cerrar">
                     <span class="modal-close-icon" aria-hidden="true">×</span>
                 </button>
                 <div class="modal-body">
