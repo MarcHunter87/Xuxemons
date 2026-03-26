@@ -569,11 +569,9 @@ class InventoryController extends Controller
                 return response()->json(['message' => 'This item cannot be used yet'], 400);
             }
 
-            $sideEffectsData = $this->applySideEffects($adquired);
-
             return response()->json([
                 'message' => 'Item used successfully',
-                'data' => array_merge($data, $sideEffectsData),
+                'data' => $data,
             ], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error using item', 'error' => $e->getMessage()], 500);
@@ -668,19 +666,22 @@ class InventoryController extends Controller
 
         if ($name === 'Nulberry') {
             $adquired->status_effect_id = null;
+            $adquired->side_effect_id_1 = null;
+            $adquired->side_effect_id_2 = null;
+            $adquired->side_effect_id_3 = null;
             $adquired->save();
         } elseif ($name === 'Yellow Mushroom'){
-            $gluttonyEffectId = DB::table('side_effects')->where('name', 'Gluttony')->value('id');
-            if ($adquired->status_effect_id === $gluttonyEffectId) {
-                $adquired->status_effect_id = null;
-                $adquired->save();
-            }
+            $adquired->load(['sideEffect1', 'sideEffect2', 'sideEffect3']);
+            if ($adquired->sideEffect1?->name === 'Gluttony') $adquired->side_effect_id_1 = null;
+            if ($adquired->sideEffect2?->name === 'Gluttony') $adquired->side_effect_id_2 = null;
+            if ($adquired->sideEffect3?->name === 'Gluttony') $adquired->side_effect_id_3 = null;
+            $adquired->save();
         } elseif ($name === 'Red Mushroom') {
-            $starvingEffectId = DB::table('side_effects')->where('name', 'Starving')->value('id');
-            if ($adquired->status_effect_id === $starvingEffectId) {
-                $adquired->status_effect_id = null;
-                $adquired->save();
-            }
+            $adquired->load(['sideEffect1', 'sideEffect2', 'sideEffect3']);
+            if ($adquired->sideEffect1?->name === 'Starving') $adquired->side_effect_id_1 = null;
+            if ($adquired->sideEffect2?->name === 'Starving') $adquired->side_effect_id_2 = null;
+            if ($adquired->sideEffect3?->name === 'Starving') $adquired->side_effect_id_3 = null;
+            $adquired->save();
         }
 
         $bagItem->reduceQuantity(1);
@@ -707,6 +708,7 @@ class InventoryController extends Controller
 
         $adquired->bonus_attack = $newBonus;
         $adquired->save();
+        $this->applySideEffects($adquired);
 
         $bagItem->reduceQuantity(1);
 
@@ -733,6 +735,7 @@ class InventoryController extends Controller
 
         $adquired->bonus_defense = $newBonus;
         $adquired->save();
+        $this->applySideEffects($adquired);
 
         $bagItem->reduceQuantity(1);
 
@@ -770,7 +773,7 @@ class InventoryController extends Controller
 
         $adquired->current_hp = $newHp;
         $adquired->save();
-
+        $this->applySideEffects($adquired);
         // Consumir 1 unidad del ítem
         $bagItem->reduceQuantity(1);
 
@@ -787,12 +790,12 @@ class InventoryController extends Controller
     {
         $progress = ((int) $adquired->requirement_progress) + 1;
         $newSize = Size::resolveForProgress($progress);
-
         $adquired->requirement_progress = $progress;
         if ($newSize) {
             $adquired->size_id = $newSize->id;
         }
         $adquired->save();
+        $this->applySideEffects($adquired);
 
         $bagItem->reduceQuantity(1);
 

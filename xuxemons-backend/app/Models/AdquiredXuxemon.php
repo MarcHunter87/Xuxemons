@@ -64,6 +64,21 @@ class AdquiredXuxemon extends Model
         return $this->belongsTo(StatusEffect::class);
     }
 
+    public function sideEffect1()
+    {
+        return $this->belongsTo(SideEffect::class, 'side_effect_id_1');
+    }
+
+    public function sideEffect2()
+    {
+        return $this->belongsTo(SideEffect::class, 'side_effect_id_2');
+    }
+
+    public function sideEffect3()
+    {
+        return $this->belongsTo(SideEffect::class, 'side_effect_id_3');
+    }
+
     public function getSizeAttribute(): string
     {
         $sizeId = $this->attributes['size_id'] ?? 1;

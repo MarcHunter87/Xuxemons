@@ -131,23 +131,51 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         const list = this.myXuxemons();
         const q = this.useSearchQuery().toLowerCase().trim();
         const item = this.selectedItem();
+
         const isSpecialMeat = item?.name === 'Special Meat';
         const isHealingItem = item?.effect_type === 'Heal';
         const isRemoveStatusItem = item?.effect_type === 'Remove Status Effects';
+        const isYellowMushroom = item?.name === 'Yellow Mushroom';
+        const isRedMushroom = item?.name === 'Red Mushroom';
+        const isNulberry = item?.name === 'Nulberry';
+
         let filtered = list.filter(
             (x) =>
                 (x.name ?? '').toLowerCase().includes(q) &&
                 (x.adquired_id != null),
         );
+
         if (isSpecialMeat) {
             filtered = filtered.filter((x) => x.size !== 'Large');
         }
         if (isHealingItem) {
             filtered = filtered.filter((x) => (x.current_hp ?? x.hp!) < x.hp!);
         }
-        if (isRemoveStatusItem) {
+
+        if (isYellowMushroom) {
+            filtered = filtered.filter((x) => 
+                x.side_effect_1?.name === 'Gluttony' || 
+                x.side_effect_2?.name === 'Gluttony' || 
+                x.side_effect_3?.name === 'Gluttony'
+            );
+        } else if (isRedMushroom) {
+            filtered = filtered.filter((x) => 
+                x.side_effect_1?.name === 'Starving' || 
+                x.side_effect_2?.name === 'Starving' || 
+                x.side_effect_3?.name === 'Starving'
+            );
+        } else if (isNulberry) {
+            // Nulberry cures everything (Status AND Side Effects)
+            filtered = filtered.filter((x) => 
+                Boolean(x.statusEffect?.name) || 
+                Boolean(x.side_effect_1?.name) || 
+                Boolean(x.side_effect_2?.name) || 
+                Boolean(x.side_effect_3?.name)
+            );
+        } else if (isRemoveStatusItem) {
             filtered = filtered.filter((x) => Boolean(x.statusEffect?.name));
         }
+
         return filtered;
     });
 
@@ -283,6 +311,15 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         const healed = Math.round(maxHp * pct / 100);
         const newHp = Math.min(currentHp + healed, maxHp);
         return { healed, newHp };
+    }
+
+    isEffectTargeted(effectName: string | undefined, isStatusEffect: boolean = false): boolean {
+        const item = this.selectedItem();
+        if (!item || !effectName) return false;
+        if (item.name === 'Yellow Mushroom' && effectName === 'Gluttony') return true;
+        if (item.name === 'Red Mushroom' && effectName === 'Starving') return true;
+        if (item.name === 'Nulberry') return true; // Cures any status and any side effect
+        return false;
     }
 
     getStatBuffPreview(xu: Xuxemon, stat: 'attack' | 'defense'): { boosted: number } {

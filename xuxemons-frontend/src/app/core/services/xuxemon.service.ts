@@ -101,6 +101,15 @@ export class XuxemonService {
         };
     }
 
+    private mapSideEffect(side: any): { name: string; description?: string; icon_url: string } | undefined {
+        if (!side?.name || !side?.icon_path) return undefined;
+        return {
+            name: side.name,
+            description: side.description,
+            icon_url: this.auth.getAssetUrl(`/${side.icon_path}`),
+        };
+    }
+
     private mapAttacks(x: any): Xuxemon['attacks'] {
         const a1 = x.attack1 ?? x.attack_1;
         const a2 = x.attack2 ?? x.attack_2;
@@ -148,6 +157,7 @@ export class XuxemonService {
         if (!isPlatformBrowser(this.platformId)) return;
         try {
             const raw = await firstValueFrom(this.http.get<any[]>(`${this.apiUrl}/xuxemons/me`));
+            console.log('Xuxemon de mis inventario (raw response):', raw);
             const data = (raw || []).map(x => ({
                 id: x.id,
                 name: x.name,
@@ -156,6 +166,9 @@ export class XuxemonService {
                 adquired_id: x.adquired_id,
                 image_url: this.auth.getAssetUrl(`/${x.icon_path || ''}`),
                 statusEffect: this.mapStatusEffect(x.status_effect_applied),
+                side_effect_1: this.mapSideEffect(x.side_effect_1),
+                side_effect_2: this.mapSideEffect(x.side_effect_2),
+                side_effect_3: this.mapSideEffect(x.side_effect_3),
                 description: x.description,
                 adquired_at: x.adquired_at ?? x.created_at,
                 hp: x.hp,

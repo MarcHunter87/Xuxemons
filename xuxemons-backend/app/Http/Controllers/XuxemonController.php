@@ -51,7 +51,7 @@ class XuxemonController extends Controller
         }
 
         $query = AdquiredXuxemon::where('user_id', $userId)
-            ->with(['xuxemon.type', 'xuxemon.attack1.statusEffect', 'xuxemon.attack2.statusEffect', 'statusEffect']);
+            ->with(['xuxemon.type', 'xuxemon.attack1.statusEffect', 'xuxemon.attack2.statusEffect', 'statusEffect', 'sideEffect1', 'sideEffect2', 'sideEffect3']);
 
         if ($request->filled('type')) {
             $query->whereHas('xuxemon.type', fn ($q) => $q->where('name', $request->input('type')));
@@ -78,6 +78,9 @@ class XuxemonController extends Controller
                 $x['size'] = $a->size;
                 $x['adquired_id'] = $a->id;
                 $x['status_effect_applied'] = $a->statusEffect;
+                $x['side_effect_1'] = $a->sideEffect1;
+                $x['side_effect_2'] = $a->sideEffect2;
+                $x['side_effect_3'] = $a->sideEffect3;
 
                 return $x;
             })

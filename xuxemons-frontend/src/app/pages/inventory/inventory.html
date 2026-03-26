@@ -152,20 +152,62 @@
             <span class="use-item-xuxemon-size">{{ xu.size }}</span>
             }
             @if (selectedItem()?.effect_type === 'Remove Status Effects') {
-            <div class="use-item-status-block" role="group" [attr.aria-label]="'Status effects on ' + xu.name">
-              @if (xu.statusEffect?.name) {
+            <div class="use-item-status-block" role="group" [attr.aria-label]="'Status and side effects on ' + xu.name">
               <div class="use-item-status-chips">
-                <span class="use-item-status-chip" [title]="xu.statusEffect!.name">
-                  @if (xu.statusEffect?.icon_url) {
-                  <img [src]="xu.statusEffect!.icon_url" [alt]="xu.statusEffect!.name" class="use-item-status-icon"
-                    width="20" height="20" onerror="this.style.display='none'" />
-                  }
-                  <span class="use-item-status-name">{{ xu.statusEffect!.name }}</span>
-                </span>
+                @if (xu.statusEffect?.name) {
+                  <span class="use-item-status-chip" [class.is-target]="isEffectTargeted(xu.statusEffect!.name, true)" [title]="xu.statusEffect!.name">
+                    @if (xu.statusEffect?.icon_url) {
+                      <img [src]="xu.statusEffect!.icon_url" [alt]="xu.statusEffect!.name" class="use-item-status-icon"
+                        width="20" height="20" onerror="this.style.display='none'" />
+                    }
+                    <span class="use-item-status-name">
+                      {{ xu.statusEffect!.name }}
+                      @if (isEffectTargeted(xu.statusEffect!.name, true)) {
+                        <i class="bi bi-check-circle-fill ms-1" style="color: #22c55e;"></i>
+                      }
+                    </span>
+                  </span>
+                }
+                @if (xu.side_effect_1?.name) {
+                  <span class="use-item-status-chip side-effect" [class.is-target]="isEffectTargeted(xu.side_effect_1!.name)" [title]="xu.side_effect_1!.name">
+                    <img [src]="xu.side_effect_1!.icon_url" [alt]="xu.side_effect_1!.name" class="use-item-status-icon"
+                      width="20" height="20" onerror="this.style.display='none'" />
+                    <span class="use-item-status-name">
+                      {{ xu.side_effect_1!.name }}
+                      @if (isEffectTargeted(xu.side_effect_1!.name)) {
+                        <i class="bi bi-check-circle-fill ms-1" style="color: #22c55e;"></i>
+                      }
+                    </span>
+                  </span>
+                }
+                @if (xu.side_effect_2?.name) {
+                  <span class="use-item-status-chip side-effect" [class.is-target]="isEffectTargeted(xu.side_effect_2!.name)" [title]="xu.side_effect_2!.name">
+                    <img [src]="xu.side_effect_2!.icon_url" [alt]="xu.side_effect_2!.name" class="use-item-status-icon"
+                      width="20" height="20" onerror="this.style.display='none'" />
+                    <span class="use-item-status-name">
+                      {{ xu.side_effect_2!.name }}
+                      @if (isEffectTargeted(xu.side_effect_2!.name)) {
+                        <i class="bi bi-check-circle-fill ms-1" style="color: #22c55e;"></i>
+                      }
+                    </span>
+                  </span>
+                }
+                @if (xu.side_effect_3?.name) {
+                  <span class="use-item-status-chip side-effect" [class.is-target]="isEffectTargeted(xu.side_effect_3!.name)" [title]="xu.side_effect_3!.name">
+                    <img [src]="xu.side_effect_3!.icon_url" [alt]="xu.side_effect_3!.name" class="use-item-status-icon"
+                      width="20" height="20" onerror="this.style.display='none'" />
+                    <span class="use-item-status-name">
+                      {{ xu.side_effect_3!.name }}
+                      @if (isEffectTargeted(xu.side_effect_3!.name)) {
+                        <i class="bi bi-check-circle-fill ms-1" style="color: #22c55e;"></i>
+                      }
+                    </span>
+                  </span>
+                }
+                @if (!xu.statusEffect?.name && !xu.side_effect_1?.name && !xu.side_effect_2?.name && !xu.side_effect_3?.name) {
+                  <span class="use-item-status-none">None</span>
+                }
               </div>
-              } @else {
-              <span class="use-item-status-none">None</span>
-              }
             </div>
             }
             @if (
