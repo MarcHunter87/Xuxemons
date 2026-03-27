@@ -12,6 +12,21 @@ export interface Xuxemon {
     name: string;
     icon_url: string;
   };
+  side_effect_1?: {
+    name: string;
+    description?: string;
+    icon_url: string;
+  };
+  side_effect_2?: {
+    name: string;
+    description?: string;
+    icon_url: string;
+  };
+  side_effect_3?: {
+    name: string;
+    description?: string;
+    icon_url: string;
+  };
   description?: string;
   adquired_at?: string;
   level?: number;

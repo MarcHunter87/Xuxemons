@@ -6,6 +6,33 @@
         [attr.aria-label]="'View details for ' + (xuxemon?.name ?? 'xuxemon')"
     >
         <div class="card xuxemon-card h-100">
+            @if (showSizeBadge && xuxemon?.size) {
+                <span class="size-label">{{ xuxemon?.size }}</span>
+            }
+
+            <div class="status-effects-container">
+                @if (xuxemon?.statusEffect?.icon_url) {
+                    <span class="status-effect-badge" [attr.aria-label]="'Status effect: ' + (xuxemon?.statusEffect?.name ?? '')" [title]="xuxemon?.statusEffect?.name ?? ''">
+                        <img [src]="xuxemon?.statusEffect?.icon_url ?? ''" [alt]="xuxemon?.statusEffect?.name ?? ''" class="status-effect-icon">
+                    </span>
+                }
+                @if (xuxemon?.side_effect_1?.icon_url) {
+                    <span class="status-effect-badge" [attr.aria-label]="'Side effect: ' + (xuxemon?.side_effect_1?.name ?? '')" [title]="xuxemon?.side_effect_1?.name ?? ''">
+                        <img [src]="xuxemon?.side_effect_1?.icon_url ?? ''" [alt]="xuxemon?.side_effect_1?.name ?? ''" class="status-effect-icon">
+                    </span>
+                }
+                @if (xuxemon?.side_effect_2?.icon_url) {
+                    <span class="status-effect-badge" [attr.aria-label]="'Side effect: ' + (xuxemon?.side_effect_2?.name ?? '')" [title]="xuxemon?.side_effect_2?.name ?? ''">
+                        <img [src]="xuxemon?.side_effect_2?.icon_url ?? ''" [alt]="xuxemon?.side_effect_2?.name ?? ''" class="status-effect-icon">
+                    </span>
+                }
+                @if (xuxemon?.side_effect_3?.icon_url) {
+                    <span class="status-effect-badge" [attr.aria-label]="'Side effect: ' + (xuxemon?.side_effect_3?.name ?? '')" [title]="xuxemon?.side_effect_3?.name ?? ''">
+                        <img [src]="xuxemon?.side_effect_3?.icon_url ?? ''" [alt]="xuxemon?.side_effect_3?.name ?? ''" class="status-effect-icon">
+                    </span>
+                }
+            </div>
+
             <div class="card-body p-0 card-image d-flex align-items-center justify-content-center">
                 <div class="image-frame d-flex align-items-center justify-content-center">
                     <img [src]="xuxemon?.image_url" [alt]="xuxemon?.name" class="img-fluid card-creature-image">
@@ -13,14 +40,6 @@
             </div>
             <div class="card-footer d-flex justify-content-center align-items-center text-center">
                 <h2 class="mb-0 card-name">{{ xuxemon?.name }}</h2>
-                @if (showSizeBadge && xuxemon?.size) {
-                    <span class="size-label">{{ xuxemon?.size }}</span>
-                }
-                @if (xuxemon?.statusEffect?.icon_url) {
-                    <span class="status-effect-badge" [attr.aria-label]="'Status effect: ' + (xuxemon?.statusEffect?.name ?? '')" [title]="xuxemon?.statusEffect?.name ?? ''">
-                        <img [src]="xuxemon?.statusEffect?.icon_url ?? ''" [alt]="xuxemon?.statusEffect?.name ?? ''" class="status-effect-icon">
-                    </span>
-                }
             </div>
         </div>
     </button>
@@ -63,6 +82,24 @@
                                 <span class="status-effect-chip" [title]="xuxemon.statusEffect?.name ?? ''">
                                     <img [src]="xuxemon.statusEffect?.icon_url ?? ''" [alt]="xuxemon.statusEffect?.name ?? ''" class="status-effect-icon">
                                     {{ xuxemon.statusEffect?.name ?? '' }}
+                                </span>
+                            }
+                            @if (isOwnedVariant() && xuxemon.side_effect_1?.icon_url) {
+                                <span class="status-effect-chip side-effect-chip" [title]="xuxemon.side_effect_1?.name ?? ''">
+                                    <img [src]="xuxemon.side_effect_1?.icon_url ?? ''" [alt]="xuxemon.side_effect_1?.name ?? ''" class="status-effect-icon">
+                                    {{ xuxemon.side_effect_1?.name ?? '' }}
+                                </span>
+                            }
+                            @if (isOwnedVariant() && xuxemon.side_effect_2?.icon_url) {
+                                <span class="status-effect-chip side-effect-chip" [title]="xuxemon.side_effect_2?.name ?? ''">
+                                    <img [src]="xuxemon.side_effect_2?.icon_url ?? ''" [alt]="xuxemon.side_effect_2?.name ?? ''" class="status-effect-icon">
+                                    {{ xuxemon.side_effect_2?.name ?? '' }}
+                                </span>
+                            }
+                            @if (isOwnedVariant() && xuxemon.side_effect_3?.icon_url) {
+                                <span class="status-effect-chip side-effect-chip" [title]="xuxemon.side_effect_3?.name ?? ''">
+                                    <img [src]="xuxemon.side_effect_3?.icon_url ?? ''" [alt]="xuxemon.side_effect_3?.name ?? ''" class="status-effect-icon">
+                                    {{ xuxemon.side_effect_3?.name ?? '' }}
                                 </span>
                             }
                         </div>

@@ -17,6 +17,9 @@ class AdquiredXuxemon extends Model
         'bonus_attack' => 'integer',
         'bonus_defense' => 'integer',
         'status_effect_id' => 'integer',
+        'side_effect_id_1' => 'integer',
+        'side_effect_id_2' => 'integer',
+        'side_effect_id_3' => 'integer',
     ];
 
     protected $fillable = [
@@ -31,6 +34,9 @@ class AdquiredXuxemon extends Model
         'bonus_defense',
         'current_hp',
         'status_effect_id',
+        'side_effect_id_1',
+        'side_effect_id_2',
+        'side_effect_id_3',
     ];
 
     protected static function booted(): void
@@ -56,6 +62,21 @@ class AdquiredXuxemon extends Model
     public function statusEffect()
     {
         return $this->belongsTo(StatusEffect::class);
+    }
+
+    public function sideEffect1()
+    {
+        return $this->belongsTo(SideEffect::class, 'side_effect_id_1');
+    }
+
+    public function sideEffect2()
+    {
+        return $this->belongsTo(SideEffect::class, 'side_effect_id_2');
+    }
+
+    public function sideEffect3()
+    {
+        return $this->belongsTo(SideEffect::class, 'side_effect_id_3');
     }
 
     public function getSizeAttribute(): string

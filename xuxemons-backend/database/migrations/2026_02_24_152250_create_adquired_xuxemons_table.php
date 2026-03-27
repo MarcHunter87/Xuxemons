@@ -25,6 +25,9 @@ return new class extends Migration
             $table->integer('bonus_attack')->default(0);
             $table->integer('bonus_defense')->default(0);
             $table->foreignId('status_effect_id')->nullable()->constrained('status_effects')->nullOnDelete();
+            $table->foreignId('side_effect_id_1')->nullable()->constrained('side_effects')->nullOnDelete();
+            $table->foreignId('side_effect_id_2')->nullable()->constrained('side_effects')->nullOnDelete();
+            $table->foreignId('side_effect_id_3')->nullable()->constrained('side_effects')->nullOnDelete();
             $table->timestamps();
         });
     }

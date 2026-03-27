@@ -11,29 +11,29 @@ class SideEffectSeeder extends Seeder
     {
         $effects = [
             [
-                'name'        => 'Sugar Drop',
+                'name' => 'Starving',
                 'description' => 'Has a 5% chance of being applied when consuming an item. The Xuxemon requires 2 more Special Meat per level to grow.',
-                'icon_path'   => 'side effects/suggardrop.png',
+                'icon_path' => 'status effects/starving.png',
                 'apply_chance' => 5,
             ],
             [
-                'name'        => 'Gluttony',
+                'name' => 'Gluttony',
                 'description' => 'Has a 15% chance of being applied when consuming an item. The Xuxemon cannot eat Special Meat.',
-                'icon_path'   => 'side effects/gluttony.png',
+                'icon_path' => 'status effects/gluttony.png',
                 'apply_chance' => 15,
             ],
         ];
 
         foreach ($effects as $effect) {
             DB::table('side_effects')->updateOrInsert(
-                ['name' => $effect['name']],
-                [
-                    'description' => $effect['description'],
-                    'icon_path'   => $effect['icon_path'],
-                    'apply_chance' => $effect['apply_chance'],
-                    'created_at'  => now(),
-                    'updated_at'  => now(),
-                ]
+            ['name' => $effect['name']],
+            [
+                'description' => $effect['description'],
+                'icon_path' => $effect['icon_path'],
+                'apply_chance' => $effect['apply_chance'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
             );
         }
     }
