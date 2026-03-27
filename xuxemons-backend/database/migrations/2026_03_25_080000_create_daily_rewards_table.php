@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('daily_rewards', function (Blueprint $table) {
             $table->id();
+            $table->string('reward_type');
             $table->time('time');
             $table->unsignedInteger('quantity')->default(1);
             $table->foreignId('item_id')->nullable()->constrained('items');

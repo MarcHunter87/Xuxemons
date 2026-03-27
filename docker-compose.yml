@@ -57,6 +57,37 @@ services:
       bash -c " composer install --no-interaction --optimize-autoloader && [ ! -f /var/www/html/.env ] && cp /var/www/html/.env.example /var/www/html/.env || true && php artisan key:generate --no-interaction && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force && echo 'Server started' && apache2-foreground "
 
   # =====================
+  # LARAVEL SCHEDULER
+  # =====================
+  scheduler:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    container_name: xuxemons_scheduler_app
+    restart: always
+    working_dir: /var/www/html
+    volumes:
+      - ./xuxemons-backend:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - xuxemons-network
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${MYSQL_DATABASE}
+      - DB_USERNAME=root
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=http://localhost:${BACKEND_PORT}
+    command: >
+      bash -c "until [ -f /var/www/html/vendor/autoload.php ] && [ -f /var/www/html/.env ]; do sleep 2; done; php artisan schedule:work"
+
+  # =====================
   # ANGULAR
   # =====================
   frontend:

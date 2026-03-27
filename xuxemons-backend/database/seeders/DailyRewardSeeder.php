@@ -19,6 +19,7 @@ class DailyRewardSeeder extends Seeder
 
         DB::table('daily_rewards')->insert([
             [
+                'reward_type' => 'daily_items',
                 'time' => '08:00:00',
                 'quantity' => 10,
                 'item_id' => null,
@@ -26,6 +27,7 @@ class DailyRewardSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'reward_type' => 'daily_xuxemon',
                 'time' => '08:00:00',
                 'quantity' => 1,
                 'item_id' => $gachaTicketId,
