@@ -801,6 +801,35 @@ button.item-slot:focus {
   color: var(--text-muted);
 }
 
+.icon-success {
+  color: var(--potion-heal-light);
+}
+
+.size-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background-color: rgba(168,85,247,0.06);
+  border: 1px solid rgba(168,85,247,0.12);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.size-current {
+  color: var(--text-alt-color);
+  background: transparent;
+}
+.size-arrow {
+  color: var(--dark-gray-color);
+  opacity: 0.9;
+}
+.size-preview {
+  color: var(--evolve-color);
+  background: transparent;
+  box-shadow: 0 2px 6px var(--evolve-glow);
+}
+
 .stat-preview-evolve {
   color: var(--text-alt-color) !important;
 }

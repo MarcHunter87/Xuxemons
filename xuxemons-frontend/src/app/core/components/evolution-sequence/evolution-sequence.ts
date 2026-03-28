@@ -17,6 +17,7 @@ export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('evolutionAudio') audioEl!: ElementRef<HTMLAudioElement>;
 
     private finishTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    private audioStartTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
     ngOnInit(): void {
         this.finishTimeoutId = setTimeout(() => this.finish(), 10000);
@@ -25,13 +26,20 @@ export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
     ngAfterViewInit(): void {
         if (this.audioEl && this.audioEl.nativeElement) {
             this.audioEl.nativeElement.volume = 0.6;
-            this.audioEl.nativeElement.play().catch(e => console.warn('Audio playback prevented by browser policy', e));
+            this.audioStartTimeoutId = setTimeout(() => {
+                this.audioEl.nativeElement.play().catch(e => console.warn('Audio playback prevented by browser policy', e));
+                this.audioStartTimeoutId = null;
+            }, 50);
         }
     }
 
     ngOnDestroy(): void {
         if (this.finishTimeoutId) {
             clearTimeout(this.finishTimeoutId);
+        }
+        if (this.audioStartTimeoutId) {
+            clearTimeout(this.audioStartTimeoutId);
+            this.audioStartTimeoutId = null;
         }
     }
 
