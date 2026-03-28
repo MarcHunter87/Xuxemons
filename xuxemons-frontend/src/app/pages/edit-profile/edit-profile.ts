@@ -55,8 +55,11 @@ export class EditProfile {
       confirm_password: ['', [Validators.required, Validators.minLength(6)]],
     });
     
+    const prefersReducedMotion = typeof window !== 'undefined'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     this.settingsForm = this.fb.group({
-      view_animations: [true],
+      view_animations: [!prefersReducedMotion],
       theme: ['light'],
     });
 
@@ -69,7 +72,7 @@ export class EditProfile {
     });
 
     this.settingsForm.patchValue({
-      view_animations: this.user?.view_animations ?? true,
+      view_animations: this.user?.view_animations ?? !prefersReducedMotion,
       theme: this.user?.theme ?? 'light',
     });
 

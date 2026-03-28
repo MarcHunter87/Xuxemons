@@ -13,15 +13,19 @@ Artisan::command('inspire', function () {
 Schedule::call(function () {
     $dailyXuxemonTime = DailyReward::where('reward_type', 'daily_xuxemon')
         ->value('time');
+    $dailyItemsTime = DailyReward::where('reward_type', 'daily_items')
+        ->value('time');
 
-    if (! $dailyXuxemonTime) {
-        return;
+    $timeFormattedXuxemons = Carbon::parse($dailyXuxemonTime)->format('H:i');
+    $timeFormattedItems = Carbon::parse($dailyItemsTime)->format('H:i');
+
+    if (Carbon::now()->format('H:i') === $timeFormattedXuxemons) {
+        Artisan::call('app:process-daily-xuxemons');
+        echo Artisan::output();
     }
 
-    $timeFormatted = Carbon::parse($dailyXuxemonTime)->format('H:i');
-
-    if (Carbon::now()->format('H:i') === $timeFormatted) {
-        Artisan::call('app:process-daily-xuxemons');
+    if (Carbon::now()->format('H:i') === $timeFormattedItems) {
+        Artisan::call('app:process-daily-items');
         echo Artisan::output();
     }
 })->everyMinute();
