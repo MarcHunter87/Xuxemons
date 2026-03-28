@@ -18,7 +18,7 @@ import { AdminEvolve } from './pages/admin-pages/admin-evolve/admin-evolve';
 import { AdminEditEvolve } from './pages/admin-pages/admin-edit-evolve/admin-edit-evolve';
 import { AdminGiveItem } from './pages/admin-pages/admin-give-item/admin-give-item';
 import { AdminDailyreward } from './pages/admin-pages/admin-dailyreward/admin-dailyreward';
-import { AdminDailyrewardEdit } from './pages/admin-pages/admin-dailyreward-edit/admin-dailyreward-edit';
+import { AdminDailyrewardEdit } from './pages/admin-pages/admin-edit-dailyreward/admin-edit-dailyreward';
 import { authGuard } from './guard/auth-guard';
 import { adminGuard } from './guard/admin-guard';
 import { adminGiveItemGuard } from './guard/admin-give-item.guard';

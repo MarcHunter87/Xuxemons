@@ -7,11 +7,11 @@ import { DailyReward } from '../../../core/interfaces';
 import { AdminService } from '../../../core/services/admin';
 
 @Component({
-  selector: 'app-admin-dailyreward-edit',
+  selector: 'app-admin-edit-dailyreward',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './admin-dailyreward-edit.html',
-  styleUrl: './admin-dailyreward-edit.css',
+  templateUrl: './admin-edit-dailyreward.html',
+  styleUrl: './admin-edit-dailyreward.css',
 })
 export class AdminDailyrewardEdit implements OnInit {
   private readonly fb = inject(FormBuilder);

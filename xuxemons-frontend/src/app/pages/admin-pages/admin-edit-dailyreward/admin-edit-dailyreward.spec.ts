@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AdminDailyrewardEdit } from './admin-dailyreward-edit';
+import { AdminDailyrewardEdit } from './admin-edit-dailyreward';
 
 describe('AdminDailyrewardEdit', () => {
   let component: AdminDailyrewardEdit;
