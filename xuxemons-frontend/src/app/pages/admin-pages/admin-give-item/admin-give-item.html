@@ -31,87 +31,93 @@
 
 @if (!isLoading()) {
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="admin-give-item">
-  <div class="form-group">
-    <label for="admin-give-item-item-trigger" class="label">Select Item</label>
-    <div class="item-select-wrapper">
-      <button
-        type="button"
-        id="admin-give-item-item-trigger"
-        class="item-select-trigger"
-        [class.input-error]="isFieldInvalid('itemId')"
-        [attr.aria-expanded]="dropdownOpen()"
-        [attr.aria-haspopup]="'listbox'"
-        [attr.aria-describedby]="isFieldInvalid('itemId') ? 'admin-give-item-itemId-error' : null"
-        [attr.aria-invalid]="isFieldInvalid('itemId')"
-        (click)="dropdownOpen.set(!dropdownOpen())"
-      >
-        @if (getSelectedItem(); as selected) {
-          <img [src]="getItemImageUrl(selected)" [alt]="selected.name" class="item-select-img" width="28" height="28" />
-          <span>{{ selected.name }}</span>
-        } @else {
-          <span class="item-select-placeholder">Choose an item...</span>
-        }
-      </button>
-      @if (dropdownOpen()) {
-        <div class="item-select-backdrop" (click)="closeDropdown()" aria-hidden="true"></div>
-        <ul class="item-select-dropdown" role="listbox" aria-labelledby="admin-give-item-item-trigger">
-          @for (item of items(); track item.id) {
-            <li
-              role="option"
-              [attr.aria-selected]="getSelectedItem()?.id === item.id"
-              class="item-select-option"
-              (click)="selectItem(item)"
-            >
-              <img [src]="getItemImageUrl(item)" [alt]="item.name" class="item-select-img" width="28" height="28" />
-              <span>{{ item.name }}</span>
-            </li>
+  <fieldset class="form-fieldset">
+    <legend class="form-legend">Item selection</legend>
+    <div class="form-group">
+      <label for="admin-give-item-item-trigger" class="label">Select Item</label>
+      <div class="item-select-wrapper">
+        <button
+          type="button"
+          id="admin-give-item-item-trigger"
+          class="item-select-trigger form-control"
+          [class.input-error]="isFieldInvalid('itemId')"
+          [attr.aria-expanded]="dropdownOpen()"
+          [attr.aria-haspopup]="'listbox'"
+          [attr.aria-describedby]="isFieldInvalid('itemId') ? 'admin-give-item-itemId-error' : null"
+          [attr.aria-invalid]="isFieldInvalid('itemId')"
+          (click)="dropdownOpen.set(!dropdownOpen())"
+        >
+          @if (getSelectedItem(); as selected) {
+            <img [src]="getItemImageUrl(selected)" [alt]="selected.name" class="item-select-img" width="28" height="28" />
+            <span>{{ selected.name }}</span>
+          } @else {
+            <span class="item-select-placeholder">Choose an item...</span>
           }
-        </ul>
-      }
-    </div>
-    @if (isFieldInvalid('itemId')) {
-      <span id="admin-give-item-itemId-error" class="error-text" aria-live="polite" role="alert">
-        {{ getErrorMessage('itemId') }}
-      </span>
-    }
-  </div>
-
-  @if (getSelectedItem(); as selected) {
-    <div class="item-details">
-      <div class="item-details-visual">
-        <img [src]="getItemImageUrl(selected)" [alt]="selected.name" class="item-details-img" width="80" height="80" />
-      </div>
-      <div class="item-details-body">
-        <p class="item-details-name">{{ selected.name }}</p>
-        <p class="item-description">{{ selected.description }}</p>
-        @if (selected.effect_type || selected.effect_value != null) {
-          <p class="item-effect">
-            <span class="item-effect-label">Effect:</span>
-            {{ getEffectLabel(selected) }}
-          </p>
+        </button>
+        @if (dropdownOpen()) {
+          <div class="item-select-backdrop" (click)="closeDropdown()" aria-hidden="true"></div>
+          <ul class="item-select-dropdown" role="listbox" aria-labelledby="admin-give-item-item-trigger">
+            @for (item of items(); track item.id) {
+              <li
+                role="option"
+                [attr.aria-selected]="getSelectedItem()?.id === item.id"
+                class="item-select-option"
+                (click)="selectItem(item)"
+              >
+                <img [src]="getItemImageUrl(item)" [alt]="item.name" class="item-select-img" width="28" height="28" />
+                <span>{{ item.name }}</span>
+              </li>
+            }
+          </ul>
         }
       </div>
-    </div>
-  }
-
-  <div class="form-group">
-    <label for="admin-give-item-quantity" class="label">Quantity</label>
-      <input
-        type="number"
-        id="admin-give-item-quantity"
-        formControlName="quantity"
-        class="form-control"
-        min="1"
-        [class.input-error]="isFieldInvalid('quantity')"
-        [attr.aria-describedby]="isFieldInvalid('quantity') ? 'admin-give-item-quantity-error' : null"
-        [attr.aria-invalid]="isFieldInvalid('quantity')"
-      />
-      @if (isFieldInvalid('quantity')) {
-        <span id="admin-give-item-quantity-error" class="error-text" aria-live="polite" role="alert">
-          {{ getErrorMessage('quantity') }}
+      @if (isFieldInvalid('itemId')) {
+        <span id="admin-give-item-itemId-error" class="error-text" aria-live="polite" role="alert">
+          {{ getErrorMessage('itemId') }}
         </span>
       }
     </div>
+
+    @if (getSelectedItem(); as selected) {
+      <div class="item-details">
+        <div class="item-details-visual">
+          <img [src]="getItemImageUrl(selected)" [alt]="selected.name" class="item-details-img" width="80" height="80" />
+        </div>
+        <div class="item-details-body">
+          <p class="item-details-name">{{ selected.name }}</p>
+          <p class="item-description">{{ selected.description }}</p>
+          @if (selected.effect_type || selected.effect_value != null) {
+            <p class="item-effect">
+              <span class="item-effect-label">Effect:</span>
+              {{ getEffectLabel(selected) }}
+            </p>
+          }
+        </div>
+      </div>
+    }
+  </fieldset>
+
+  <fieldset class="form-fieldset">
+    <legend class="form-legend">Delivery settings</legend>
+    <div class="form-group">
+      <label for="admin-give-item-quantity" class="label">Quantity</label>
+        <input
+          type="number"
+          id="admin-give-item-quantity"
+          formControlName="quantity"
+          class="form-control"
+          min="1"
+          [class.input-error]="isFieldInvalid('quantity')"
+          [attr.aria-describedby]="isFieldInvalid('quantity') ? 'admin-give-item-quantity-error' : null"
+          [attr.aria-invalid]="isFieldInvalid('quantity')"
+        />
+        @if (isFieldInvalid('quantity')) {
+          <span id="admin-give-item-quantity-error" class="error-text" aria-live="polite" role="alert">
+            {{ getErrorMessage('quantity') }}
+          </span>
+        }
+      </div>
+  </fieldset>
 
   <div class="form-actions">
     <button type="button" class="btn btn-secondary" routerLink="/admin">Cancel</button>

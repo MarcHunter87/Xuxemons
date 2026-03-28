@@ -23,18 +23,21 @@
 
   @if (!notEditable()) {
     <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
-      <label class="field">
-        <span>Size</span>
-        <input id="admin-edit-evolve-size-name" type="text" [value]="size()" readonly />
-      </label>
+      <fieldset class="form-fieldset">
+        <legend class="form-legend">Evolution settings</legend>
+        <label class="field">
+          <span>Size</span>
+          <input id="admin-edit-evolve-size-name" class="form-control" type="text" [value]="size()" readonly />
+        </label>
 
-      <label class="field">
-        <span>Requirement Progress</span>
-        <input id="admin-edit-evolve-progress" type="number" min="0" step="1" inputmode="numeric" formControlName="requirement_progress" [attr.aria-invalid]="isFieldInvalid('requirement_progress')" [attr.aria-describedby]="getErrorMessage('requirement_progress') ? 'admin-edit-evolve-progress-error' : null" />
-        @if (getErrorMessage('requirement_progress')) {
-          <p id="admin-edit-evolve-progress-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('requirement_progress') }}</p>
-        }
-      </label>
+        <label class="field">
+          <span>Requirement Progress</span>
+          <input id="admin-edit-evolve-progress" class="form-control" type="number" min="0" step="1" inputmode="numeric" formControlName="requirement_progress" [attr.aria-invalid]="isFieldInvalid('requirement_progress')" [attr.aria-describedby]="getErrorMessage('requirement_progress') ? 'admin-edit-evolve-progress-error' : null" />
+          @if (getErrorMessage('requirement_progress')) {
+            <p id="admin-edit-evolve-progress-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('requirement_progress') }}</p>
+          }
+        </label>
+      </fieldset>
 
       <div class="actions field-full">
         <button type="button" class="btn-secondary" (click)="goBack()">Cancel</button>

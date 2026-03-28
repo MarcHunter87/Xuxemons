@@ -37,6 +37,40 @@
   grid-template-columns: repeat(2, minmax(220px, 1fr));
 }
 
+.form-fieldset {
+  grid-column: 1 / -1;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: calc(var(--page-section-gap) * 0.75);
+  border: 1px solid color-mix(in srgb, var(--accent-color) 18%, var(--light-gray-color));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent-glow) 16%, var(--white-color));
+  padding: 1.4rem 1rem 1rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.form-legend {
+  position: absolute;
+  top: 0;
+  left: 0.85rem;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  max-width: calc(100% - 1.7rem);
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: var(--text-alt-color);
+  padding: 0 0.5rem;
+  margin: 0;
+  line-height: 1.1;
+  background: var(--primary-color);
+  border: 1px solid color-mix(in srgb, var(--accent-color) 35%, var(--light-gray-color));
+  border-radius: 6px;
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -63,6 +97,12 @@
   font-size: 1rem;
   font-family: inherit;
   box-sizing: border-box;
+}
+
+.field .form-control {
+  border: 1px solid var(--light-gray-color);
+  border-radius: 8px;
+  font-size: 1rem;
 }
 
 .field input:focus-visible,
@@ -119,6 +159,10 @@
 
 @media (max-width: 860px) {
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-fieldset {
     grid-template-columns: 1fr;
   }
 }
