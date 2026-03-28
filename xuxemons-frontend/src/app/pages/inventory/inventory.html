@@ -224,13 +224,13 @@
               }
               @if (selectedItem()?.effect_type === 'DMG Up') {
               <span class="stat-atk">
-                <img src="/icons/dmg-up.png" alt="DMG Up" class="stat-icon" width="18" height="18" onerror="this.style.display='none'" /> ⚔️ {{ xu.attack }}
+                <img src="/icons/attack_logo.png" alt="DMG Up" class="stat-icon" onerror="this.style.display='none'" /> {{ xu.attack }}
                 <span class="stat-preview stat-preview-atk">→ {{ getStatBuffPreview(xu, 'attack').boosted }}</span>
               </span>
               }
               @if (selectedItem()?.effect_type === 'Defense Up') {
               <span class="stat-def">
-                <img src="/icons/defense-up.png" alt="Defense Up" class="stat-icon" width="18" height="18" onerror="this.style.display='none'" /> 🛡️ {{ xu.defense }}
+                <img src="/icons/defense_logo.png" alt="Defense Up" class="stat-icon" onerror="this.style.display='none'" /> {{ xu.defense }}
                 <span class="stat-preview stat-preview-def">→ {{ getStatBuffPreview(xu, 'defense').boosted }}</span>
               </span>
               }
@@ -300,174 +300,6 @@
   </div>
 </div>
 }
-
-    @if (useModalOpen() && selectedItem()) {
-      <div
-        class="use-item-modal-backdrop modal"
-        tabindex="-1"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="use-item-modal-title"
-        (click)="closeUseModal()"
-      >
-        <div class="modal-dialog" role="document" (click)="$event.stopPropagation()">
-          <div class="use-item-modal modal-content">
-          <h2 id="use-item-modal-title" class="use-item-modal-title">Use item on a Xuxemon</h2>
-          <p class="use-item-modal-subtitle">Select a Xuxemon to use {{ selectedItem()!.name }} on.</p>
-          <div class="use-item-search-wrap">
-            <label for="use-item-search" class="visually-hidden">Search your Xuxemons</label>
-            <input
-              id="use-item-search"
-              type="text"
-              class="use-item-search"
-              placeholder="Search by name..."
-              [ngModel]="useSearchQuery()"
-              (ngModelChange)="setUseSearchQuery($event)"
-            />
-          </div>
-          @if (selectedItem()?.name === 'Special Meat') {
-            <p class="use-item-hint">Special Meat evolves the Xuxemon increasing its size.</p>
-          }
-          <ul class="use-item-xuxemon-list" role="listbox" aria-label="Your Xuxemons">
-            @for (xu of useModalXuxemons(); track xu.adquired_id ?? xu.id) {
-              <li>
-                <button
-                  type="button"
-                  class="use-item-xuxemon-btn"
-                  [class.selected]="selectedXuxemonForUse()?.adquired_id === xu.adquired_id"
-                  (click)="selectXuxemonForUse(xu)">
-                  <img [src]="xu.image_url" [alt]="xu.name" class="use-item-xuxemon-img">
-                  <div class="use-item-xuxemon-info">
-                    <span class="use-item-xuxemon-name">{{ xu.name }}</span>
-                    @if (selectedItem()?.effect_type === 'Evolve') {
-                      <div class="use-item-xuxemon-stats use-item-xuxemon-stats-evolve" aria-label="Evolution preview">
-                        <span class="stat-evolve">
-                          {{ getEvolvePreview(xu).fromSize }}
-                          @if (getEvolvePreview(xu).willEvolve) {
-                            <span class="stat-preview stat-preview-evolve">→ {{ getEvolvePreview(xu).toSize }}</span>
-                          }
-                        </span>
-                      </div>
-                    }
-                    @if (selectedItem()?.effect_type === 'Remove Status Effects') {
-                      <div class="use-item-status-block" role="group" [attr.aria-label]="'Status effects on ' + xu.name">
-                        @if (xu.statusEffect?.name) {
-                          <div class="use-item-status-chips">
-                            <span class="use-item-status-chip" [title]="xu.statusEffect!.name">
-                              @if (xu.statusEffect?.icon_url) {
-                                <img
-                                  [src]="xu.statusEffect!.icon_url"
-                                  [alt]="xu.statusEffect!.name"
-                                  class="use-item-status-icon"
-                                  width="20"
-                                  height="20"
-                                />
-                              }
-                              <span class="use-item-status-name">{{ xu.statusEffect!.name }}</span>
-                            </span>
-                          </div>
-                        } @else {
-                          <span class="use-item-status-none">None</span>
-                        }
-                      </div>
-                    }
-                    @if (
-                      selectedItem()?.effect_type === 'Heal' ||
-                      selectedItem()?.effect_type === 'DMG Up' ||
-                      selectedItem()?.effect_type === 'Defense Up'
-                    ) {
-                      <div class="use-item-xuxemon-stats">
-                        @if (selectedItem()?.effect_type === 'Heal') {
-                          <span class="stat-hp">
-                            ❤️ {{ xu.current_hp ?? xu.hp }}/{{ xu.hp }}
-                            <span class="stat-preview stat-preview-heal">→ {{ getHealPreview(xu).newHp }}/{{ xu.hp }}</span>
-                          </span>
-                        }
-                        @if (selectedItem()?.effect_type === 'DMG Up') {
-                          <span class="stat-atk">
-                            ⚔️ {{ xu.attack }}
-                            <span class="stat-preview stat-preview-atk">→ {{ getStatBuffPreview(xu, 'attack').boosted }}</span>
-                          </span>
-                        }
-                        @if (selectedItem()?.effect_type === 'Defense Up') {
-                          <span class="stat-def">
-                            🛡️ {{ xu.defense }}
-                            <span class="stat-preview stat-preview-def">→ {{ getStatBuffPreview(xu, 'defense').boosted }}</span>
-                          </span>
-                        }
-                      </div>
-                    }
-                  </div>
-                </button>
-              </li>
-            } @empty {
-              <li class="use-item-empty">No Xuxemons match your search.</li>
-            }
-          </ul>
-          @if (useApiError()) {
-            <div class="use-item-api-error">
-              <i class="bi bi-exclamation-triangle-fill"></i>
-              <span>{{ useApiError() }}</span>
-            </div>
-          }
-          <div class="use-item-actions">
-            <button type="button" class="btn btn-secondary btn-lg" (click)="closeUseModal()">Cancel</button>
-            <button
-              type="button"
-              class="btn btn-primary btn-lg"
-              [disabled]="!selectedXuxemonForUse() || isUsing()"
-              [attr.aria-busy]="isUsing()"
-              (click)="confirmUseItem()">
-              @if (isUsing()) {
-                <span class="btn-loading-icon" aria-hidden="true"></span>
-              } @else {
-                Use Item
-              }
-            </button>
-          </div>
-          </div>
-        </div>
-      </div>
-    }
-
-    @if (discardMode() && selectedItem()) {
-      <div class="discard-modal-backdrop" (click)="cancelDiscard()">
-        <div class="discard-modal" (click)="$event.stopPropagation()">
-          <div class="discard-picker">
-            <p class="discard-label">How many do you want to discard?</p>
-            <div class="discard-controls">
-              <button class="qty-btn" (click)="updateDiscardQuantity(discardQuantity() - 1)" [disabled]="discardQuantity() <= 1 || isDiscarding()">−</button>
-              <input
-                class="qty-input"
-                [class.qty-input-error]="discardError()"
-                type="number"
-                [ngModel]="discardQuantity()"
-                (ngModelChange)="updateDiscardQuantity($event)"
-                min="1"
-                [max]="selectedItem()!.quantity"
-                [disabled]="isDiscarding()" />
-              <button class="qty-btn" (click)="updateDiscardQuantity(discardQuantity() + 1)" [disabled]="discardQuantity() >= selectedItem()!.quantity || isDiscarding()">+</button>
-            </div>
-            @if (discardError()) {
-              <p class="discard-error">⚠ {{ discardError() }}</p>
-            }
-            @if (discardApiError()) {
-              <div class="discard-api-error">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <span>{{ discardApiError() }}</span>
-              </div>
-            }
-            <p class="discard-hint">Max: {{ selectedItem()!.quantity }} unit{{ selectedItem()!.quantity > 1 ? 's' : '' }}</p>
-            <div class="discard-confirm-row">
-              <button class="btn btn-secondary btn-lg flex-1" (click)="cancelDiscard()" [disabled]="isDiscarding()">Cancel</button>
-              <button class="btn btn-danger btn-lg flex-1" (click)="confirmDiscard()" [disabled]="isDiscarding() || !!discardError() || discardQuantity() < 1">
-                @if (isDiscarding()) { Discarding... } @else { Confirm Discard }
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    }
 
     @if (evolutionAnimation(); as animation) {
       <app-evolution-sequence

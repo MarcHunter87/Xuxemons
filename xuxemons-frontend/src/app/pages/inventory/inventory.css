@@ -922,7 +922,17 @@ button.item-slot:focus {
   height: 18px;
   object-fit: contain;
   vertical-align: middle;
-  margin-right: 0.4rem;
+  margin-right: 0.12rem;
+}
+
+/* Ensure stat rows align icon and text vertically centered */
+.use-item-xuxemon-stats > span,
+.use-item-xuxemon-stats span.stat-atk,
+.use-item-xuxemon-stats span.stat-def,
+.use-item-xuxemon-stats span.stat-hp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12rem;
 }
 
 .use-item-empty {
