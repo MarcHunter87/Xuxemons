@@ -11,15 +11,14 @@ class ProcessDailyXuxemons extends Command
 {
     protected $signature = 'app:process-daily-xuxemons';
 
-    protected $description = 'Process and distribute daily Gacha Ticket to all active players';
+    protected $description = 'Distribute the daily Gacha Ticket to all active players';
 
     public function handle(): int
     {
         try {
-            $dailyXuxemonRewards = DailyReward::where('reward_type', 'daily_xuxemon')
-                ->get();
+            $reward = DailyReward::where('reward_type', 'daily_xuxemon')->first();
 
-            foreach ($dailyXuxemonRewards as $reward) {
+            if ($reward) {
                 $item = Item::find($reward->item_id);
 
                 User::where('role', 'player')
@@ -27,15 +26,14 @@ class ProcessDailyXuxemons extends Command
                     ->chunk(500, function ($players) use ($item, $reward) {
                         foreach ($players as $player) {
                             $bagItem = $player->bag->bagItems()
-                                ->firstOrCreate(
-                                    ['item_id' => $item->id],
-                                    ['quantity' => 0]
-                                );
+                                ->firstOrCreate(['item_id' => $item->id]);
 
                             $bagItem->quantity = min($bagItem->quantity + $reward->quantity, $item->max_quantity);
                             $bagItem->save();
                         }
                     });
+
+                $this->info('All daily Gacha Tickets have been distributed');
             }
 
             return Command::SUCCESS;
