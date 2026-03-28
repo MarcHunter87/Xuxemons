@@ -3,6 +3,7 @@ FROM php:8.4-apache
 # Install dependencies
 RUN apt-get update -qq && \
     apt-get install -y -qq \
+    cron \
     libzip-dev \
     libsodium-dev \
     unzip \
