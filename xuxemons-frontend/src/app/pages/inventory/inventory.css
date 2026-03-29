@@ -1472,6 +1472,15 @@ button.item-slot:focus {
   transform: translateY(0) scale(0.98);
 }
 
+.btn-primary:disabled {
+  background: #9aaec4;
+  color: var(--white-color);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
 .btn-danger {
   background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-color-2) 100%);
   border: none;
@@ -1491,6 +1500,15 @@ button.item-slot:focus {
 
 .btn-danger:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
+}
+
+.btn-danger:disabled {
+  background: #bda0a0;
+  color: var(--white-color);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+  opacity: 1;
 }
 
 /* Info Message */

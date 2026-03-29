@@ -140,9 +140,14 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     isUseActionDisabled(): boolean {
         if (!this.selectedXuxemonForUse() || this.isUsing()) return true;
         if (this.isSpecialMeatUseBlocked()) return true;
-        if (this.selectedItem()?.name === 'Special Meat' && this.maxUsableSpecialMeat() === 0) return true;
+        const item = this.selectedItem();
+        const isEvolve = item?.effect_type === 'Evolve';
+        const isSpecialMeat = item?.name === 'Special Meat';
+        if ((isSpecialMeat || isEvolve) && this.maxUsableSpecialMeat() === 0) return true;
 
-        return this.selectedItem()?.name === 'Special Meat' && Boolean(this.useQuantityError());
+        if ((isSpecialMeat || isEvolve) && Boolean(this.useQuantityError())) return true;
+
+        return false;
     }
 
     isStarvingSelected(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): boolean {
@@ -234,6 +239,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     // Actualiza la cantidad a usar y valida
     updateUseQuantity(val: number): void {
         const max = this.maxUsableSpecialMeat();
+        const totalStock = this.getTotalItemQuantity(this.selectedItem()?.name ?? '');
         const parsed = Math.floor(val);
         const normalized = this.getNormalizedUseQuantity(parsed);
         this.useQuantity.set(Number.isFinite(normalized) ? normalized : parsed);
@@ -245,7 +251,9 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
             this.useQuantityError.set('Quantity must be at least 1.');
         } else if (this.isStarvingSelected() && parsed % 2 !== 0) {
             this.useQuantityError.set(null);
-        } else if (max > 0 && normalized > max) {
+        } else if (totalStock > 0 && parsed > totalStock) {
+            this.useQuantityError.set(`You only have ${totalStock} units in stock.`);
+        } else if (max > 0 && parsed > max) {
             this.useQuantityError.set(`You can use up to ${max}.`);
         } else if (this.showStarvingMeatError()) {
             this.useQuantityError.set('You do not have enough Special Meat: Starving requires 2 per progress.');

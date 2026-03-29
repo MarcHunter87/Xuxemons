@@ -157,6 +157,19 @@
 	outline-offset: 2px;
 }
 
+@keyframes scaleUp {
+	0% { transform: scale(0.96); opacity: 0; }
+	60% { transform: scale(1.04); opacity: 1; }
+	85% { transform: scale(0.995); }
+	100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-scale-up {
+	animation: scaleUp 360ms cubic-bezier(.16,.84,.3,1) both;
+	transform-origin: center center;
+	will-change: transform, opacity;
+}
+
 @media (max-width: 576px) {
 	.daily-noti-content {
 		margin: 0 0.35rem;

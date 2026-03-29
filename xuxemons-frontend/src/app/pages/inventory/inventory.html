@@ -284,8 +284,7 @@
         <!-- Quantity summary removed as requested -->
         @if (useQuantityError() && !isSpecialMeatUseBlocked()) {
           <div class="qty-error error-message use-item-modal-warning mt-2" role="alert">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span>{{ useQuantityError() }}</span>
+            <span>⚠ {{ useQuantityError() }}</span>
           </div>
         }
         @if (showStarvingMeatError() && !isSpecialMeatUseBlocked()) {
@@ -329,13 +328,14 @@
   <div #discardModalRoot class="discard-modal" tabindex="-1" (click)="$event.stopPropagation()">
     <div class="discard-picker">
       <p id="discard-modal-title" class="discard-label">How many do you want to discard?</p>
-        <div class="discard-controls">
-        <button class="qty-btn qty-decrease" (click)="updateDiscardQuantity(discardQuantity() - 1)"
-          [disabled]="discardQuantity() <= 1 || isDiscarding()">−</button>
-        <input class="qty-input" [class.qty-input-error]="discardError()" type="number" [ngModel]="discardQuantity()"
+      <label for="discard-qty-input" class="qty-label mb-2">Quantity to discard</label>
+      <div class="qty-controls compact qty-controls-row discard-controls">
+        <button class="qty-btn qty-btn-use qty-decrease" (click)="updateDiscardQuantity(discardQuantity() - 1)"
+          [disabled]="discardQuantity() <= 1 || isDiscarding()">-</button>
+        <input id="discard-qty-input" class="qty-input styled qty-input-use" type="number" [ngModel]="discardQuantity()"
           (ngModelChange)="updateDiscardQuantity($event)" min="1" [max]="selectedItem()!.quantity"
           [disabled]="isDiscarding()" />
-        <button class="qty-btn qty-increase" (click)="updateDiscardQuantity(discardQuantity() + 1)"
+        <button class="qty-btn qty-btn-use qty-increase" (click)="updateDiscardQuantity(discardQuantity() + 1)"
           [disabled]="discardQuantity() >= selectedItem()!.quantity || isDiscarding()">+</button>
       </div>
       @if (discardError()) {
@@ -347,7 +347,7 @@
         <span>{{ discardApiError() }}</span>
       </div>
       }
-      <p class="discard-hint">Max: {{ selectedItem()!.quantity }} unit{{ selectedItem()!.quantity > 1 ? 's' : '' }}</p>
+      <!-- Max hint removed as requested -->
       <div class="discard-confirm-row">
         <button #discardCancelButton class="btn btn-secondary btn-lg flex-1" (click)="cancelDiscard()"
           [disabled]="isDiscarding()">Cancel</button>

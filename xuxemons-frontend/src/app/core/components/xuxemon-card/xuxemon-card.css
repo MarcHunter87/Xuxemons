@@ -511,7 +511,8 @@
 }
 
 .stat-label {
-    font-weight: 600;
+    font-weight: 800;
+    color: rgba(0,0,0,0.85);
 }
 
 .stat-value {

@@ -24,8 +24,8 @@ class DatabaseSeeder extends Seeder
             SideEffectSeeder::class,
             AttackSeeder::class,
             XuxemonSeeder::class,
-            AdquiredXuxemonSeeder::class,
             SizeSeeder::class,
+            AdquiredXuxemonSeeder::class,
         ]);
     }
 }

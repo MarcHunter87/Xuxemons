@@ -23,7 +23,7 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
   private shouldFocusRoot = false;
 
   constructor(public auth: AuthService) {}
-
+  
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['open']?.currentValue && !changes['open']?.previousValue) {
       this.previousFocusedElement = typeof document !== 'undefined'
@@ -93,6 +93,16 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
       event.preventDefault();
       first.focus();
     }
+  }
+
+  shouldAnimate(): boolean {
+    const user = this.auth.getUser();
+    if (!user) return true;
+    const val = (user as any).view_animations;
+    if (val === false) return false;
+    if (val === 0) return false;
+    if (val === '0' || val === 'false') return false;
+    return true;
   }
 
   handleClose(): void {
