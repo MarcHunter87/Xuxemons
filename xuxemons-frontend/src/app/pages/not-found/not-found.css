@@ -1,0 +1,108 @@
+.not-found-container {
+	min-height: 70vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 2rem 1rem;
+	animation: fadeIn404 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.not-found-img {
+	width: 160px;
+	height: 160px;
+	object-fit: contain;
+	margin-bottom: 1.5rem;
+	filter: drop-shadow(0 2px 12px #bdbdbd);
+	animation: walkXuxemon 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes walkXuxemon {
+	0% { transform: translateX(-10px) rotate(-4deg); }
+	50% { transform: translateX(10px) rotate(4deg); }
+	100% { transform: translateX(-10px) rotate(-4deg); }
+}
+
+@keyframes fadeIn404 {
+	from { opacity: 0; transform: translateY(32px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+.not-found-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-bottom: 0.5rem;
+	color: #2c2c2c;
+	letter-spacing: 1px;
+}
+
+.not-found-message {
+	font-size: 1.2rem;
+	color: #555;
+	margin-bottom: 2rem;
+}
+
+.not-found-home-link {
+	display: inline-block;
+	padding: 0.75rem 2rem;
+	background: #4f8cff;
+	color: #fff;
+	border-radius: 2rem;
+	font-weight: 600;
+	text-decoration: none;
+	font-size: 1.1rem;
+	transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+	box-shadow: 0 2px 12px #b6d0ff33;
+}
+.not-found-home-link:hover {
+	background: #2563eb;
+	transform: translateY(-2px) scale(1.04);
+	box-shadow: 0 4px 18px #b6d0ff55;
+}
+
+.not-found-container {
+	min-height: 70vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 2rem 1rem;
+}
+
+.not-found-img {
+	width: 160px;
+	height: 160px;
+	object-fit: contain;
+	margin-bottom: 1.5rem;
+	filter: drop-shadow(0 2px 12px #bdbdbd);
+}
+
+.not-found-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-bottom: 0.5rem;
+	color: #2c2c2c;
+}
+
+.not-found-message {
+	font-size: 1.2rem;
+	color: #555;
+	margin-bottom: 2rem;
+}
+
+.not-found-home-link {
+	display: inline-block;
+	padding: 0.75rem 2rem;
+	background: #4f8cff;
+	color: #fff;
+	border-radius: 2rem;
+	font-weight: 600;
+	text-decoration: none;
+	font-size: 1.1rem;
+	transition: background 0.2s;
+}
+.not-found-home-link:hover {
+	background: #2563eb;
+}

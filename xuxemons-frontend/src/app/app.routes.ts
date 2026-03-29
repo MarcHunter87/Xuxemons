@@ -24,6 +24,7 @@ import { adminGuard } from './guard/admin-guard';
 import { adminGiveItemGuard } from './guard/admin-give-item.guard';
 import { Register } from './pages/auth/register/register';
 import { Login } from './pages/auth/login/login';
+import { NotFound } from './pages/not-found/not-found';
 
 export const routes: Routes = [
   {
@@ -68,6 +69,15 @@ export const routes: Routes = [
     path: 'profile',
     canActivate: [authGuard],
     children: [{ path: '', component: Profile }, { path: 'edit', component: EditProfile }],
+  },
+  {
+    path: 'NotFound',
+    component: NotFound
+  },
+  {
+    path: '**',
+    redirectTo: '/NotFound',
+    pathMatch: 'full'
   },
   {
     path: 'admin',
