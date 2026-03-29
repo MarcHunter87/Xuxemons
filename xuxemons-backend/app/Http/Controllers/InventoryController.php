@@ -803,9 +803,16 @@ class InventoryController extends Controller
                 'gluttony_blocked' => true,
             ];
         }
-
+        
         $progress = ((int) $adquired->requirement_progress) + 1;
-        $newSize = Size::resolveForProgress($progress);
+        // Penalización: si tiene Starving, para la evolución se considera progress-2
+        $hasStarving = (
+            ($adquired->sideEffect1?->name ?? null) === 'Starving' ||
+            ($adquired->sideEffect2?->name ?? null) === 'Starving' ||
+            ($adquired->sideEffect3?->name ?? null) === 'Starving'
+        );
+        $progressForEvolution = $hasStarving ? $progress - 2 : $progress;
+        $newSize = Size::resolveForProgress($progressForEvolution);
         $adquired->requirement_progress = $progress;
         if ($newSize) {
             $adquired->size_id = $newSize->id;
@@ -819,6 +826,7 @@ class InventoryController extends Controller
             'xuxemon_size' => $newSize?->size ?? 'Small',
             'requirement_progress' => $adquired->requirement_progress,
             'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
+            'starving_penalty_applied' => $hasStarving,
         ];
     }
 
