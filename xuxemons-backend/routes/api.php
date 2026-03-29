@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DailyRewardNotificationController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\XuxemonController;
@@ -35,6 +36,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/admin/daily-rewards', [AdminController::class, 'getAllDailyRewards']);
     Route::get('/admin/daily-rewards/{id}', [AdminController::class, 'getDailyReward']);
     Route::put('/admin/daily-rewards/{id}', [AdminController::class, 'updateDailyReward']);
+    // Ejecutar las daily rewards
+    Route::post('/admin/process-daily-items', [AdminController::class, 'processDailyItems']);
+    Route::post('/admin/process-daily-xuxemons', [AdminController::class, 'processDailyXuxemons']);
+    Route::post('/admin/process-daily-all', [AdminController::class, 'processDailyAll']);
     
     // Rutas de Profile
     Route::get('/user', [AuthController::class, 'me']);
@@ -62,4 +67,8 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/inventory/item/{bagItemId}', [InventoryController::class, 'discardItem']);
     Route::post('/inventory/use', [InventoryController::class, 'useItem']);
     Route::get('/inventory/gacha-tickets', [InventoryController::class, 'getGachaTicketCount']);
+
+    // Daily rewards notifications
+    Route::get('/daily-rewards/pending', [DailyRewardNotificationController::class, 'pending']);
+    Route::post('/daily-rewards/{id}/ack', [DailyRewardNotificationController::class, 'acknowledge']);
 });

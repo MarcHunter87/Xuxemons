@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Bag;
 use App\Models\BagItem;
 use App\Models\DailyReward;
+use App\Models\DailyRewardNotification;
 use App\Models\Item;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -23,6 +24,7 @@ class ProcessDailyItems extends Command
 
             if ($reward) {
                 $attemptsPerPlayer = max(0, (int) $reward->quantity);
+                $rewardDate = now()->toDateString();
                 $itemPool = Item::query()
                     ->where('effect_type', '!=', 'Gacha Ticket')
                     ->get();
@@ -30,16 +32,36 @@ class ProcessDailyItems extends Command
                 if ($attemptsPerPlayer > 0 && $itemPool->isNotEmpty()) {
                     User::where('role', 'player')
                         ->where('is_active', true)
-                        ->chunk(500, function ($players) use ($itemPool, $attemptsPerPlayer) {
+                        ->chunk(500, function ($players) use ($itemPool, $attemptsPerPlayer, $rewardDate) {
                             foreach ($players as $player) {
                                 $bag = Bag::firstOrCreate(
                                     ['user_id' => $player->id],
                                     ['max_slots' => Bag::MAX_SLOTS]
                                 );
 
+                                $receivedItems = [];
+
                                 for ($i = 0; $i < $attemptsPerPlayer; $i++) {
                                     $randomItem = $itemPool->random();
-                                    $this->tryAddOneItemToBag($bag, $randomItem);
+
+                                    if ($this->tryAddOneItemToBag($bag, $randomItem)) {
+                                        $itemId = (int) $randomItem->id;
+                                        if (! isset($receivedItems[$itemId])) {
+                                            $receivedItems[$itemId] = [
+                                                'item_id' => $itemId,
+                                                'name' => $randomItem->name,
+                                                'icon_path' => $randomItem->icon_path,
+                                                'effect_type' => $randomItem->effect_type,
+                                                'quantity' => 0,
+                                            ];
+                                        }
+
+                                        $receivedItems[$itemId]['quantity']++;
+                                    }
+                                }
+
+                                if (! empty($receivedItems)) {
+                                    $this->upsertDailyNotification($player->id, $rewardDate, array_values($receivedItems));
                                 }
                             }
                         });
@@ -122,5 +144,58 @@ class ProcessDailyItems extends Command
 
         $freeSlotsForItem = max(0, $bag->max_slots - ($usedSlots - $existingQty));
         return max(0, $freeSlotsForItem - $existingQty);
+    }
+
+    private function upsertDailyNotification(string $userId, string $rewardDate, array $receivedItems): void
+    {
+        $notification = DailyRewardNotification::query()
+            ->where('user_id', $userId)
+            ->where('reward_date', $rewardDate)
+            ->first();
+
+        if (! $notification) {
+            DailyRewardNotification::create([
+                'user_id' => $userId,
+                'reward_date' => $rewardDate,
+                'gacha_ticket_quantity' => 0,
+                'items' => $receivedItems,
+                'shown_at' => null,
+            ]);
+
+            return;
+        }
+
+        $mergedItems = collect($notification->items ?? [])
+            ->keyBy(fn ($item) => (int) ($item['item_id'] ?? 0))
+            ->all();
+
+        foreach ($receivedItems as $item) {
+            $itemId = (int) ($item['item_id'] ?? 0);
+            $quantity = (int) ($item['quantity'] ?? 0);
+
+            if ($itemId <= 0 || $quantity <= 0) {
+                continue;
+            }
+
+            if (! isset($mergedItems[$itemId])) {
+                $mergedItems[$itemId] = [
+                    'item_id' => $itemId,
+                    'name' => $item['name'] ?? 'Item',
+                    'icon_path' => $item['icon_path'] ?? null,
+                    'effect_type' => $item['effect_type'] ?? null,
+                    'quantity' => 0,
+                ];
+            }
+
+            if (empty($mergedItems[$itemId]['effect_type']) && ! empty($item['effect_type'])) {
+                $mergedItems[$itemId]['effect_type'] = $item['effect_type'];
+            }
+
+            $mergedItems[$itemId]['quantity'] = (int) $mergedItems[$itemId]['quantity'] + $quantity;
+        }
+
+        $notification->items = array_values($mergedItems);
+        $notification->shown_at = null;
+        $notification->save();
     }
 }

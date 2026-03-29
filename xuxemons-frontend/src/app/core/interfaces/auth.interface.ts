@@ -62,3 +62,27 @@ export interface DeactivateAccountResponse {
   message: string;
   errors?: Record<string, string[]>;
 }
+
+export interface DailyRewardNotificationItem {
+  item_id: number;
+  name: string;
+  icon_path?: string | null;
+  effect_type?: string | null;
+  quantity: number;
+}
+
+export interface DailyRewardNotification {
+  id: number;
+  reward_date: string;
+  gacha_ticket: {
+    name: string;
+    icon_path?: string | null;
+    effect_type?: string | null;
+    quantity: number;
+  };
+  items: DailyRewardNotificationItem[];
+}
+
+export interface DailyRewardNotificationResponse {
+  data: DailyRewardNotification | null;
+}

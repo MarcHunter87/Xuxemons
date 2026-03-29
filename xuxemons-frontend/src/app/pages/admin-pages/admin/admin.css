@@ -244,6 +244,10 @@
   box-shadow: 0 2px 8px var(--accent-glow);
 }
 
+.backpack-icon {
+  margin-right: 0.25rem;
+}
+
 .give-item-btn:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
 }

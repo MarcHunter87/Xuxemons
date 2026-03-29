@@ -19,6 +19,9 @@ export class AdminDailyreward implements OnInit {
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
   readonly hasContent = computed(() => !this.isLoading() && !this.errorMessage());
+  readonly isProcessing = signal(false);
+  readonly isProcessingXux = signal(false);
+  readonly isProcessingItems = signal(false);
 
   ngOnInit(): void {
     this.loadRewards();
@@ -43,6 +46,42 @@ export class AdminDailyreward implements OnInit {
         error: (err) => {
           this.errorMessage.set(err?.error?.message ?? 'Failed to load daily rewards');
         },
+      });
+  }
+
+  runAll(): void {
+    if (this.isProcessing()) return;
+    this.isProcessing.set(true);
+    this.adminService
+      .processDailyAll()
+      .pipe(finalize(() => this.isProcessing.set(false)))
+      .subscribe({
+        next: () => this.loadRewards(),
+        error: (err) => console.error('Error running daily all', err),
+      });
+  }
+
+  runXuxemon(): void {
+    if (this.isProcessingXux()) return;
+    this.isProcessingXux.set(true);
+    this.adminService
+      .processDailyXuxemons()
+      .pipe(finalize(() => this.isProcessingXux.set(false)))
+      .subscribe({
+        next: () => this.loadRewards(),
+        error: (err) => console.error('Error running daily xuxemon', err),
+      });
+  }
+
+  runItems(): void {
+    if (this.isProcessingItems()) return;
+    this.isProcessingItems.set(true);
+    this.adminService
+      .processDailyItems()
+      .pipe(finalize(() => this.isProcessingItems.set(false)))
+      .subscribe({
+        next: () => this.loadRewards(),
+        error: (err) => console.error('Error running daily items', err),
       });
   }
 }
