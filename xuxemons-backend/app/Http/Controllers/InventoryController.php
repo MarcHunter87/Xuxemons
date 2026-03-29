@@ -530,6 +530,7 @@ class InventoryController extends Controller
 
             $bagItemId = (int) $request->input('bag_item_id');
             $adquiredXuxemonId = (int) $request->input('adquired_xuxemon_id');
+            $quantity = (int) $request->input('quantity', 1);
             if (! $bagItemId || ! $adquiredXuxemonId) {
                 return response()->json(['message' => 'bag_item_id and adquired_xuxemon_id are required'], 422);
             }
@@ -555,9 +556,9 @@ class InventoryController extends Controller
             }
 
             $item = $bagItem->item;
-            
+
             $data = match ($item->effect_type) {
-                'Evolve'      => $this->useSpecialMeat($bagItem, $adquired),
+                'Evolve'      => $this->useSpecialMeat($bagItem, $adquired, $quantity),
                 'Heal'        => $this->applyHealing($bagItem, $adquired),
                 'Defense Up'  => $this->applyDefenseUp($bagItem, $adquired),
                 'DMG Up'      => $this->applyAttackUp($bagItem, $adquired),
@@ -786,7 +787,7 @@ class InventoryController extends Controller
         ];
     }
 
-    private function useSpecialMeat(BagItem $bagItem, AdquiredXuxemon $adquired): array
+    private function useSpecialMeat(BagItem $bagItem, AdquiredXuxemon $adquired, int $quantity = 1): array
     {
         // Check if the Xuxemon has the side effect 'Gluttony'
         $adquired->load(['sideEffect1', 'sideEffect2', 'sideEffect3']);
@@ -801,33 +802,89 @@ class InventoryController extends Controller
                 'message' => 'Your Xuxemon is affected by Gluttony and cannot eat Special Meat.',
                 'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
                 'gluttony_blocked' => true,
+                'gluttony_info' => 'This Xuxemon is affected by Gluttony and cannot eat Special Meat until cured.'
             ];
         }
-        
-        $progress = ((int) $adquired->requirement_progress) + 1;
-        // Penalización: si tiene Starving, para la evolución se considera progress-2
+
         $hasStarving = (
             ($adquired->sideEffect1?->name ?? null) === 'Starving' ||
             ($adquired->sideEffect2?->name ?? null) === 'Starving' ||
             ($adquired->sideEffect3?->name ?? null) === 'Starving'
         );
-        $progressForEvolution = $hasStarving ? $progress - 2 : $progress;
-        $newSize = Size::resolveForProgress($progressForEvolution);
+
+        // Calcular requirement_total dinámicamente según la tabla Size
+        $progress = (int) $adquired->requirement_progress;
+        // Obtener el siguiente Size (evolución) para este Xuxemon
+        $currentSize = $adquired->size_id;
+        $nextSize = \App\Models\Size::where('id', '>', $currentSize)->orderBy('id')->first();
+        $requirementTotal = $nextSize ? (int) $nextSize->requirement_progress : $progress; // Si no hay siguiente, ya está al máximo
+        $needed = max(0, $requirementTotal - $progress);
+        if ($needed < 1) {
+            return [
+                'message' => 'This Xuxemon cannot evolve further.',
+                'requirement_progress' => $progress,
+                'requirement_total' => $requirementTotal,
+                'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
+            ];
+        }
+
+        $maxUsable = 1;
+        if ($hasStarving) {
+            $maxUsable = min(floor($bagItem->quantity / 2), $needed);
+        } else {
+            $maxUsable = min($bagItem->quantity, $needed);
+        }
+        $qtyToUse = max(1, min($quantity, $maxUsable));
+        $progressGained = 0;
+        $meatUsed = 0;
+        if ($hasStarving) {
+            $meatNeeded = $qtyToUse * 2;
+            if ($bagItem->quantity < $meatNeeded) {
+                return [
+                    'error' => true,
+                    'message' => 'Your Xuxemon is Starving and needs 2 Special Meat per progress, but you do not have enough.',
+                    'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
+                    'starving_blocked' => true,
+                ];
+            }
+            $bagItem->reduceQuantity($meatNeeded);
+            $progressGained = $qtyToUse;
+            $meatUsed = $meatNeeded;
+        } else {
+            if ($bagItem->quantity < $qtyToUse) {
+                return [
+                    'error' => true,
+                    'message' => 'You do not have enough Special Meat.',
+                    'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
+                ];
+            }
+            $bagItem->reduceQuantity($qtyToUse);
+            $progressGained = $qtyToUse;
+            $meatUsed = $qtyToUse;
+        }
+
+        $progress += $progressGained;
         $adquired->requirement_progress = $progress;
+        $newSize = Size::resolveForProgress($progress);
         if ($newSize) {
             $adquired->size_id = $newSize->id;
         }
         $adquired->save();
         $this->applySideEffects($adquired);
 
-        $bagItem->reduceQuantity(1);
-
-        return [
+        $response = [
             'xuxemon_size' => $newSize?->size ?? 'Small',
             'requirement_progress' => $adquired->requirement_progress,
+            'requirement_total' => $requirementTotal,
             'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
             'starving_penalty_applied' => $hasStarving,
+            'progress_gained' => $progressGained,
+            'meat_used' => $meatUsed,
         ];
+        if ($hasStarving) {
+            $response['starving_info'] = 'Your Xuxemon is Starving and needs 2 Special Meat per progress. '.$meatUsed.' were consumed for '.$progressGained.' progress.';
+        }
+        return $response;
     }
 
     public function getAllItems(): JsonResponse

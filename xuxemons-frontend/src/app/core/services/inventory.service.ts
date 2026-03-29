@@ -258,11 +258,16 @@ export class InventoryService {
         adquiredXuxemonId: number,
         onSuccess?: (data?: UseItemResponseData) => void,
         onError?: (message: string) => void,
+        quantity?: number,
     ): void {
+        const body: any = { bag_item_id: bagItemId, adquired_xuxemon_id: adquiredXuxemonId };
+        if (typeof quantity === 'number' && quantity > 0) {
+            body.quantity = quantity;
+        }
         this.http
             .post<{ message: string; data?: UseItemResponseData }>(
                 `${this.apiUrl}/inventory/use`,
-                { bag_item_id: bagItemId, adquired_xuxemon_id: adquiredXuxemonId },
+                body,
             )
             .subscribe({
                 next: (response) => {

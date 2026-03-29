@@ -139,6 +139,40 @@
     </div>
     @if (selectedItem()?.name === 'Special Meat') {
     <p class="use-item-hint">Special Meat evolves the Xuxemon increasing its size.</p>
+    <div class="use-item-qty-picker redesigned-qty-picker">
+      <label for="use-qty-input" class="qty-label mb-2">Quantity to use</label>
+      <div class="qty-controls compact qty-controls-row" style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem; justify-content: flex-start;">
+        <button class="qty-btn" (click)="updateUseQuantity(useQuantity() - 1)" [disabled]="useQuantity() <= 1 || isUsing()" style="min-width: 2.2rem; height: 2.2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <i class="bi bi-dash-lg"></i>
+        </button>
+        <input id="use-qty-input" class="qty-input styled" type="number" min="1" [max]="maxUsableSpecialMeat()" [ngModel]="useQuantity()" (ngModelChange)="updateUseQuantity($event)" [disabled]="isUsing()" style="width: 3.2rem; text-align: center; font-size: 1.2rem; font-weight: 500; border-radius: 0.5rem; border: 1.5px solid #d1d5db;" />
+        <button class="qty-btn" (click)="updateUseQuantity(useQuantity() + 1)" [disabled]="useQuantity() >= maxUsableSpecialMeat() || isUsing()" style="min-width: 2.2rem; height: 2.2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+          <i class="bi bi-plus-lg"></i>
+        </button>
+      </div>
+      <div class="qty-max-hint mt-1" *ngIf="maxUsableSpecialMeat() > 0">
+        <span class="qty-max-label">Max:</span>
+        <span class="qty-max-value">{{ maxUsableSpecialMeat() }}</span>
+        <span class="qty-max-desc">available</span>
+      </div>
+      <div class="qty-max-hint mt-1 text-danger" *ngIf="maxUsableSpecialMeat() === 0">
+        <i class="bi bi-exclamation-circle"></i>
+        <span>No Special Meat available for this Xuxemon.</span>
+      </div>
+      <div class="qty-info mt-1">Will consume <b>{{ getMeatToConsumeForQuantity(useQuantity()) }}</b> Special Meat for <b>{{ useQuantity() }}</b> progress.</div>
+      @if (useQuantityError()) {
+        <div class="qty-error error-message mt-2">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <span>{{ useQuantityError() }}</span>
+        </div>
+      }
+      @if (showStarvingMeatError()) {
+        <div class="qty-error error-message mt-2">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <span>You do not have enough Special Meat: Starving requires 2 per progress.</span>
+        </div>
+      }
+    </div>
     }
     <ul class="use-item-xuxemon-list" role="listbox" aria-label="Your Xuxemons">
       @for (xu of useModalXuxemons(); track xu.adquired_id ?? xu.id) {
@@ -255,6 +289,12 @@
       <i class="bi bi-exclamation-triangle-fill"></i>
       <span>{{ useApiError() }}</span>
     </div>
+    }
+    @if (useStarvingInfo()) {
+      <div class="use-item-info-message starving-highlight">
+        <i class="bi bi-info-circle-fill starving-icon"></i>
+        <span class="starving-text">{{ useStarvingInfo() }}</span>
+      </div>
     }
     <div class="use-item-actions">
       <button type="button" class="btn btn-secondary btn-lg" (click)="closeUseModal()">Cancel</button>

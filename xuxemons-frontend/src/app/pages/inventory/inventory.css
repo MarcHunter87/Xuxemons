@@ -1,3 +1,26 @@
+/* Mejorar el diseño del mensaje starving-info */
+.starving-highlight {
+  background: linear-gradient(90deg, #fffbe6 0%, #fff7cc 100%);
+  border: 1.5px solid #ffe066;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 2px 8px 0 rgba(255, 224, 102, 0.10);
+  font-size: 1.08rem;
+  color: #7c6f1c;
+}
+.starving-icon {
+  font-size: 1.7rem;
+  color: #e6b800;
+  flex-shrink: 0;
+}
+.starving-text {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
 /* ==========================================
    FILTER SECTION
    ========================================== */

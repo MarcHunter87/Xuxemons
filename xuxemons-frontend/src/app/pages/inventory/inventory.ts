@@ -1,3 +1,4 @@
+
 import {
     Component,
     ChangeDetectionStrategy,
@@ -41,6 +42,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     readonly useSearchQuery = signal('');
     readonly selectedXuxemonForUse = signal<Xuxemon | null>(null);
     readonly useApiError = signal<string | null>(null);
+    readonly useStarvingInfo = signal<string | null>(null);
     readonly isUsing = signal(false);
     readonly filteredItems = signal<InventoryItem[]>([]);
     readonly selectedItem = signal<InventoryItem | null>(null);
@@ -87,6 +89,70 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
             return `Slot ${slot.slotNumber} - ${slot.item.quantity} ${slot.item.name}`;
         }
         return `Slot ${slot.slotNumber} - empty`;
+    }
+
+        // --- Lógica para cantidad de uso de Special Meat ---
+    readonly useQuantity = signal(1);
+    readonly useQuantityError = signal<string | null>(null);
+
+    // Calcula el máximo de carnes que se pueden usar según inventario, progreso y estado
+    maxUsableSpecialMeat(): number {
+        const item = this.selectedItem();
+        const xuxemon = this.selectedXuxemonForUse();
+        if (!item || item.name !== 'Special Meat' || !xuxemon) return 1;
+        const meatInBag = item.quantity ?? 1;
+        // Preferir requirement_total si está en la última respuesta del backend
+        let progress = xuxemon.requirement_progress ?? 0;
+        let total = xuxemon.requirement_total ?? null;
+        // Si la última respuesta de uso de item tiene requirement_total, úsala
+        const lastUseData = (this as any).lastUseItemData as any;
+        if (lastUseData && typeof lastUseData.requirement_total === 'number') {
+            total = lastUseData.requirement_total;
+            progress = lastUseData.requirement_progress ?? progress;
+        }
+        if (typeof total !== 'number' || total < 1) total = progress + 1;
+        const needed = Math.max(0, total - progress);
+        const hasStarving = xuxemon.side_effect_1?.name === 'Starving' || xuxemon.side_effect_2?.name === 'Starving' || xuxemon.side_effect_3?.name === 'Starving';
+        if (hasStarving) {
+            return Math.min(Math.floor(meatInBag / 2), needed);
+        } else {
+            return Math.min(meatInBag, needed);
+        }
+    }
+        // Muestra error si está en Starving y solo tiene una carne
+    showStarvingMeatError(): boolean {
+        const item = this.selectedItem();
+        const xuxemon = this.selectedXuxemonForUse();
+        if (!item || item.name !== 'Special Meat' || !xuxemon) return false;
+        const hasStarving = xuxemon.side_effect_1?.name === 'Starving' || xuxemon.side_effect_2?.name === 'Starving' || xuxemon.side_effect_3?.name === 'Starving';
+        return hasStarving && (item.quantity === 1);
+    }
+
+
+    // Actualiza la cantidad a usar y valida
+    updateUseQuantity(val: number): void {
+        const max = this.maxUsableSpecialMeat();
+        const parsed = Math.floor(val);
+        this.useQuantity.set(parsed);
+        if (!parsed || isNaN(parsed)) {
+            this.useQuantityError.set('Please enter a valid number.');
+        } else if (parsed < 1) {
+            this.useQuantityError.set('Quantity must be at least 1.');
+        } else if (parsed > max) {
+            this.useQuantityError.set(`You can use up to ${max}.`);
+        } else if (this.showStarvingMeatError()) {
+            this.useQuantityError.set('You do not have enough Special Meat: Starving requires 2 per progress.');
+        } else {
+            this.useQuantityError.set(null);
+        }
+    }
+
+    // Calcula cuántas carnes se consumirán para la cantidad seleccionada
+    getMeatToConsumeForQuantity(qty: number): number {
+        const xuxemon = this.selectedXuxemonForUse();
+        if (!xuxemon) return qty;
+        const hasStarving = xuxemon.side_effect_1?.name === 'Starving' || xuxemon.side_effect_2?.name === 'Starving' || xuxemon.side_effect_3?.name === 'Starving';
+        return hasStarving ? qty * 2 : qty;
     }
 
     readonly usedCapacity = computed(() =>
@@ -206,6 +272,10 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         this.useApiError.set(null);
         this.selectedXuxemonForUse.set(null);
         this.useSearchQuery.set('');
+        this.useQuantity.set(1);
+        this.useQuantityError.set(null);
+        this.useStarvingInfo.set(null);
+        (this as any).lastUseItemData = undefined;
         this.xuxemonService.loadMyXuxemons();
         this.useModalOpen.set(true);
         this.focusUseItemSearch = true;
@@ -233,24 +303,48 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     selectXuxemonForUse(xuxemon: Xuxemon): void {
         this.selectedXuxemonForUse.set(xuxemon);
         this.useApiError.set(null);
+        this.useQuantityError.set(null);
+        this.useStarvingInfo.set(null);
+        (this as any).lastUseItemData = undefined;
+        this.useQuantity.set(1);
+        // Mostrar starving_info si corresponde
+        const item = this.selectedItem();
+        const hasStarving =
+            xuxemon.side_effect_1?.name === 'Starving' ||
+            xuxemon.side_effect_2?.name === 'Starving' ||
+            xuxemon.side_effect_3?.name === 'Starving';
+        if (item?.name === 'Special Meat' && hasStarving) {
+            this.useStarvingInfo.set('This Xuxemon is Starving and will consume 2 Special Meat for 1 progress.');
+        } else {
+            this.useStarvingInfo.set(null);
+        }
     }
 
     confirmUseItem(): void {
         const item = this.selectedItem();
         const xuxemon = this.selectedXuxemonForUse();
+        const qty = this.useQuantity();
         if (!item?.bag_item_id || !xuxemon?.adquired_id) return;
+        if (item.name === 'Special Meat' && this.useQuantityError()) return;
         this.isUsing.set(true);
         this.useApiError.set(null);
+        this.useStarvingInfo.set(null);
         this.inventoryService.useItem(
             item.bag_item_id,
             xuxemon.adquired_id,
             (data) => {
                 this.isUsing.set(false);
-                // Si la respuesta indica bloqueo por Gluttony, mostrar mensaje fuera del modal y no cerrar ni reabrir el modal
+                // Guardar la última respuesta para requirement_total
+                (this as any).lastUseItemData = data;
                 if (data && (data as any).gluttony_blocked) {
                     this.closeUseModal();
                     this.errorMessage.set((data as any).message || 'This Xuxemon cannot eat due to Gluttony.');
                     return;
+                }
+                if (data && (data as any).starving_info) {
+                    this.useStarvingInfo.set((data as any).starving_info);
+                } else {
+                    this.useStarvingInfo.set(null);
                 }
                 this.closeUseModal();
                 if (item.effect_type === 'Evolve') {
@@ -262,6 +356,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
                 this.useApiError.set(msg);
                 this.isUsing.set(false);
             },
+            item.name === 'Special Meat' ? qty : undefined
         );
     }
 

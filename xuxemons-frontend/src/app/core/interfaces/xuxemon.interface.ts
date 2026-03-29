@@ -6,6 +6,7 @@ export interface Xuxemon {
   image_url: string;
   adquired_id?: number;
   requirement_progress?: number;
+  requirement_total?: number;
   next_size?: 'Small' | 'Medium' | 'Large';
   will_evolve_next?: boolean;
   statusEffect?: {
