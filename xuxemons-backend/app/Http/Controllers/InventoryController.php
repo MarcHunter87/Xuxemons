@@ -788,6 +788,22 @@ class InventoryController extends Controller
 
     private function useSpecialMeat(BagItem $bagItem, AdquiredXuxemon $adquired): array
     {
+        // Check if the Xuxemon has the side effect 'Gluttony'
+        $adquired->load(['sideEffect1', 'sideEffect2', 'sideEffect3']);
+        $hasGluttony = (
+            ($adquired->sideEffect1?->name ?? null) === 'Gluttony' ||
+            ($adquired->sideEffect2?->name ?? null) === 'Gluttony' ||
+            ($adquired->sideEffect3?->name ?? null) === 'Gluttony'
+        );
+        if ($hasGluttony) {
+            return [
+                'error' => true,
+                'message' => 'Your Xuxemon is affected by Gluttony and cannot eat Special Meat.',
+                'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
+                'gluttony_blocked' => true,
+            ];
+        }
+
         $progress = ((int) $adquired->requirement_progress) + 1;
         $newSize = Size::resolveForProgress($progress);
         $adquired->requirement_progress = $progress;

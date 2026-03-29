@@ -22,6 +22,12 @@ class SideEffectSeeder extends Seeder
                 'icon_path' => 'status effects/gluttony.png',
                 'apply_chance' => 15,
             ],
+            [
+                'name' => 'Overdose',
+                'description' => 'Has a 10% chance of being applied when consuming an item. The size of the xuxemon is reduced by 1 level.',
+                'icon_path' => 'status effects/overdose.png',
+                'apply_chance' => 10,
+            ]
         ];
 
         foreach ($effects as $effect) {

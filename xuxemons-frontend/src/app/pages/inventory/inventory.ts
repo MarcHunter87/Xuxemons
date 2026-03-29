@@ -246,6 +246,12 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
             xuxemon.adquired_id,
             (data) => {
                 this.isUsing.set(false);
+                // Si la respuesta indica bloqueo por Gluttony, mostrar mensaje fuera del modal y no cerrar ni reabrir el modal
+                if (data && (data as any).gluttony_blocked) {
+                    this.closeUseModal();
+                    this.errorMessage.set((data as any).message || 'This Xuxemon cannot eat due to Gluttony.');
+                    return;
+                }
                 this.closeUseModal();
                 if (item.effect_type === 'Evolve') {
                     this.openEvolutionAnimation(xuxemon, data);
