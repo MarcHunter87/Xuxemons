@@ -789,13 +789,40 @@ class InventoryController extends Controller
 
     private function useSpecialMeat(BagItem $bagItem, AdquiredXuxemon $adquired, int $quantity = 1): array
     {
-        // Check if the Xuxemon has the side effect 'Gluttony'
+
+        // Check if the Xuxemon has the side effect 'Gluttony' or 'Overdose'
         $adquired->load(['sideEffect1', 'sideEffect2', 'sideEffect3']);
         $hasGluttony = (
             ($adquired->sideEffect1?->name ?? null) === 'Gluttony' ||
             ($adquired->sideEffect2?->name ?? null) === 'Gluttony' ||
             ($adquired->sideEffect3?->name ?? null) === 'Gluttony'
         );
+        $hasOverdose = (
+            ($adquired->sideEffect1?->name ?? null) === 'Overdose' ||
+            ($adquired->sideEffect2?->name ?? null) === 'Overdose' ||
+            ($adquired->sideEffect3?->name ?? null) === 'Overdose'
+        );
+        if ($hasOverdose) {
+            // Lower the size if not already Small
+            $currentSize = $adquired->size_id;
+            $currentSizeObj = \App\Models\Size::find($currentSize);
+            if ($currentSizeObj && strtolower($currentSizeObj->size) !== 'small') {
+                // Find the previous size (lower)
+                $prevSize = \App\Models\Size::where('id', '<', $currentSize)->orderByDesc('id')->first();
+                if ($prevSize) {
+                    $adquired->size_id = $prevSize->id;
+                    $adquired->requirement_progress = $prevSize->requirement_progress;
+                    $adquired->save();
+                }
+            }
+            return [
+                'error' => true,
+                'message' => 'Your Xuxemon is affected by Overdose and cannot eat Special Meat. Its size has been reduced.',
+                'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
+                'overdose_blocked' => true,
+                'overdose_info' => 'This Xuxemon is affected by Overdose and cannot eat Special Meat until cured. Its size has been reduced.'
+            ];
+        }
         if ($hasGluttony) {
             return [
                 'error' => true,

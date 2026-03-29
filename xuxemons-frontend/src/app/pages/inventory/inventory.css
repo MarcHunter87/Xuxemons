@@ -1,3 +1,63 @@
+/* Overdose alert styles */
+.overdose-highlight {
+  background: #fbe9f0;
+  border-color: #c2185b;
+  color: #880e4f;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 2px 8px 0 rgba(194, 24, 91, 0.10);
+  font-size: 1.08rem;
+}
+.overdose-icon {
+  color: #c2185b;
+  font-size: 1.7rem;
+  flex-shrink: 0;
+}
+.overdose-text {
+  color: #880e4f;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+/* Gluttony and Starving alert styles (unified aesthetics) */
+.use-item-info-message {
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1.08rem;
+  font-weight: 500;
+  border: 1.5px solid #e0b800;
+}
+.starving-highlight {
+  background: #fffbe7;
+  border-color: #e0b800;
+  color: #b89c00;
+}
+.starving-icon {
+  color: #e0b800;
+  font-size: 1.3rem;
+}
+.starving-text {
+  color: #b89c00;
+}
+.gluttony-highlight {
+  background: #fbeaea;
+  border-color: #e53935;
+  color: #b71c1c;
+}
+.gluttony-icon {
+  color: #e53935;
+  font-size: 1.3rem;
+}
+.gluttony-text {
+  color: #b71c1c;
+}
 /* Mejorar el diseño del mensaje starving-info */
 .starving-highlight {
   background: linear-gradient(90deg, #fffbe6 0%, #fff7cc 100%);

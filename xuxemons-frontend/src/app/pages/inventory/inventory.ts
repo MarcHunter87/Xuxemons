@@ -29,6 +29,7 @@ import { XuxemonService } from '../../core/services/xuxemon.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
+        readonly useOverdoseInfo = signal<string | null>(null);
     private auth = inject(AuthService);
     private inventoryService = inject(InventoryService);
     private xuxemonService = inject(XuxemonService);
@@ -305,18 +306,26 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         this.useApiError.set(null);
         this.useQuantityError.set(null);
         this.useStarvingInfo.set(null);
+        this.useOverdoseInfo?.set?.(null);
         (this as any).lastUseItemData = undefined;
         this.useQuantity.set(1);
-        // Mostrar starving_info si corresponde
+        // Mostrar info de overdose o starving si corresponde al seleccionar
         const item = this.selectedItem();
         const hasStarving =
             xuxemon.side_effect_1?.name === 'Starving' ||
             xuxemon.side_effect_2?.name === 'Starving' ||
             xuxemon.side_effect_3?.name === 'Starving';
-        if (item?.name === 'Special Meat' && hasStarving) {
+        const hasOverdose =
+            xuxemon.side_effect_1?.name === 'Overdose' ||
+            xuxemon.side_effect_2?.name === 'Overdose' ||
+            xuxemon.side_effect_3?.name === 'Overdose';
+        if (item?.name === 'Special Meat' && hasOverdose) {
+            this.useOverdoseInfo.set('Your Xuxemon is affected by Overdose, cannot eat Special Meat, and its size has been reduced.');
+        } else if (item?.name === 'Special Meat' && hasStarving) {
             this.useStarvingInfo.set('This Xuxemon is Starving and will consume 2 Special Meat for 1 progress.');
         } else {
             this.useStarvingInfo.set(null);
+            this.useOverdoseInfo?.set?.(null);
         }
     }
 

@@ -140,6 +140,12 @@
     @if (selectedItem()?.name === 'Special Meat') {
     <p class="use-item-hint">Special Meat evolves the Xuxemon increasing its size.</p>
     <div class="use-item-qty-picker redesigned-qty-picker">
+            @if (useOverdoseInfo()) {
+              <div class="use-item-info-message overdose-highlight mt-2">
+                <i class="bi bi-exclamation-octagon-fill overdose-icon"></i>
+                <span class="overdose-text">{{ useOverdoseInfo() }}</span>
+              </div>
+            }
       <label for="use-qty-input" class="qty-label mb-2">Quantity to use</label>
       <div class="qty-controls compact qty-controls-row" style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem; justify-content: flex-start;">
         <button class="qty-btn" (click)="updateUseQuantity(useQuantity() - 1)" [disabled]="useQuantity() <= 1 || isUsing()" style="min-width: 2.2rem; height: 2.2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
@@ -150,15 +156,29 @@
           <i class="bi bi-plus-lg"></i>
         </button>
       </div>
-      <div class="qty-max-hint mt-1" *ngIf="maxUsableSpecialMeat() > 0">
-        <span class="qty-max-label">Max:</span>
-        <span class="qty-max-value">{{ maxUsableSpecialMeat() }}</span>
-        <span class="qty-max-desc">available</span>
-      </div>
-      <div class="qty-max-hint mt-1 text-danger" *ngIf="maxUsableSpecialMeat() === 0">
-        <i class="bi bi-exclamation-circle"></i>
-        <span>No Special Meat available for this Xuxemon.</span>
-      </div>
+      @if (selectedXuxemonForUse() && (
+        selectedXuxemonForUse()?.side_effect_1?.name === 'Gluttony' ||
+        selectedXuxemonForUse()?.side_effect_2?.name === 'Gluttony' ||
+        selectedXuxemonForUse()?.side_effect_3?.name === 'Gluttony')
+      ) {
+        <div class="use-item-info-message gluttony-highlight mt-2">
+          <i class="bi bi-exclamation-triangle-fill gluttony-icon"></i>
+          <span class="gluttony-text">Your Xuxemon is affected by Gluttony and cannot eat Special Meat.</span>
+        </div>
+      }
+      @if (maxUsableSpecialMeat() > 0) {
+        <div class="qty-max-hint mt-1">
+          <span class="qty-max-label">Max:</span>
+          <span class="qty-max-value">{{ maxUsableSpecialMeat() }}</span>
+          <span class="qty-max-desc">available</span>
+        </div>
+      }
+      @if (maxUsableSpecialMeat() === 0) {
+        <div class="qty-max-hint mt-1 text-danger">
+          <i class="bi bi-exclamation-circle"></i>
+          <span>No Special Meat available for this Xuxemon.</span>
+        </div>
+      }
       <div class="qty-info mt-1">Will consume <b>{{ getMeatToConsumeForQuantity(useQuantity()) }}</b> Special Meat for <b>{{ useQuantity() }}</b> progress.</div>
       @if (useQuantityError()) {
         <div class="qty-error error-message mt-2">
