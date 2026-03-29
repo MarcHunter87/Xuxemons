@@ -520,9 +520,25 @@ button.item-slot:focus {
     transform: scale(1.02);
 }
 
+.use-item-status-block .use-item-status-chip.is-target {
+  border-color: rgba(16, 185, 129, 0.45);
+  background:  #86efac;
+  box-shadow: 0 6px 16px rgba(16,185,129,0.12);
+  color: #064e3b;
+}
+
+.use-item-status-block .use-item-status-chip.is-target .icon-success {
+  display: none;
+}
+
+.use-item-status-block .use-item-status-chip.is-target .use-item-status-name {
+  color: #064e3b;
+  font-weight: 700;
+}
+
 @keyframes target-subtle-pulse {
-    0%, 100% { transform: scale(1.02); box-shadow: 0 2px 10px rgba(109, 40, 217, 0.2); }
-    50% { transform: scale(1.04); box-shadow: 0 4px 15px rgba(109, 40, 217, 0.4); }
+  0%, 100% { transform: scale(1.02); box-shadow: 0 2px 10px rgba(16,185,129,0.12); }
+  50% { transform: scale(1.04); box-shadow: 0 4px 15px rgba(16,185,129,0.18); }
 }
 
 .item-icon {

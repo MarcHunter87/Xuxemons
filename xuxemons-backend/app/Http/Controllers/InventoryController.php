@@ -652,11 +652,37 @@ class InventoryController extends Controller
 
         if (! empty($appliedEffects)) {
             $adquired->save();
+
+            foreach ($appliedEffects as $effect) {
+                if ($effect['name'] === 'Overdose') {
+                    $this->applyOverdoseSizeReduction($adquired);
+                    break;
+                }
+            }
         }
 
         return [
             'applied_side_effects' => $appliedEffects,
         ];
+    }
+
+    private function applyOverdoseSizeReduction(AdquiredXuxemon $adquired): void
+    {
+        $currentSizeId = (int) $adquired->size_id;
+        $prevSize = \App\Models\Size::where('id', '<', $currentSizeId)->orderByDesc('id')->first();
+        if ($prevSize) {
+            $adquired->size_id = $prevSize->id;
+            $adquired->save();
+        }
+    }
+
+    private function recalculateSizeFromProgress(AdquiredXuxemon $adquired): void
+    {
+        $correctSize = \App\Models\Size::resolveForProgress((int) $adquired->requirement_progress);
+        if ($correctSize && (int) $adquired->size_id !== (int) $correctSize->id) {
+            $adquired->size_id = $correctSize->id;
+            $adquired->save();
+        }
     }
 
     private function applyRemoveStatusEffects(BagItem $bagItem, AdquiredXuxemon $adquired): array
@@ -666,11 +692,20 @@ class InventoryController extends Controller
         $name = $item->name;
 
         if ($name === 'Nulberry') {
+            $adquired->load(['sideEffect1', 'sideEffect2', 'sideEffect3']);
+            $hadOverdose = (
+                ($adquired->sideEffect1?->name ?? null) === 'Overdose' ||
+                ($adquired->sideEffect2?->name ?? null) === 'Overdose' ||
+                ($adquired->sideEffect3?->name ?? null) === 'Overdose'
+            );
             $adquired->status_effect_id = null;
             $adquired->side_effect_id_1 = null;
             $adquired->side_effect_id_2 = null;
             $adquired->side_effect_id_3 = null;
             $adquired->save();
+            if ($hadOverdose) {
+                $this->recalculateSizeFromProgress($adquired);
+            }
         } elseif ($name === 'Yellow Mushroom'){
             $adquired->load(['sideEffect1', 'sideEffect2', 'sideEffect3']);
             if ($adquired->sideEffect1?->name === 'Gluttony') $adquired->side_effect_id_1 = null;
@@ -803,24 +838,13 @@ class InventoryController extends Controller
             ($adquired->sideEffect3?->name ?? null) === 'Overdose'
         );
         if ($hasOverdose) {
-            // Lower the size if not already Small
-            $currentSize = $adquired->size_id;
-            $currentSizeObj = \App\Models\Size::find($currentSize);
-            if ($currentSizeObj && strtolower($currentSizeObj->size) !== 'small') {
-                // Find the previous size (lower)
-                $prevSize = \App\Models\Size::where('id', '<', $currentSize)->orderByDesc('id')->first();
-                if ($prevSize) {
-                    $adquired->size_id = $prevSize->id;
-                    $adquired->requirement_progress = $prevSize->requirement_progress;
-                    $adquired->save();
-                }
-            }
+            // Only block — size reduction happens when Overdose is applied, not on each attempt.
             return [
-                'error' => true,
-                'message' => 'Your Xuxemon is affected by Overdose and cannot eat Special Meat. Its size has been reduced.',
+                'error'              => true,
+                'message'            => 'Your Xuxemon is affected by Overdose, cannot eat Special Meat, and its size has been reduced.',
                 'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
-                'overdose_blocked' => true,
-                'overdose_info' => 'This Xuxemon is affected by Overdose and cannot eat Special Meat until cured. Its size has been reduced.'
+                'overdose_blocked'   => true,
+                'overdose_info'      => 'This Xuxemon is affected by Overdose and cannot eat Special Meat until cured. Its size has been reduced.',
             ];
         }
         if ($hasGluttony) {
