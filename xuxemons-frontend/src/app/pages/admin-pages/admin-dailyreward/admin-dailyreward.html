@@ -22,10 +22,57 @@
 }
 
 @if (hasContent()) {
+  <div class="daily-action-buttons">
+    <button
+      type="button"
+      class="admin-nav-btn admin-nav-btn-daily-all"
+      (click)="runAll()"
+      [disabled]="isProcessing()"
+      [attr.aria-label]="'Give daily rewards'"
+    >
+      @if (isProcessing()) {
+        <span class="btn-loading-icon" aria-hidden="true"></span>
+      } @else {
+        <i class="bi bi-clock-history" aria-hidden="true"></i>
+        Give Daily Rewards
+      }
+    </button>
+
+    <button
+      type="button"
+      class="admin-nav-btn admin-nav-btn-daily-xuxemon"
+      (click)="runXuxemon()"
+      [disabled]="isProcessingXux()"
+      [attr.aria-label]="'Give daily xuxemon'"
+    >
+      @if (isProcessingXux()) {
+        <span class="btn-loading-icon" aria-hidden="true"></span>
+      } @else {
+        <i class="bi bi-dice-5" aria-hidden="true"></i>
+        Give Daily Xuxemon
+      }
+    </button>
+
+    <button
+      type="button"
+      class="admin-nav-btn admin-nav-btn-daily-items"
+      (click)="runItems()"
+      [disabled]="isProcessingItems()"
+      [attr.aria-label]="'Give daily items'"
+    >
+      @if (isProcessingItems()) {
+        <span class="btn-loading-icon" aria-hidden="true"></span>
+      } @else {
+        <i class="bi bi-gift" aria-hidden="true"></i>
+        Give Daily Items
+      }
+    </button>
+  </div>
+
   <div class="players-section">
     @if (rewards().length === 0) {
       <div class="empty-state">
-        <i class="bi bi-inbox" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+        <i class="bi bi-inbox empty-icon" aria-hidden="true"></i>
         <p>No daily rewards found</p>
       </div>
     }

@@ -21,13 +21,13 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Throwable;
+use Illuminate\Support\Facades\Artisan;
 
 class AdminController extends Controller
 {
     public function getAllDailyRewards(): JsonResponse
     {
         try {
-            /** @var User $admin */
             $admin = Auth::guard('api')->user();
             if (! $admin || ! $admin->is_admin) {
                 return response()->json(['message' => 'Unauthorized'], 403);
@@ -57,7 +57,6 @@ class AdminController extends Controller
     public function getDailyReward(int $id): JsonResponse
     {
         try {
-            /** @var User $admin */
             $admin = Auth::guard('api')->user();
             if (! $admin || ! $admin->is_admin) {
                 return response()->json(['message' => 'Unauthorized'], 403);
@@ -130,6 +129,67 @@ class AdminController extends Controller
         } catch (Throwable $e) {
             return response()->json([
                 'message' => 'Could not update daily reward',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function processDailyItems(): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            Artisan::call('app:process-daily-items');
+
+            return response()->json(['message' => 'Daily items processing started']);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not process daily items',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function processDailyXuxemons(): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            Artisan::call('app:process-daily-xuxemons');
+
+            return response()->json(['message' => 'Daily xuxemons processing started']);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not process daily xuxemons',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function processDailyAll(): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            Artisan::call('app:process-daily-xuxemons');
+            Artisan::call('app:process-daily-items');
+
+            return response()->json(['message' => 'All daily processing started']);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not process daily rewards',
                 'errors' => ['server' => [$e->getMessage()]],
             ], 500);
         }

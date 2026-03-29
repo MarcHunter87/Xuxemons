@@ -108,4 +108,16 @@ export class AdminService {
   updateDailyReward(id: number, data: { time: string; quantity: number }): Observable<{ message: string; data: DailyReward }> {
     return this.http.put<{ message: string; data: DailyReward }>(`${this.apiUrl}/admin/daily-rewards/${id}`, data);
   }
+
+  processDailyItems(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/admin/process-daily-items`, {});
+  }
+
+  processDailyXuxemons(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/admin/process-daily-xuxemons`, {});
+  }
+
+  processDailyAll(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/admin/process-daily-all`, {});
+  }
 }

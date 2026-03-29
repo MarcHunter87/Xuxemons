@@ -2,6 +2,12 @@
   max-width: none;
 }
 
+.empty-state .empty-icon {
+  font-size: 2rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
 .loading-state,
 .error-state,
 .empty-state {
@@ -35,6 +41,86 @@
   border-radius: 12px;
   box-shadow: 0 2px 8px var(--shadow-color);
   animation: slideInUp 0.4s ease-out;
+}
+
+.daily-action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: var(--page-section-gap);
+  flex-wrap: wrap;
+}
+
+.admin-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.admin-nav-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: none;
+  box-shadow: none;
+}
+
+.admin-nav-btn-daily-all {
+  background-color: var(--warning-dark, #c43e00);
+  color: var(--white-color);
+}
+
+.admin-nav-btn-daily-all:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--warning-dark, #c43e00) 45%, transparent);
+}
+
+.admin-nav-btn-daily-all:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.admin-nav-btn-daily-xuxemon {
+  background-color: var(--success-color, #28a745);
+  color: var(--white-color);
+}
+
+.admin-nav-btn-daily-xuxemon:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+}
+
+.admin-nav-btn-daily-xuxemon:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.admin-nav-btn-daily-items {
+  background-color: var(--accent-color);
+  color: var(--white-color);
+}
+
+.admin-nav-btn-daily-items:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.admin-nav-btn-daily-items:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-loading-icon {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--white-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 .players-table {
