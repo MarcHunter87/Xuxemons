@@ -71,15 +71,6 @@ export const routes: Routes = [
     children: [{ path: '', component: Profile }, { path: 'edit', component: EditProfile }],
   },
   {
-    path: 'NotFound',
-    component: NotFound
-  },
-  {
-    path: '**',
-    redirectTo: '/NotFound',
-    pathMatch: 'full'
-  },
-  {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
     children: [
@@ -120,5 +111,14 @@ export const routes: Routes = [
         ],
       },
     ],
+  },
+  {
+    path: 'NotFound',
+    component: NotFound
+  },
+  {
+    path: '**',
+    redirectTo: '/NotFound',
+    pathMatch: 'full'
   },
 ];

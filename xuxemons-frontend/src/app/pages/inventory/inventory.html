@@ -147,7 +147,7 @@
               </div>
             }
       <label for="use-qty-input" class="qty-label mb-2">Quantity to use</label>
-      <div class="qty-controls compact qty-controls-row" style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem; justify-content: flex-start;">
+      <div class="qty-controls compact qty-controls-row">
         <button class="qty-btn" (click)="updateUseQuantity(useQuantity() - 1)" [disabled]="useQuantity() <= 1 || isUsing()" style="min-width: 2.2rem; height: 2.2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
           <i class="bi bi-dash-lg"></i>
         </button>
@@ -164,13 +164,6 @@
         <div class="use-item-info-message gluttony-highlight mt-2">
           <i class="bi bi-exclamation-triangle-fill gluttony-icon"></i>
           <span class="gluttony-text">Your Xuxemon is affected by Gluttony and cannot eat Special Meat.</span>
-        </div>
-      }
-      @if (maxUsableSpecialMeat() > 0) {
-        <div class="qty-max-hint mt-1">
-          <span class="qty-max-label">Max:</span>
-          <span class="qty-max-value">{{ maxUsableSpecialMeat() }}</span>
-          <span class="qty-max-desc">available</span>
         </div>
       }
       @if (maxUsableSpecialMeat() === 0) {
@@ -206,8 +199,8 @@
             <div class="use-item-xuxemon-stats use-item-xuxemon-stats-evolve">
               <span class="stat-evolve">
                 {{ xu.size }}
-                @if (getEvolvePreview(xu).willEvolve) {
-                  <span class="stat-preview stat-preview-evolve">→ {{ getEvolvePreview(xu).toSize }}</span>
+                @if (getEvolvePreview(xu, selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? useQuantity() : 1).willEvolve) {
+                  <span class="stat-preview stat-preview-evolve">→ {{ getEvolvePreview(xu, selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? useQuantity() : 1).toSize }}</span>
                 }
               </span>
             </div>

@@ -96,28 +96,31 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     readonly useQuantity = signal(1);
     readonly useQuantityError = signal<string | null>(null);
 
+    private getTotalItemQuantity(itemName: string): number {
+        return this.items()
+            .filter(i => i.name === itemName)
+            .reduce((sum, i) => sum + (i.quantity ?? 0), 0);
+    }
+
     // Calcula el máximo de carnes que se pueden usar según inventario, progreso y estado
     maxUsableSpecialMeat(): number {
         const item = this.selectedItem();
         const xuxemon = this.selectedXuxemonForUse();
         if (!item || item.name !== 'Special Meat' || !xuxemon) return 1;
-        const meatInBag = item.quantity ?? 1;
-        // Preferir requirement_total si está en la última respuesta del backend
+        const totalMeat = this.getTotalItemQuantity('Special Meat');
         let progress = xuxemon.requirement_progress ?? 0;
-        let total = xuxemon.requirement_total ?? null;
-        // Si la última respuesta de uso de item tiene requirement_total, úsala
         const lastUseData = (this as any).lastUseItemData as any;
-        if (lastUseData && typeof lastUseData.requirement_total === 'number') {
-            total = lastUseData.requirement_total;
+        if (lastUseData && typeof lastUseData.requirement_progress === 'number') {
             progress = lastUseData.requirement_progress ?? progress;
         }
-        if (typeof total !== 'number' || total < 1) total = progress + 1;
-        const needed = Math.max(0, total - progress);
+        // Calcular cuánto falta para el próximo tamaño usando requirement_total_max > requirement_total > size_breakpoints
+        const requirementMax = (xuxemon.requirement_total_max as number) ?? (xuxemon.requirement_total as number) ?? null;
+        const needed = typeof requirementMax === 'number' ? Math.max(0, requirementMax - progress) : 1;
         const hasStarving = xuxemon.side_effect_1?.name === 'Starving' || xuxemon.side_effect_2?.name === 'Starving' || xuxemon.side_effect_3?.name === 'Starving';
         if (hasStarving) {
-            return Math.min(Math.floor(meatInBag / 2), needed);
+            return Math.min(Math.floor(totalMeat / 2), needed);
         } else {
-            return Math.min(meatInBag, needed);
+            return Math.min(totalMeat, needed);
         }
     }
         // Muestra error si está en Starving y solo tiene una carne
@@ -126,7 +129,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         const xuxemon = this.selectedXuxemonForUse();
         if (!item || item.name !== 'Special Meat' || !xuxemon) return false;
         const hasStarving = xuxemon.side_effect_1?.name === 'Starving' || xuxemon.side_effect_2?.name === 'Starving' || xuxemon.side_effect_3?.name === 'Starving';
-        return hasStarving && (item.quantity === 1);
+        return hasStarving && (this.getTotalItemQuantity('Special Meat') < 2);
     }
 
 
@@ -154,6 +157,19 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         if (!xuxemon) return qty;
         const hasStarving = xuxemon.side_effect_1?.name === 'Starving' || xuxemon.side_effect_2?.name === 'Starving' || xuxemon.side_effect_3?.name === 'Starving';
         return hasStarving ? qty * 2 : qty;
+    }
+
+    // Devuelve el tamaño resultante para un progreso dado usando los size_breakpoints
+    private resolveSizeForProgress(progress: number, sizeBreakpoints?: Record<string, number>): 'Small' | 'Medium' | 'Large' {
+        if (!sizeBreakpoints || Object.keys(sizeBreakpoints).length === 0) return 'Small';
+        let chosen: string = 'Small';
+        const entries = Object.entries(sizeBreakpoints).map(([k, v]) => [k, Number(v)] as [string, number]);
+        entries.sort((a, b) => a[1] - b[1]);
+        for (const [sizeName, req] of entries) {
+            if (progress >= req) chosen = sizeName;
+        }
+        if (chosen === 'Small' || chosen === 'Medium' || chosen === 'Large') return chosen as any;
+        return 'Small';
     }
 
     readonly usedCapacity = computed(() =>
@@ -472,9 +488,17 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return fallback;
     }
 
-    getEvolvePreview(xu: Xuxemon): { willEvolve: boolean; fromSize: XuxemonSize; toSize: XuxemonSize } {
+    getEvolvePreview(xu: Xuxemon, qty: number = 1): { willEvolve: boolean; fromSize: XuxemonSize; toSize: XuxemonSize } {
         const fromSize = this.normalizeSize(xu.size);
-        const toSize = this.normalizeSize(xu.next_size, fromSize);
-        return { willEvolve: Boolean(xu.will_evolve_next), fromSize, toSize };
+        // Si tiene Starving, cada progreso requiere 2 carnes
+        const hasStarving = xu.side_effect_1?.name === 'Starving' || xu.side_effect_2?.name === 'Starving' || xu.side_effect_3?.name === 'Starving';
+        let progressGain = qty;
+        if (hasStarving) {
+            progressGain = Math.floor(qty / 2);
+        }
+        const progress = (xu.requirement_progress ?? 0) + progressGain;
+        const toSize = this.resolveSizeForProgress(progress, xu.size_breakpoints) ?? fromSize;
+        const willEvolve = toSize !== fromSize;
+        return { willEvolve, fromSize, toSize };
     }
 }

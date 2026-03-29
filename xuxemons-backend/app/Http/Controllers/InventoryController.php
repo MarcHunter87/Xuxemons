@@ -839,12 +839,12 @@ class InventoryController extends Controller
             ($adquired->sideEffect3?->name ?? null) === 'Starving'
         );
 
-        // Calcular requirement_total dinámicamente según la tabla Size
+        // Calcular requirement_total máximo hasta Large para permitir uso múltiple real.
         $progress = (int) $adquired->requirement_progress;
-        // Obtener el siguiente Size (evolución) para este Xuxemon
-        $currentSize = $adquired->size_id;
-        $nextSize = \App\Models\Size::where('id', '>', $currentSize)->orderBy('id')->first();
-        $requirementTotal = $nextSize ? (int) $nextSize->requirement_progress : $progress; // Si no hay siguiente, ya está al máximo
+        $largeRequirement = (int) (Size::query()
+            ->whereRaw('LOWER(size) = ?', ['large'])
+            ->value('requirement_progress') ?? $progress);
+        $requirementTotal = $largeRequirement;
         $needed = max(0, $requirementTotal - $progress);
         if ($needed < 1) {
             return [
@@ -864,6 +864,7 @@ class InventoryController extends Controller
         $qtyToUse = max(1, min($quantity, $maxUsable));
         $progressGained = 0;
         $meatUsed = 0;
+        $sideEffectsApplications = 0;
         if ($hasStarving) {
             $meatNeeded = $qtyToUse * 2;
             if ($bagItem->quantity < $meatNeeded) {
@@ -877,6 +878,7 @@ class InventoryController extends Controller
             $bagItem->reduceQuantity($meatNeeded);
             $progressGained = $qtyToUse;
             $meatUsed = $meatNeeded;
+            $sideEffectsApplications = $meatNeeded;
         } else {
             if ($bagItem->quantity < $qtyToUse) {
                 return [
@@ -888,6 +890,7 @@ class InventoryController extends Controller
             $bagItem->reduceQuantity($qtyToUse);
             $progressGained = $qtyToUse;
             $meatUsed = $qtyToUse;
+            $sideEffectsApplications = $qtyToUse;
         }
 
         $progress += $progressGained;
@@ -897,7 +900,11 @@ class InventoryController extends Controller
             $adquired->size_id = $newSize->id;
         }
         $adquired->save();
-        $this->applySideEffects($adquired);
+
+        // Aplicar efectos secundarios una vez por cada carne consumida
+        for ($i = 0; $i < $sideEffectsApplications; $i++) {
+            $this->applySideEffects($adquired);
+        }
 
         $response = [
             'xuxemon_size' => $newSize?->size ?? 'Small',

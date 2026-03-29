@@ -7,6 +7,8 @@ export interface Xuxemon {
   adquired_id?: number;
   requirement_progress?: number;
   requirement_total?: number;
+  requirement_total_max?: number;
+  size_breakpoints?: Record<string, number>;
   next_size?: 'Small' | 'Medium' | 'Large';
   will_evolve_next?: boolean;
   statusEffect?: {

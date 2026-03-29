@@ -80,6 +80,17 @@ class XuxemonController extends Controller
                 $x['adquired_id'] = $a->id;
                 $progress = (int) $a->requirement_progress;
                 $x['requirement_progress'] = $progress;
+                $nextSizeForRequirement = Size::where('id', '>', $a->size_id)
+                    ->orderBy('id')
+                    ->first();
+                $x['requirement_total'] = $nextSizeForRequirement
+                    ? (int) $nextSizeForRequirement->requirement_progress
+                    : $progress;
+                $sizeBreakpoints = Size::orderBy('id')->get()->mapWithKeys(function ($s) {
+                    return [$s->size => (int) $s->requirement_progress];
+                })->toArray();
+                $x['size_breakpoints'] = $sizeBreakpoints;
+                $x['requirement_total_max'] = $sizeBreakpoints['Large'] ?? $x['requirement_total'];
                 $nextSize = Size::resolveForProgress($progress + 1)?->size ?? $x['size'];
                 $x['next_size'] = $nextSize;
                 $x['will_evolve_next'] = $nextSize !== $x['size'];
