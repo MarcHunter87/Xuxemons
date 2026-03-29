@@ -2,7 +2,7 @@
     <button
         type="button"
         class="card-button"
-        (click)="openDetails()"
+        (click)="openDetails($event)"
         [attr.aria-label]="'View details for ' + (xuxemon?.name ?? 'xuxemon')"
     >
         <div class="card xuxemon-card h-100">
@@ -47,13 +47,13 @@
     @if (showDetails() && xuxemon) {
         <div
             class="xuxemon-modal-overlay"
-            appFocusTrap
             role="dialog"
             aria-modal="true"
             aria-labelledby="xuxemon-card-detail-title"
+            (keydown)="onModalKeydown($event)"
             (click)="closeDetails()"
         >
-            <article class="xuxemon-modal-card animate-pop" (click)="$event.stopPropagation()">
+            <article #dialogRoot class="xuxemon-modal-card animate-pop" tabindex="-1" (click)="$event.stopPropagation()">
                 <button type="button" class="btn-primary btn-sm modal-close" (click)="closeDetails(); $event.stopPropagation()" aria-label="Cerrar">
                     <span class="modal-close-icon" aria-hidden="true">×</span>
                 </button>
@@ -65,7 +65,7 @@
 
                     <div class="modal-content">
                         <div class="modal-header-row">
-                            <h1 class="modal-name">
+                            <h1 class="modal-name" id="xuxemon-card-detail-title">
                                 {{ xuxemon.name }}
                                 @if (isOwnedVariant()) {
                                     <span class="modal-level-inline">Lv. {{ xuxemon.level ?? 1 }}</span>

@@ -90,22 +90,23 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="gacha-spin-error-title"
+      (keydown)="onModalKeydown($event, 'error')"
       (click)="closeSpinError()"
     >
-      <div class="modal-content gacha-spin-error-dialog animate-pop" (click)="$event.stopPropagation()">
+      <div #spinErrorDialogRoot class="modal-content gacha-spin-error-dialog animate-pop" tabindex="-1" (click)="$event.stopPropagation()">
         <h2 id="gacha-spin-error-title" class="winner-title">Spin failed</h2>
         <p class="gacha-spin-error-text">{{ spinError() }}</p>
         <div class="modal-actions">
-          <button type="button" (click)="closeSpinError()" class="btn-primary">OK</button>
+          <button #spinErrorOkButton type="button" (click)="closeSpinError()" class="btn-primary">OK</button>
         </div>
       </div>
     </div>
   }
 
   @if (showAward()) {
-    <div class="modal-overlay" (click)="closeModal()">
-      <div class="modal-content animate-pop" (click)="$event.stopPropagation()">
-        <h2 class="winner-title">Congratulations!</h2>
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="gacha-award-title" (keydown)="onModalKeydown($event, 'award')" (click)="closeModal()">
+      <div #awardDialogRoot class="modal-content animate-pop" tabindex="-1" (click)="$event.stopPropagation()">
+        <h2 id="gacha-award-title" class="winner-title">Congratulations!</h2>
         <div class="winner-display">
           <button
             type="button"
@@ -149,7 +150,7 @@
           }
         </div>
         <div class="modal-actions">
-          <button type="button" (click)="closeModal()" class="btn-secondary">Close</button>
+          <button #awardCloseButton type="button" (click)="closeModal()" class="btn-secondary">Close</button>
           <button
             type="button"
             (click)="spinAgain()"

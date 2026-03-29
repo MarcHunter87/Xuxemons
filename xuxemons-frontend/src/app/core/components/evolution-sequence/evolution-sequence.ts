@@ -15,15 +15,24 @@ export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
     @Output() finished = new EventEmitter<void>();
 
     @ViewChild('evolutionAudio') audioEl!: ElementRef<HTMLAudioElement>;
+    @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
 
     private finishTimeoutId: ReturnType<typeof setTimeout> | null = null;
     private audioStartTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    private previousFocusedElement: HTMLElement | null = null;
 
     ngOnInit(): void {
+        this.previousFocusedElement = typeof document !== 'undefined'
+            ? (document.activeElement as HTMLElement | null)
+            : null;
         this.finishTimeoutId = setTimeout(() => this.finish(), 10000);
     }
 
     ngAfterViewInit(): void {
+        if (this.dialogRoot?.nativeElement) {
+            setTimeout(() => this.dialogRoot?.nativeElement.focus(), 0);
+        }
+
         if (this.audioEl && this.audioEl.nativeElement) {
             this.audioEl.nativeElement.volume = 0.6;
             this.audioStartTimeoutId = setTimeout(() => {
@@ -48,6 +57,13 @@ export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
         this.finish();
     }
 
+    onModalKeydown(event: KeyboardEvent): void {
+        if (event.key === 'Tab') {
+            event.preventDefault();
+            this.dialogRoot?.nativeElement.focus();
+        }
+    }
+
     get fromScale(): number {
         return this.getSizeScale(this.fromSize);
     }
@@ -60,6 +76,9 @@ export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
         if (this.finishTimeoutId) {
             clearTimeout(this.finishTimeoutId);
             this.finishTimeoutId = null;
+        }
+        if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
+            setTimeout(() => this.previousFocusedElement?.focus(), 0);
         }
         this.finished.emit();
     }

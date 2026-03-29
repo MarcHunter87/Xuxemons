@@ -143,9 +143,9 @@
 }
 
 @if (showAwardModal() && awardedXuxemon()) {
-  <div class="award-modal-overlay" (click)="closeAwardModal()">
-    <div class="award-modal-content animate-pop" (click)="$event.stopPropagation()">
-      <h2 class="award-modal-title">Xuxemon awarded</h2>
+  <div class="award-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="award-modal-title" (keydown)="onModalKeydown($event)" (click)="closeAwardModal()">
+    <div #awardModalRoot class="award-modal-content animate-pop" tabindex="-1" (click)="$event.stopPropagation()">
+      <h2 id="award-modal-title" class="award-modal-title">Xuxemon awarded</h2>
       <div class="award-modal-display">
         <div
           class="award-modal-image-wrapper"
@@ -182,7 +182,7 @@
         }
       </div>
       <div class="award-modal-actions">
-        <button type="button" (click)="closeAwardModal()" class="btn btn-primary">Close</button>
+        <button #awardCloseButton type="button" (click)="closeAwardModal()" class="btn btn-primary">Close</button>
       </div>
     </div>
   </div>

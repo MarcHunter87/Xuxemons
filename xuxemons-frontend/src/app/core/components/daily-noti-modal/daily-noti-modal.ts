@@ -20,6 +20,7 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
 
   private previousFocusedElement: HTMLElement | null = null;
   private shouldFocusPrimaryAction = false;
+  private shouldFocusRoot = false;
 
   constructor(public auth: AuthService) {}
 
@@ -28,11 +29,16 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
       this.previousFocusedElement = typeof document !== 'undefined'
         ? (document.activeElement as HTMLElement | null)
         : null;
+      this.shouldFocusRoot = true;
       this.shouldFocusPrimaryAction = true;
     }
   }
 
   ngAfterViewChecked(): void {
+    if (this.shouldFocusRoot && this.dialogRoot?.nativeElement) {
+      this.dialogRoot.nativeElement.focus();
+      this.shouldFocusRoot = false;
+    }
     if (this.shouldFocusPrimaryAction && this.confirmButton?.nativeElement) {
       this.confirmButton.nativeElement.focus();
       this.shouldFocusPrimaryAction = false;

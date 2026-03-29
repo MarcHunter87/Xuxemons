@@ -1,4 +1,4 @@
-<div class="evolution-overlay" role="dialog" aria-modal="true" [attr.aria-label]="'Evolución de ' + spriteName">
+<div #dialogRoot class="evolution-overlay" role="dialog" aria-modal="true" tabindex="0" [attr.aria-label]="'Evolución de ' + spriteName" (keydown)="onModalKeydown($event)">
   <video class="evolution-video" src="http://localhost:8080/FondoEvolucion.mp4" autoplay muted loop playsinline>
   </video>
 

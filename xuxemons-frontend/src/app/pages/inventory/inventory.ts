@@ -1,4 +1,3 @@
-
 import {
     Component,
     ChangeDetectionStrategy,
@@ -11,6 +10,8 @@ import {
     computed,
     OnInit,
     OnDestroy,
+    ViewChild,
+    AfterViewInit,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -36,6 +37,14 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     private elementRef = inject(ElementRef<HTMLElement>);
     private subs = new Subscription();
     private focusUseItemSearch = false;
+    private focusDiscardCancelButton = false;
+    private previousFocusedElement: HTMLElement | null = null;
+
+    @ViewChild('useModalRoot') useModalRoot?: ElementRef<HTMLElement>;
+    @ViewChild('discardModalRoot') discardModalRoot?: ElementRef<HTMLElement>;
+    @ViewChild('discardCancelButton') discardCancelButton?: ElementRef<HTMLButtonElement>;
+    @ViewChild('plusQtyBtn') plusQtyBtn?: ElementRef<HTMLButtonElement>;
+    @ViewChild('qtyInput') qtyInput?: ElementRef<HTMLInputElement>;
 
     readonly items = signal<InventoryItem[]>([]);
     readonly myXuxemons = signal<Xuxemon[]>([]);
@@ -96,6 +105,95 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     readonly useQuantity = signal(1);
     readonly useQuantityError = signal<string | null>(null);
 
+    private hasSideEffect(xuxemon: Xuxemon | null | undefined, effectName: string): boolean {
+        if (!xuxemon) return false;
+
+        return xuxemon.side_effect_1?.name === effectName
+            || xuxemon.side_effect_2?.name === effectName
+            || xuxemon.side_effect_3?.name === effectName;
+    }
+
+    isGluttonyBlocked(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): boolean {
+        return this.selectedItem()?.name === 'Special Meat' && this.hasSideEffect(xuxemon, 'Gluttony');
+    }
+
+    isOverdoseBlocked(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): boolean {
+        return this.selectedItem()?.name === 'Special Meat' && this.hasSideEffect(xuxemon, 'Overdose');
+    }
+
+    isSpecialMeatUseBlocked(): boolean {
+        return this.isGluttonyBlocked() || this.isOverdoseBlocked();
+    }
+
+    getSpecialMeatBlockMessage(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): string | null {
+        if (this.selectedItem()?.name !== 'Special Meat' || !xuxemon) return null;
+        if (this.hasSideEffect(xuxemon, 'Gluttony')) {
+            return 'Your Xuxemon is affected by Gluttony and cannot eat Special Meat.';
+        }
+        if (this.hasSideEffect(xuxemon, 'Overdose')) {
+            return 'Your Xuxemon is affected by Overdose, cannot eat Special Meat, and its size has been reduced.';
+        }
+
+        return null;
+    }
+
+    isUseActionDisabled(): boolean {
+        if (!this.selectedXuxemonForUse() || this.isUsing()) return true;
+        if (this.isSpecialMeatUseBlocked()) return true;
+        if (this.selectedItem()?.name === 'Special Meat' && this.maxUsableSpecialMeat() === 0) return true;
+
+        return this.selectedItem()?.name === 'Special Meat' && Boolean(this.useQuantityError());
+    }
+
+    isStarvingSelected(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): boolean {
+        return this.selectedItem()?.name === 'Special Meat' && this.hasSideEffect(xuxemon, 'Starving');
+    }
+
+    getUseQuantityStep(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): number {
+        return this.isStarvingSelected(xuxemon) ? 2 : 1;
+    }
+
+    getUseQuantityMin(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): number {
+        return this.isStarvingSelected(xuxemon) ? 2 : 1;
+    }
+
+    getProgressForUseQuantity(qty: number, xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): number {
+        if (!Number.isFinite(qty) || qty <= 0) return 0;
+
+        return this.isStarvingSelected(xuxemon) ? Math.floor(qty / 2) : Math.floor(qty);
+    }
+
+    private getNormalizedUseQuantity(value: number, xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): number {
+        const step = this.getUseQuantityStep(xuxemon);
+        const min = this.getUseQuantityMin(xuxemon);
+        const max = this.maxUsableSpecialMeat();
+        let normalized = Math.floor(value);
+
+        if (!Number.isFinite(normalized)) return normalized;
+        if (this.isStarvingSelected(xuxemon) && normalized % 2 !== 0) {
+            normalized += 1;
+        }
+        if (normalized < min) {
+            normalized = min;
+        }
+        if (max > 0 && normalized > max) {
+            normalized = max;
+            if (this.isStarvingSelected(xuxemon) && normalized % 2 !== 0) {
+                normalized = Math.max(min, normalized - 1);
+            }
+        }
+
+        return normalized;
+    }
+
+    getInitialUseQuantity(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): number {
+        if (this.isStarvingSelected(xuxemon) && this.maxUsableSpecialMeat() >= 2) {
+            return 2;
+        }
+
+        return 1;
+    }
+
     private getTotalItemQuantity(itemName: string): number {
         return this.items()
             .filter(i => i.name === itemName)
@@ -116,9 +214,9 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         // Calcular cuánto falta para el próximo tamaño usando requirement_total_max > requirement_total > size_breakpoints
         const requirementMax = (xuxemon.requirement_total_max as number) ?? (xuxemon.requirement_total as number) ?? null;
         const needed = typeof requirementMax === 'number' ? Math.max(0, requirementMax - progress) : 1;
-        const hasStarving = xuxemon.side_effect_1?.name === 'Starving' || xuxemon.side_effect_2?.name === 'Starving' || xuxemon.side_effect_3?.name === 'Starving';
+        const hasStarving = this.hasSideEffect(xuxemon, 'Starving');
         if (hasStarving) {
-            return Math.min(Math.floor(totalMeat / 2), needed);
+            return Math.min(totalMeat - (totalMeat % 2), needed * 2);
         } else {
             return Math.min(totalMeat, needed);
         }
@@ -137,15 +235,22 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     updateUseQuantity(val: number): void {
         const max = this.maxUsableSpecialMeat();
         const parsed = Math.floor(val);
-        this.useQuantity.set(parsed);
+        const normalized = this.getNormalizedUseQuantity(parsed);
+        this.useQuantity.set(Number.isFinite(normalized) ? normalized : parsed);
         if (!parsed || isNaN(parsed)) {
             this.useQuantityError.set('Please enter a valid number.');
-        } else if (parsed < 1) {
+        } else if (this.isStarvingSelected() && parsed < 2) {
+            this.useQuantityError.set('Quantity must be at least 2 while Starving.');
+        } else if (!this.isStarvingSelected() && parsed < 1) {
             this.useQuantityError.set('Quantity must be at least 1.');
-        } else if (parsed > max) {
+        } else if (this.isStarvingSelected() && parsed % 2 !== 0) {
+            this.useQuantityError.set(null);
+        } else if (max > 0 && normalized > max) {
             this.useQuantityError.set(`You can use up to ${max}.`);
         } else if (this.showStarvingMeatError()) {
             this.useQuantityError.set('You do not have enough Special Meat: Starving requires 2 per progress.');
+        } else if (max === 0) {
+            this.useQuantityError.set(null);
         } else {
             this.useQuantityError.set(null);
         }
@@ -153,10 +258,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
 
     // Calcula cuántas carnes se consumirán para la cantidad seleccionada
     getMeatToConsumeForQuantity(qty: number): number {
-        const xuxemon = this.selectedXuxemonForUse();
-        if (!xuxemon) return qty;
-        const hasStarving = xuxemon.side_effect_1?.name === 'Starving' || xuxemon.side_effect_2?.name === 'Starving' || xuxemon.side_effect_3?.name === 'Starving';
-        return hasStarving ? qty * 2 : qty;
+        return Math.max(0, Math.floor(qty));
     }
 
     // Devuelve el tamaño resultante para un progreso dado usando los size_breakpoints
@@ -286,12 +388,16 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     openUseModal(): void {
+        this.previousFocusedElement = typeof document !== 'undefined'
+            ? (document.activeElement as HTMLElement | null)
+            : null;
         this.useApiError.set(null);
         this.selectedXuxemonForUse.set(null);
         this.useSearchQuery.set('');
         this.useQuantity.set(1);
         this.useQuantityError.set(null);
         this.useStarvingInfo.set(null);
+        this.useOverdoseInfo.set(null);
         (this as any).lastUseItemData = undefined;
         this.xuxemonService.loadMyXuxemons();
         this.useModalOpen.set(true);
@@ -305,12 +411,20 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
             setTimeout(() => input.focus(), 0);
             this.focusUseItemSearch = false;
         }
+
+        if (this.focusDiscardCancelButton && this.discardCancelButton?.nativeElement) {
+            setTimeout(() => this.discardCancelButton?.nativeElement.focus(), 0);
+            this.focusDiscardCancelButton = false;
+        }
     }
 
     closeUseModal(): void {
         this.useModalOpen.set(false);
         this.selectedXuxemonForUse.set(null);
         this.useApiError.set(null);
+        this.useStarvingInfo.set(null);
+        this.useOverdoseInfo.set(null);
+        this.restorePreviousFocus();
     }
 
     setUseSearchQuery(value: string): void {
@@ -324,32 +438,48 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         this.useStarvingInfo.set(null);
         this.useOverdoseInfo?.set?.(null);
         (this as any).lastUseItemData = undefined;
-        this.useQuantity.set(1);
+        this.useQuantity.set(this.getInitialUseQuantity(xuxemon));
         // Mostrar info de overdose o starving si corresponde al seleccionar
         const item = this.selectedItem();
-        const hasStarving =
-            xuxemon.side_effect_1?.name === 'Starving' ||
-            xuxemon.side_effect_2?.name === 'Starving' ||
-            xuxemon.side_effect_3?.name === 'Starving';
-        const hasOverdose =
-            xuxemon.side_effect_1?.name === 'Overdose' ||
-            xuxemon.side_effect_2?.name === 'Overdose' ||
-            xuxemon.side_effect_3?.name === 'Overdose';
-        if (item?.name === 'Special Meat' && hasOverdose) {
-            this.useOverdoseInfo.set('Your Xuxemon is affected by Overdose, cannot eat Special Meat, and its size has been reduced.');
+        const hasStarving = this.hasSideEffect(xuxemon, 'Starving');
+        if (item?.name === 'Special Meat' && this.isOverdoseBlocked(xuxemon)) {
+            this.useOverdoseInfo.set(this.getSpecialMeatBlockMessage(xuxemon));
         } else if (item?.name === 'Special Meat' && hasStarving) {
             this.useStarvingInfo.set('This Xuxemon is Starving and will consume 2 Special Meat for 1 progress.');
         } else {
             this.useStarvingInfo.set(null);
             this.useOverdoseInfo?.set?.(null);
         }
+        // Foco automático en el botón + si corresponde
+        setTimeout(() => {
+            if (item?.name === 'Special Meat' && !this.isSpecialMeatUseBlocked() && this.qtyInput?.nativeElement) {
+                this.qtyInput.nativeElement.focus();
+            }
+        }, 0);
+    }
+
+    // Keyboard Enter handler for xuxemon list rows: select and (for non-Special Meat) execute immediately
+    onXuxemonEnter(xuxemon: Xuxemon): void {
+        this.selectXuxemonForUse(xuxemon);
+        const item = this.selectedItem();
+        if (!item) return;
+        if (item.name !== 'Special Meat') {
+            // allow previous selection logic to settle, then confirm
+            setTimeout(() => this.confirmUseItem(), 0);
+        } else {
+            // For Special Meat we move focus to + (already handled in selectXuxemonForUse)
+        }
     }
 
     confirmUseItem(): void {
         const item = this.selectedItem();
         const xuxemon = this.selectedXuxemonForUse();
-        const qty = this.useQuantity();
+        const qty = this.getProgressForUseQuantity(this.useQuantity(), xuxemon);
         if (!item?.bag_item_id || !xuxemon?.adquired_id) return;
+        if (this.isSpecialMeatUseBlocked()) {
+            this.useApiError.set(this.getSpecialMeatBlockMessage(xuxemon));
+            return;
+        }
         if (item.name === 'Special Meat' && this.useQuantityError()) return;
         this.isUsing.set(true);
         this.useApiError.set(null);
@@ -362,8 +492,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
                 // Guardar la última respuesta para requirement_total
                 (this as any).lastUseItemData = data;
                 if (data && (data as any).gluttony_blocked) {
-                    this.closeUseModal();
-                    this.errorMessage.set((data as any).message || 'This Xuxemon cannot eat due to Gluttony.');
+                    this.useApiError.set((data as any).message || 'This Xuxemon cannot eat due to Gluttony.');
                     return;
                 }
                 if (data && (data as any).starving_info) {
@@ -386,6 +515,10 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     discardItem(): void {
+        this.previousFocusedElement = typeof document !== 'undefined'
+            ? (document.activeElement as HTMLElement | null)
+            : null;
+        this.focusDiscardCancelButton = true;
         this.inventoryService.discardItem();
     }
 
@@ -399,6 +532,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
 
     cancelDiscard(): void {
         this.inventoryService.cancelDiscard();
+        this.restorePreviousFocus();
     }
 
     closeEvolutionAnimation(): void {
@@ -409,6 +543,59 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     onEscape(): void {
         if (this.useModalOpen()) this.closeUseModal();
         else if (this.discardMode()) this.cancelDiscard();
+    }
+
+    onModalKeydown(event: KeyboardEvent, modal: 'use' | 'discard'): void {
+        if (event.key !== 'Tab') {
+            return;
+        }
+
+        const root = modal === 'use'
+            ? this.useModalRoot?.nativeElement
+            : this.discardModalRoot?.nativeElement;
+        const isOpen = modal === 'use' ? this.useModalOpen() : this.discardMode();
+        if (!isOpen || !root) {
+            return;
+        }
+
+        const focusableSelector = [
+            'a[href]',
+            'button:not([disabled])',
+            'textarea:not([disabled])',
+            'input:not([disabled])',
+            'select:not([disabled])',
+            '[tabindex]:not([tabindex="-1"])',
+        ].join(',');
+
+        const focusableElements = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
+            .filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1);
+
+        if (focusableElements.length === 0) {
+            event.preventDefault();
+            root.focus();
+            return;
+        }
+
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+
+        if (event.shiftKey && active === first) {
+            event.preventDefault();
+            last.focus();
+            return;
+        }
+
+        if (!event.shiftKey && active === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    }
+
+    private restorePreviousFocus(): void {
+        if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
+            setTimeout(() => this.previousFocusedElement?.focus(), 0);
+        }
     }
 
     getSlotClass(item: InventoryItem): string {

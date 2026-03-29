@@ -1,3 +1,6 @@
+.progress-bar-loading {
+  width: 0%;
+}
 :host {
   display: flex;
   width: 100%;

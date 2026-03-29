@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal, OnInit, OnDestroy, ViewChild, ElementRef, computed } from '@angular/core';
+import { AfterViewChecked, Component, HostListener, inject, signal, OnInit, OnDestroy, ViewChild, ElementRef, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
@@ -12,7 +12,7 @@ import { AuthService } from '../../core/services/auth';
     templateUrl: './gacha.html',
     styleUrl: './gacha.css',
 })
-export class Gacha implements OnInit, OnDestroy {
+export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     private readonly winnerIndex = 80;
     private xuxemonService = inject(XuxemonService);
     private router = inject(Router);
@@ -20,6 +20,10 @@ export class Gacha implements OnInit, OnDestroy {
     private subs = new Subscription();
 
     @ViewChild('rouletteBox') rouletteBox!: ElementRef<HTMLElement>;
+    @ViewChild('awardDialogRoot') awardDialogRoot?: ElementRef<HTMLElement>;
+    @ViewChild('awardCloseButton') awardCloseButton?: ElementRef<HTMLButtonElement>;
+    @ViewChild('spinErrorDialogRoot') spinErrorDialogRoot?: ElementRef<HTMLElement>;
+    @ViewChild('spinErrorOkButton') spinErrorOkButton?: ElementRef<HTMLButtonElement>;
 
     public isSpinning = signal(false);
     public noTransition = signal(false);
@@ -31,6 +35,9 @@ export class Gacha implements OnInit, OnDestroy {
     public isDataLoaded = signal(false);
     public historyXuxemons = computed(() => this.myXuxemonsList().slice(0, 6));
     private myXuxemonsList = signal<Xuxemon[]>([]);
+    private previousFocusedElement: HTMLElement | null = null;
+    private shouldFocusAwardCloseButton = false;
+    private shouldFocusErrorButton = false;
 
     ngOnInit() {
         this.auth.refreshGachaTickets();
@@ -41,6 +48,18 @@ export class Gacha implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.subs.unsubscribe();
+    }
+
+    ngAfterViewChecked(): void {
+        if (this.shouldFocusAwardCloseButton && this.awardCloseButton?.nativeElement) {
+            this.awardCloseButton.nativeElement.focus();
+            this.shouldFocusAwardCloseButton = false;
+        }
+
+        if (this.shouldFocusErrorButton && this.spinErrorOkButton?.nativeElement) {
+            this.spinErrorOkButton.nativeElement.focus();
+            this.shouldFocusErrorButton = false;
+        }
     }
 
     async loadRoulette() {
@@ -76,6 +95,10 @@ export class Gacha implements OnInit, OnDestroy {
         if (this.isSpinning()) return;
         if (this.auth.gachaTicketCount() < 1) return;
 
+        this.previousFocusedElement = typeof document !== 'undefined'
+            ? (document.activeElement as HTMLElement | null)
+            : null;
+
         this.showAward.set(false);
         this.awardedXuxemon.set(null);
         this.spinError.set(null);
@@ -93,6 +116,7 @@ export class Gacha implements OnInit, OnDestroy {
             this.spinError.set(
                 "Couldn't complete the spin. Make sure you have tickets and your session is still active."
             );
+            this.shouldFocusErrorButton = true;
             return;
         }
 
@@ -114,6 +138,7 @@ export class Gacha implements OnInit, OnDestroy {
             this.isSpinning.set(false);
             this.awardedXuxemon.set(winner);
             this.showAward.set(true);
+            this.shouldFocusAwardCloseButton = true;
         }, 6200);
     }
 
@@ -144,10 +169,12 @@ export class Gacha implements OnInit, OnDestroy {
         this.showAward.set(false);
         this.awardedXuxemon.set(null);
         this.xuxemonService.loadMyXuxemons();
+        this.restorePreviousFocus();
     }
 
     closeSpinError(): void {
         this.spinError.set(null);
+        this.restorePreviousFocus();
     }
 
     @HostListener('document:keydown.escape')
@@ -157,5 +184,84 @@ export class Gacha implements OnInit, OnDestroy {
             return;
         }
         if (this.showAward()) this.closeModal();
+    }
+
+    @HostListener('document:keydown', ['$event'])
+    onDocumentKeydown(event: KeyboardEvent): void {
+        if (event.key !== 'Tab') {
+            return;
+        }
+
+        if (this.spinError()) {
+            this.trapFocus(event, this.spinErrorDialogRoot?.nativeElement);
+            return;
+        }
+
+        if (this.showAward()) {
+            this.trapFocus(event, this.awardDialogRoot?.nativeElement);
+        }
+    }
+
+    onModalKeydown(event: KeyboardEvent, modal: 'award' | 'error'): void {
+        if (event.key !== 'Tab') {
+            return;
+        }
+
+        const root = modal === 'award'
+            ? this.awardDialogRoot?.nativeElement
+            : this.spinErrorDialogRoot?.nativeElement;
+        this.trapFocus(event, root);
+    }
+
+    private restorePreviousFocus(): void {
+        if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
+            setTimeout(() => this.previousFocusedElement?.focus(), 0);
+        }
+    }
+
+    private trapFocus(event: KeyboardEvent, root?: HTMLElement): void {
+        if (!root) {
+            return;
+        }
+
+        const focusableSelector = [
+            'a[href]',
+            'button:not([disabled])',
+            'textarea:not([disabled])',
+            'input:not([disabled])',
+            'select:not([disabled])',
+            '[tabindex]:not([tabindex="-1"])',
+        ].join(',');
+
+        const focusableElements = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
+            .filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1);
+
+        if (focusableElements.length === 0) {
+            event.preventDefault();
+            root.focus();
+            return;
+        }
+
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+        const activeInside = !!active && root.contains(active);
+
+        if (!activeInside) {
+            event.preventDefault();
+            (event.shiftKey ? last : first).focus();
+            return;
+        }
+
+        if (event.shiftKey && active === first) {
+            event.preventDefault();
+            last.focus();
+            return;
+        }
+
+        if (!event.shiftKey && active === last) {
+            event.preventDefault();
+            first.focus();
+        }
     }
 }

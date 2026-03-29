@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, inject, signal, computed } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, OnInit, ViewChild, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -23,7 +23,7 @@ export interface AwardedXuxemonDisplay {
   templateUrl: './admin.html',
   styleUrl: './admin.css',
 })
-export class Admin implements OnInit {
+export class Admin implements OnInit, AfterViewChecked {
   private readonly adminService = inject(AdminService);
   private readonly auth = inject(AuthService);
 
@@ -36,11 +36,23 @@ export class Admin implements OnInit {
   readonly awardLoadingUserId = signal<string | null>(null);
   readonly banLoadingUserId = signal<string | null>(null);
   readonly awardError = signal<string | null>(null);
+  private previousFocusedElement: HTMLElement | null = null;
+  private shouldFocusAwardCloseButton = false;
+
+  @ViewChild('awardModalRoot') awardModalRoot?: ElementRef<HTMLElement>;
+  @ViewChild('awardCloseButton') awardCloseButton?: ElementRef<HTMLButtonElement>;
 
   readonly hasContent = computed(() => !this.isLoading() && !this.errorMessage());
 
   ngOnInit(): void {
     this.loadAllUsers();
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.shouldFocusAwardCloseButton && this.awardCloseButton?.nativeElement) {
+      this.awardCloseButton.nativeElement.focus();
+      this.shouldFocusAwardCloseButton = false;
+    }
   }
 
   private loadAllUsers(): void {
@@ -93,6 +105,9 @@ export class Admin implements OnInit {
   }
 
   giveRandomXuxemon(user: AdminUser): void {
+    this.previousFocusedElement = typeof document !== 'undefined'
+      ? (document.activeElement as HTMLElement | null)
+      : null;
     this.awardError.set(null);
     this.awardLoadingUserId.set(user.id);
     this.adminService.awardRandomXuxemonToUser(user.id).pipe(
@@ -110,6 +125,7 @@ export class Admin implements OnInit {
           defense: raw?.defense ?? 0,
         });
         this.showAwardModal.set(true);
+        this.shouldFocusAwardCloseButton = true;
       },
       error: (err) => {
         this.awardError.set(err?.error?.message ?? 'Failed to award random Xuxemon');
@@ -147,6 +163,9 @@ export class Admin implements OnInit {
     this.showAwardModal.set(false);
     this.awardedXuxemon.set(null);
     this.awardError.set(null);
+    if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
+      setTimeout(() => this.previousFocusedElement?.focus(), 0);
+    }
   }
 
   @HostListener('document:keydown.escape')
@@ -158,8 +177,23 @@ export class Admin implements OnInit {
     if (this.awardError()) this.dismissAwardError();
   }
 
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Tab' || !this.showAwardModal()) {
+      return;
+    }
+    this.trapFocus(event, this.awardModalRoot?.nativeElement);
+  }
+
   dismissAwardError(): void {
     this.awardError.set(null);
+  }
+
+  onModalKeydown(event: KeyboardEvent): void {
+    if (!this.showAwardModal() || event.key !== 'Tab') {
+      return;
+    }
+    this.trapFocus(event, this.awardModalRoot?.nativeElement);
   }
 
   getTypeColor(typeName: string): string {
@@ -168,6 +202,52 @@ export class Admin implements OnInit {
       case 'Speed': return '#0D6EFD';
       case 'Technical': return '#28A745';
       default: return '#777';
+    }
+  }
+
+  private trapFocus(event: KeyboardEvent, root?: HTMLElement): void {
+    if (!root) {
+      return;
+    }
+
+    const focusableSelector = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',');
+
+    const focusableElements = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
+      .filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1);
+
+    if (focusableElements.length === 0) {
+      event.preventDefault();
+      root.focus();
+      return;
+    }
+
+    const first = focusableElements[0];
+    const last = focusableElements[focusableElements.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+    const activeInside = !!active && root.contains(active);
+
+    if (!activeInside) {
+      event.preventDefault();
+      (event.shiftKey ? last : first).focus();
+      return;
+    }
+
+    if (event.shiftKey && active === first) {
+      event.preventDefault();
+      last.focus();
+      return;
+    }
+
+    if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
     }
   }
 }
