@@ -5,6 +5,8 @@ import { Observable, of, tap, BehaviorSubject } from 'rxjs';
 import { delay, catchError, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import type {
+  DailyRewardNotification,
+  DailyRewardNotificationResponse,
   User,
   RegisterPayload,
   LoginPayload,
@@ -239,5 +241,22 @@ export class AuthService {
 
   uploadIcon(file: File): Observable<{ message: string; user: User }> {
     return this.uploadProfileImage(file, 'icon');
+  }
+
+  getPendingDailyRewardNotification(): Observable<DailyRewardNotification | null> {
+    return this.http.get<DailyRewardNotificationResponse>(
+      `${this.apiUrl}/daily-rewards/pending`,
+      { headers: this.authHeaders() }
+    ).pipe(
+      map(res => res.data ?? null),
+    );
+  }
+
+  acknowledgeDailyRewardNotification(id: number): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/daily-rewards/${id}/ack`,
+      {},
+      { headers: this.authHeaders() }
+    );
   }
 }

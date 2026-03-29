@@ -1,0 +1,164 @@
+.daily-noti-modal {
+	z-index: 1070;
+}
+
+.daily-noti-content {
+	border: 0;
+	border-radius: 12px;
+	box-shadow: 0 20px 48px var(--shadow-color, rgba(0, 0, 0, 0.18));
+	background: var(--primary-color, #f1f3f5);
+}
+
+.reward-section {
+	background: var(--white-color, #ffffff);
+	border: 1px solid var(--light-gray-color, #d9dee3);
+	border-radius: 10px;
+	padding: 0.9rem;
+}
+
+.reward-section-title {
+	font-size: 0.95rem;
+	font-weight: 700;
+	color: var(--text-alt-color, #2A2B2B);
+	margin: 0 0 0.65rem;
+}
+
+.reward-items-scroll {
+	max-height: 310px;
+	overflow-y: auto;
+	padding-right: 0.2rem;
+}
+
+.reward-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 0.55rem;
+}
+
+.reward-row {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	background: var(--white-color, #ffffff);
+	border: 1px solid var(--light-gray-color, #d9dee3);
+	border-radius: 8px;
+	padding: 0.55rem 0.65rem;
+}
+
+.reward-row.slot-bg-heal { background: rgba(22, 197, 74, 0.1); }
+.reward-row.slot-bg-mana { background: rgba(6, 182, 212, 0.1); }
+.reward-row.slot-bg-dmg-up { background: rgba(220, 38, 38, 0.1); }
+.reward-row.slot-bg-defense-up { background: rgba(234, 88, 12, 0.1); }
+.reward-row.slot-bg-remove-status-effects { background: rgba(37, 99, 235, 0.1); }
+.reward-row.slot-bg-apply-status-effects { background: rgba(168, 85, 247, 0.1); }
+.reward-row.slot-bg-revive, .reward-row.slot-bg-evolve, .reward-row.slot-bg-gacha-ticket { background: rgba(251, 191, 36, 0.1); }
+
+.reward-icon-slot {
+	width: 44px;
+	height: 44px;
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	overflow: hidden;
+	border: 1px solid var(--white-alpha-30, rgba(255, 255, 255, 0.3));
+	background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-on-light) 100%);
+}
+
+.reward-icon {
+	width: 36px;
+	height: 36px;
+	border-radius: 6px;
+	object-fit: contain;
+	background: rgba(255, 255, 255, 0.72);
+	border: 1px solid rgba(255, 255, 255, 0.78);
+}
+
+.reward-meta {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.reward-name {
+	margin: 0;
+	color: #12264f;
+	font-weight: 600;
+	line-height: 1.1;
+}
+
+.reward-qty {
+	margin: 0.2rem 0 0;
+	color: #0b4fb3;
+	font-weight: 700;
+}
+
+.reward-empty {
+	margin: 0;
+	color: #5f6e8a;
+	font-size: 0.95rem;
+}
+
+.reward-icon-slot.slot-bg-heal {
+	background: linear-gradient(135deg, var(--potion-heal-light) 0%, var(--potion-heal) 100%);
+}
+
+.reward-icon-slot.slot-bg-mana {
+	background: linear-gradient(135deg, var(--slot-mana-start) 0%, var(--slot-mana-end) 100%);
+}
+
+.reward-icon-slot.slot-bg-dmg-up {
+	background: linear-gradient(135deg, var(--potion-dmg-light) 0%, var(--potion-dmg) 100%);
+}
+
+.reward-icon-slot.slot-bg-defense-up {
+	background: linear-gradient(135deg, var(--potion-defense-light) 0%, var(--potion-defense) 100%);
+}
+
+.reward-icon-slot.slot-bg-remove-status-effects {
+	background: linear-gradient(135deg, var(--slot-info-start) 0%, var(--slot-info-end) 100%);
+}
+
+.reward-icon-slot.slot-bg-apply-status-effects {
+	background: linear-gradient(135deg, var(--slot-status-start) 0%, var(--slot-status-end) 100%);
+}
+
+.reward-icon-slot.slot-bg-revive,
+.reward-icon-slot.slot-bg-evolve,
+.reward-icon-slot.slot-bg-gacha-ticket {
+	background: linear-gradient(135deg, var(--slot-revive-start) 0%, var(--slot-revive-end) 100%);
+}
+
+.daily-cta-btn {
+	width: 100%;
+	max-width: none;
+	border-radius: 10px;
+	font-weight: 700;
+	min-height: 46px;
+	background: var(--accent-color, #0d6efd);
+	border: 1px solid var(--accent-on-light, #0a58ca);
+	color: var(--white-color, #ffffff);
+	box-shadow: none;
+}
+
+.daily-cta-btn:hover,
+.daily-cta-btn:active {
+	background: var(--accent-color, #0d6efd);
+	border-color: var(--accent-on-light, #0a58ca);
+	color: var(--white-color, #ffffff);
+	filter: brightness(0.95);
+}
+
+.daily-cta-btn:focus-visible {
+	outline: 3px solid rgba(10, 78, 203, 0.35);
+	outline-offset: 2px;
+}
+
+@media (max-width: 576px) {
+	.daily-noti-content {
+		margin: 0 0.35rem;
+	}
+}

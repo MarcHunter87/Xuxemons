@@ -16,3 +16,9 @@
 @if (showLayout()) {
   <app-footer></app-footer>
 }
+
+<app-daily-noti-modal
+  [open]="showDailyRewardsModal()"
+  [notification]="pendingDailyRewards()"
+  (closeModal)="onCloseDailyRewardsModal()">
+</app-daily-noti-modal>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DailyRewardNotificationController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\XuxemonController;
@@ -62,4 +63,8 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/inventory/item/{bagItemId}', [InventoryController::class, 'discardItem']);
     Route::post('/inventory/use', [InventoryController::class, 'useItem']);
     Route::get('/inventory/gacha-tickets', [InventoryController::class, 'getGachaTicketCount']);
+
+    // Daily rewards notifications
+    Route::get('/daily-rewards/pending', [DailyRewardNotificationController::class, 'pending']);
+    Route::post('/daily-rewards/{id}/ack', [DailyRewardNotificationController::class, 'acknowledge']);
 });
