@@ -1,0 +1,74 @@
+<section class="page-hero" aria-labelledby="admin-edit-sideeffects-title">
+	<h1 id="admin-edit-sideeffects-title">
+		<span class="page-hero-title-black">Edit side effect</span>
+	</h1>
+	<p class="page-hero-desc">Update the apply chance for this side effect.</p>
+</section>
+
+@if (isLoadingSideEffect()) {
+	<div class="loading-state">
+		<span class="stat-card__spinner" aria-hidden="true"></span>
+		<p class="loading-text">Loading side effect...</p>
+	</div>
+}
+
+@if (!isLoadingSideEffect()) {
+	<section class="form-card card">
+		@if (errorMessage()) {
+			<p id="admin-edit-sideeffects-error" class="error-message" role="alert" aria-live="polite">{{ errorMessage() }}</p>
+		}
+		@if (successMessage()) {
+			<p id="admin-edit-sideeffects-success" class="success-message" role="status" aria-live="polite">{{ successMessage() }}</p>
+		}
+
+		<form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+			<fieldset class="form-fieldset">
+				<legend class="form-legend">Side effect settings</legend>
+
+				<label class="field">
+					<span>Name</span>
+					<input id="admin-edit-sideeffects-name" class="form-control" type="text" [value]="sideEffectName()" readonly />
+				</label>
+
+				<label class="field">
+					<span>Apply chance (%)</span>
+					<input
+						id="admin-edit-sideeffects-apply-chance"
+						class="form-control"
+						type="text"
+						inputmode="numeric"
+						autocomplete="off"
+						formControlName="apply_chance"
+						[attr.aria-invalid]="isFieldInvalid('apply_chance')"
+						[attr.aria-describedby]="getErrorMessage('apply_chance') ? 'admin-edit-sideeffects-apply-chance-error' : null" />
+					@if (getErrorMessage('apply_chance')) {
+						<p id="admin-edit-sideeffects-apply-chance-error" class="field-error" role="status" aria-live="polite">
+							{{ getErrorMessage('apply_chance') }}
+						</p>
+					}
+				</label>
+
+				<label class="field field-full">
+					<span>Description</span>
+					<textarea
+						id="admin-edit-sideeffects-description"
+						class="form-control"
+						rows="4"
+						[value]="sideEffectDescription() || ''"
+						readonly></textarea>
+				</label>
+			</fieldset>
+
+			<div class="actions field-full">
+				<button type="button" class="btn-secondary" (click)="goBack()">Cancel</button>
+				<button type="submit" class="btn-primary" [disabled]="form.invalid || isSaving()">
+					@if (isSaving()) {
+						<span class="btn-loading-icon" aria-hidden="true"></span>
+					} @else {
+						Save changes
+					}
+				</button>
+			</div>
+		</form>
+	</section>
+}

@@ -1,0 +1,79 @@
+<section class="page-hero" aria-labelledby="admin-sideeffects-title">
+	<h1 id="admin-sideeffects-title">
+		<span class="page-hero-title-black">Side effects</span>
+	</h1>
+	<p class="page-hero-desc">Configure side effects and their probability of being applied.</p>
+</section>
+
+@if (isLoading()) {
+	<div class="loading-state">
+		<div class="spinner"></div>
+		<p class="loading-text">Loading side effects...</p>
+	</div>
+}
+
+@if (errorMessage() && !isLoading()) {
+	<div class="error-state">
+		<p class="error-message" role="alert" aria-live="polite">
+			<i class="bi bi-exclamation-triangle"></i>
+			{{ errorMessage() }}
+		</p>
+	</div>
+}
+
+@if (hasContent()) {
+	<div class="players-section">
+		@if (sideEffects().length === 0) {
+			<div class="empty-state">
+				<i class="bi bi-inbox empty-icon" aria-hidden="true"></i>
+				<p>No side effects found</p>
+			</div>
+		}
+
+		@if (sideEffects().length > 0) {
+			<div class="players-table-wrapper">
+				<table class="players-table">
+					<thead>
+						<tr>
+							<th scope="col">ID</th>
+							<th scope="col">Name</th>
+							<th scope="col">Apply chance</th>
+							<th scope="col">Description</th>
+							<th scope="col" class="col-actions">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@for (sideEffect of sideEffects(); track sideEffect.id) {
+							<tr>
+								<td><span class="cell-id">{{ sideEffect.id }}</span></td>
+								<td><span class="cell-name">{{ sideEffect.name }}</span></td>
+								<td>
+									<span class="cell-num">
+										{{ sideEffect.apply_chance !== null ? sideEffect.apply_chance + '%' : '-' }}
+									</span>
+								</td>
+								<td>
+									@if (sideEffect.description) {
+										<span class="cell-description">{{ sideEffect.description }}</span>
+									} @else {
+										<span class="cell-description">-</span>
+									}
+								</td>
+								<td class="col-actions">
+									<div class="col-actions-btns">
+										<a
+											[routerLink]="['/admin/side-effects/edit', sideEffect.id]"
+											class="btn btn-edit btn-sm"
+											[attr.aria-label]="'Edit side effect ' + sideEffect.id">
+											<i class="bi bi-pencil" aria-hidden="true"></i>
+										</a>
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		}
+	</div>
+}

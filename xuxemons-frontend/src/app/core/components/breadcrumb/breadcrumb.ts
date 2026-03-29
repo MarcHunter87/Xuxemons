@@ -33,6 +33,7 @@ export class Breadcrumb implements OnInit, OnDestroy {
     'evolve': 'Evolution sizes',
     'edit-evolve': 'Edit evolution',
     'daily-rewards': 'Daily rewards',
+    'side-effects': 'Side effects',
     'give-item': 'Give Item',
     'leaderboard': 'Leaderboard',
   };

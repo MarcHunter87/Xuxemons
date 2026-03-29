@@ -19,6 +19,8 @@ import { AdminEditEvolve } from './pages/admin-pages/admin-edit-evolve/admin-edi
 import { AdminGiveItem } from './pages/admin-pages/admin-give-item/admin-give-item';
 import { AdminDailyreward } from './pages/admin-pages/admin-dailyreward/admin-dailyreward';
 import { AdminDailyrewardEdit } from './pages/admin-pages/admin-edit-dailyreward/admin-edit-dailyreward';
+import { AdminSideeffects } from './pages/admin-pages/admin-sideeffects/admin-sideeffects';
+import { AdminEditSideeffects } from './pages/admin-pages/admin-edit-sideeffects/admin-edit-sideeffects';
 import { authGuard } from './guard/auth-guard';
 import { adminGuard } from './guard/admin-guard';
 import { adminGiveItemGuard } from './guard/admin-give-item.guard';
@@ -108,6 +110,13 @@ export const routes: Routes = [
         children: [
           { path: '', component: AdminDailyreward },
           { path: 'edit/:id', component: AdminDailyrewardEdit },
+        ],
+      },
+      {
+        path: 'side-effects',
+        children: [
+          { path: '', component: AdminSideeffects },
+          { path: 'edit/:id', component: AdminEditSideeffects },
         ],
       },
     ],

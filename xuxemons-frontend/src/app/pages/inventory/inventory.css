@@ -1181,6 +1181,40 @@ button.item-slot:focus {
   margin-top: 0.15rem;
 }
 
+.use-item-evolve-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.use-item-sideeffects-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.use-item-sideeffect-badge {
+  width: 1.95rem;
+  height: 1.95rem;
+  border-radius: 6px;
+  border: 1px solid #e7af1f;
+  background: linear-gradient(135deg, #f9e7a9 0%, #f4cd52 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 9px rgba(231, 175, 31, 0.38);
+  transition: none;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.use-item-sideeffect-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  object-fit: contain;
+}
+
 .use-item-xuxemon-stats span {
   font-size: max(1rem, 16px);
   font-weight: 600;
@@ -1192,15 +1226,23 @@ button.item-slot:focus {
   white-space: nowrap;
 }
 
+.use-item-xuxemon-stats span.use-item-sideeffect-badge,
+.use-item-sideeffects-row .use-item-sideeffect-badge {
+  background: linear-gradient(135deg, #f9e7a9 0%, #f4cd52 100%);
+  border: 1px solid #e7af1f;
+  box-shadow: 0 2px 9px rgba(231, 175, 31, 0.38);
+  color: var(--text-alt-color);
+  pointer-events: none;
+}
+
 .stat-hp   { border-color: #f87171 !important; color: #dc2626 !important; }
 .stat-atk  { border-color: #fb923c !important; color: #ea580c !important; }
 .stat-def  { border-color: #60a5fa !important; color: #2563eb !important; }
 .stat-evolve {
   border-color: var(--warning-color) !important;
   color: var(--text-alt-color) !important;
-  background: linear-gradient(135deg, var(--warning-alpha-15) 0%, var(--warning-alpha-10) 100%) !important;
+  background: linear-gradient(135deg, #f9e7a9 0%, #f4cd52 100%) !important;
 }
-
 
 .stat-preview {
   margin-left: 0.3rem;
@@ -1302,6 +1344,25 @@ button.item-slot:focus {
   color: var(--danger-color-2);
   font-weight: 600;
   letter-spacing: 0;
+}
+
+.use-item-modal .use-item-warning-stack {
+  display: block;
+  max-height: 132px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.use-item-modal .use-item-warning-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.use-item-modal .use-item-warning-item + .use-item-warning-item {
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(208, 24, 27, 0.22);
 }
 
 .use-item-actions {

@@ -1,0 +1,170 @@
+.page-hero-desc {
+	max-width: none;
+}
+
+.empty-state .empty-icon {
+	font-size: 2rem;
+	color: var(--text-muted);
+	margin-bottom: 1rem;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+	text-align: center;
+	padding: 3rem 2rem;
+	border-radius: 12px;
+	background-color: var(--white-color);
+	border: 1px solid var(--light-gray-color);
+	animation: slideInUp 0.4s ease-out;
+}
+
+.error-message {
+	color: var(--danger-color);
+	font-weight: 500;
+	margin: 0;
+}
+
+.players-section {
+	display: flex;
+	flex-direction: column;
+	gap: var(--page-section-gap);
+	width: 100%;
+	margin-bottom: var(--page-section-gap);
+}
+
+.players-table-wrapper {
+	overflow-x: auto;
+	width: 100%;
+	background-color: var(--white-color);
+	border: 1px solid var(--light-gray-color);
+	border-radius: 12px;
+	box-shadow: 0 2px 8px var(--shadow-color);
+	animation: slideInUp 0.4s ease-out;
+}
+
+.players-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.players-table th.col-actions,
+.players-table td.col-actions {
+	white-space: nowrap;
+	text-align: left;
+}
+
+.col-actions-btns {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.5rem;
+}
+
+.col-actions .btn.btn-edit.btn-sm {
+	gap: 0;
+	width: 40px;
+	height: 40px;
+	min-width: 40px;
+	min-height: 40px;
+	padding: 0;
+	border-radius: 10px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+	background-color: var(--accent-color);
+	border: 1px solid var(--accent-color);
+	color: var(--white-color);
+	transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.col-actions .btn.btn-edit.btn-sm:hover {
+	background-color: var(--accent-hover, color-mix(in srgb, var(--accent-color) 85%, black));
+	border-color: var(--accent-hover, color-mix(in srgb, var(--accent-color) 85%, black));
+	color: var(--white-color);
+}
+
+.col-actions .btn.btn-edit.btn-sm:active {
+	transform: translateY(0) scale(0.98);
+}
+
+.col-actions .btn.btn-edit.btn-sm .bi {
+	font-size: 1.2rem;
+	color: var(--white-color);
+}
+
+.players-table thead tr {
+	background-color: var(--accent-color);
+}
+
+.players-table th {
+	text-align: left;
+	font-size: 1rem;
+	font-weight: 700;
+	color: var(--white-color);
+	letter-spacing: 0.01em;
+	padding: 0.9rem 1rem;
+	border-bottom: 1px solid var(--light-gray-color);
+}
+
+.players-table td {
+	padding: 0.9rem 1rem;
+	border-bottom: 1px solid var(--light-gray-color);
+	vertical-align: middle;
+}
+
+.players-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.players-table tbody tr:hover {
+	background-color: color-mix(in srgb, var(--accent-glow) 20%, var(--white-color));
+}
+
+.cell-id,
+.cell-num {
+	font-variant-numeric: tabular-nums;
+	color: var(--dark-gray-color);
+}
+
+.cell-name {
+	color: var(--text-alt-color);
+	font-weight: 600;
+}
+
+.cell-description {
+	color: var(--dark-gray-color);
+}
+
+@keyframes slideInUp {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.spinner {
+	width: 40px;
+	height: 40px;
+	margin: 0 auto 1rem;
+	border: 3px solid var(--accent-border-alpha);
+	border-top-color: var(--accent-color);
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+.loading-text {
+	margin: 0;
+	color: var(--text-muted);
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}

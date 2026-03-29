@@ -2,7 +2,7 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
-import { AdminCreationMeta, AdminUser, BagStatus, DailyReward, Item } from '../interfaces';
+import { AdminCreationMeta, AdminUser, BagStatus, DailyReward, Item, SideEffect } from '../interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -119,5 +119,17 @@ export class AdminService {
 
   processDailyAll(): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/admin/process-daily-all`, {});
+  }
+
+  getAllSideEffects(): Observable<{ data: SideEffect[] }> {
+    return this.http.get<{ data: SideEffect[] }>(`${this.apiUrl}/admin/side-effects`);
+  }
+
+  getSideEffect(id: number): Observable<{ data: SideEffect }> {
+    return this.http.get<{ data: SideEffect }>(`${this.apiUrl}/admin/side-effects/${id}`);
+  }
+
+  updateSideEffect(id: number, data: { apply_chance: number | null }): Observable<{ message: string; data: SideEffect }> {
+    return this.http.put<{ message: string; data: SideEffect }>(`${this.apiUrl}/admin/side-effects/${id}`, data);
   }
 }

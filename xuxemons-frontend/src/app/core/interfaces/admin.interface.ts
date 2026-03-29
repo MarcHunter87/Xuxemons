@@ -31,3 +31,11 @@ export interface DailyReward {
   item_id: number | null;
   item_name?: string | null;
 }
+
+export interface SideEffect {
+  id: number;
+  name: string;
+  description: string | null;
+  icon_path: string;
+  apply_chance: number | null;
+}

@@ -685,6 +685,9 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
 
     getEvolvePreview(xu: Xuxemon, qty: number = 1): { willEvolve: boolean; fromSize: XuxemonSize; toSize: XuxemonSize } {
         const fromSize = this.normalizeSize(xu.size);
+        if (this.hasSideEffect(xu, 'Overdose')) {
+            return { willEvolve: false, fromSize, toSize: fromSize };
+        }
         // Si tiene Starving, cada progreso requiere 2 carnes
         const hasStarving = xu.side_effect_1?.name === 'Starving' || xu.side_effect_2?.name === 'Starving' || xu.side_effect_3?.name === 'Starving';
         let progressGain = qty;

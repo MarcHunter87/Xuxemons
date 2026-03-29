@@ -151,12 +151,32 @@
             <span class="use-item-xuxemon-name">{{ xu.name }}</span>
             @if (selectedItem()?.effect_type === 'Evolve') {
             <div class="use-item-xuxemon-stats use-item-xuxemon-stats-evolve">
-              <span class="stat-evolve">
-                {{ xu.size }}
-                @if (getEvolvePreview(xu, selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? useQuantity() : 1).willEvolve) {
-                  <span class="stat-preview stat-preview-evolve">→ {{ getEvolvePreview(xu, selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? useQuantity() : 1).toSize }}</span>
-                }
-              </span>
+              <div class="use-item-evolve-row">
+                <span class="stat-evolve">
+                  {{ xu.size }}
+                  @if (getEvolvePreview(xu, selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? useQuantity() : 1).willEvolve) {
+                    <span class="stat-preview stat-preview-evolve">→ {{ getEvolvePreview(xu, selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? useQuantity() : 1).toSize }}</span>
+                  }
+                </span>
+
+                <div class="use-item-sideeffects-row" role="group" [attr.aria-label]="'Side effects on ' + xu.name">
+                  @if (xu.side_effect_1?.icon_url) {
+                    <span class="use-item-sideeffect-badge" [title]="xu.side_effect_1?.name ?? ''">
+                      <img [src]="xu.side_effect_1?.icon_url ?? ''" [alt]="xu.side_effect_1?.name ?? 'Side effect'" class="use-item-sideeffect-icon" />
+                    </span>
+                  }
+                  @if (xu.side_effect_2?.icon_url) {
+                    <span class="use-item-sideeffect-badge" [title]="xu.side_effect_2?.name ?? ''">
+                      <img [src]="xu.side_effect_2?.icon_url ?? ''" [alt]="xu.side_effect_2?.name ?? 'Side effect'" class="use-item-sideeffect-icon" />
+                    </span>
+                  }
+                  @if (xu.side_effect_3?.icon_url) {
+                    <span class="use-item-sideeffect-badge" [title]="xu.side_effect_3?.name ?? ''">
+                      <img [src]="xu.side_effect_3?.icon_url ?? ''" [alt]="xu.side_effect_3?.name ?? 'Side effect'" class="use-item-sideeffect-icon" />
+                    </span>
+                  }
+                </div>
+              </div>
             </div>
             }
             @if (selectedItem()?.effect_type === 'Remove Status Effects') {
@@ -253,12 +273,6 @@
     </ul>
     @if (selectedItem()?.name === 'Special Meat' && selectedXuxemonForUse()) {
       <div class="use-item-qty-picker redesigned-qty-picker mt-2">
-        @if (useOverdoseInfo()) {
-          <div class="use-item-info-message use-item-modal-warning overdose-highlight mt-2" role="alert">
-            <i class="bi bi-exclamation-octagon-fill overdose-icon"></i>
-            <span class="overdose-text">Your Xuxemon is affected by <strong>Overdose</strong>, cannot eat Special Meat, and its size has been reduced.</span>
-          </div>
-        }
         <label for="use-qty-input" class="qty-label mb-2">Quantity to use</label>
         <div class="qty-controls compact qty-controls-row">
           <button class="qty-btn qty-btn-use qty-decrease" (click)="updateUseQuantity(useQuantity() - getUseQuantityStep())" [disabled]="useQuantity() <= getUseQuantityMin() || isUsing() || isSpecialMeatUseBlocked()">
@@ -269,28 +283,51 @@
             <i class="bi bi-plus-lg"></i>
           </button>
         </div>
-        @if (isGluttonyBlocked()) {
-          <div class="use-item-info-message use-item-modal-warning gluttony-highlight mt-2" role="alert">
-            <i class="bi bi-exclamation-triangle-fill gluttony-icon"></i>
-            <span class="gluttony-text">Your Xuxemon is affected by <strong>Gluttony</strong> and cannot eat Special Meat.</span>
-          </div>
-        }
-        @if (maxUsableSpecialMeat() === 0 && !isSpecialMeatUseBlocked()) {
-          <div class="qty-max-hint use-item-modal-warning mt-1" role="alert">
-            <i class="bi bi-exclamation-circle"></i>
-            <span>No Special Meat available for this Xuxemon.</span>
-          </div>
-        }
-        <!-- Quantity summary removed as requested -->
-        @if (useQuantityError() && !isSpecialMeatUseBlocked()) {
-          <div class="qty-error error-message use-item-modal-warning mt-2" role="alert">
-            <span>⚠ {{ useQuantityError() }}</span>
-          </div>
-        }
-        @if (showStarvingMeatError() && !isSpecialMeatUseBlocked()) {
-          <div class="qty-error error-message use-item-modal-warning mt-2" role="alert">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span>You do not have enough Special Meat: <strong>Starving</strong> consumes 2 Special Meat instead of 1.</span>
+        @if (
+          useOverdoseInfo() ||
+          isGluttonyBlocked() ||
+          (maxUsableSpecialMeat() === 0 && !isSpecialMeatUseBlocked()) ||
+          (useQuantityError() && !isSpecialMeatUseBlocked()) ||
+          (showStarvingMeatError() && !isSpecialMeatUseBlocked()) ||
+          useStarvingInfo()
+        ) {
+          <div class="use-item-warning-stack use-item-modal-warning mt-2" role="alert">
+            @if (useOverdoseInfo()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-octagon-fill overdose-icon"></i>
+                <span class="overdose-text">Your Xuxemon is affected by <strong>Overdose</strong>, cannot eat Special Meat, and its size has been reduced.</span>
+              </div>
+            }
+            @if (isGluttonyBlocked()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-triangle-fill gluttony-icon"></i>
+                <span class="gluttony-text">Your Xuxemon is affected by <strong>Gluttony</strong> and cannot eat Special Meat.</span>
+              </div>
+            }
+            @if (maxUsableSpecialMeat() === 0 && !isSpecialMeatUseBlocked()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-circle"></i>
+                <span>No Special Meat available for this Xuxemon.</span>
+              </div>
+            }
+            @if (useQuantityError() && !isSpecialMeatUseBlocked()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>{{ useQuantityError() }}</span>
+              </div>
+            }
+            @if (showStarvingMeatError() && !isSpecialMeatUseBlocked()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>You do not have enough Special Meat: <strong>Starving</strong> consumes 2 Special Meat instead of 1.</span>
+              </div>
+            }
+            @if (useStarvingInfo()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-triangle-fill starving-icon"></i>
+                <span class="starving-text">This Xuxemon is <strong>Starving</strong> and will consume 2 Special Meat instead of 1 to progress.</span>
+              </div>
+            }
           </div>
         }
       </div>
@@ -300,12 +337,6 @@
       <i class="bi bi-exclamation-triangle-fill"></i>
       <span>{{ useApiError() }}</span>
     </div>
-    }
-    @if (useStarvingInfo()) {
-      <div class="use-item-info-message use-item-modal-warning starving-highlight" role="alert">
-        <i class="bi bi-exclamation-triangle-fill starving-icon"></i>
-        <span class="starving-text">This Xuxemon is <strong>Starving</strong> and will consume 2 Special Meat instead of 1 to progress.</span>
-      </div>
     }
     <div class="use-item-actions">
       <button type="button" class="btn btn-secondary btn-lg" (click)="closeUseModal()">Cancel</button>

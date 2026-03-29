@@ -36,6 +36,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/admin/daily-rewards', [AdminController::class, 'getAllDailyRewards']);
     Route::get('/admin/daily-rewards/{id}', [AdminController::class, 'getDailyReward']);
     Route::put('/admin/daily-rewards/{id}', [AdminController::class, 'updateDailyReward']);
+    Route::get('/admin/side-effects', [AdminController::class, 'getAllSideEffects']);
+    Route::get('/admin/side-effects/{id}', [AdminController::class, 'getSideEffect']);
+    Route::put('/admin/side-effects/{id}', [AdminController::class, 'updateSideEffect']);
     // Ejecutar las daily rewards
     Route::post('/admin/process-daily-items', [AdminController::class, 'processDailyItems']);
     Route::post('/admin/process-daily-xuxemons', [AdminController::class, 'processDailyXuxemons']);

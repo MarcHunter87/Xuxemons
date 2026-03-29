@@ -8,6 +8,7 @@ use App\Models\Bag;
 use App\Models\BagItem;
 use App\Models\DailyReward;
 use App\Models\Item;
+use App\Models\SideEffect;
 use App\Models\Size;
 use App\Models\StatusEffect;
 use App\Models\Type;
@@ -190,6 +191,111 @@ class AdminController extends Controller
         } catch (Throwable $e) {
             return response()->json([
                 'message' => 'Could not process daily rewards',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function getAllSideEffects(): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $sideEffects = SideEffect::query()
+                ->orderBy('id')
+                ->get(['id', 'name', 'description', 'icon_path', 'apply_chance'])
+                ->map(fn (SideEffect $sideEffect) => [
+                    'id' => $sideEffect->id,
+                    'name' => $sideEffect->name,
+                    'description' => $sideEffect->description,
+                    'icon_path' => $sideEffect->icon_path,
+                    'apply_chance' => $sideEffect->apply_chance !== null ? (int) $sideEffect->apply_chance : null,
+                ]);
+
+            return response()->json(['data' => $sideEffects]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not retrieve side effects',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function getSideEffect(int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $sideEffect = SideEffect::query()->find($id);
+            if (! $sideEffect) {
+                return response()->json(['message' => 'Side effect not found'], 404);
+            }
+
+            return response()->json([
+                'data' => [
+                    'id' => $sideEffect->id,
+                    'name' => $sideEffect->name,
+                    'description' => $sideEffect->description,
+                    'icon_path' => $sideEffect->icon_path,
+                    'apply_chance' => $sideEffect->apply_chance !== null ? (int) $sideEffect->apply_chance : null,
+                ],
+            ]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not retrieve side effect',
+                'errors' => ['server' => [$e->getMessage()]],
+            ], 500);
+        }
+    }
+
+    public function updateSideEffect(Request $request, int $id): JsonResponse
+    {
+        try {
+            /** @var User $admin */
+            $admin = Auth::guard('api')->user();
+            if (! $admin || ! $admin->is_admin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $sideEffect = SideEffect::query()->find($id);
+            if (! $sideEffect) {
+                return response()->json(['message' => 'Side effect not found'], 404);
+            }
+
+            $validated = $request->validate([
+                'apply_chance' => 'nullable|integer|min:0|max:100',
+            ]);
+
+            $sideEffect->update([
+                'apply_chance' => array_key_exists('apply_chance', $validated) ? $validated['apply_chance'] : $sideEffect->apply_chance,
+            ]);
+
+            return response()->json([
+                'message' => 'Side effect updated successfully',
+                'data' => [
+                    'id' => $sideEffect->id,
+                    'name' => $sideEffect->name,
+                    'description' => $sideEffect->description,
+                    'icon_path' => $sideEffect->icon_path,
+                    'apply_chance' => $sideEffect->apply_chance !== null ? (int) $sideEffect->apply_chance : null,
+                ],
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Could not update side effect',
                 'errors' => ['server' => [$e->getMessage()]],
             ], 500);
         }

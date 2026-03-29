@@ -74,6 +74,26 @@
   transform: translateY(0) scale(0.98);
 }
 
+.admin-nav-btn-side-effects {
+  background-color: var(--danger-color);
+  color: var(--white-color);
+}
+
+.admin-nav-btn-side-effects .bi {
+  font-size: 1.1rem;
+  margin-right: -0.25rem;
+  margin-left: 0;
+}
+
+.admin-nav-btn-side-effects:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--danger-color) 45%, transparent);
+}
+
+.admin-nav-btn-side-effects:active {
+  transform: translateY(0) scale(0.98);
+}
+
 .loading-state,
 .error-state,
 .empty-state {
