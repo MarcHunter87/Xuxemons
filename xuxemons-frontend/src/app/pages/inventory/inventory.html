@@ -153,8 +153,8 @@
             <div class="use-item-xuxemon-stats use-item-xuxemon-stats-evolve">
               <span class="stat-evolve">
                 {{ xu.size }}
-                @if (getEvolvePreview(xu, selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? getProgressForUseQuantity(useQuantity()) : 1).willEvolve) {
-                  <span class="stat-preview stat-preview-evolve">→ {{ getEvolvePreview(xu, selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? getProgressForUseQuantity(useQuantity()) : 1).toSize }}</span>
+                @if (getEvolvePreview(xu, selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? useQuantity() : 1).willEvolve) {
+                  <span class="stat-preview stat-preview-evolve">→ {{ getEvolvePreview(xu, selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? useQuantity() : 1).toSize }}</span>
                 }
               </span>
             </div>
