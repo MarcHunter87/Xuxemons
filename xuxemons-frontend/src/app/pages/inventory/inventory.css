@@ -470,6 +470,26 @@ button.item-slot:focus {
   border-color: var(--white-alpha-60);
 }
 
+.item-slot.filled:active,
+button.item-slot.filled:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 6px 14px var(--shadow-color);
+  transition: transform 0.08s ease, box-shadow 0.12s ease;
+}
+
+.item-slot.filled:active .item-icon,
+button.item-slot.filled:active .item-icon {
+  transform: scale(0.98);
+  transition: transform 0.06s ease;
+}
+
+.item-slot.empty:active,
+button.item-slot.empty:active {
+  transform: translateY(0);
+  box-shadow: none;
+  border-color: var(--light-gray-color);
+}
+
 .item-slot.filled.selected {
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px var(--accent-glow), 0 8px 20px var(--accent-glow);

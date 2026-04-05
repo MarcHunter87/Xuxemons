@@ -55,7 +55,7 @@
     </button>
 
     @if (historyXuxemons().length > 0) {
-      <div class="recent-xuxemons-section">
+      <section class="recent-xuxemons-section">
         <h2 class="recent-title">Recently obtained</h2>
         <div class="recent-grid">
           @for (xuxe of historyXuxemons(); track xuxe.id) {
@@ -80,7 +80,7 @@
             </button>
           }
         </div>
-      </div>
+      </section>
     }
   }
 
