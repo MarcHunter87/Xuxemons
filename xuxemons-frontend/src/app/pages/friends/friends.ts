@@ -5,6 +5,9 @@ import {
   OnInit,
   inject,
   signal,
+  ElementRef,
+  ViewChild,
+  AfterViewChecked,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -37,6 +40,13 @@ export class Friends implements OnInit, OnDestroy {
   confirmRemoveFriend = signal<FriendUser | null>(null);
   sendingRequestTo = signal<string[]>([]);
   searchIconErrors = signal<string[]>([]);
+
+  @ViewChild('confirmDialog') confirmDialog?: ElementRef<HTMLElement>;
+  @ViewChild('confirmPrimary') confirmPrimary?: ElementRef<HTMLButtonElement>;
+
+  private previousFocusedElement: HTMLElement | null = null;
+  private shouldFocusRoot = false;
+  private shouldFocusPrimaryAction = false;
 
   get pendingCount(): number {
     return this.pendingRequests().length;
@@ -90,6 +100,17 @@ export class Friends implements OnInit, OnDestroy {
     this.friendsService.loadAll();
   }
 
+  ngAfterViewChecked(): void {
+    if (this.shouldFocusRoot && this.confirmDialog?.nativeElement) {
+      this.confirmDialog.nativeElement.focus();
+      this.shouldFocusRoot = false;
+    }
+    if (this.shouldFocusPrimaryAction && this.confirmPrimary?.nativeElement) {
+      this.confirmPrimary.nativeElement.focus();
+      this.shouldFocusPrimaryAction = false;
+    }
+  }
+
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
@@ -141,6 +162,11 @@ export class Friends implements OnInit, OnDestroy {
   }
 
   askConfirmRemove(friend: FriendUser): void {
+    this.previousFocusedElement = typeof document !== 'undefined'
+      ? (document.activeElement as HTMLElement | null)
+      : null;
+    this.shouldFocusRoot = true;
+    this.shouldFocusPrimaryAction = true;
     this.confirmRemoveFriend.set(friend);
   }
 
@@ -148,6 +174,9 @@ export class Friends implements OnInit, OnDestroy {
     const friend = this.confirmRemoveFriend();
     if (!friend) return;
     this.confirmRemoveFriend.set(null);
+    if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
+      setTimeout(() => this.previousFocusedElement?.focus(), 0);
+    }
 
     this.errorMessage.set(null);
     this.friendsService.removeFriend(friend.id).subscribe({
@@ -158,6 +187,9 @@ export class Friends implements OnInit, OnDestroy {
 
   cancelRemove(): void {
     this.confirmRemoveFriend.set(null);
+    if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
+      setTimeout(() => this.previousFocusedElement?.focus(), 0);
+    }
   }
 
   isSendingTo(userId: string): boolean {
@@ -182,5 +214,30 @@ export class Friends implements OnInit, OnDestroy {
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.confirmRemoveFriend()) this.cancelRemove();
+  }
+
+  onConfirmModalKeydown(event: KeyboardEvent): void {
+    if (!this.confirmRemoveFriend() || event.key !== 'Tab') return;
+    const root = this.confirmDialog?.nativeElement;
+    if (!root) return;
+
+    const focusableSelector = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',');
+
+    const focusable = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
+      .filter(el => !el.hasAttribute('disabled') && el.tabIndex !== -1);
+
+    if (focusable.length === 0) { event.preventDefault(); return; }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+    if (event.shiftKey && active === first) { event.preventDefault(); last.focus(); return; }
+    if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
   }
 }

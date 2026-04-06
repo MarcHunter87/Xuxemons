@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, signal, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, signal, ElementRef, ViewChild, HostListener, AfterViewChecked } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, User } from '../../core/services/auth';
 
@@ -11,6 +11,8 @@ import { AuthService, User } from '../../core/services/auth';
 export class EditProfile {
   @ViewChild('bannerInput') bannerInput!: ElementRef<HTMLInputElement>;
   @ViewChild('iconInput') iconInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('deleteDialog') deleteDialog?: ElementRef<HTMLElement>;
+  @ViewChild('primaryDeactivateButton') primaryDeactivateButton?: ElementRef<HTMLButtonElement>;
 
   user: User | null = null;
   bannerPreview = signal<string>('/images/default_banner.png');
@@ -38,6 +40,10 @@ export class EditProfile {
   settingsError = signal('');
   settingsSuccess = signal('');
   isSavingSettings = signal(false);
+
+  private previousFocusedElement: HTMLElement | null = null;
+  private shouldFocusRoot = false;
+  private shouldFocusPrimaryAction = false;
 
   constructor(
     private authService: AuthService,
@@ -83,6 +89,47 @@ export class EditProfile {
     if (this.user?.icon_path) {
       this.iconPreview.set(this.authService.getAssetUrl(this.user.icon_path, this.user.updated_at));
     }
+  }
+
+  ngAfterViewChecked(): void {
+    if (this.shouldFocusRoot && this.deleteDialog?.nativeElement) {
+      this.deleteDialog.nativeElement.focus();
+      this.shouldFocusRoot = false;
+    }
+    if (this.shouldFocusPrimaryAction && this.primaryDeactivateButton?.nativeElement) {
+      this.primaryDeactivateButton.nativeElement.focus();
+      this.shouldFocusPrimaryAction = false;
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeModal(): void {
+    if (this.showDeactivateModal()) this.closeDeactivateModal();
+  }
+
+  onModalKeydown(event: KeyboardEvent): void {
+    if (!this.showDeactivateModal() || event.key !== 'Tab') return;
+    const root = this.deleteDialog?.nativeElement;
+    if (!root) return;
+
+    const focusableSelector = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',');
+
+    const focusable = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
+      .filter(el => !el.hasAttribute('disabled') && el.tabIndex !== -1);
+
+    if (focusable.length === 0) { event.preventDefault(); return; }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+    if (event.shiftKey && active === first) { event.preventDefault(); last.focus(); return; }
+    if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
   }
 
   updatePersonalInformation(): void {
@@ -293,7 +340,7 @@ export class EditProfile {
     this.authService.deactivateAccount().subscribe({
       next: () => {
         this.isDeactivating.set(false);
-        this.showDeactivateModal.set(false);
+        this.closeDeactivateModal();
         this.cdr.detectChanges();
       },
       error: err => {
@@ -311,11 +358,19 @@ export class EditProfile {
 
   openDeactivateModal(): void {
     this.deactivateError.set('');
+    this.previousFocusedElement = typeof document !== 'undefined'
+      ? (document.activeElement as HTMLElement | null)
+      : null;
+    this.shouldFocusRoot = true;
+    this.shouldFocusPrimaryAction = true;
     this.showDeactivateModal.set(true);
   }
 
   closeDeactivateModal(): void {
     this.showDeactivateModal.set(false);
+    if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
+      setTimeout(() => this.previousFocusedElement?.focus(), 0);
+    }
   }
 
   openBannerPicker(): void {
