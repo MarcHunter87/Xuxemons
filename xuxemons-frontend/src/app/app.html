@@ -22,3 +22,11 @@
   [notification]="pendingDailyRewards()"
   (closeModal)="onCloseDailyRewardsModal()">
 </app-daily-noti-modal>
+
+<app-friend-request-noti-modal
+  [open]="showFriendRequestModal()"
+  [requests]="pendingFriendRequests()"
+  (closeModal)="onCloseFriendRequestModal()"
+  (acceptRequest)="onAcceptFriendRequest($event)"
+  (rejectRequest)="onRejectFriendRequest($event)">
+</app-friend-request-noti-modal>

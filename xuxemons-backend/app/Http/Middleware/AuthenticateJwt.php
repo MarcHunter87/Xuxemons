@@ -32,6 +32,12 @@ class AuthenticateJwt
             return response()->json(['message' => 'User not found.'], 401);
         }
 
+        if (!$user->last_seen_at || \Carbon\Carbon::parse($user->last_seen_at)->diffInMinutes(now()) >= 1) {
+            $user->timestamps = false;
+            $user->last_seen_at = now();
+            $user->save();
+        }
+
         $request->setUserResolver(fn () => $user);
 
         return $next($request);

@@ -24,6 +24,7 @@ export class EditProfile {
   passwordSuccess = signal('');
   deactivateError = signal('');
   isDeactivating = signal(false);
+  showDeactivateModal = signal(false);
   isSavingPersonalInfo = signal(false);
   isSavingPassword = signal(false);
   showPassword: Record<'current_password' | 'new_password' | 'confirm_password', boolean> = {
@@ -285,18 +286,14 @@ export class EditProfile {
   }
 
   confirmDeactivateAccount(): void {
+    // Perform delete action (called from modal confirm)
     this.deactivateError.set('');
-
-    const confirmed = window.confirm('Are you sure you want to delete your account?'); //dialog
-    if (!confirmed) {
-      return;
-    }
-
     this.isDeactivating.set(true);
 
     this.authService.deactivateAccount().subscribe({
       next: () => {
         this.isDeactivating.set(false);
+        this.showDeactivateModal.set(false);
         this.cdr.detectChanges();
       },
       error: err => {
@@ -310,6 +307,15 @@ export class EditProfile {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  openDeactivateModal(): void {
+    this.deactivateError.set('');
+    this.showDeactivateModal.set(true);
+  }
+
+  closeDeactivateModal(): void {
+    this.showDeactivateModal.set(false);
   }
 
   openBannerPicker(): void {

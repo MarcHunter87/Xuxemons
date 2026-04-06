@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DailyRewardNotificationController;
+use App\Http\Controllers\FriendController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\XuxemonController;
@@ -74,4 +75,13 @@ Route::middleware('auth:api')->group(function () {
     // Daily rewards notifications
     Route::get('/daily-rewards/pending', [DailyRewardNotificationController::class, 'pending']);
     Route::post('/daily-rewards/{id}/ack', [DailyRewardNotificationController::class, 'acknowledge']);
+
+    // Friends
+    Route::get('/friends/search', [FriendController::class, 'searchUsers']);
+    Route::get('/friends/requests', [FriendController::class, 'getPendingRequests']);
+    Route::post('/friends/requests', [FriendController::class, 'sendRequest']);
+    Route::put('/friends/requests/{id}/accept', [FriendController::class, 'acceptRequest']);
+    Route::delete('/friends/requests/{id}', [FriendController::class, 'rejectRequest']);
+    Route::get('/friends', [FriendController::class, 'getFriends']);
+    Route::delete('/friends/{friendUserId}', [FriendController::class, 'removeFriend']);
 });

@@ -1,0 +1,82 @@
+<article
+  class="card friend-card"
+  [class.friend-card--animated]="animationsEnabled"
+  [attr.aria-label]="'Friend: ' + friend.name + ', level ' + (friend.level ?? 1)"
+>
+  <div class="friend-card-top">
+    <div class="friend-avatar-wrap">
+      <div class="friend-avatar" aria-hidden="true">
+        @if (friend.icon_path && !iconError) {
+          <img [src]="getIconUrl()" [alt]="friend.name" (error)="iconError = true">
+        } @else {
+          <i class="bi bi-person-fill"></i>
+        }
+      </div>
+      <span
+        class="status-dot"
+        [class.status-dot--online]="friend.status === 'online'"
+        [class.status-dot--away]="friend.status === 'away'"
+        [class.status-dot--offline]="friend.status === 'offline' || !friend.status"
+        aria-hidden="true"
+      ></span>
+    </div>
+
+    <div class="friend-info">
+      <div class="friend-name-row">
+        <span class="friend-name">{{ friend.name }}</span>
+        <span class="friend-level">Lvl. {{ friend.level ?? 1 }}</span>
+      </div>
+      <span class="friend-id">{{ friend.id }}</span>
+      <span
+        class="friend-status-text"
+        [class.friend-status-text--online]="friend.status === 'online'"
+        [class.friend-status-text--away]="friend.status === 'away'"
+      >{{ getStatusText() }}</span>
+    </div>
+
+    <div class="friend-menu-wrap">
+      <button
+        type="button"
+        class="friend-menu-btn"
+        [attr.aria-label]="'Options for ' + friend.name"
+        [attr.aria-expanded]="menuOpen"
+        aria-haspopup="true"
+        (click)="toggleMenu($event)"
+      >
+        <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+      </button>
+      @if (menuOpen) {
+        <div class="friend-dropdown" role="menu" [attr.aria-label]="'Options for ' + friend.name">
+          <button
+            type="button"
+            role="menuitem"
+            class="friend-dropdown-item"
+            (click)="onRemove()"
+          >
+            <i class="bi bi-person-x-fill" aria-hidden="true"></i>
+            <span>Remove friend</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="friend-card-actions">
+    <button
+      type="button"
+      class="btn-sm btn-primary friend-action-btn"
+      [attr.aria-label]="'Challenge ' + friend.name"
+    >
+      <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
+      <span>Challenge</span>
+    </button>
+    <button
+      type="button"
+      class="btn-sm btn-secondary friend-action-btn"
+      [attr.aria-label]="'Chat with ' + friend.name"
+    >
+      <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
+      <span>Chat</span>
+    </button>
+  </div>
+</article>

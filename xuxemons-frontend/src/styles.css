@@ -228,9 +228,8 @@ textarea:focus-visible,
 }
 
 .btn-danger:hover:not(:disabled) {
-  filter: none;
-  transform: none;
-  box-shadow: 0 0 0 3px var(--accent-color);
+  filter: brightness(0.9);
+  transform: translateY(-1px);
 }
 
 .btn-danger:focus-visible:not(:disabled) {
@@ -245,8 +244,7 @@ textarea:focus-visible,
 
 .btn-danger:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
-  filter: none;
-  box-shadow: none;
+  filter: brightness(0.85);
 }
 
 a.btn:focus-visible,

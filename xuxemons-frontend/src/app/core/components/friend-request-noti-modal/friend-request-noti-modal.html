@@ -1,0 +1,74 @@
+@if (open && requests.length > 0) {
+	<div class="modal fade show d-block friend-req-noti-modal" tabindex="-1" role="dialog" aria-modal="true"
+		aria-labelledby="friend-req-noti-title" (keydown)="onModalKeydown($event)">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content friend-req-noti-content" [class.animate-scale-up]="shouldAnimate()" #dialogRoot tabindex="-1">
+				<div class="modal-header border-0 pb-0">
+					<h2 class="modal-title h4 mb-0 d-flex align-items-center gap-2" id="friend-req-noti-title">
+						<i class="bi bi-people-fill" aria-hidden="true"></i>
+						Friend Requests
+						<span
+							class="badge badge-noti-count"
+							[attr.aria-label]="requests.length + ' pending requests'"
+						>{{ requests.length > 99 ? '99+' : requests.length }}</span>
+					</h2>
+				</div>
+
+				<div class="modal-body">
+					<section aria-labelledby="friend-req-noti-list-title">
+						<h3 id="friend-req-noti-list-title" class="reward-section-title">
+							{{ requests.length }} pending {{ requests.length === 1 ? 'request' : 'requests' }}
+						</h3>
+						<div class="reward-items-scroll" tabindex="0" aria-label="Pending friend requests">
+							<ul class="reward-list" role="list">
+								@for (req of requests; track req.id) {
+									<li class="reward-row friend-req-row">
+										<div class="friend-req-avatar" aria-hidden="true">
+											@if (req.sender_icon_path && !iconErrors[req.sender_id]) {
+												<img
+													[src]="getIconUrl(req.sender_icon_path)"
+													[alt]="req.sender_name"
+													(error)="onIconError(req.sender_id)"
+												/>
+											} @else {
+												<i class="bi bi-person-fill"></i>
+											}
+										</div>
+										<div class="reward-meta friend-req-meta">
+											<p class="reward-name">{{ req.sender_name }}</p>
+											<p class="friend-req-level">{{ req.sender_id }}</p>
+										</div>
+										<div class="friend-req-actions">
+											<button
+												type="button"
+												class="btn-sm btn-primary btn-req-accept"
+												[attr.aria-label]="'Accept request from ' + req.sender_name"
+												(click)="onAccept(req)">
+												<i class="bi bi-person-check-fill" aria-hidden="true"></i>
+											</button>
+											<button
+												type="button"
+												class="btn-sm btn-danger btn-req-reject"
+												[attr.aria-label]="'Reject request from ' + req.sender_name"
+												(click)="onReject(req)">
+												<i class="bi bi-person-x-fill" aria-hidden="true"></i>
+											</button>
+										</div>
+									</li>
+								}
+							</ul>
+						</div>
+					</section>
+				</div>
+
+				<div class="modal-footer border-0 pt-0">
+					<button #primaryButton type="button" class="btn-secondary friend-req-close-btn" (click)="handleClose()">
+						Close
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal-backdrop fade show"></div>
+}

@@ -5,12 +5,14 @@ import { Header } from './core/layouts/header/header';
 import { Footer } from './core/layouts/footer/footer';
 import { Breadcrumb } from './core/components/breadcrumb/breadcrumb';
 import { DailyNotiModal } from './core/components/daily-noti-modal/daily-noti-modal';
+import { FriendRequestNotiModal } from './core/components/friend-request-noti-modal/friend-request-noti-modal';
 import { AuthService } from './core/services/auth';
-import type { DailyRewardNotification } from './core/interfaces';
+import { FriendsService } from './core/services/friends.service';
+import type { DailyRewardNotification, FriendRequestItem } from './core/interfaces';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Header, Footer, Breadcrumb, DailyNotiModal],
+  imports: [RouterOutlet, Header, Footer, Breadcrumb, DailyNotiModal, FriendRequestNotiModal],
   standalone: true,
   templateUrl: './app.html',
   styleUrls: ['./app.css']
@@ -21,10 +23,13 @@ export class App implements OnInit, OnDestroy {
   protected readonly isProfilePage = signal(false);
   protected readonly showDailyRewardsModal = signal(false);
   protected readonly pendingDailyRewards = signal<DailyRewardNotification | null>(null);
+  protected readonly showFriendRequestModal = signal(false);
+  protected readonly pendingFriendRequests = signal<FriendRequestItem[]>([]);
   private sub: { unsubscribe: () => void } | null = null;
+  private friendSub: { unsubscribe: () => void } | null = null;
   private isCheckingPendingDailyRewards = false;
 
-  constructor(private router: Router, private authService: AuthService) { }
+  constructor(private router: Router, private authService: AuthService, private friendsService: FriendsService) { }
 
   private updateShowLayout(): void {
     const url = this.router.url.split('?')[0];
@@ -36,6 +41,13 @@ export class App implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.updateShowLayout();
     this.checkPendingDailyRewards();
+
+    this.friendSub = this.friendsService.pendingRequests.subscribe(requests => {
+      this.pendingFriendRequests.set(requests);
+      if (requests.length > 0 && !this.showFriendRequestModal()) {
+        this.showFriendRequestModal.set(true);
+      }
+    });
 
     this.sub = this.router.events.pipe(
       filter(e => e.constructor.name === 'NavigationEnd')
@@ -57,6 +69,7 @@ export class App implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.friendSub?.unsubscribe();
   }
 
   onCloseDailyRewardsModal(): void {
@@ -95,6 +108,30 @@ export class App implements OnInit, OnDestroy {
       error: () => {
         this.isCheckingPendingDailyRewards = false;
       }
+    });
+  }
+
+  onCloseFriendRequestModal(): void {
+    this.showFriendRequestModal.set(false);
+  }
+
+  onAcceptFriendRequest(req: FriendRequestItem): void {
+    this.friendsService.acceptRequest(req.id).subscribe({
+      next: () => {
+        if (this.pendingFriendRequests().length === 0) {
+          this.showFriendRequestModal.set(false);
+        }
+      },
+    });
+  }
+
+  onRejectFriendRequest(req: FriendRequestItem): void {
+    this.friendsService.rejectRequest(req.id).subscribe({
+      next: () => {
+        if (this.pendingFriendRequests().length === 0) {
+          this.showFriendRequestModal.set(false);
+        }
+      },
     });
   }
 

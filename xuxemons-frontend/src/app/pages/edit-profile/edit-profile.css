@@ -348,6 +348,33 @@
 	gap: 1rem;
 }
 
+.delete-account-modal {
+	z-index: 1070;
+}
+.delete-account-content {
+	border-radius: 12px;
+	background: var(--white-color);
+	padding: 1rem;
+}
+
+.delete-account-content .modal-title {
+	color: var(--danger-color);
+}
+.delete-account-content .modal-title i {
+	color: var(--danger-color);
+}
+.delete-account-footer {
+	display: flex;
+	gap: 0.75rem;
+}
+.delete-account-footer .btn-secondary {
+	flex: 1;
+	min-width: 0;
+}
+.delete-account-footer .btn-danger {
+	flex: none;
+}
+
 .settings-card {
 	background: var(--primary-color);
 	border: 1px solid var(--light-gray-color);

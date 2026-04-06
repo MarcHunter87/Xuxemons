@@ -1,0 +1,40 @@
+<article
+  class="card request-card"
+  [class.request-card--animated]="animationsEnabled"
+  [attr.aria-label]="'Friend request from ' + request.sender_name + ', id ' + request.sender_id"
+>
+  <div class="request-card-info">
+    <div class="request-avatar" aria-hidden="true">
+      @if (request.sender_icon_path && !iconError) {
+        <img [src]="getIconUrl()" [alt]="request.sender_name" (error)="iconError = true">
+      } @else {
+        <i class="bi bi-person-fill"></i>
+      }
+    </div>
+    <div class="request-user">
+      <span class="request-name">{{ request.sender_name }}</span>
+      <span class="request-level">{{ request.sender_id }}</span>
+    </div>
+  </div>
+
+  <div class="request-actions">
+    <button
+      type="button"
+      class="btn-sm btn-primary request-btn"
+      (click)="accept.emit()"
+      [attr.aria-label]="'Accept friend request from ' + request.sender_name"
+    >
+      <i class="bi bi-person-check-fill" aria-hidden="true"></i>
+      Accept
+    </button>
+    <button
+      type="button"
+      class="btn-sm btn-danger request-btn"
+      (click)="reject.emit()"
+      [attr.aria-label]="'Reject friend request from ' + request.sender_name"
+    >
+      <i class="bi bi-person-x-fill" aria-hidden="true"></i>
+      Reject
+    </button>
+  </div>
+</article>

@@ -1,1 +1,183 @@
-<p>friends works!</p>
+<main class="friends-main">
+
+  <!-- ── Page header ── -->
+  <div class="friends-header">
+    <h1 class="friends-title">Friends</h1>
+    <p class="friends-subtitle">Connect, challenge, and chat with your friends.</p>
+  </div>
+
+  <!-- ── Toast notifications ── -->
+  <!-- ── Error / Success messages ── -->
+  @if (errorMessage()) {
+    <div class="error-state">
+      <p class="error-message" role="alert" aria-live="polite">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        {{ errorMessage() }}
+      </p>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <p class="success-message" role="status" aria-live="polite">{{ successMessage() }}</p>
+  }
+
+  <!-- ── Search section ── -->
+  <section class="search-section" aria-labelledby="search-label">
+    <label id="search-label" for="user-search" class="search-label">
+      Search user by ID
+    </label>
+    <div class="input-group search-input-group">
+      <span class="input-group-text search-input-icon" aria-hidden="true">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        id="user-search"
+        type="search"
+        class="form-control search-input"
+        placeholder="Type at least 3 characters."
+        [formControl]="searchControl"
+        autocomplete="off"
+      >
+    </div>
+
+    <div
+      class="search-results-region"
+      aria-live="polite"
+      aria-label="Search results"
+    >
+      @if (searchLoading()) {
+        <p class="search-hint">Searching…</p>
+      } @else if (showSearchResults) {
+        @if (searchResults().length > 0) {
+          <ul class="search-results-list" role="list">
+            @for (user of searchResults(); track user.id) {
+              <li class="search-result-item">
+                <div class="search-result-avatar" aria-hidden="true">
+                  @if (user.icon_path && !hasSearchIconError(user.id)) {
+                    <img
+                      [src]="getIconUrl(user.icon_path)"
+                      [alt]="user.name"
+                      (error)="onSearchIconError(user.id)"
+                    >
+                  } @else {
+                    <i class="bi bi-person-fill"></i>
+                  }
+                </div>
+                <div class="search-result-info">
+                  <span class="search-result-name">{{ user.name }}</span>
+                  <span class="search-result-id">{{ user.id }}</span>
+                </div>
+                @if (user.request_sent) {
+                  <span class="search-result-badge" aria-label="Request sent">Request sent</span>
+                } @else if (user.request_received) {
+                  <span class="search-result-badge search-result-badge--pending" aria-label="Pending">Pending</span>
+                } @else {
+                  <button
+                    type="button"
+                    class="btn-send-request"
+                    [disabled]="isSendingTo(user.id)"
+                    (click)="sendRequest(user)"
+                    [attr.aria-label]="'Send friend request to ' + user.name"
+                  >
+                    @if (isSendingTo(user.id)) { Sending… } @else { Send friend request }
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="search-hint">No users found matching your search.</p>
+        }
+      }
+    </div>
+  </section>
+
+  <!-- ── Body: friends list + requests panel ── -->
+  <div class="friends-body">
+
+    <!-- My Friends -->
+    <section class="friends-main-col" aria-labelledby="friends-section-title">
+      <div class="section-header">
+        <h2 id="friends-section-title" class="section-title">My Friends</h2>
+      </div>
+
+      @if (friends().length === 0) {
+        <p class="empty-msg">You haven't added any friends yet. Search for users above to get started.</p>
+      } @else {
+        <ul
+          class="friends-grid"
+          [class.friends-grid--animated]="animationsEnabled"
+          role="list"
+          aria-label="Friends list"
+        >
+          @for (friend of friends(); track friend.id) {
+            <li class="friends-grid-item">
+              <app-friend-card
+                [friend]="friend"
+                (remove)="askConfirmRemove(friend)"
+              ></app-friend-card>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- Requests panel -->
+    <section class="friends-sidebar" aria-labelledby="requests-panel-title">
+      <div class="requests-panel">
+        <div class="requests-panel-header">
+          <i class="bi bi-person-plus-fill requests-panel-icon" aria-hidden="true"></i>
+          <h2 id="requests-panel-title" class="requests-panel-title">Requests</h2>
+          @if (pendingCount > 0) {
+            <span
+              class="badge badge-pending"
+              [attr.aria-label]="pendingCount + ' pending requests'"
+            >{{ pendingCount }}</span>
+          }
+        </div>
+
+        @if (pendingRequests().length === 0) {
+          <p class="empty-msg">No pending requests.</p>
+        } @else {
+          <ul class="requests-list" role="list" aria-label="Pending friend requests">
+            @for (request of pendingRequests(); track request.id) {
+              <li>
+                <app-friend-request-card
+                  [request]="request"
+                  (accept)="acceptRequest(request)"
+                  (reject)="rejectRequest(request)"
+                ></app-friend-request-card>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ── Confirm remove dialog ── -->
+  @if (confirmRemoveFriend()) {
+    <div
+      class="confirm-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-title"
+      (click)="cancelRemove()"
+    >
+      <div class="confirm-dialog" (click)="$event.stopPropagation()">
+        <h3 id="confirm-title" class="confirm-title">Remove friend?</h3>
+        <p class="confirm-text">
+          Are you sure you want to remove
+          <strong>{{ confirmRemoveFriend()!.name }}</strong>
+          from your friends? This will also remove you from their list.
+        </p>
+        <div class="confirm-actions">
+          <button type="button" class="btn-secondary" (click)="cancelRemove()">Cancel</button>
+          <button type="button" class="btn-danger" (click)="confirmRemove()">Remove friend</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</main>
