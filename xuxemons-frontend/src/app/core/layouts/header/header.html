@@ -25,6 +25,13 @@
       }
       <a routerLink="/friends" class="icon-btn" aria-label="Friends">
         <i class="bi bi-people-fill"></i>
+        @if ((friendsService.pendingCount | async) ?? 0; as count) {
+          @if (count > 0) {
+            <span class="friend-req-badge" [attr.aria-label]="count + ' pending friend requests'">
+              {{ count > 99 ? '99+' : count }}
+            </span>
+          }
+        }
       </a>
       @if (user) {
       <a
@@ -106,6 +113,13 @@
           }
           <a routerLink="/friends" class="icon-btn" aria-label="Friends" (click)="closeMenu()">
             <i class="bi bi-people-fill"></i>
+            @if ((friendsService.pendingCount | async) ?? 0; as count) {
+              @if (count > 0) {
+                <span class="friend-req-badge" [attr.aria-label]="count + ' pending friend requests'">
+                  {{ count > 99 ? '99+' : count }}
+                </span>
+              }
+            }
           </a>
           @if (user) {
           <a

@@ -14,13 +14,15 @@
   }
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
-    <label class="field">
-      <span>Name</span>
-      <input id="admin-new-xuxemon-name" type="text" formControlName="name" maxlength="128" [attr.aria-invalid]="isFieldInvalid('name')" [attr.aria-describedby]="getErrorMessage('name') ? 'admin-new-xuxemon-name-error' : null" />
-      @if (getErrorMessage('name')) {
-        <p id="admin-new-xuxemon-name-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('name') }}</p>
-      }
-    </label>
+    <fieldset class="form-fieldset">
+      <legend class="form-legend">Basic information</legend>
+      <label class="field">
+        <span>Name</span>
+        <input id="admin-new-xuxemon-name" class="form-control" type="text" formControlName="name" maxlength="128" [attr.aria-invalid]="isFieldInvalid('name')" [attr.aria-describedby]="getErrorMessage('name') ? 'admin-new-xuxemon-name-error' : null" />
+        @if (getErrorMessage('name')) {
+          <p id="admin-new-xuxemon-name-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('name') }}</p>
+        }
+      </label>
 
     <div class="field">
       <span>Type</span>
@@ -88,12 +90,16 @@
 
     <label class="field field-full">
       <span>Description</span>
-      <textarea rows="4" formControlName="description"></textarea>
+      <textarea class="form-control" rows="4" formControlName="description"></textarea>
     </label>
+    </fieldset>
+
+    <fieldset class="form-fieldset">
+      <legend class="form-legend">Combat stats and moves</legend>
 
     <label class="field">
       <span>Attack 1</span>
-      <input id="admin-new-xuxemon-attack_1_id" type="text" [value]="attack1Label()" readonly [attr.aria-invalid]="isFieldInvalid('attack_1_id')" [attr.aria-describedby]="getErrorMessage('attack_1_id') ? 'admin-new-xuxemon-attack_1_id-error' : null" />
+      <input id="admin-new-xuxemon-attack_1_id" class="form-control" type="text" [value]="attack1Label()" readonly [attr.aria-invalid]="isFieldInvalid('attack_1_id')" [attr.aria-describedby]="getErrorMessage('attack_1_id') ? 'admin-new-xuxemon-attack_1_id-error' : null" />
       @if (getErrorMessage('attack_1_id')) {
         <p id="admin-new-xuxemon-attack_1_id-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('attack_1_id') }}</p>
       }
@@ -165,7 +171,7 @@
 
     <label class="field">
       <span>HP</span>
-      <input id="admin-new-xuxemon-hp" type="number" min="1" formControlName="hp" [attr.aria-invalid]="isFieldInvalid('hp')" [attr.aria-describedby]="getErrorMessage('hp') ? 'admin-new-xuxemon-hp-error' : null" />
+      <input id="admin-new-xuxemon-hp" class="form-control" type="number" min="1" formControlName="hp" [attr.aria-invalid]="isFieldInvalid('hp')" [attr.aria-describedby]="getErrorMessage('hp') ? 'admin-new-xuxemon-hp-error' : null" />
       @if (getErrorMessage('hp')) {
         <p id="admin-new-xuxemon-hp-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('hp') }}</p>
       }
@@ -173,7 +179,7 @@
 
     <label class="field">
       <span>Attack</span>
-      <input id="admin-new-xuxemon-attack" type="number" min="1" formControlName="attack" [attr.aria-invalid]="isFieldInvalid('attack')" [attr.aria-describedby]="getErrorMessage('attack') ? 'admin-new-xuxemon-attack-error' : null" />
+      <input id="admin-new-xuxemon-attack" class="form-control" type="number" min="1" formControlName="attack" [attr.aria-invalid]="isFieldInvalid('attack')" [attr.aria-describedby]="getErrorMessage('attack') ? 'admin-new-xuxemon-attack-error' : null" />
       @if (getErrorMessage('attack')) {
         <p id="admin-new-xuxemon-attack-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('attack') }}</p>
       }
@@ -181,20 +187,24 @@
 
     <label class="field">
       <span>Defense</span>
-      <input id="admin-new-xuxemon-defense" type="number" min="1" formControlName="defense" [attr.aria-invalid]="isFieldInvalid('defense')" [attr.aria-describedby]="getErrorMessage('defense') ? 'admin-new-xuxemon-defense-error' : null" />
+      <input id="admin-new-xuxemon-defense" class="form-control" type="number" min="1" formControlName="defense" [attr.aria-invalid]="isFieldInvalid('defense')" [attr.aria-describedby]="getErrorMessage('defense') ? 'admin-new-xuxemon-defense-error' : null" />
       @if (getErrorMessage('defense')) {
         <p id="admin-new-xuxemon-defense-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('defense') }}</p>
       }
     </label>
+    </fieldset>
+
+    <fieldset class="form-fieldset">
+      <legend class="form-legend">Visual assets</legend>
 
     <label class="field field-full field-hidden" aria-hidden="true">
       <span>Image path (auto)</span>
-      <input type="text" formControlName="icon_path" readonly tabindex="-1" />
+      <input type="text" class="form-control" formControlName="icon_path" readonly tabindex="-1" />
     </label>
 
     <label class="field field-full">
       <span>Image</span>
-      <input type="file" accept="image/*" (change)="onImageSelected($event)" />
+      <input type="file" class="form-control" accept="image/*" (change)="onImageSelected($event)" />
     </label>
 
     @if (imagePreview()) {
@@ -202,6 +212,7 @@
         <img [src]="imagePreview()" alt="Xuxemon image preview" />
       </div>
     }
+    </fieldset>
 
     <div class="actions field-full">
       <button type="button" class="btn-secondary" (click)="goBack()">Cancel</button>

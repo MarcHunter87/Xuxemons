@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 import { AuthService, User } from '../../services/auth';
+import { FriendsService } from '../../services/friends.service';
 
 @Component({
   selector: 'app-header',
@@ -22,6 +23,7 @@ export class Header {
   displayName = 'Unknown';
 
   readonly auth = inject(AuthService);
+  readonly friendsService = inject(FriendsService);
   private readonly router = inject(Router);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
@@ -32,8 +34,12 @@ export class Header {
       this.displayName = u?.id ?? 'Unknown';
       this.iconUrl = u?.icon_path ? this.auth.getAssetUrl(u.icon_path, u.updated_at) : null;
       if (this.isBrowser) {
-        if (u) this.auth.refreshGachaTickets();
-        else this.auth.setGachaTicketCount(0);
+        if (u) {
+          this.auth.refreshGachaTickets();
+          this.friendsService.loadPendingRequests();
+        } else {
+          this.auth.setGachaTicketCount(0);
+        }
       }
     });
 
@@ -41,7 +47,10 @@ export class Header {
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd), takeUntilDestroyed())
       .subscribe(() => {
         this.menuOpen = false;
-        if (this.isBrowser && this.user) this.auth.refreshGachaTickets();
+        if (this.isBrowser && this.user) {
+          this.auth.refreshGachaTickets();
+          this.friendsService.loadPendingRequests();
+        }
       });
   }
 

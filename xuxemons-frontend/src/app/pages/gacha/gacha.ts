@@ -24,6 +24,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     @ViewChild('awardCloseButton') awardCloseButton?: ElementRef<HTMLButtonElement>;
     @ViewChild('spinErrorDialogRoot') spinErrorDialogRoot?: ElementRef<HTMLElement>;
     @ViewChild('spinErrorOkButton') spinErrorOkButton?: ElementRef<HTMLButtonElement>;
+    @ViewChild('gachaAudio') gachaAudio?: ElementRef<HTMLAudioElement>;
 
     public isSpinning = signal(false);
     public noTransition = signal(false);
@@ -91,6 +92,21 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         return (containerWidth / 2) - winnerCenter;
     }
 
+    private playGachaAudio() {
+        const audio = this.gachaAudio?.nativeElement;
+        if (!audio) return;
+        audio.volume = 0.4;
+        audio.currentTime = 0;
+        audio.play().catch(e => console.warn('Audio playback prevented by browser policy', e));
+    }
+
+    private stopGachaAudio() {
+        const audio = this.gachaAudio?.nativeElement;
+        if (!audio) return;
+        audio.pause();
+        audio.currentTime = 0;
+    }
+
     async spin() {
         if (this.isSpinning()) return;
         if (this.auth.gachaTicketCount() < 1) return;
@@ -103,6 +119,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         this.awardedXuxemon.set(null);
         this.spinError.set(null);
         this.isSpinning.set(true);
+        this.playGachaAudio();
 
         this.noTransition.set(true);
         this.trackTransform.set('translateX(0)');
@@ -111,6 +128,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         const winner = await this.xuxemonService.awardRandomXuxemonGacha();
 
         if (!winner) {
+            this.stopGachaAudio();
             this.isSpinning.set(false);
             this.noTransition.set(false);
             this.spinError.set(
@@ -166,6 +184,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     closeModal() {
+        this.stopGachaAudio();
         this.showAward.set(false);
         this.awardedXuxemon.set(null);
         this.xuxemonService.loadMyXuxemons();
@@ -173,6 +192,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     closeSpinError(): void {
+        this.stopGachaAudio();
         this.spinError.set(null);
         this.restorePreviousFocus();
     }

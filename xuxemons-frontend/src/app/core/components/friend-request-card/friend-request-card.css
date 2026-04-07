@@ -74,10 +74,12 @@
 .request-actions {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .request-btn {
-  flex: 1;
+  flex: 1 1 160px;
+  min-width: 120px;
   gap: 0.4rem;
 }
 .request-btn:active:not(:disabled) {

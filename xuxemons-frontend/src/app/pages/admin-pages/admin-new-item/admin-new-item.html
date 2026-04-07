@@ -14,25 +14,30 @@
   }
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
-    <label class="field">
-      <span>Name</span>
-      <input id="admin-new-item-name" type="text" formControlName="name" maxlength="255" [attr.aria-invalid]="isFieldInvalid('name')" [attr.aria-describedby]="getErrorMessage('name') ? 'admin-new-item-name-error' : null" />
-      @if (getErrorMessage('name')) {
-        <p id="admin-new-item-name-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('name') }}</p>
-      }
-    </label>
+    <fieldset class="form-fieldset">
+      <legend class="form-legend">Basic information</legend>
+      <label class="field">
+        <span>Name</span>
+        <input id="admin-new-item-name" class="form-control" type="text" formControlName="name" maxlength="255" [attr.aria-invalid]="isFieldInvalid('name')" [attr.aria-describedby]="getErrorMessage('name') ? 'admin-new-item-name-error' : null" />
+        @if (getErrorMessage('name')) {
+          <p id="admin-new-item-name-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('name') }}</p>
+        }
+      </label>
 
-    <label class="field field-full">
-      <span>Description</span>
-      <textarea id="admin-new-item-description" rows="4" formControlName="description" [attr.aria-invalid]="isFieldInvalid('description')" [attr.aria-describedby]="getErrorMessage('description') ? 'admin-new-item-description-error' : null"></textarea>
-      @if (getErrorMessage('description')) {
-        <p id="admin-new-item-description-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('description') }}</p>
-      }
-    </label>
+      <label class="field field-full">
+        <span>Description</span>
+        <textarea id="admin-new-item-description" class="form-control" rows="4" formControlName="description" [attr.aria-invalid]="isFieldInvalid('description')" [attr.aria-describedby]="getErrorMessage('description') ? 'admin-new-item-description-error' : null"></textarea>
+        @if (getErrorMessage('description')) {
+          <p id="admin-new-item-description-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('description') }}</p>
+        }
+      </label>
+    </fieldset>
 
-    <div class="field">
-      <span>Effect type</span>
-      <div class="custom-select-wrapper" (focusout)="onEffectTypeFocusOut($event)">
+    <fieldset class="form-fieldset">
+      <legend class="form-legend">Effect configuration</legend>
+      <div class="field">
+        <span>Effect type</span>
+        <div class="custom-select-wrapper" (focusout)="onEffectTypeFocusOut($event)">
           <button
             type="button"
             id="admin-new-item-effect_type"
@@ -82,19 +87,19 @@
             }
           </ul>
         }
+        </div>
+        @if (getErrorMessage('effect_type')) {
+          <p id="admin-new-item-effect_type-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('effect_type') }}</p>
+        }
       </div>
-      @if (getErrorMessage('effect_type')) {
-        <p id="admin-new-item-effect_type-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('effect_type') }}</p>
-      }
-    </div>
 
-    <label class="field">
-      <span>Effect value</span>
-      <input id="admin-new-item-effect_value" type="number" min="0" step="1" inputmode="numeric" formControlName="effect_value" placeholder="0" [attr.aria-invalid]="isFieldInvalid('effect_value')" [attr.aria-describedby]="getErrorMessage('effect_value') ? 'admin-new-item-effect_value-error' : null" />
-      @if (getErrorMessage('effect_value')) {
-        <p id="admin-new-item-effect_value-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('effect_value') }}</p>
-      }
-    </label>
+      <label class="field">
+        <span>Effect value</span>
+        <input id="admin-new-item-effect_value" class="form-control" type="number" min="0" step="1" inputmode="numeric" formControlName="effect_value" placeholder="0" [attr.aria-invalid]="isFieldInvalid('effect_value')" [attr.aria-describedby]="getErrorMessage('effect_value') ? 'admin-new-item-effect_value-error' : null" />
+        @if (getErrorMessage('effect_value')) {
+          <p id="admin-new-item-effect_value-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('effect_value') }}</p>
+        }
+      </label>
 
     @if (form.get('effect_type')?.value === 'Apply Status Effects') {
       <div class="field">
@@ -160,38 +165,45 @@
           <p id="admin-new-item-status_effect_id-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('status_effect_id') }}</p>
         }
       </div>
-    }
+      }
+    </fieldset>
 
-    <label class="field field-inline field-full">
-      <input type="checkbox" formControlName="is_stackable" />
-      <span>Stackable</span>
-    </label>
-
-    @if (form.get('is_stackable')?.value) {
-      <label class="field field-full">
-        <span>Max quantity</span>
-        <input id="admin-new-item-max_quantity" type="number" min="1" [max]="getMaxQuantityLimit()" step="1" inputmode="numeric" formControlName="max_quantity" placeholder="1" [attr.aria-invalid]="isFieldInvalid('max_quantity')" [attr.aria-describedby]="getErrorMessage('max_quantity') ? 'admin-new-item-max_quantity-error' : null" />
-        @if (getErrorMessage('max_quantity')) {
-          <p id="admin-new-item-max_quantity-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('max_quantity') }}</p>
-        }
+    <fieldset class="form-fieldset">
+      <legend class="form-legend">Inventory rules</legend>
+      <label class="field field-inline field-full">
+        <input type="checkbox" class="form-check-input" formControlName="is_stackable" />
+        <span>Stackable</span>
       </label>
-    }
 
-    <label class="field field-full field-hidden" aria-hidden="true">
-      <span>Icon path (auto)</span>
-      <input type="text" formControlName="icon_path" readonly tabindex="-1" />
-    </label>
+      @if (form.get('is_stackable')?.value) {
+        <label class="field field-full">
+          <span>Max quantity</span>
+          <input id="admin-new-item-max_quantity" class="form-control" type="number" min="1" [max]="getMaxQuantityLimit()" step="1" inputmode="numeric" formControlName="max_quantity" placeholder="1" [attr.aria-invalid]="isFieldInvalid('max_quantity')" [attr.aria-describedby]="getErrorMessage('max_quantity') ? 'admin-new-item-max_quantity-error' : null" />
+          @if (getErrorMessage('max_quantity')) {
+            <p id="admin-new-item-max_quantity-error" class="field-error" role="status" aria-live="polite">{{ getErrorMessage('max_quantity') }}</p>
+          }
+        </label>
+      }
+    </fieldset>
 
-    <label class="field field-full">
-      <span>Icon image</span>
-      <input type="file" accept="image/*" (change)="onImageSelected($event)" />
-    </label>
+    <fieldset class="form-fieldset">
+      <legend class="form-legend">Visual assets</legend>
+      <label class="field field-full field-hidden" aria-hidden="true">
+        <span>Icon path (auto)</span>
+        <input type="text" class="form-control" formControlName="icon_path" readonly tabindex="-1" />
+      </label>
 
-    @if (imagePreview()) {
-      <div class="image-preview">
-        <img [src]="imagePreview()" alt="Item icon preview" />
-      </div>
-    }
+      <label class="field field-full">
+        <span>Icon image</span>
+        <input type="file" class="form-control" accept="image/*" (change)="onImageSelected($event)" />
+      </label>
+
+      @if (imagePreview()) {
+        <div class="image-preview">
+          <img [src]="imagePreview()" alt="Item icon preview" />
+        </div>
+      }
+    </fieldset>
 
     <div class="actions field-full">
       <button type="button" class="btn-secondary" (click)="goBack()">Cancel</button>
