@@ -33,6 +33,7 @@ class UserSeeder extends Seeder
             'email' => 'marc@gmail.com', 
             'password' => Hash::make('123456'),
             'role' => 'player',
+            'icon_path' => '/users/icons/#Marc1987.png',
             ],
             ['id' => '#Liqi1990', 
             'name' => 'Liqi', 
@@ -40,7 +41,8 @@ class UserSeeder extends Seeder
             'email' => 'liqi@gmail.com', 
             'password' => Hash::make('123456'),
             'role' => 'player',
-            'icon_path' => '/users/icons/#Liqi1990.png',
+            'icon_path' => '/users/icons/#Liqi1990.webp',
+            'banner_path' => '/users/banners/#Liqi1990.png',
             ],
             ['id' => '#Pau2000', 
             'name' => 'Pau', 
@@ -48,6 +50,8 @@ class UserSeeder extends Seeder
             'email' => 'pau@gmail.com', 
             'password' => Hash::make('123456'),
             'role' => 'player',
+            'icon_path' => '/users/icons/#Pau2000.jfif',
+            'banner_path' => '/users/banners/#Pau2000.jpg',
             ],
         ];
 
