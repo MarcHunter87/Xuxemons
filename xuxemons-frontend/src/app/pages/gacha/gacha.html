@@ -1,4 +1,5 @@
 <audio #gachaAudio [src]="auth.getAssetUrl('Blue Archive OST 7.mp3')" preload="auto" loop></audio>
+<audio #modalAudio [src]="auth.getAssetUrl('Xuxemon Modal.mp3')" preload="auto"></audio>
 
 <div class="gacha-container">
   <section class="page-hero" aria-labelledby="gacha-title">
@@ -106,63 +107,167 @@
   }
 
   @if (showAward()) {
-    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="gacha-award-title" (keydown)="onModalKeydown($event, 'award')" (click)="closeModal()">
-      <div #awardDialogRoot class="modal-content animate-pop" tabindex="-1" (click)="$event.stopPropagation()">
-        <h2 id="gacha-award-title" class="winner-title">Congratulations!</h2>
-        <div class="winner-display">
-          <button
-            type="button"
-            class="winner-image-button"
-            (click)="goToXuxemonDetailsFromRecent(awardedXuxemon()!.id)"
-            [attr.aria-label]="'View ' + (awardedXuxemon()?.name ?? 'Xuxemon') + ' in My Xuxemons'"
-          >
+    @if (viewAnimations) {
+      <!-- ANIMATED REVEAL (view_animations = true) -->
+      <div
+        class="gacha-reveal-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="gacha-reveal-title"
+        [style.--type-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+        [style.--type-glow]="getTypeColorGlow(awardedXuxemon()?.type?.name ?? '')"
+        (keydown)="onModalKeydown($event, 'award')"
+        (click)="closeModal()"
+      >
+        <!-- Background effects -->
+        <div class="reveal-effects-layer">
+          <div class="reveal-flash"></div>
+          <div class="reveal-flash-color"></div>
+          <div class="reveal-rays-container">
+            @for (angle of revealRayAngles; track $index) {
+              <div class="reveal-ray" [style.--ray-rot]="angle + 'deg'"></div>
+            }
+          </div>
+          <div class="reveal-ring"></div>
+          <div class="reveal-ring reveal-ring-delay-1"></div>
+          <div class="reveal-ring reveal-ring-delay-2"></div>
+          @for (s of revealSparkles; track $index) {
             <div
-              class="image-wrapper"
-              [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
-            >
-              <img
-                [src]="awardedXuxemon()?.image_url"
-                [alt]="awardedXuxemon()?.name"
-                class="animate-float"
-              />
-            </div>
-          </button>
-          <p class="winner-name">{{ awardedXuxemon()?.name }}</p>
-          <span
-            class="type-badge"
-            [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
-          >
-            {{ awardedXuxemon()?.type?.name }}
-          </span>
-          @if (awardedXuxemon()?.hp != null && awardedXuxemon()?.attack != null && awardedXuxemon()?.defense != null) {
-            <div class="winner-stats">
-              <div class="stat stat-hp">
-                <span class="stat-label">HP</span>
-                <span class="stat-value">{{ awardedXuxemon()?.hp }}</span>
-              </div>
-              <div class="stat stat-attack">
-                <span class="stat-label">Attack</span>
-                <span class="stat-value">{{ awardedXuxemon()?.attack }}</span>
-              </div>
-              <div class="stat stat-defense">
-                <span class="stat-label">Defense</span>
-                <span class="stat-value">{{ awardedXuxemon()?.defense }}</span>
-              </div>
-            </div>
+              class="reveal-sparkle"
+              [style.--sp-x]="s.x + 'vw'"
+              [style.--sp-y]="s.y + 'vh'"
+              [style.--sp-size]="s.size + 'px'"
+              [style.--sp-delay]="s.delay + 's'"
+              [style.--sp-duration]="s.duration + 's'"
+            ></div>
           }
         </div>
-        <div class="modal-actions">
-          <button #awardCloseButton type="button" (click)="closeModal()" class="btn-secondary">Close</button>
-          <button
-            type="button"
-            (click)="spinAgain()"
-            class="btn-primary"
-            [disabled]="auth.gachaTicketCount() < 1"
-          >
-            Spin Again
-          </button>
+
+        <div #awardDialogRoot class="modal-content animate-pop" tabindex="-1" (click)="$event.stopPropagation()">
+          <h2 id="gacha-reveal-title" class="winner-title">Congratulations!</h2>
+          <div class="winner-display">
+            <button
+              type="button"
+              class="winner-image-button"
+              (click)="goToXuxemonDetailsFromRecent(awardedXuxemon()!.id)"
+              [attr.aria-label]="'View ' + (awardedXuxemon()?.name ?? 'Xuxemon') + ' in My Xuxemons'"
+            >
+              <div
+                class="image-wrapper"
+                [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+              >
+                <img
+                  [src]="awardedXuxemon()?.image_url"
+                  [alt]="awardedXuxemon()?.name"
+                  class="animate-float"
+                />
+              </div>
+            </button>
+            <p class="winner-name">{{ awardedXuxemon()?.name }}</p>
+            <span
+              class="type-badge"
+              [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+            >
+              {{ awardedXuxemon()?.type?.name }}
+            </span>
+            @if (awardedXuxemon()?.hp != null && awardedXuxemon()?.attack != null && awardedXuxemon()?.defense != null) {
+              <div class="winner-stats">
+                <div class="stat stat-hp">
+                  <span class="stat-label">HP</span>
+                  <span class="stat-value">{{ awardedXuxemon()?.hp }}</span>
+                </div>
+                <div class="stat stat-attack">
+                  <span class="stat-label">Attack</span>
+                  <span class="stat-value">{{ awardedXuxemon()?.attack }}</span>
+                </div>
+                <div class="stat stat-defense">
+                  <span class="stat-label">Defense</span>
+                  <span class="stat-value">{{ awardedXuxemon()?.defense }}</span>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="modal-actions">
+            <button #awardCloseButton type="button" (click)="closeModal()" class="btn-secondary">Close</button>
+            <button
+              type="button"
+              (click)="spinAgain()"
+              class="btn-primary"
+              [disabled]="auth.gachaTicketCount() < 1"
+            >
+              Spin Again
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    } @else {
+      <!-- SIMPLE MODAL (view_animations = false) -->
+      <div
+        class="modal-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="gacha-award-title-simple"
+        [style.--type-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+        [style.--type-glow]="getTypeColorGlow(awardedXuxemon()?.type?.name ?? '')"
+        (keydown)="onModalKeydown($event, 'award')"
+        (click)="closeModal()"
+      >
+        <div #awardDialogRoot class="modal-content" tabindex="-1" (click)="$event.stopPropagation()">
+          <h2 id="gacha-award-title-simple" class="winner-title">Congratulations!</h2>
+          <div class="winner-display">
+            <button
+              type="button"
+              class="winner-image-button"
+              (click)="goToXuxemonDetailsFromRecent(awardedXuxemon()!.id)"
+              [attr.aria-label]="'View ' + (awardedXuxemon()?.name ?? 'Xuxemon') + ' in My Xuxemons'"
+            >
+              <div
+                class="image-wrapper"
+                [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+              >
+                <img
+                  [src]="awardedXuxemon()?.image_url"
+                  [alt]="awardedXuxemon()?.name"
+                />
+              </div>
+            </button>
+            <p class="winner-name">{{ awardedXuxemon()?.name }}</p>
+            <span
+              class="type-badge"
+              [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
+            >
+              {{ awardedXuxemon()?.type?.name }}
+            </span>
+            @if (awardedXuxemon()?.hp != null && awardedXuxemon()?.attack != null && awardedXuxemon()?.defense != null) {
+              <div class="winner-stats">
+                <div class="stat stat-hp">
+                  <span class="stat-label">HP</span>
+                  <span class="stat-value">{{ awardedXuxemon()?.hp }}</span>
+                </div>
+                <div class="stat stat-attack">
+                  <span class="stat-label">Attack</span>
+                  <span class="stat-value">{{ awardedXuxemon()?.attack }}</span>
+                </div>
+                <div class="stat stat-defense">
+                  <span class="stat-label">Defense</span>
+                  <span class="stat-value">{{ awardedXuxemon()?.defense }}</span>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="modal-actions">
+            <button #awardCloseButton type="button" (click)="closeModal()" class="btn-secondary">Close</button>
+            <button
+              type="button"
+              (click)="spinAgain()"
+              class="btn-primary"
+              [disabled]="auth.gachaTicketCount() < 1"
+            >
+              Spin Again
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   }
 </div>

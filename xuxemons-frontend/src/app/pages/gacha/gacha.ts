@@ -25,6 +25,8 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     @ViewChild('spinErrorDialogRoot') spinErrorDialogRoot?: ElementRef<HTMLElement>;
     @ViewChild('spinErrorOkButton') spinErrorOkButton?: ElementRef<HTMLButtonElement>;
     @ViewChild('gachaAudio') gachaAudio?: ElementRef<HTMLAudioElement>;
+    @ViewChild('modalAudio') modalAudio?: ElementRef<HTMLAudioElement>;
+    private modalAudioRestoreTimeout?: ReturnType<typeof setTimeout>;
 
     public isSpinning = signal(false);
     public noTransition = signal(false);
@@ -39,6 +41,9 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     private previousFocusedElement: HTMLElement | null = null;
     private shouldFocusAwardCloseButton = false;
     private shouldFocusErrorButton = false;
+
+    readonly revealRayAngles = Array.from({ length: 14 }, (_, i) => Math.round((i * 360) / 14));
+    revealSparkles: Array<{ x: number; y: number; size: number; delay: number; duration: number }> = [];
 
     ngOnInit() {
         this.auth.refreshGachaTickets();
@@ -153,16 +158,22 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         }, 50);
 
         setTimeout(() => {
+            this.generateSparkles();
             this.isSpinning.set(false);
             this.awardedXuxemon.set(winner);
             this.showAward.set(true);
             this.shouldFocusAwardCloseButton = true;
+            this.playModalRevealAudio();
         }, 6200);
     }
 
     spinAgain() {
         this.closeModal();
         this.spin();
+    }
+
+    get viewAnimations(): boolean {
+        return this.auth.getUser()?.view_animations ?? true;
     }
 
     getTypeColor(typeName: string): string {
@@ -172,6 +183,42 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
             case 'Technical': return '#28A745';
             default: return '#777';
         }
+    }
+
+    getTypeColorGlow(typeName: string): string {
+        switch (typeName) {
+            case 'Power': return 'rgba(208, 24, 27, 0.5)';
+            case 'Speed': return 'rgba(13, 110, 253, 0.5)';
+            case 'Technical': return 'rgba(40, 167, 69, 0.5)';
+            default: return 'rgba(119, 119, 119, 0.5)';
+        }
+    }
+
+    private playModalRevealAudio() {
+        const bgm = this.gachaAudio?.nativeElement;
+        const sfx = this.modalAudio?.nativeElement;
+        if (bgm) bgm.volume = 0.25;
+        if (sfx) {
+            sfx.volume = 0.9;
+            sfx.currentTime = 0;
+            sfx.play().catch(e => console.warn('Modal audio playback prevented', e));
+        }
+        clearTimeout(this.modalAudioRestoreTimeout);
+        this.modalAudioRestoreTimeout = setTimeout(() => {
+            if (bgm) bgm.volume = 0.4;
+        }, 2800);
+    }
+
+    private generateSparkles() {
+        const count = 100;
+        this.revealSparkles = Array.from({ length: count }, () => {
+            const x = -8 + Math.random() * 116;
+            const y = -8 + Math.random() * 116;
+            const size = 2 + Math.random() * 8;
+            const delay = Math.random() * 2.4;
+            const duration = 1.2 + Math.random() * 2.6;
+            return { x, y, size, delay, duration };
+        });
     }
 
     goToXuxemonDetailsFromRecent(xuxemonId: number): void {
@@ -184,6 +231,9 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     closeModal() {
+        clearTimeout(this.modalAudioRestoreTimeout);
+        const sfx = this.modalAudio?.nativeElement;
+        if (sfx) { sfx.pause(); sfx.currentTime = 0; }
         this.stopGachaAudio();
         this.showAward.set(false);
         this.awardedXuxemon.set(null);
