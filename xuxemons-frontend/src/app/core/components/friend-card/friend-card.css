@@ -122,21 +122,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0;
+  gap: 0.5rem;
   border-radius: 10px;
-  font-size: 1rem;
+  font-size: 18px;
   line-height: 1;
   box-sizing: border-box;
   transition: transform 0.12s, filter 0.12s;
+  padding: 0.5rem 0.9rem;
 }
 
 .friend-remove-btn i {
-  font-size: 1.15rem;
-  display: block;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .friend-remove-btn:hover:not(:disabled) {
@@ -224,6 +223,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0.75rem 1.5rem;
+  min-height: 52px;
+  font-size: 18px;
+  font-weight: 500;
+  border-radius: 10px;
 }
 
 /* Ensure icons inside friend cards are 20x20 and vertically centered */
@@ -257,4 +261,6 @@
   align-items: center;
   justify-content: center;
   vertical-align: middle;
+  height: 100%;
+  box-sizing: border-box;
 }

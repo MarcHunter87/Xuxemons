@@ -37,12 +37,13 @@
     <div class="friend-menu-wrap">
       <button
         type="button"
-        class="friend-remove-btn btn-sm btn-danger"
-        [attr.aria-label]="'Remove ' + friend.name"
-        title="Remove friend"
+        class="btn-danger friend-remove-btn"
+        [attr.aria-label]="'Unfriend ' + friend.name"
+        title="Unfriend"
         (click)="onRemove()"
       >
         <i class="bi bi-person-x-fill" aria-hidden="true"></i>
+        <span>Unfriend</span>
       </button>
     </div>
   </div>
@@ -50,7 +51,7 @@
   <div class="friend-card-actions">
     <button
       type="button"
-      class="btn-sm btn-primary friend-action-btn"
+      class="btn-primary friend-action-btn"
       [attr.aria-label]="'Challenge ' + friend.name"
     >
       <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
@@ -58,7 +59,7 @@
     </button>
     <button
       type="button"
-      class="btn-sm btn-secondary friend-action-btn"
+      class="btn-secondary friend-action-btn"
       [attr.aria-label]="'Chat with ' + friend.name"
     >
       <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>

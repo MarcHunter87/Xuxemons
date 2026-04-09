@@ -20,21 +20,21 @@
   <div class="request-actions">
     <button
       type="button"
-      class="btn-sm btn-primary request-btn"
+      class="btn-primary request-btn"
       (click)="accept.emit()"
       [attr.aria-label]="'Accept friend request from ' + request.sender_name"
     >
       <i class="bi bi-person-check-fill" aria-hidden="true"></i>
-      Accept
+      <span>Accept</span>
     </button>
     <button
       type="button"
-      class="btn-sm btn-danger request-btn"
+      class="btn-danger request-btn"
       (click)="reject.emit()"
       [attr.aria-label]="'Reject friend request from ' + request.sender_name"
     >
       <i class="bi bi-person-x-fill" aria-hidden="true"></i>
-      Reject
+      <span>Reject</span>
     </button>
   </div>
 </article>

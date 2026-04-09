@@ -81,17 +81,24 @@
   flex: 1 1 0;
   min-width: 0;
   gap: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 .request-btn:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
   filter: brightness(0.85);
 }
-.request-btn i {
-  font-size: 20px;
+.request-btn > i,
+.request-btn > svg {
   width: 20px;
   height: 20px;
-  display: inline-block;
+  font-size: 20px;
   line-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (max-width: 425px) {
