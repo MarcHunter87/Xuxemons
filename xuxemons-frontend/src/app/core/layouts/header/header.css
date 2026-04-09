@@ -211,7 +211,7 @@ nav {
   border-radius: 8px;
   font-size: 16px;
   font-weight: 700;
-  line-height: 22px;
+  line-height: normal;
   text-align: center;
   pointer-events: none;
 }
