@@ -25,6 +25,7 @@ export class App implements OnInit, OnDestroy {
   protected readonly pendingDailyRewards = signal<DailyRewardNotification | null>(null);
   protected readonly showFriendRequestModal = signal(false);
   protected readonly pendingFriendRequests = signal<FriendRequestItem[]>([]);
+  private dismissedFriendRequestIds: Record<string, boolean> = {};
   private sub: { unsubscribe: () => void } | null = null;
   private friendSub: { unsubscribe: () => void } | null = null;
   private isCheckingPendingDailyRewards = false;
@@ -44,7 +45,8 @@ export class App implements OnInit, OnDestroy {
 
     this.friendSub = this.friendsService.pendingRequests.subscribe(requests => {
       this.pendingFriendRequests.set(requests);
-      if (requests.length > 0 && !this.showFriendRequestModal()) {
+      const hasUndismissed = requests.some(r => !this.dismissedFriendRequestIds[String(r.id)]);
+      if (requests.length > 0 && hasUndismissed && !this.showFriendRequestModal()) {
         this.showFriendRequestModal.set(true);
       }
     });
@@ -112,12 +114,15 @@ export class App implements OnInit, OnDestroy {
   }
 
   onCloseFriendRequestModal(): void {
+    const pending = this.pendingFriendRequests();
+    pending.forEach(r => { this.dismissedFriendRequestIds[String(r.id)] = true; });
     this.showFriendRequestModal.set(false);
   }
 
   onAcceptFriendRequest(req: FriendRequestItem): void {
     this.friendsService.acceptRequest(req.id).subscribe({
       next: () => {
+        delete this.dismissedFriendRequestIds[String(req.id)];
         if (this.pendingFriendRequests().length === 0) {
           this.showFriendRequestModal.set(false);
         }
@@ -128,6 +133,7 @@ export class App implements OnInit, OnDestroy {
   onRejectFriendRequest(req: FriendRequestItem): void {
     this.friendsService.rejectRequest(req.id).subscribe({
       next: () => {
+        delete this.dismissedFriendRequestIds[String(req.id)];
         if (this.pendingFriendRequests().length === 0) {
           this.showFriendRequestModal.set(false);
         }
