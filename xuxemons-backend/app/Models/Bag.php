@@ -6,6 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * App\Models\Bag
+ *
+ * @property int $id
+ * @property int $user_id
+ * @property int $max_slots
+ */
 class Bag extends Model
 {
     const MAX_SLOTS = 20;

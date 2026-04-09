@@ -5,6 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * App\Models\AdquiredXuxemon
+ *
+ * @property mixed $id
+ * @property mixed $user_id
+ * @property mixed $xuxemon_id
+ * @property int $level
+ * @property int $experience
+ * @property int $size_id
+ * @property int $requirement_progress
+ * @property int $bonus_hp
+ * @property int $bonus_attack
+ * @property int $bonus_defense
+ * @property int $current_hp
+ * @property mixed|null $status_effect_id
+ * @property mixed|null $side_effect_id_1
+ * @property mixed|null $side_effect_id_2
+ * @property mixed|null $side_effect_id_3
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class AdquiredXuxemon extends Model
 {
     protected $casts = [

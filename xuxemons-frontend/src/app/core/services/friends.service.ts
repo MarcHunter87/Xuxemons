@@ -48,6 +48,10 @@ export class FriendsService {
         );
     }
 
+    cancelRequest(receiverId: string): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/friends/requests/cancel/${encodeURIComponent(receiverId)}`);
+    }
+
     acceptRequest(requestId: number): Observable<void> {
         return this.http.put<void>(`${this.apiUrl}/friends/requests/${requestId}/accept`, {}).pipe(
             tap(() => {

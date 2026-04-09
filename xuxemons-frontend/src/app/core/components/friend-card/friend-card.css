@@ -118,6 +118,37 @@
   align-self: flex-start;
 }
 
+.friend-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 10px;
+  font-size: 1rem;
+  line-height: 1;
+  box-sizing: border-box;
+  transition: transform 0.12s, filter 0.12s;
+}
+
+.friend-remove-btn i {
+  font-size: 1.15rem;
+  display: block;
+}
+
+.friend-remove-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(0.95);
+}
+
+.friend-remove-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.9);
+}
+
 .friend-menu-btn {
   background: none;
   border: none;
@@ -190,4 +221,40 @@
 .friend-action-btn {
   flex: 1;
   gap: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure icons inside friend cards are 20x20 and vertically centered */
+.friend-card i,
+.friend-card svg {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.friend-action-btn > i,
+.friend-action-btn > svg {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.friend-action-btn > span {
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
 }

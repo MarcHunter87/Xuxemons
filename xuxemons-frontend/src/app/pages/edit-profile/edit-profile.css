@@ -325,12 +325,15 @@
 }
 
 .btn-cancel {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	min-height: 0;
 	border: none;
 	border-radius: 10px;
 	padding: 0.625rem 1.5rem;
 	font-size: 16px;
-	font-weight: 600;
+	font-weight: 500;
 	font-family: 'Poppins', sans-serif;
 	background: var(--text-alt-color);
 	color: var(--white-color);

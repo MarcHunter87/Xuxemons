@@ -8,6 +8,7 @@ use App\Models\DailyRewardNotification;
 use App\Models\Item;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 class ProcessDailyXuxemons extends Command
 {
@@ -57,10 +58,10 @@ class ProcessDailyXuxemons extends Command
                 $this->info('All daily Gacha Tickets have been distributed');
             }
 
-            return Command::SUCCESS;
+            return SymfonyCommand::SUCCESS;
         } catch (\Exception $e) {
             $this->error('Error processing daily xuxemon rewards: ' . $e->getMessage());
-            return Command::FAILURE;
+            return SymfonyCommand::FAILURE;
         }
     }
 

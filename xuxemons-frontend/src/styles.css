@@ -163,7 +163,7 @@ textarea:focus-visible,
   min-height: 52px;
   border: none;
   border-radius: 10px;
-  font-weight: 800;
+  font-weight: 500;
   font-size: 18px;
   font-family: 'Poppins', sans-serif;
   cursor: pointer;
@@ -275,7 +275,22 @@ a.btn-sm {
   min-height: 0;
   padding: 0.625rem 1.25rem;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
+}
+
+button,
+a.btn,
+.btn,
+.btn-sm,
+.btn-pagination,
+.card-button,
+button.item-slot,
+button.btn-primary,
+button.btn-danger,
+button.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /*

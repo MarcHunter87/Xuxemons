@@ -10,6 +10,7 @@ use App\Models\Item;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 class ProcessDailyItems extends Command
 {
@@ -42,6 +43,7 @@ class ProcessDailyItems extends Command
                                 $receivedItems = [];
 
                                 for ($i = 0; $i < $attemptsPerPlayer; $i++) {
+                                    /** @var Item $randomItem */
                                     $randomItem = $itemPool->random();
 
                                     if ($this->tryAddOneItemToBag($bag, $randomItem)) {
@@ -70,10 +72,10 @@ class ProcessDailyItems extends Command
                 }
             }
 
-            return Command::SUCCESS;
+            return SymfonyCommand::SUCCESS;
         } catch (\Exception $e) {
             $this->error('Error processing daily item rewards: ' . $e->getMessage());
-            return Command::FAILURE;
+            return SymfonyCommand::FAILURE;
         }
     }
 

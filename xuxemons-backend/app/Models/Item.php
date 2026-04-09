@@ -4,6 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\Item
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $icon_path
+ * @property string $effect_type
+ * @property bool $is_stackable
+ * @property int|null $max_quantity
+ */
 class Item extends Model
 {
     protected $fillable = [

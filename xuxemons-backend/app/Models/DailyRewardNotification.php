@@ -5,6 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * App\Models\DailyRewardNotification
+ *
+ * @property mixed $id
+ * @property mixed $user_id
+ * @property \Illuminate\Support\Carbon|null $reward_date
+ * @property int $gacha_ticket_quantity
+ * @property array $items
+ * @property \Illuminate\Support\Carbon|null $shown_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class DailyRewardNotification extends Model
 {
     protected $fillable = [

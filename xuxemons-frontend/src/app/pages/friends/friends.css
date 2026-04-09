@@ -63,6 +63,26 @@
   font-size: 1rem;
 }
 
+/* Danger variant for errors on the Friends page */
+.error-state--danger {
+  background: var(--danger-bg-alpha);
+  border: 1px solid var(--danger-border-alpha);
+  color: var(--danger-color);
+  box-shadow: 0 2px 8px var(--danger-shadow-alpha);
+}
+
+.error-state--danger .error-message {
+  color: var(--danger-color);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-state--danger .error-message i {
+  color: var(--danger-color-2);
+  font-size: 1.15rem;
+}
+
 .success-message {
   font-weight: 600;
   margin: 0 0 var(--page-section-gap) 0;
@@ -110,7 +130,6 @@
   color: var(--white-color);
   font-size: 1.05rem;
   border: none;
-  border-radius: 8px;
   box-shadow: none;
 }
 
@@ -211,9 +230,11 @@
   justify-content: center;
   gap: 0.3rem;
   font-family: 'Poppins', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 500;
   padding: 0.625rem 1.25rem;
+  min-height: 52px;
+  box-sizing: border-box;
   border-radius: 8px;
   background: var(--accent-alpha-05);
   border: 1.5px solid var(--accent-color);
@@ -223,12 +244,17 @@
 }
 
 .search-result-badge--pending {
+  font-size: 18px;
+  font-weight: 500;
   background: var(--warning-alpha-10);
   border-color: var(--warning-color);
   color: var(--warning-dark);
 }
 
 .btn-send-request {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--accent-color);
   color: var(--white-color);
   border: none;
@@ -237,7 +263,7 @@
   min-height: 52px;
   font-family: 'Poppins', sans-serif;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
@@ -260,13 +286,45 @@
   transform: none;
 }
 
+.btn-cancel-request {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  min-height: 52px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-cancel-request:hover:not(:disabled) {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
+}
+
+.btn-cancel-request:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.85);
+}
+
+.search-result-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 @media (max-width: 600px) {
   .search-result-item {
     align-items: flex-start;
   }
 
   .search-result-badge,
-  .btn-send-request {
+  .btn-send-request,
+  .btn-cancel-request {
     flex: 1 0 100%;
     align-self: stretch;
     max-width: 100%;
@@ -275,7 +333,8 @@
   }
 
   .search-result-badge,
-  .btn-send-request {
+  .btn-send-request,
+  .btn-cancel-request {
     margin-top: 0.5rem;
   }
 }

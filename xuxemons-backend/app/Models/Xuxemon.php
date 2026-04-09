@@ -4,6 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\Xuxemon
+ *
+ * @property mixed $id
+ * @property string $name
+ * @property string|null $description
+ * @property mixed $type_id
+ * @property mixed|null $attack_1_id
+ * @property mixed|null $attack_2_id
+ * @property int|null $hp
+ * @property int|null $attack
+ * @property int|null $defense
+ * @property string|null $icon_path
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Xuxemon extends Model
 {
     protected $fillable = [

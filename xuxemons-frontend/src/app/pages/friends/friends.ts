@@ -63,10 +63,36 @@ export class Friends implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subs.add(
-      this.friendsService.friends.subscribe(f => this.friends.set(f)),
+      this.friendsService.friends.subscribe(f => {
+        this.friends.set(f);
+
+        // If a user became a friend, clear any request flags
+        if (this.searchResults().length > 0) {
+          const friendIds = f.map(ff => ff.id);
+          this.searchResults.set(
+            this.searchResults().map(u => friendIds.includes(u.id)
+              ? { ...u, request_received: false, request_sent: false }
+              : u
+            ),
+          );
+        }
+      }),
     );
     this.subs.add(
-      this.friendsService.pendingRequests.subscribe(r => this.pendingRequests.set(r)),
+      this.friendsService.pendingRequests.subscribe(r => {
+        this.pendingRequests.set(r);
+
+        // Update any displayed search results to reflect pending requests
+        if (this.searchResults().length > 0) {
+          const pendingSenderIds = r.map(pr => pr.sender_id);
+          this.searchResults.set(
+            this.searchResults().map(u => ({
+              ...u,
+              request_received: pendingSenderIds.includes(u.id),
+            })),
+          );
+        }
+      }),
     );
 
     // Clear results when query is too short
@@ -142,6 +168,21 @@ export class Friends implements OnInit, OnDestroy {
         const cur = this.sendingRequestTo().filter(id => id !== user.id);
         this.sendingRequestTo.set(cur);
         this.errorMessage.set(err?.error?.message ?? 'Failed to send request.');
+      },
+    });
+  }
+
+  cancelSentRequest(user: SearchUser): void {
+    this.errorMessage.set(null);
+    this.friendsService.cancelRequest(user.id).subscribe({
+      next: () => {
+        this.searchResults.set(
+          this.searchResults().map(u => u.id === user.id ? { ...u, request_sent: false } : u),
+        );
+        this.successMessage.set('Friend request cancelled.');
+      },
+      error: err => {
+        this.errorMessage.set(err?.error?.message ?? 'Failed to cancel request.');
       },
     });
   }

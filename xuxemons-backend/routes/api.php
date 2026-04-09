@@ -80,6 +80,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/friends/search', [FriendController::class, 'searchUsers']);
     Route::get('/friends/requests', [FriendController::class, 'getPendingRequests']);
     Route::post('/friends/requests', [FriendController::class, 'sendRequest']);
+    Route::delete('/friends/requests/cancel/{receiverId}', [FriendController::class, 'cancelRequest']);
     Route::put('/friends/requests/{id}/accept', [FriendController::class, 'acceptRequest']);
     Route::delete('/friends/requests/{id}', [FriendController::class, 'rejectRequest']);
     Route::get('/friends', [FriendController::class, 'getFriends']);

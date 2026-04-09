@@ -9,7 +9,7 @@
   <!-- ── Toast notifications ── -->
   <!-- ── Error / Success messages ── -->
   @if (errorMessage()) {
-    <div class="error-state">
+    <div class="error-state error-state--danger">
       <p class="error-message" role="alert" aria-live="polite">
         <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
         {{ errorMessage() }}
@@ -68,7 +68,17 @@
                   <span class="search-result-id">{{ user.id }}</span>
                 </div>
                 @if (user.request_sent) {
-                  <span class="search-result-badge" aria-label="Request sent">Request sent</span>
+                  <div class="search-result-actions">
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-cancel-request"
+                      [attr.aria-label]="'Cancel request to ' + user.name"
+                      (click)="cancelSentRequest(user)"
+                    >
+                      Cancel Request
+                    </button>
+                    <span class="search-result-badge" aria-label="Request sent">Request Sent</span>
+                  </div>
                 } @else if (user.request_received) {
                   <span class="search-result-badge search-result-badge--pending" aria-label="Pending">Pending</span>
                 } @else {

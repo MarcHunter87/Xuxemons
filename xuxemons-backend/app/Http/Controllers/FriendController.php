@@ -155,6 +155,26 @@ class FriendController extends Controller
         }
     }
 
+    public function cancelRequest(string $receiverId): JsonResponse
+    {
+        try {
+            /** @var User $currentUser */
+            $currentUser = Auth::guard('api')->user();
+
+            $deleted = FriendRequest::where('sender_id', $currentUser->id)
+                ->where('receiver_id', $receiverId)
+                ->delete();
+
+            if (! $deleted) {
+                return response()->json(['message' => 'Request not found.'], 404);
+            }
+
+            return response()->json(['message' => 'Friend request cancelled.']);
+        } catch (Throwable) {
+            return response()->json(['message' => 'Failed to cancel request.'], 500);
+        }
+    }
+
     public function rejectRequest(int $id): JsonResponse
     {
         try {

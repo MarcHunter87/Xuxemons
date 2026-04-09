@@ -4,6 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\Size
+ *
+ * @property mixed $id
+ * @property string $size
+ * @property int $requirement_progress
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Size extends Model
 {
     protected $table = 'sizes';

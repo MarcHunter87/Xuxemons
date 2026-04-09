@@ -46,10 +46,13 @@
 .not-found-home-link {
 	display: inline-block;
 	padding: 0.75rem 2rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	background: #4f8cff;
 	color: #fff;
 	border-radius: 2rem;
-	font-weight: 600;
+	font-weight: 500;
 	text-decoration: none;
 	font-size: 1.1rem;
 	transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
@@ -102,10 +105,13 @@
 .not-found-home-link {
 	display: inline-block;
 	padding: 0.75rem 2rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	background: #4f8cff;
 	color: #fff;
 	border-radius: 2rem;
-	font-weight: 600;
+	font-weight: 500;
 	text-decoration: none;
 	font-size: 1.1rem;
 	transition: background 0.2s;

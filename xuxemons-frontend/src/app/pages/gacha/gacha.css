@@ -83,7 +83,7 @@ button.btn-primary.spin-button {
     max-width: 320px;
     padding: 0.75rem 1.25rem;
     font-size: 20px !important;
-    font-weight: 800 !important;
+    font-weight: 500 !important;
     border-radius: 12px;
     min-height: 52px;
     margin: 0 auto var(--page-section-gap);
@@ -532,7 +532,7 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
     flex: 1;
     padding: 0.75rem 1.25rem;
     border-radius: 12px;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .modal-actions .btn-primary:disabled {
@@ -1126,7 +1126,7 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
     flex: 1;
     padding: 0.75rem 1.25rem;
     border-radius: 12px;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .reveal-actions .btn-primary:disabled {

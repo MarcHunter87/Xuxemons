@@ -86,7 +86,7 @@
     background: color-mix(in srgb, var(--accent-glow) 55%, var(--white-color));
     color: var(--text-alt-color);
     font: inherit;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
   }
