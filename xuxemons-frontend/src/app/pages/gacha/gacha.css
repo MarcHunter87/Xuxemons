@@ -486,7 +486,7 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
 }
 
 .winner-stats .stat-attack {
-    background: var(--type-color, var(--potion-dmg));
+    background: var(--potion-dmg);
     color: var(--white-color);
 }
 
