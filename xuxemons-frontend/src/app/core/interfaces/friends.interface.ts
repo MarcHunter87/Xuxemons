@@ -3,7 +3,7 @@ export interface FriendUser {
   name: string;
   level?: number;
   icon_path?: string | null;
-  status?: 'online' | 'away' | 'offline';
+  status?: 'online' | 'offline';
   last_seen?: string | null;
 }
 
@@ -23,4 +23,5 @@ export interface SearchUser {
   icon_path?: string | null;
   request_sent?: boolean;
   request_received?: boolean;
+  is_friend?: boolean;
 }

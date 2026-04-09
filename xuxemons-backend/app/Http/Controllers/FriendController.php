@@ -36,16 +36,16 @@ class FriendController extends Controller
             $users = User::where('id', 'like', '%' . $query . '%')
                 ->where('id', '!=', $currentUser->id)
                 ->where('is_active', true)
-                ->whereNotIn('id', $friendIds)
                 ->select(['id', 'name', 'level', 'icon_path'])
                 ->limit(20)
                 ->get()
-                ->map(function (User $user) use ($pendingSentIds, $pendingReceivedIds) {
+                ->map(function (User $user) use ($friendIds, $pendingSentIds, $pendingReceivedIds) {
                     return [
                         'id'               => $user->id,
                         'name'             => $user->name,
                         'level'            => $user->level,
                         'icon_path'        => $user->icon_path,
+                        'is_friend'        => $friendIds->contains($user->id),
                         'request_sent'     => $pendingSentIds->contains($user->id),
                         'request_received' => $pendingReceivedIds->contains($user->id),
                     ];
@@ -207,21 +207,7 @@ class FriendController extends Controller
                 ->map(function ($f) {
                     $user = $f->friendUser;
                     $lastSeen = $user->last_seen_at ? Carbon::parse($user->last_seen_at) : null;
-                    $status = 'offline';
-                    $lastSeenDisplay = null;
-
-                    if ($lastSeen) {
-                        $diffMinutes = $lastSeen->diffInMinutes(now());
-                        if ($diffMinutes <= 5) {
-                            $status = 'online';
-                        } elseif ($diffMinutes <= 60) {
-                            $status = 'away';
-                            $lastSeenDisplay = $lastSeen->diffForHumans();
-                        } else {
-                            $status = 'offline';
-                            $lastSeenDisplay = $lastSeen->diffForHumans();
-                        }
-                    }
+                    $status = ($lastSeen && $lastSeen->diffInMinutes(now()) <= 1) ? 'online' : 'offline';
 
                     return [
                         'id'        => $user->id,
@@ -229,7 +215,7 @@ class FriendController extends Controller
                         'level'     => $user->level,
                         'icon_path' => $user->icon_path,
                         'status'    => $status,
-                        'last_seen' => $lastSeenDisplay,
+                        'last_seen' => null,
                     ];
                 });
 

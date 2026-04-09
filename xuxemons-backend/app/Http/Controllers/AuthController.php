@@ -104,6 +104,14 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        /** @var User|null $user */
+        $user = Auth::guard('api')->user();
+        if ($user instanceof User) {
+            $user->timestamps = false;
+            $user->last_seen_at = null;
+            $user->save();
+        }
+
         Auth::guard('api')->logout();
 
         return response()->json([

@@ -1,6 +1,7 @@
-import { Component, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, interval, Subscription } from 'rxjs';
 import { Header } from './core/layouts/header/header';
 import { Footer } from './core/layouts/footer/footer';
 import { Breadcrumb } from './core/components/breadcrumb/breadcrumb';
@@ -28,7 +29,9 @@ export class App implements OnInit, OnDestroy {
   private dismissedFriendRequestIds: Record<string, boolean> = {};
   private sub: { unsubscribe: () => void } | null = null;
   private friendSub: { unsubscribe: () => void } | null = null;
+  private periodicSyncSub: Subscription | null = null;
   private isCheckingPendingDailyRewards = false;
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   constructor(private router: Router, private authService: AuthService, private friendsService: FriendsService) { }
 
@@ -51,6 +54,16 @@ export class App implements OnInit, OnDestroy {
       }
     });
 
+    if (this.isBrowser) {
+      this.periodicSyncSub = interval(15_000).subscribe(() => {
+        if (this.authService.getUser()) {
+          this.friendsService.loadFriends();
+          this.friendsService.loadPendingRequests();
+          this.checkPendingDailyRewards();
+        }
+      });
+    }
+
     this.sub = this.router.events.pipe(
       filter(e => e.constructor.name === 'NavigationEnd')
     ).subscribe(() => {
@@ -72,6 +85,7 @@ export class App implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
     this.friendSub?.unsubscribe();
+    this.periodicSyncSub?.unsubscribe();
   }
 
   onCloseDailyRewardsModal(): void {

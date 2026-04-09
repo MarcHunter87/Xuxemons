@@ -15,7 +15,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/xuxemons', [XuxemonController::class, 'index']);
 Route::get('/items', [InventoryController::class, 'getAllItems']);
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'update.last.seen'])->group(function () {
     // Rutas de Admin
     Route::get('/users', [AdminController::class, 'getAllUsers']);
     Route::get('/users/{userId}/bag-status', [AdminController::class, 'checkBagStatus']);

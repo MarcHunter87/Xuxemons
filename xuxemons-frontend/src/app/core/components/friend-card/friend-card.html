@@ -15,8 +15,7 @@
       <span
         class="status-dot"
         [class.status-dot--online]="friend.status === 'online'"
-        [class.status-dot--away]="friend.status === 'away'"
-        [class.status-dot--offline]="friend.status === 'offline' || !friend.status"
+        [class.status-dot--offline]="friend.status !== 'online'"
         aria-hidden="true"
       ></span>
     </div>
@@ -30,7 +29,6 @@
       <span
         class="friend-status-text"
         [class.friend-status-text--online]="friend.status === 'online'"
-        [class.friend-status-text--away]="friend.status === 'away'"
       >{{ getStatusText() }}</span>
     </div>
 

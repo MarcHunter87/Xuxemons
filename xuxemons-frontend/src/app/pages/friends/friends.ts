@@ -66,13 +66,13 @@ export class Friends implements OnInit, OnDestroy {
       this.friendsService.friends.subscribe(f => {
         this.friends.set(f);
 
-        // If a user became a friend, clear any request flags
+        // If a user became a friend, mark as friend and clear request flags
         if (this.searchResults().length > 0) {
           const friendIds = f.map(ff => ff.id);
           this.searchResults.set(
             this.searchResults().map(u => friendIds.includes(u.id)
-              ? { ...u, request_received: false, request_sent: false }
-              : u
+              ? { ...u, is_friend: true, request_received: false, request_sent: false }
+              : { ...u, is_friend: false },
             ),
           );
         }
@@ -141,6 +141,17 @@ export class Friends implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
+  private reloadAll(): void {
+    this.friendsService.loadFriends();
+    this.friendsService.loadPendingRequests();
+    const q = this.searchControl.value ?? '';
+    if (q.length >= 3) {
+      this.friendsService.searchUsers(q).subscribe({
+        next: results => this.searchResults.set(results),
+      });
+    }
+  }
+
   sendRequest(user: SearchUser): void {
     const current = [...this.sendingRequestTo()];
     if (!current.includes(user.id)) current.push(user.id);
@@ -164,10 +175,10 @@ export class Friends implements OnInit, OnDestroy {
           this.successMessage.set('Friend request sent!');
         }
       },
-      error: err => {
+      error: () => {
         const cur = this.sendingRequestTo().filter(id => id !== user.id);
         this.sendingRequestTo.set(cur);
-        this.errorMessage.set(err?.error?.message ?? 'Failed to send request.');
+        this.reloadAll();
       },
     });
   }
@@ -181,9 +192,7 @@ export class Friends implements OnInit, OnDestroy {
         );
         this.successMessage.set('Friend request cancelled.');
       },
-      error: err => {
-        this.errorMessage.set(err?.error?.message ?? 'Failed to cancel request.');
-      },
+      error: () => this.reloadAll(),
     });
   }
 
@@ -191,14 +200,14 @@ export class Friends implements OnInit, OnDestroy {
     this.errorMessage.set(null);
     this.friendsService.acceptRequest(request.id).subscribe({
       next: () => this.successMessage.set('Friend added!'),
-      error: (err) => this.errorMessage.set(err?.error?.message ?? 'Failed to accept request.'),
+      error: () => this.reloadAll(),
     });
   }
 
   rejectRequest(request: FriendRequestItem): void {
     this.errorMessage.set(null);
     this.friendsService.rejectRequest(request.id).subscribe({
-      error: (err) => this.errorMessage.set(err?.error?.message ?? 'Failed to reject request.'),
+      error: () => this.reloadAll(),
     });
   }
 
@@ -222,7 +231,7 @@ export class Friends implements OnInit, OnDestroy {
     this.errorMessage.set(null);
     this.friendsService.removeFriend(friend.id).subscribe({
       next: () => this.successMessage.set(`${friend.name} removed from your friends.`),
-      error: (err) => this.errorMessage.set(err?.error?.message ?? 'Failed to remove friend.'),
+      error: () => this.reloadAll(),
     });
   }
 
@@ -235,6 +244,10 @@ export class Friends implements OnInit, OnDestroy {
 
   isSendingTo(userId: string): boolean {
     return this.sendingRequestTo().includes(userId);
+  }
+
+  getFriendById(userId: string): FriendUser | undefined {
+    return this.friends().find(f => f.id === userId);
   }
 
   getIconUrl(iconPath: string | null | undefined): string {

@@ -29,10 +29,7 @@ export class FriendCard {
   }
 
   getStatusText(): string {
-    if (this.friend.status === 'online') return 'Online';
-    if (this.friend.status === 'away') return `Away · ${this.friend.last_seen ?? ''}`;
-    if (this.friend.last_seen) return `Offline · ${this.friend.last_seen}`;
-    return 'Offline';
+    return this.friend.status === 'online' ? 'Online' : 'Offline';
   }
 
   toggleMenu(event: Event): void {

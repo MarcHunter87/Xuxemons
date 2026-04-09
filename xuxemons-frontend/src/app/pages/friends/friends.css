@@ -299,6 +299,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
 }
 
 .btn-cancel-request:hover:not(:disabled) {
@@ -309,6 +310,17 @@
 .btn-cancel-request:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
   filter: brightness(0.85);
+}
+
+.btn-cancel-request i,
+.btn-cancel-request svg {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .search-result-actions {

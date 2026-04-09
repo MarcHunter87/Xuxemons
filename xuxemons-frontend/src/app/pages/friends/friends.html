@@ -67,7 +67,19 @@
                   <span class="search-result-name">{{ user.name }}</span>
                   <span class="search-result-id">{{ user.id }}</span>
                 </div>
-                @if (user.request_sent) {
+                @if (user.is_friend) {
+                  <div class="search-result-actions">
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-cancel-request"
+                      [attr.aria-label]="'Unfriend ' + user.name"
+                      (click)="askConfirmRemove(getFriendById(user.id)!)"
+                    >
+                      <i class="bi bi-person-x-fill" aria-hidden="true"></i> Unfriend
+                    </button>
+                    <span class="search-result-badge" aria-label="Following">Following</span>
+                  </div>
+                } @else if (user.request_sent) {
                   <div class="search-result-actions">
                     <button
                       type="button"
