@@ -204,6 +204,11 @@ export class EditProfile {
     });
   }
 
+  onViewAnimationsToggle(): void {
+    if (this.isSavingSettings()) return;
+    this.updateSettings();
+  }
+
   updatePassword(): void {
     this.passwordError.set('');
     this.passwordSuccess.set('');

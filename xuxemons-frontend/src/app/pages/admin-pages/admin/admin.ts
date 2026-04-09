@@ -25,7 +25,7 @@ export interface AwardedXuxemonDisplay {
 })
 export class Admin implements OnInit, AfterViewChecked {
   private readonly adminService = inject(AdminService);
-  private readonly auth = inject(AuthService);
+  public readonly auth = inject(AuthService);
 
   readonly users = signal<AdminUser[]>([]);
   readonly bagStatusMap = signal<Record<string, BagStatus>>({});
@@ -41,6 +41,7 @@ export class Admin implements OnInit, AfterViewChecked {
 
   @ViewChild('awardModalRoot') awardModalRoot?: ElementRef<HTMLElement>;
   @ViewChild('awardCloseButton') awardCloseButton?: ElementRef<HTMLButtonElement>;
+  @ViewChild('modalAudio') modalAudio?: ElementRef<HTMLAudioElement>;
 
   readonly hasContent = computed(() => !this.isLoading() && !this.errorMessage());
 
@@ -125,6 +126,7 @@ export class Admin implements OnInit, AfterViewChecked {
           defense: raw?.defense ?? 0,
         });
         this.showAwardModal.set(true);
+        this.playModalRevealAudio();
         this.shouldFocusAwardCloseButton = true;
       },
       error: (err) => {
@@ -160,11 +162,23 @@ export class Admin implements OnInit, AfterViewChecked {
   }
 
   closeAwardModal(): void {
+    const sfx = this.modalAudio?.nativeElement;
+    if (sfx) { sfx.pause(); sfx.currentTime = 0; }
+
     this.showAwardModal.set(false);
     this.awardedXuxemon.set(null);
     this.awardError.set(null);
     if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
       setTimeout(() => this.previousFocusedElement?.focus(), 0);
+    }
+  }
+
+  private playModalRevealAudio(): void {
+    const sfx = this.modalAudio?.nativeElement;
+    if (sfx) {
+      sfx.volume = 0.9;
+      sfx.currentTime = 0;
+      sfx.play().catch(e => console.warn('Modal audio playback prevented', e));
     }
   }
 

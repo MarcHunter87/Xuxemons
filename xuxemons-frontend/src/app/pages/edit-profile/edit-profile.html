@@ -191,7 +191,7 @@
 						<p>Enable or disable the animation sequence when a Xuxemon evolves.</p>
 					</div>
 					<label class="switch">
-						<input type="checkbox" formControlName="view_animations">
+						<input type="checkbox" formControlName="view_animations" (change)="onViewAnimationsToggle()" [disabled]="isSavingSettings()">
 						<span class="slider"></span>
 					</label>
 				</div>
@@ -202,18 +202,6 @@
 				@if (settingsSuccess()) {
 					<p class="form-message form-message-success" role="status" aria-live="polite">{{ settingsSuccess() }}</p>
 				}
-
-				<hr class="section-divider">
-
-				<div class="actions-row">
-					<button type="submit" class="btn-primary btn-sm" [disabled]="isSavingSettings()" [attr.aria-busy]="isSavingSettings()">
-						@if (isSavingSettings()) {
-							<span class="btn-loading-icon" aria-hidden="true"></span>
-						} @else {
-							Save settings
-						}
-					</button>
-				</div>
 			</form>
 		</section>
 

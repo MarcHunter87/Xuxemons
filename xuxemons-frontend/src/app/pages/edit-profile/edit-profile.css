@@ -15,6 +15,7 @@
 	max-width: var(--layout-max-width);
 	margin: 0 auto;
 	padding-bottom: var(--page-section-gap);
+	font-size: 16px;
 	box-sizing: border-box;
 }
 
@@ -400,7 +401,7 @@
 
 .settings-info p {
 	margin: 0.25rem 0 0;
-	font-size: 14px;
+	font-size: 16px;
 	color: var(--text-alt-color);
 }
 

@@ -1,3 +1,5 @@
+<audio #modalAudio [src]="auth.getAssetUrl('Xuxemon Modal.mp3')" preload="auto"></audio>
+
 <section class="page-hero" aria-labelledby="admin-title">
   <h1 id="admin-title">
     <span class="page-hero-title-black">Admin Panel</span>
@@ -146,7 +148,7 @@
   </div>
 }
 
-@if (showAwardModal() && awardedXuxemon()) {
+  @if (showAwardModal() && awardedXuxemon()) {
   <div class="award-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="award-modal-title" (keydown)="onModalKeydown($event)" (click)="closeAwardModal()">
     <div #awardModalRoot class="award-modal-content animate-pop" tabindex="-1" (click)="$event.stopPropagation()">
       <h2 id="award-modal-title" class="award-modal-title">Xuxemon awarded</h2>

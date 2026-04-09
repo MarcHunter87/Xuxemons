@@ -203,7 +203,6 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
             sfx.currentTime = 0;
             sfx.play().catch(e => console.warn('Modal audio playback prevented', e));
         }
-        clearTimeout(this.modalAudioRestoreTimeout);
         this.modalAudioRestoreTimeout = setTimeout(() => {
             if (bgm) bgm.volume = 0.4;
         }, 2800);

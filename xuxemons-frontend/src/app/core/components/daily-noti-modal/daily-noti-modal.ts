@@ -17,6 +17,7 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
 
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
   @ViewChild('confirmButton') confirmButton?: ElementRef<HTMLButtonElement>;
+  @ViewChild('modalAudio') modalAudio?: ElementRef<HTMLAudioElement>;
 
   private previousFocusedElement: HTMLElement | null = null;
   private shouldFocusPrimaryAction = false;
@@ -31,6 +32,7 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
         : null;
       this.shouldFocusRoot = true;
       this.shouldFocusPrimaryAction = true;
+      this.playModalRevealAudio();
     }
   }
 
@@ -106,10 +108,22 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
   }
 
   handleClose(): void {
+    const sfx = this.modalAudio?.nativeElement;
+    if (sfx) { sfx.pause(); sfx.currentTime = 0; }
+
     this.closeModal.emit();
 
     if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
       setTimeout(() => this.previousFocusedElement?.focus(), 0);
+    }
+  }
+
+  private playModalRevealAudio(): void {
+    const sfx = this.modalAudio?.nativeElement;
+    if (sfx) {
+      sfx.volume = 0.9;
+      sfx.currentTime = 0;
+      sfx.play().catch(e => console.warn('Daily modal audio playback prevented', e));
     }
   }
 
