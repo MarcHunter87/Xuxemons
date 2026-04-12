@@ -74,7 +74,7 @@ export class Friends implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subs.add(
       this.friendsService.friends.subscribe(f => {
-        const previousIds = new Set(this.friends().map(friend => friend.id));
+        const previousIds = this.friends().map(friend => friend.id);
         this.friends.set(f);
         this.animateFriendEntries(previousIds, f);
 
@@ -92,7 +92,7 @@ export class Friends implements OnInit, OnDestroy {
     );
     this.subs.add(
       this.friendsService.pendingRequests.subscribe(r => {
-        const previousIds = new Set(this.pendingRequests().map(request => request.id));
+        const previousIds = this.pendingRequests().map(request => request.id);
         this.pendingRequests.set(r);
         this.animateRequestEntries(previousIds, r);
 
@@ -166,47 +166,53 @@ export class Friends implements OnInit, OnDestroy {
 
   private addFriendIds(target: ReturnType<typeof signal<string[]>>, ids: string[]): void {
     if (ids.length === 0) return;
-    target.set(Array.from(new Set([...target(), ...ids])));
+    const merged = [...target()];
+    ids.forEach(id => {
+      if (!merged.includes(id)) merged.push(id);
+    });
+    target.set(merged);
   }
 
   private removeFriendIds(target: ReturnType<typeof signal<string[]>>, ids: string[]): void {
     if (ids.length === 0) return;
-    const idsSet = new Set(ids);
-    target.set(target().filter(id => !idsSet.has(id)));
+    target.set(target().filter(id => !ids.includes(id)));
   }
 
   private addRequestIds(target: ReturnType<typeof signal<number[]>>, ids: number[]): void {
     if (ids.length === 0) return;
-    target.set(Array.from(new Set([...target(), ...ids])));
+    const merged = [...target()];
+    ids.forEach(id => {
+      if (!merged.includes(id)) merged.push(id);
+    });
+    target.set(merged);
   }
 
   private removeRequestIds(target: ReturnType<typeof signal<number[]>>, ids: number[]): void {
     if (ids.length === 0) return;
-    const idsSet = new Set(ids);
-    target.set(target().filter(id => !idsSet.has(id)));
+    target.set(target().filter(id => !ids.includes(id)));
   }
 
-  private animateFriendEntries(previousIds: Set<string>, nextFriends: FriendUser[]): void {
+  private animateFriendEntries(previousIds: string[], nextFriends: FriendUser[]): void {
     const shouldAnimateEntries = this.friendsInitialized && this.animationsEnabled;
     this.friendsInitialized = true;
     if (!shouldAnimateEntries) return;
 
     const enteringIds = nextFriends
       .map(friend => friend.id)
-      .filter(id => !previousIds.has(id));
+      .filter(id => !previousIds.includes(id));
 
     this.addFriendIds(this.enteringFriendIds, enteringIds);
     this.scheduleTimeout(() => this.removeFriendIds(this.enteringFriendIds, enteringIds), this.cardAnimationMs);
   }
 
-  private animateRequestEntries(previousIds: Set<number>, nextRequests: FriendRequestItem[]): void {
+  private animateRequestEntries(previousIds: number[], nextRequests: FriendRequestItem[]): void {
     const shouldAnimateEntries = this.pendingRequestsInitialized && this.animationsEnabled;
     this.pendingRequestsInitialized = true;
     if (!shouldAnimateEntries) return;
 
     const enteringIds = nextRequests
       .map(request => request.id)
-      .filter(id => !previousIds.has(id));
+      .filter(id => !previousIds.includes(id));
 
     this.addRequestIds(this.enteringRequestIds, enteringIds);
     this.scheduleTimeout(() => this.removeRequestIds(this.enteringRequestIds, enteringIds), this.cardAnimationMs);
