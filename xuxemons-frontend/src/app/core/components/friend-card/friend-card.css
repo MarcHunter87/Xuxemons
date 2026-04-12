@@ -213,8 +213,8 @@
 .friend-card-actions {
   display: flex;
   gap: 0.5rem;
-  border-top: 1.5px solid var(--surface-light);
-  padding-top: 0.85rem;
+  border-top: 1.5px solid var(--light-gray-color);
+  padding-top: 16px;
 }
 
 .friend-action-btn {

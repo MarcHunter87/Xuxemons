@@ -158,6 +158,24 @@
   margin-top: 0.75rem;
 }
 
+.list-card--animated {
+  transform-origin: center;
+  will-change: transform;
+}
+
+.list-card--entering {
+  animation: friendCardScaleIn 0.26s ease-out both;
+}
+
+.list-card--exiting {
+  animation: friendCardScaleOut 0.26s ease-in both;
+  pointer-events: none;
+}
+
+.list-card--busy {
+  pointer-events: none;
+}
+
 .search-hint {
   font-size: 1rem;
   margin: 0;
@@ -171,6 +189,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.requests-list-item {
+  list-style: none;
 }
 
 .search-result-item {
@@ -323,6 +345,28 @@
   justify-content: center;
 }
 
+/* ── Friend / request card animation ── */
+
+@keyframes friendCardScaleIn {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes friendCardScaleOut {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(0);
+  }
+}
+
 .search-result-actions {
   display: flex;
   align-items: center;
@@ -418,15 +462,6 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
-}
-
-.friends-grid--animated .friends-grid-item {
-  animation: friendFadeIn 0.25s ease both;
-}
-
-@keyframes friendFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 599px) {

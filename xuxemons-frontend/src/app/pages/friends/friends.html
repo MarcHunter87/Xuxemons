@@ -133,7 +133,13 @@
           aria-label="Friends list"
         >
           @for (friend of friends(); track friend.id) {
-            <li class="friends-grid-item">
+            <li
+              class="friends-grid-item"
+              [class.list-card--animated]="animationsEnabled"
+              [class.list-card--entering]="isFriendEntering(friend.id)"
+              [class.list-card--exiting]="isFriendExiting(friend.id)"
+              [class.list-card--busy]="isFriendBusy(friend.id)"
+            >
               <app-friend-card
                 [friend]="friend"
                 (remove)="askConfirmRemove(friend)"
@@ -163,7 +169,14 @@
         } @else {
           <ul class="requests-list" role="list" aria-label="Pending friend requests">
             @for (request of pendingRequests(); track request.id) {
-              <li>
+              <li
+                class="requests-list-item"
+                [class.list-card--animated]="animationsEnabled"
+                [class.list-card--entering]="isRequestEntering(request.id)"
+                [class.list-card--exiting]="isRequestExiting(request.id)"
+                [class.list-card--busy]="isRequestBusy(request.id)"
+                [attr.aria-busy]="isRequestBusy(request.id)"
+              >
                 <app-friend-request-card
                   [request]="request"
                   (accept)="acceptRequest(request)"

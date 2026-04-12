@@ -25,9 +25,13 @@ import type { FriendUser, FriendRequestItem, SearchUser } from '../../core/inter
   styleUrl: './friends.css',
 })
 export class Friends implements OnInit, OnDestroy {
+  private readonly cardAnimationMs = 180;
   private auth = inject(AuthService);
   private friendsService = inject(FriendsService);
   private subs = new Subscription();
+  private timeoutIds: ReturnType<typeof setTimeout>[] = [];
+  private friendsInitialized = false;
+  private pendingRequestsInitialized = false;
 
   searchControl = new FormControl('');
 
@@ -40,6 +44,12 @@ export class Friends implements OnInit, OnDestroy {
   confirmRemoveFriend = signal<FriendUser | null>(null);
   sendingRequestTo = signal<string[]>([]);
   searchIconErrors = signal<string[]>([]);
+  enteringFriendIds = signal<string[]>([]);
+  exitingFriendIds = signal<string[]>([]);
+  enteringRequestIds = signal<number[]>([]);
+  exitingRequestIds = signal<number[]>([]);
+  busyRequestIds = signal<number[]>([]);
+  busyFriendIds = signal<string[]>([]);
 
   @ViewChild('confirmDialog') confirmDialog?: ElementRef<HTMLElement>;
   @ViewChild('confirmPrimary') confirmPrimary?: ElementRef<HTMLButtonElement>;
@@ -64,7 +74,9 @@ export class Friends implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subs.add(
       this.friendsService.friends.subscribe(f => {
+        const previousIds = new Set(this.friends().map(friend => friend.id));
         this.friends.set(f);
+        this.animateFriendEntries(previousIds, f);
 
         // If a user became a friend, mark as friend and clear request flags
         if (this.searchResults().length > 0) {
@@ -80,7 +92,9 @@ export class Friends implements OnInit, OnDestroy {
     );
     this.subs.add(
       this.friendsService.pendingRequests.subscribe(r => {
+        const previousIds = new Set(this.pendingRequests().map(request => request.id));
         this.pendingRequests.set(r);
+        this.animateRequestEntries(previousIds, r);
 
         // Update any displayed search results to reflect pending requests
         if (this.searchResults().length > 0) {
@@ -139,6 +153,127 @@ export class Friends implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
+    this.timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
+  }
+
+  private scheduleTimeout(callback: () => void, delay: number): void {
+    const timeoutId = setTimeout(() => {
+      this.timeoutIds = this.timeoutIds.filter(id => id !== timeoutId);
+      callback();
+    }, delay);
+    this.timeoutIds.push(timeoutId);
+  }
+
+  private addFriendIds(target: ReturnType<typeof signal<string[]>>, ids: string[]): void {
+    if (ids.length === 0) return;
+    target.set(Array.from(new Set([...target(), ...ids])));
+  }
+
+  private removeFriendIds(target: ReturnType<typeof signal<string[]>>, ids: string[]): void {
+    if (ids.length === 0) return;
+    const idsSet = new Set(ids);
+    target.set(target().filter(id => !idsSet.has(id)));
+  }
+
+  private addRequestIds(target: ReturnType<typeof signal<number[]>>, ids: number[]): void {
+    if (ids.length === 0) return;
+    target.set(Array.from(new Set([...target(), ...ids])));
+  }
+
+  private removeRequestIds(target: ReturnType<typeof signal<number[]>>, ids: number[]): void {
+    if (ids.length === 0) return;
+    const idsSet = new Set(ids);
+    target.set(target().filter(id => !idsSet.has(id)));
+  }
+
+  private animateFriendEntries(previousIds: Set<string>, nextFriends: FriendUser[]): void {
+    const shouldAnimateEntries = this.friendsInitialized && this.animationsEnabled;
+    this.friendsInitialized = true;
+    if (!shouldAnimateEntries) return;
+
+    const enteringIds = nextFriends
+      .map(friend => friend.id)
+      .filter(id => !previousIds.has(id));
+
+    this.addFriendIds(this.enteringFriendIds, enteringIds);
+    this.scheduleTimeout(() => this.removeFriendIds(this.enteringFriendIds, enteringIds), this.cardAnimationMs);
+  }
+
+  private animateRequestEntries(previousIds: Set<number>, nextRequests: FriendRequestItem[]): void {
+    const shouldAnimateEntries = this.pendingRequestsInitialized && this.animationsEnabled;
+    this.pendingRequestsInitialized = true;
+    if (!shouldAnimateEntries) return;
+
+    const enteringIds = nextRequests
+      .map(request => request.id)
+      .filter(id => !previousIds.has(id));
+
+    this.addRequestIds(this.enteringRequestIds, enteringIds);
+    this.scheduleTimeout(() => this.removeRequestIds(this.enteringRequestIds, enteringIds), this.cardAnimationMs);
+  }
+
+  private removeVisibleRequest(requestId: number): void {
+    this.pendingRequests.set(this.pendingRequests().filter(request => request.id !== requestId));
+  }
+
+  private removeVisibleFriend(friendId: string): void {
+    this.friends.set(this.friends().filter(friend => friend.id !== friendId));
+  }
+
+  private animateRequestRemoval(requestId: number, callback: () => void): void {
+    this.addRequestIds(this.busyRequestIds, [requestId]);
+    if (!this.animationsEnabled) {
+      this.removeVisibleRequest(requestId);
+      callback();
+      return;
+    }
+
+    this.addRequestIds(this.exitingRequestIds, [requestId]);
+    this.scheduleTimeout(() => {
+      this.removeRequestIds(this.exitingRequestIds, [requestId]);
+      this.removeVisibleRequest(requestId);
+      callback();
+    }, this.cardAnimationMs);
+  }
+
+  private animateFriendRemoval(friendId: string, callback: () => void): void {
+    this.addFriendIds(this.busyFriendIds, [friendId]);
+    if (!this.animationsEnabled) {
+      this.removeVisibleFriend(friendId);
+      callback();
+      return;
+    }
+
+    this.addFriendIds(this.exitingFriendIds, [friendId]);
+    this.scheduleTimeout(() => {
+      this.removeFriendIds(this.exitingFriendIds, [friendId]);
+      this.removeVisibleFriend(friendId);
+      callback();
+    }, this.cardAnimationMs);
+  }
+
+  isFriendEntering(friendId: string): boolean {
+    return this.enteringFriendIds().includes(friendId);
+  }
+
+  isFriendExiting(friendId: string): boolean {
+    return this.exitingFriendIds().includes(friendId);
+  }
+
+  isRequestEntering(requestId: number): boolean {
+    return this.enteringRequestIds().includes(requestId);
+  }
+
+  isRequestExiting(requestId: number): boolean {
+    return this.exitingRequestIds().includes(requestId);
+  }
+
+  isRequestBusy(requestId: number): boolean {
+    return this.busyRequestIds().includes(requestId);
+  }
+
+  isFriendBusy(friendId: string): boolean {
+    return this.busyFriendIds().includes(friendId);
   }
 
   private reloadAll(): void {
@@ -197,17 +332,33 @@ export class Friends implements OnInit, OnDestroy {
   }
 
   acceptRequest(request: FriendRequestItem): void {
+    if (this.isRequestBusy(request.id)) return;
     this.errorMessage.set(null);
-    this.friendsService.acceptRequest(request.id).subscribe({
-      next: () => this.successMessage.set('Friend added!'),
-      error: () => this.reloadAll(),
+    this.animateRequestRemoval(request.id, () => {
+      this.friendsService.acceptRequest(request.id).subscribe({
+        next: () => {
+          this.removeRequestIds(this.busyRequestIds, [request.id]);
+          this.successMessage.set('Friend added!');
+        },
+        error: () => {
+          this.removeRequestIds(this.busyRequestIds, [request.id]);
+          this.reloadAll();
+        },
+      });
     });
   }
 
   rejectRequest(request: FriendRequestItem): void {
+    if (this.isRequestBusy(request.id)) return;
     this.errorMessage.set(null);
-    this.friendsService.rejectRequest(request.id).subscribe({
-      error: () => this.reloadAll(),
+    this.animateRequestRemoval(request.id, () => {
+      this.friendsService.rejectRequest(request.id).subscribe({
+        next: () => this.removeRequestIds(this.busyRequestIds, [request.id]),
+        error: () => {
+          this.removeRequestIds(this.busyRequestIds, [request.id]);
+          this.reloadAll();
+        },
+      });
     });
   }
 
@@ -229,9 +380,16 @@ export class Friends implements OnInit, OnDestroy {
     }
 
     this.errorMessage.set(null);
-    this.friendsService.removeFriend(friend.id).subscribe({
-      next: () => this.successMessage.set(`${friend.name} removed from your friends.`),
-      error: () => this.reloadAll(),
+    this.animateFriendRemoval(friend.id, () => {
+      this.friendsService.removeFriend(friend.id).subscribe({
+        next: () => {
+          this.removeFriendIds(this.busyFriendIds, [friend.id]);
+        },
+        error: () => {
+          this.removeFriendIds(this.busyFriendIds, [friend.id]);
+          this.reloadAll();
+        },
+      });
     });
   }
 

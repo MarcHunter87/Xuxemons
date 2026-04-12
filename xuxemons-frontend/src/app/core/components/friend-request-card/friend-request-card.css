@@ -75,6 +75,8 @@
   display: flex;
   gap: 0.5rem;
   flex-wrap: nowrap;
+  border-top: 1.5px solid var(--light-gray-color);
+  padding-top: 16px;
 }
 
 .request-btn {
@@ -85,6 +87,7 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  min-height: 52px;
 }
 .request-btn:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
