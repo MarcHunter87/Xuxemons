@@ -1,11 +1,8 @@
-:host {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
 .home-main {
   background-color: var(--white-color);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .stats-row {
@@ -25,3 +22,13 @@
   align-self: stretch;
 }
 
+@media (max-width: 600px) {
+  .stats-row {
+    flex-direction: column;
+  }
+
+  .stats-row app-trainer-lvl,
+  .stats-row app-win-streak-v1 {
+    flex: 0 0 auto;
+  }
+}

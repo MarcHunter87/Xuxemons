@@ -576,18 +576,6 @@ nav {
   }
 }
 
-@media (max-width: 1300px) {
-  .nav-links-mobile li:first-child a {
-    padding-left: 0 !important;
-  }
-}
-
-@media (max-width: 1000px) {
-  .nav-links-mobile li:first-child a {
-    padding-left: 0 !important;
-  }
-}
-
 @media (max-width: 590px) {
   .nav-mobile-row {
     display: grid;
