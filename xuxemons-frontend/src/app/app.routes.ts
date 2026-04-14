@@ -48,6 +48,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'battle/:id',
+    component: Battle,
+    canActivate: [authGuard],
+  },
+  {
     path: 'gacha',
     component: Gacha,
     canActivate: [authGuard],

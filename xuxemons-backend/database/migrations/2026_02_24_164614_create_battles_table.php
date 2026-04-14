@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('user_id');
             $table->string('opponent_user_id');
             $table->string('winner_id')->nullable();
+            $table->enum('status', ['pending', 'accepted', 'rejected', 'completed'])->default('pending');
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreign('opponent_user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreign('winner_id')->references('id')->on('users')->nullOnDelete();

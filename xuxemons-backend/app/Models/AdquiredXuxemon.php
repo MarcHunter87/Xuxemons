@@ -28,6 +28,8 @@ use Illuminate\Support\Facades\DB;
  */
 class AdquiredXuxemon extends Model
 {
+    protected $appends = ['hp', 'attack', 'defense', 'size', 'name', 'image_url', 'type'];
+
     protected $casts = [
         'current_hp' => 'integer',
         'level' => 'integer',
@@ -98,6 +100,21 @@ class AdquiredXuxemon extends Model
     public function sideEffect3()
     {
         return $this->belongsTo(SideEffect::class, 'side_effect_id_3');
+    }
+
+    public function getNameAttribute(): string
+    {
+        return $this->xuxemon?->name ?? 'Unknown';
+    }
+
+    public function getImageUrlAttribute(): string
+    {
+        return $this->xuxemon?->image_url ?? '';
+    }
+
+    public function getTypeAttribute()
+    {
+        return $this->xuxemon?->type;
     }
 
     public function getSizeAttribute(): string

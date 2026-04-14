@@ -21,6 +21,22 @@ class Battle extends Model
         'user_id',
         'opponent_user_id',
         'winner_id',
+        'status',
         'turn',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function opponentUser()
+    {
+        return $this->belongsTo(User::class, 'opponent_user_id');
+    }
+
+    public function winner()
+    {
+        return $this->belongsTo(User::class, 'winner_id');
+    }
 }

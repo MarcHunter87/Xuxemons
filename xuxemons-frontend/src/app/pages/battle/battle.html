@@ -1,9 +1,176 @@
-<section class="page-hero" aria-labelledby="battle-title">
-  <h1 id="battle-title">
-    <span class="page-hero-title-black">Ready to </span>
-    <span class="page-hero-title-blue">Battle</span>
-  </h1>
-  <p class="page-hero-desc">
-    Challenge other trainers and climb the leaderboard.
-  </p>
-</section>
+<div class="battle-container">
+  @if (isPractice()) {
+    <div class="practice-badge">Practice Mode (AI)</div>
+  }
+
+  <!-- Turn Indicator -->
+  <div class="turn-indicator" [class.player-turn]="currentTurn() === 'player'" [class.opponent-turn]="currentTurn() === 'opponent'">
+    {{ currentTurn() === 'player' ? 'YOUR TURN' : 'OPPONENT TURN' }}
+  </div>
+  
+  <!-- Selection Overlay (Only shown if no Xuxemon selected) -->
+  @if (!selectedXuxemon()) {
+    <div class="selection-overlay">
+      <div class="selection-card">
+        <h2>Select your Xuxemon</h2>
+        <p class="sidebar-info">Choose a Xuxemon from your battle team to start.</p>
+        <div class="xuxemon-list">
+          @for (xuxemon of myXuxemons(); track xuxemon.adquired_id || xuxemon.id) {
+            <div class="xuxemon-item-card" (click)="selectXuxemon(xuxemon)">
+              <img [src]="xuxemon.image_url" [alt]="xuxemon.name">
+              <div class="item-card-info">
+                <span class="item-card-name">{{ xuxemon.name }}</span>
+                <div class="item-card-stats">
+                  <span>HP: {{ xuxemon.hp }}</span>
+                  <span>ATK: {{ xuxemon.attack }}</span>
+                  <span>DEF: {{ xuxemon.defense }}</span>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <p class="empty-team-msg">Your team is empty! Go to your profile to select Xuxemons for battle.</p>
+          }
+          <button class="back-btn" routerLink="/profile">Back to Profile</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Main Battle Arena -->
+  <div class="battle-arena">
+    <div class="battle-screen">
+      @if (selectedXuxemon() && opponentXuxemon()) {
+        <div class="battle-grid">
+          <!-- Opponent Status -->
+          <div class="status-box opponent-status">
+            <div class="name-row">
+              <span class="name">{{ opponentXuxemon()?.name }}</span>
+              <span class="level">Lv.{{ opponentXuxemon()?.level || 50 }}</span>
+            </div>
+            <div class="hp-bar-container">
+              <div class="hp-bar" [style.width.%]="opponentHP()" [class.low]="opponentHP() < 20" [class.med]="opponentHP() < 50 && opponentHP() >= 20"></div>
+            </div>
+            <div class="hp-text">{{ opponentHP() | number:'1.0-0' }}%</div>
+          </div>
+
+          <!-- Opponent Position -->
+          <div class="opponent-pos">
+            <div class="sprite-container opponent-sprite" [class.hit]="opponentHit()">
+              <img [src]="opponentXuxemon()!.image_url" [class.attacking]="opponentAttacking()" alt="Opponent">
+              <div class="platform"></div>
+            </div>
+          </div>
+
+          <!-- Player Position -->
+          <div class="player-pos">
+            <div class="sprite-container player-sprite" [class.hit]="playerHit()">
+              <img [src]="selectedXuxemon()!.image_url" [class.attacking]="playerAttacking()" alt="Player">
+              <div class="platform"></div>
+            </div>
+          </div>
+
+          <!-- Player Status -->
+          <div class="status-box player-status">
+            <div class="name-row">
+              <span class="name">{{ selectedXuxemon()?.name }}</span>
+              <span class="level">Lv.{{ selectedXuxemon()?.level || 50 }}</span>
+            </div>
+            <div class="hp-bar-container">
+              <div class="hp-bar" [style.width.%]="playerHP()" [class.low]="playerHP() < 20" [class.med]="playerHP() < 50 && playerHP() >= 20"></div>
+            </div>
+            <div class="hp-text">
+              {{ (playerHP() * playerMaxHP() / 100) | number:'1.0-0' }} / {{ playerMaxHP() }}
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="empty-arena">
+          <div class="pokeball-spinner"></div>
+          <p>Waiting for battle...</p>
+        </div>
+      }
+    </div>
+
+    <!-- Battle Footer -->
+    <div class="battle-footer">
+      <div class="battle-logs">
+        @for (log of battleLog(); track $index) {
+          <p [class.new-log]="$index === 0">{{ log }}</p>
+        } @empty {
+          <p>The battle begins!</p>
+        }
+      </div>
+      
+      <div class="battle-actions">
+        @if (battleStatus() === 'ready' && currentTurn() === 'player' && !currentSubMenu()) {
+          <div class="menu-grid">
+            <button class="menu-btn fight" (click)="showSubMenu('attacks')">FIGHT</button>
+            <button class="menu-btn bag" (click)="showSubMenu('bag')">BAG</button>
+            <button class="menu-btn pokemon" (click)="showSubMenu('switch')">POKEMON</button>
+            <button class="menu-btn run" (click)="runAway()">RUN</button>
+          </div>
+        } @else if (currentSubMenu() === 'attacks') {
+          <div class="attack-grid">
+            @for (atk of selectedXuxemon()?.attacks; track atk.id) {
+              <button class="atk-btn" (click)="attack(atk)">{{ atk.name }}</button>
+            } @empty {
+              <button class="atk-btn" (click)="attack({name: 'Tackle', dmg: 10})">Tackle</button>
+              <button class="atk-btn" (click)="attack({name: 'Quick Attack', dmg: 15})">Quick Attack</button>
+            }
+            <button class="back-btn" (click)="showSubMenu(null)">BACK</button>
+          </div>
+        } @else if (currentSubMenu() === 'bag') {
+          <div class="attack-grid">
+            @for (item of myItems(); track item.id) {
+              <button class="atk-btn" (click)="useItem(item)">{{ item.name }} ({{ item.quantity }})</button>
+            } @empty {
+              <p class="no-items">No items available</p>
+            }
+            <button class="back-btn" (click)="showSubMenu(null)">BACK</button>
+          </div>
+        } @else if (currentSubMenu() === 'switch') {
+          <div class="attack-grid">
+            @for (xuxemon of myXuxemons(); track xuxemon.id) {
+              @if (xuxemon.id !== selectedXuxemon()?.id) {
+                <button class="atk-btn" (click)="switchXuxemon(xuxemon)">
+                  {{ xuxemon.name }}
+                </button>
+              }
+            }
+            <button class="back-btn" (click)="showSubMenu(null)">BACK</button>
+          </div>
+        } @else {
+          <div class="waiting-msg">
+            <span class="pulse">
+              {{ battleStatus() === 'animating' ? 'Executing action...' : 'Waiting for opponent...' }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Dice Overlay -->
+  @if (showDice()) {
+    <div class="dice-overlay">
+      <div class="dice-container">
+        <div class="dice" [class.rolling]="diceRolling()">
+          {{ diceValue() || '?' }}
+        </div>
+        <p class="dice-label">Rolling for Buffs!</p>
+      </div>
+    </div>
+  }
+
+  <!-- Victory Modal -->
+  @if (showVictoryModal()) {
+    <div class="victory-modal">
+      <div class="victory-content">
+        <h2 class="victory-title">VICTORY!</h2>
+        <img [src]="selectedXuxemon()?.image_url" class="winner-sprite" alt="">
+        <p>{{ selectedXuxemon()?.name }} won!</p>
+        <button class="btn-continue" (click)="closeVictoryModal()">CONTINUE</button>
+      </div>
+    </div>
+  }
+</div>

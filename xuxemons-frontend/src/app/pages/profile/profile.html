@@ -49,6 +49,94 @@
       </div>
     </section>
 
+    <!-- Battle Team Selection -->
+    <section class="team-section">
+      <h2 class="section-title">Battle Team</h2>
+      <p class="section-desc">Select up to 6 Xuxemons for your battle team.</p>
+      
+      <div class="team-grid">
+        @for (slot of [1,2,3,4,5,6]; track slot) {
+          <div class="team-slot-card" (click)="openSelector(slot)">
+            @if (getSlotXuxemon(slot)) {
+              <div class="slot-card-content">
+                <div class="slot-img-container">
+                  <img [src]="authService.getAssetUrl(getSlotXuxemon(slot).xuxemon.icon_path)" [alt]="getSlotXuxemon(slot).xuxemon.name">
+                </div>
+                <span class="slot-card-name">{{ getSlotXuxemon(slot).xuxemon.name }}</span>
+                <span class="slot-card-type" [attr.data-type]="getSlotXuxemon(slot).xuxemon.type.name.toLowerCase()">{{ getSlotXuxemon(slot).xuxemon.type.name }}</span>
+                <div class="slot-card-stats">
+                  <div class="card-stat">
+                    <i class="bi bi-heart-fill hp"></i>
+                    <span>{{ getSlotXuxemon(slot).hp }}</span>
+                  </div>
+                  <div class="card-stat">
+                    <i class="bi bi-lightning-fill atk"></i>
+                    <span>{{ getSlotXuxemon(slot).attack }}</span>
+                  </div>
+                  <div class="card-stat">
+                    <i class="bi bi-shield-fill def"></i>
+                    <span>{{ getSlotXuxemon(slot).defense }}</span>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div class="slot-empty-card">
+                <i class="bi bi-plus-lg"></i>
+                <span>Empty Slot</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Xuxemon Selector Modal -->
+    @if (isSelectingForSlot() !== null) {
+      <div class="modal-overlay" (click)="closeSelector()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Select Xuxemon for Slot {{ isSelectingForSlot() }}</h3>
+            <button class="btn-close" (click)="closeSelector()">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="selector-grid">
+              <div class="selector-item none" (click)="selectForSlot(null)">
+                <div class="item-main">
+                  <i class="bi bi-trash"></i>
+                  <span>Remove</span>
+                </div>
+              </div>
+              @for (xuxemon of myXuxemons(); track xuxemon.adquired_id || xuxemon.id) {
+                <div class="selector-item" (click)="selectForSlot(xuxemon)">
+                  <div class="item-main">
+                    <img [src]="xuxemon.image_url" [alt]="xuxemon.name">
+                    <span class="item-name">{{ xuxemon.name }}</span>
+                    <span class="item-type" [attr.data-type]="xuxemon.type.name.toLowerCase()">{{ xuxemon.type.name }}</span>
+                  </div>
+                  <div class="item-stats">
+                    <div class="stat">
+                      <i class="bi bi-heart-fill hp"></i>
+                      <span>{{ xuxemon.hp }}</span>
+                    </div>
+                    <div class="stat">
+                      <i class="bi bi-lightning-fill atk"></i>
+                      <span>{{ xuxemon.attack }}</span>
+                    </div>
+                    <div class="stat">
+                      <i class="bi bi-shield-fill def"></i>
+                      <span>{{ xuxemon.defense }}</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
     <button type="button" class="btn-danger" [disabled]="isLoggingOut()" (click)="logout()" [attr.aria-busy]="isLoggingOut()">
       @if (isLoggingOut()) {
         <span class="btn-loading-icon" aria-hidden="true"></span>

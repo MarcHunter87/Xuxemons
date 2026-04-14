@@ -85,4 +85,17 @@ Route::middleware(['auth:api', 'update.last.seen'])->group(function () {
     Route::delete('/friends/requests/{id}', [FriendController::class, 'rejectRequest']);
     Route::get('/friends', [FriendController::class, 'getFriends']);
     Route::delete('/friends/{friendUserId}', [FriendController::class, 'removeFriend']);
+
+    // Batallas
+    Route::post('/battles/request/{friendId}', [\App\Http\Controllers\BattleController::class, 'requestBattle']);
+    Route::post('/battles/{battleId}/accept', [\App\Http\Controllers\BattleController::class, 'acceptBattle']);
+    Route::post('/battles/{battleId}/reject', [\App\Http\Controllers\BattleController::class, 'rejectBattle']);
+    Route::get('/battles/pending', [\App\Http\Controllers\BattleController::class, 'getPendingBattles']);
+    Route::get('/battles/{battleId}', [\App\Http\Controllers\BattleController::class, 'getBattle']);
+    Route::post('/battles/{battleId}/finish', [\App\Http\Controllers\BattleController::class, 'finishBattle']);
+
+    // Equipos
+    Route::get('/team', [\App\Http\Controllers\TeamController::class, 'getTeam']);
+    Route::post('/team/slot/{slotNumber}', [\App\Http\Controllers\TeamController::class, 'updateSlot']);
 });
+

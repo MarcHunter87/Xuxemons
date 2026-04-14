@@ -14,6 +14,8 @@ import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth';
 import { FriendsService } from '../../core/services/friends.service';
+import { BattleService } from '../../core/services/battle.service';
+import { Router } from '@angular/router';
 import { FriendCard } from '../../core/components/friend-card/friend-card';
 import { FriendRequestCard } from '../../core/components/friend-request-card/friend-request-card';
 import type { FriendUser, FriendRequestItem, SearchUser } from '../../core/interfaces';
@@ -28,6 +30,8 @@ export class Friends implements OnInit, OnDestroy {
   private readonly cardAnimationMs = 180;
   private auth = inject(AuthService);
   private friendsService = inject(FriendsService);
+  private battleService = inject(BattleService);
+  private router = inject(Router);
   private subs = new Subscription();
   private timeoutIds: ReturnType<typeof setTimeout>[] = [];
   private friendsInitialized = false;
@@ -37,6 +41,7 @@ export class Friends implements OnInit, OnDestroy {
 
   friends = signal<FriendUser[]>([]);
   pendingRequests = signal<FriendRequestItem[]>([]);
+  pendingBattles = signal<any[]>([]);
   searchResults = signal<SearchUser[]>([]);
   searchLoading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -59,7 +64,7 @@ export class Friends implements OnInit, OnDestroy {
   private shouldFocusPrimaryAction = false;
 
   get pendingCount(): number {
-    return this.pendingRequests().length;
+    return this.pendingRequests().length + this.pendingBattles().length;
   }
 
   get animationsEnabled(): boolean {
@@ -72,6 +77,7 @@ export class Friends implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadPendingBattles();
     this.subs.add(
       this.friendsService.friends.subscribe(f => {
         const previousIds = this.friends().map(friend => friend.id);
@@ -138,6 +144,52 @@ export class Friends implements OnInit, OnDestroy {
     );
 
     this.friendsService.loadAll();
+  }
+
+  loadPendingBattles(): void {
+    this.battleService.getPendingBattles().subscribe(battles => {
+      this.pendingBattles.set(battles);
+      
+      // Mostrar modal si hay batallas pendientes nuevas
+      if (battles.length > 0 && !this.showBattleRequestModal()) {
+        this.currentBattleRequest.set(battles[0]);
+        this.showBattleRequestModal.set(true);
+      }
+    });
+  }
+
+  showBattleRequestModal = signal(false);
+  currentBattleRequest = signal<any>(null);
+
+  closeRequestModal(): void {
+    this.showBattleRequestModal.set(false);
+    this.currentBattleRequest.set(null);
+  }
+
+  onAcceptRequest(): void {
+    if (this.currentBattleRequest()) {
+      this.acceptBattle(this.currentBattleRequest().id);
+      this.closeRequestModal();
+    }
+  }
+
+  onRejectRequest(): void {
+    if (this.currentBattleRequest()) {
+      this.rejectBattle(this.currentBattleRequest().id);
+      this.closeRequestModal();
+    }
+  }
+
+  acceptBattle(battleId: number): void {
+    this.battleService.acceptBattle(battleId).subscribe(() => {
+      this.router.navigate(['/battle', battleId]);
+    });
+  }
+
+  rejectBattle(battleId: number): void {
+    this.battleService.rejectBattle(battleId).subscribe(() => {
+      this.loadPendingBattles();
+    });
   }
 
   ngAfterViewChecked(): void {

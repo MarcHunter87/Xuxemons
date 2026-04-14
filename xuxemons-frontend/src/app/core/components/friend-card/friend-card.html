@@ -51,6 +51,7 @@
       type="button"
       class="btn-primary friend-action-btn"
       [attr.aria-label]="'Challenge ' + friend.name"
+      (click)="onChallenge()"
     >
       <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
       <span>Challenge</span>

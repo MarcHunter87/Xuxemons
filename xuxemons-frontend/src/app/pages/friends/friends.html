@@ -164,10 +164,25 @@
           }
         </div>
 
-        @if (pendingRequests().length === 0) {
+        @if (pendingRequests().length === 0 && pendingBattles().length === 0) {
           <p class="empty-msg">No pending requests.</p>
         } @else {
-          <ul class="requests-list" role="list" aria-label="Pending friend requests">
+          <ul class="requests-list" role="list" aria-label="Pending requests">
+            <!-- Battle Requests -->
+            @for (battle of pendingBattles(); track battle.id) {
+              <li class="requests-list-item">
+                <div class="card request-card">
+                  <div class="request-info">
+                    <span class="request-name">Battle Request from {{ battle.user.name }}</span>
+                  </div>
+                  <div class="request-actions">
+                    <button type="button" class="btn-success" (click)="acceptBattle(battle.id)">Accept</button>
+                    <button type="button" class="btn-danger" (click)="rejectBattle(battle.id)">Reject</button>
+                  </div>
+                </div>
+              </li>
+            }
+            <!-- Friend Requests -->
             @for (request of pendingRequests(); track request.id) {
               <li
                 class="requests-list-item"
@@ -210,6 +225,23 @@
         <div class="confirm-actions">
           <button type="button" class="btn-secondary" (click)="cancelRemove()">Cancel</button>
           <button #confirmPrimary type="button" class="btn-danger" (click)="confirmRemove()">Remove friend</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Battle Request Modal -->
+  @if (showBattleRequestModal()) {
+    <div class="modal-overlay battle-request-modal">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="request-icon">
+          <i class="bi bi-lightning-charge-fill"></i>
+        </div>
+        <h2>BATTLE CHALLENGE!</h2>
+        <p><strong>{{ currentBattleRequest()?.user?.name }}</strong> wants to battle with you!</p>
+        <div class="modal-actions">
+          <button type="button" class="btn-success" (click)="onAcceptRequest()">ACCEPT</button>
+          <button type="button" class="btn-danger" (click)="onRejectRequest()">REJECT</button>
         </div>
       </div>
     </div>
