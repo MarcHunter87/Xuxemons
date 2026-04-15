@@ -104,8 +104,8 @@ export class AuthService {
   private clearLocalAuth(): void {
     this.getStorage()?.removeItem('token');
     this.getStorage()?.removeItem('user');
+    this.refreshGachaTickets();
     this.userSubject.next(null);
-    this.gachaTicketCount.set(0);
     this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 
@@ -136,11 +136,15 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    return this.getToken() !== null;
   }
 
   isAdmin(): boolean {
     return this.getStoredUser()?.role === 'admin';
+  }
+  
+  handleUnauthorizedSession(): void {
+    this.clearLocalAuth();
   }
 
   private saveAuth(res: AuthResponse): void {

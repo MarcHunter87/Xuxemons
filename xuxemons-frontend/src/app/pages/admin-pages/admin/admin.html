@@ -7,7 +7,7 @@
   <p class="page-hero-desc">Manage players and distribute items.</p>
 </section>
 
-<div class="admin-nav-buttons">
+<nav class="admin-nav-buttons" aria-label="Admin sections">
   <a [routerLink]="['/admin/xuxemons']" class="admin-nav-btn admin-nav-btn-xuxemons">
     <i class="bi bi-dice-5" aria-hidden="true"></i>
     All Xuxemons
@@ -28,7 +28,7 @@
     <i class="bi bi-clock-history" aria-hidden="true"></i>
     Daily Rewards
   </a>
-</div>
+</nav>
 
 @if (isLoading()) {
   <div class="loading-state">

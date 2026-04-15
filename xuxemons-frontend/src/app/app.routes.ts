@@ -33,97 +33,110 @@ export const routes: Routes = [
     path: '',
     component: Home,
     canActivate: [authGuard],
+    title: 'Home',
   },
   {
     path: 'register',
     component: Register,
+    title: 'Register',
   },
   {
     path: 'login',
     component: Login,
+    title: 'Login',
   },
   {
     path: 'battle',
     component: Battle,
     canActivate: [authGuard],
+    title: 'Battle',
   },
   {
     path: 'gacha',
     component: Gacha,
     canActivate: [authGuard],
+    title: 'Gacha',
   },
   {
     path: 'xuxedex',
     component: Xuxedex,
     canActivate: [authGuard],
+    title: 'Xuxedex',
   },
   {
     path: 'inventory',
     component: Inventory,
     canActivate: [authGuard],
+    title: 'Inventory',
   },
   {
     path: 'friends',
     component: Friends,
     canActivate: [authGuard],
+    title: 'Friends',
   },
   {
     path: 'profile',
     canActivate: [authGuard],
-    children: [{ path: '', component: Profile }, { path: 'edit', component: EditProfile }],
+    children: [
+      { path: '', component: Profile, title: 'Profile' },
+      { path: 'edit', component: EditProfile, title: 'Edit Profile' },
+    ],
   },
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
     children: [
-      { path: '', component: Admin },
+      { path: '', component: Admin, title: 'Admin Panel' },
       {
         path: 'items',
         children: [
-          { path: '', component: AdminItems },
-          { path: 'new-item', component: AdminNewItem },
-          { path: 'edit-item/:id', component: AdminEditItem },
+          { path: '', component: AdminItems, title: 'Admin Items' },
+          { path: 'new-item', component: AdminNewItem, title: 'New Item' },
+          { path: 'edit-item/:id', component: AdminEditItem, title: 'Edit Item' },
         ],
       },
       {
         path: 'xuxemons',
         children: [
-          { path: '', component: AdminXuxemons },
-          { path: 'new-xuxemon', component: AdminNewXuxemon },
-          { path: 'edit-xuxemon/:id', component: AdminEditXuxemon },
+          { path: '', component: AdminXuxemons, title: 'Admin Xuxemons' },
+          { path: 'new-xuxemon', component: AdminNewXuxemon, title: 'New Xuxemon' },
+          { path: 'edit-xuxemon/:id', component: AdminEditXuxemon, title: 'Edit Xuxemon' },
         ],
       },
       {
         path: 'give-item/:userId',
         component: AdminGiveItem,
         canActivate: [adminGiveItemGuard],
+        title: 'Give Item',
       },
       {
         path: 'evolve',
         children: [
-          { path: '', component: AdminEvolve },
-          { path: 'edit-evolve/:id', component: AdminEditEvolve },
+          { path: '', component: AdminEvolve, title: 'Evolution Sizes' },
+          { path: 'edit-evolve/:id', component: AdminEditEvolve, title: 'Edit Evolution' },
         ],
       },
       {
         path: 'daily-rewards',
         children: [
-          { path: '', component: AdminDailyreward },
-          { path: 'edit/:id', component: AdminDailyrewardEdit },
+          { path: '', component: AdminDailyreward, title: 'Daily Rewards' },
+          { path: 'edit/:id', component: AdminDailyrewardEdit, title: 'Edit Daily Reward' },
         ],
       },
       {
         path: 'side-effects',
         children: [
-          { path: '', component: AdminSideeffects },
-          { path: 'edit/:id', component: AdminEditSideeffects },
+          { path: '', component: AdminSideeffects, title: 'Side Effects' },
+          { path: 'edit/:id', component: AdminEditSideeffects, title: 'Edit Side Effect' },
         ],
       },
     ],
   },
   {
     path: 'NotFound',
-    component: NotFound
+    component: NotFound,
+    title: '404 Not Found',
   },
   {
     path: '**',

@@ -1,5 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 import { AuthService } from '../core/services/auth';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
@@ -13,7 +15,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authReq = req.clone({
       setHeaders: { Authorization: `Bearer ${token}` }
     });
-    return next(authReq);
+    return next(authReq).pipe(
+      catchError((error) => {
+        if (error.status === 401) {
+          authService.handleUnauthorizedSession();
+        }
+        return throwError(() => error);
+      })
+    );
   }
 
   if (typeof ngDevMode === 'undefined' || ngDevMode) {

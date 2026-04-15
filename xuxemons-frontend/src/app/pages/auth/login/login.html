@@ -1,8 +1,8 @@
-<section class="login-page">
+<section class="login-page" aria-labelledby="login-title">
   <form class="login-card" [formGroup]="loginForm" (ngSubmit)="onSubmit()" aria-label="Login form">
     <div class="brand">
       <img src="/icons/logo.svg" class="brand-logo" alt="Xuxemons logo">
-      <h1>Welcome Back</h1>
+      <h1 id="login-title">Welcome Back</h1>
       <p>Sign in to continue your journey</p>
     </div>
 
