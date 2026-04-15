@@ -20,6 +20,15 @@
   box-sizing: border-box;
 }
 
+.app-content.battle-full-screen {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  height: calc(100vh - 80px); /* Height minus navbar */
+}
+
 .app-content app-breadcrumb {
   display: block;
   margin-bottom: 1rem;

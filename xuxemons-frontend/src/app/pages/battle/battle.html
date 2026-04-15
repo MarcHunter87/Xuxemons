@@ -3,58 +3,59 @@
     <div class="practice-badge">Practice Mode (AI)</div>
   }
 
-  <!-- Turn Indicator -->
-  <div class="turn-indicator" [class.player-turn]="currentTurn() === 'player'" [class.opponent-turn]="currentTurn() === 'opponent'">
-    {{ currentTurn() === 'player' ? 'YOUR TURN' : 'OPPONENT TURN' }}
-  </div>
-  
-  <!-- Selection Overlay (Only shown if no Xuxemon selected) -->
-  @if (!selectedXuxemon()) {
-    <div class="selection-overlay">
-      <div class="selection-card">
-        <h2>Select your Xuxemon</h2>
-        <p class="sidebar-info">Choose a Xuxemon from your battle team to start.</p>
-        <div class="xuxemon-list">
-          @for (xuxemon of myXuxemons(); track xuxemon.adquired_id || xuxemon.id) {
-            <div class="xuxemon-item-card" (click)="selectXuxemon(xuxemon)">
-              <img [src]="xuxemon.image_url" [alt]="xuxemon.name">
-              <div class="item-card-info">
-                <span class="item-card-name">{{ xuxemon.name }}</span>
-                <div class="item-card-stats">
-                  <span>HP: {{ xuxemon.hp }}</span>
-                  <span>ATK: {{ xuxemon.attack }}</span>
-                  <span>DEF: {{ xuxemon.defense }}</span>
-                </div>
-              </div>
-            </div>
-          } @empty {
-            <p class="empty-team-msg">Your team is empty! Go to your profile to select Xuxemons for battle.</p>
-          }
-          <button class="back-btn" routerLink="/profile">Back to Profile</button>
-        </div>
+  <div class="battle-wrapper">
+    <!-- Main Battle Arena -->
+    <div class="battle-arena">
+      <!-- Turn Indicator -->
+      <div class="turn-indicator" [class.player-turn]="currentTurn() === 'player'" [class.opponent-turn]="currentTurn() === 'opponent'">
+        {{ currentTurn() === 'player' ? 'YOUR TURN' : 'OPPONENT TURN' }}
       </div>
-    </div>
-  }
 
-  <!-- Main Battle Arena -->
-  <div class="battle-arena">
-    <div class="battle-screen">
+      <div class="battle-screen" [style.background-image]="'url(' + getAssetUrl('/fondo batalla.jfif') + ')'">
       @if (selectedXuxemon() && opponentXuxemon()) {
         <div class="battle-grid">
-          <!-- Opponent Status -->
-          <div class="status-box opponent-status">
-            <div class="name-row">
-              <span class="name">{{ opponentXuxemon()?.name }}</span>
-              <span class="level">Lv.{{ opponentXuxemon()?.level || 50 }}</span>
-            </div>
-            <div class="hp-bar-container">
-              <div class="hp-bar" [style.width.%]="opponentHP()" [class.low]="opponentHP() < 20" [class.med]="opponentHP() < 50 && opponentHP() >= 20"></div>
-            </div>
-            <div class="hp-text">{{ opponentHP() | number:'1.0-0' }}%</div>
-          </div>
-
           <!-- Opponent Position -->
           <div class="opponent-pos">
+            <!-- Opponent Status Card -->
+            <div class="status-box opponent-status">
+              <div class="trainer-info">
+                @if (opponentTrainerIcon()) {
+                  <img [src]="opponentTrainerIcon()" class="trainer-icon" alt="">
+                }
+                <div class="trainer-details">
+                  <span class="trainer-name">{{ opponentTrainerName() }}</span>
+                  <span class="trainer-level">Lv.{{ opponentTrainerLevel() }}</span>
+                </div>
+              </div>
+              <hr class="status-divider">
+              <div class="name-row">
+                <span class="name">{{ opponentXuxemon()?.name }}</span>
+                <span class="level">Lv.{{ opponentXuxemon()?.level || 50 }}</span>
+              </div>
+              <div class="hp-bar-container">
+                <div class="hp-bar" [style.width.%]="opponentHP()" [class.low]="opponentHP() < 20" [class.med]="opponentHP() < 50 && opponentHP() >= 20"></div>
+              </div>
+              <div class="hp-text">
+                {{ (opponentHP() * opponentMaxHP() / 100) | number:'1.0-0' }} / {{ opponentMaxHP() }}
+              </div>
+              
+              <!-- Status Effects Display -->
+              <div class="status-effects">
+                @if (opponentXuxemon()?.statusEffect?.icon_url) {
+                  <img [src]="opponentXuxemon()?.statusEffect?.icon_url" [title]="opponentXuxemon()?.statusEffect?.name" class="status-icon">
+                }
+                @if (opponentXuxemon()?.side_effect_1?.icon_url) {
+                  <img [src]="opponentXuxemon()?.side_effect_1?.icon_url" [title]="opponentXuxemon()?.side_effect_1?.name" class="status-icon">
+                }
+                @if (opponentXuxemon()?.side_effect_2?.icon_url) {
+                  <img [src]="opponentXuxemon()?.side_effect_2?.icon_url" [title]="opponentXuxemon()?.side_effect_2?.name" class="status-icon">
+                }
+                @if (opponentXuxemon()?.side_effect_3?.icon_url) {
+                  <img [src]="opponentXuxemon()?.side_effect_3?.icon_url" [title]="opponentXuxemon()?.side_effect_3?.name" class="status-icon">
+                }
+              </div>
+            </div>
+
             <div class="sprite-container opponent-sprite" [class.hit]="opponentHit()">
               <img [src]="opponentXuxemon()!.image_url" [class.attacking]="opponentAttacking()" alt="Opponent">
               <div class="platform"></div>
@@ -63,23 +64,49 @@
 
           <!-- Player Position -->
           <div class="player-pos">
+            <!-- Player Status Card -->
+            <div class="status-box player-status">
+              <div class="trainer-info">
+                @if (playerTrainerIcon()) {
+                  <img [src]="playerTrainerIcon()" class="trainer-icon" alt="">
+                }
+                <div class="trainer-details">
+                  <span class="trainer-name">{{ playerTrainerName() }}</span>
+                  <span class="trainer-level">Lv.{{ playerTrainerLevel() }}</span>
+                </div>
+              </div>
+              <hr class="status-divider">
+              <div class="name-row">
+                <span class="name">{{ selectedXuxemon()?.name }}</span>
+                <span class="level">Lv.{{ selectedXuxemon()?.level || 50 }}</span>
+              </div>
+              <div class="hp-bar-container">
+                <div class="hp-bar" [style.width.%]="playerHP()" [class.low]="playerHP() < 20" [class.med]="playerHP() < 50 && playerHP() >= 20"></div>
+              </div>
+              <div class="hp-text">
+                {{ (playerHP() * playerMaxHP() / 100) | number:'1.0-0' }} / {{ playerMaxHP() }}
+              </div>
+
+              <!-- Status Effects Display -->
+              <div class="status-effects">
+                @if (selectedXuxemon()?.statusEffect?.icon_url) {
+                  <img [src]="selectedXuxemon()?.statusEffect?.icon_url" [title]="selectedXuxemon()?.statusEffect?.name" class="status-icon">
+                }
+                @if (selectedXuxemon()?.side_effect_1?.icon_url) {
+                  <img [src]="selectedXuxemon()?.side_effect_1?.icon_url" [title]="selectedXuxemon()?.side_effect_1?.name" class="status-icon">
+                }
+                @if (selectedXuxemon()?.side_effect_2?.icon_url) {
+                  <img [src]="selectedXuxemon()?.side_effect_2?.icon_url" [title]="selectedXuxemon()?.side_effect_2?.name" class="status-icon">
+                }
+                @if (selectedXuxemon()?.side_effect_3?.icon_url) {
+                  <img [src]="selectedXuxemon()?.side_effect_3?.icon_url" [title]="selectedXuxemon()?.side_effect_3?.name" class="status-icon">
+                }
+              </div>
+            </div>
+
             <div class="sprite-container player-sprite" [class.hit]="playerHit()">
               <img [src]="selectedXuxemon()!.image_url" [class.attacking]="playerAttacking()" alt="Player">
               <div class="platform"></div>
-            </div>
-          </div>
-
-          <!-- Player Status -->
-          <div class="status-box player-status">
-            <div class="name-row">
-              <span class="name">{{ selectedXuxemon()?.name }}</span>
-              <span class="level">Lv.{{ selectedXuxemon()?.level || 50 }}</span>
-            </div>
-            <div class="hp-bar-container">
-              <div class="hp-bar" [style.width.%]="playerHP()" [class.low]="playerHP() < 20" [class.med]="playerHP() < 50 && playerHP() >= 20"></div>
-            </div>
-            <div class="hp-text">
-              {{ (playerHP() * playerMaxHP() / 100) | number:'1.0-0' }} / {{ playerMaxHP() }}
             </div>
           </div>
         </div>
@@ -147,8 +174,37 @@
           </div>
         }
       </div>
+      </div>
     </div>
   </div>
+
+  <!-- Selection Overlay (Only shown if no Xuxemon selected) -->
+  @if (!selectedXuxemon()) {
+    <div class="selection-overlay">
+      <div class="selection-card">
+        <h2>Select your Xuxemon</h2>
+        <p class="sidebar-info">Choose a Xuxemon from your battle team to start.</p>
+        <div class="xuxemon-list">
+          @for (xuxemon of myXuxemons(); track xuxemon.adquired_id || xuxemon.id) {
+            <div class="xuxemon-item-card" (click)="selectXuxemon(xuxemon)">
+              <img [src]="xuxemon.image_url" [alt]="xuxemon.name">
+              <div class="item-card-info">
+                <span class="item-card-name">{{ xuxemon.name }}</span>
+                <div class="item-card-stats">
+                  <span>HP: {{ xuxemon.hp }}</span>
+                  <span>ATK: {{ xuxemon.attack }}</span>
+                  <span>DEF: {{ xuxemon.defense }}</span>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <p class="empty-team-msg">Your team is empty! Go to your profile to select Xuxemons for battle.</p>
+          }
+          <button class="back-btn" routerLink="/profile">Back to Profile</button>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- Dice Overlay -->
   @if (showDice()) {

@@ -20,8 +20,10 @@ import type { DailyRewardNotification, FriendRequestItem } from './core/interfac
 })
 export class App implements OnInit, OnDestroy {
   protected readonly showLayout = signal(true);
+  protected readonly showFooter = signal(true);
   protected readonly showTopBreadcrumb = signal(true);
   protected readonly isProfilePage = signal(false);
+  protected readonly isBattlePage = signal(false);
   protected readonly showDailyRewardsModal = signal(false);
   protected readonly pendingDailyRewards = signal<DailyRewardNotification | null>(null);
   protected readonly showFriendRequestModal = signal(false);
@@ -38,8 +40,10 @@ export class App implements OnInit, OnDestroy {
   private updateShowLayout(): void {
     const url = this.router.url.split('?')[0];
     this.showLayout.set(url !== '/login' && url !== '/register');
-    this.showTopBreadcrumb.set(url !== '/profile');
+    this.showFooter.set(url !== '/login' && url !== '/register' && !url.startsWith('/battle'));
+    this.showTopBreadcrumb.set(url !== '/profile' && !url.startsWith('/battle'));
     this.isProfilePage.set(url === '/profile');
+    this.isBattlePage.set(url.startsWith('/battle'));
   }
 
   ngOnInit(): void {

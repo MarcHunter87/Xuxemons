@@ -3,7 +3,7 @@
 }
 <main class="app-main">
   @if (showLayout()) {
-    <div class="app-content" [class.profile-no-padding-bottom]="isProfilePage()">
+    <div class="app-content" [class.profile-no-padding-bottom]="isProfilePage()" [class.battle-full-screen]="isBattlePage()">
       @if (showTopBreadcrumb()) {
         <app-breadcrumb></app-breadcrumb>
       }
@@ -13,7 +13,7 @@
     <router-outlet></router-outlet>
   }
 </main>
-@if (showLayout()) {
+@if (showLayout() && showFooter()) {
   <app-footer></app-footer>
 }
 
