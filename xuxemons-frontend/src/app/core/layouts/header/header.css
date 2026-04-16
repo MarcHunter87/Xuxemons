@@ -187,6 +187,12 @@ nav {
   color: var(--accent-color);
 }
 
+.icon-btn.active {
+  background-color: var(--white-color);
+  color: var(--accent-color);
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
 .icon-btn:active {
   transform: scale(0.98);
 }
@@ -207,8 +213,8 @@ nav {
   min-height: 20px;
   height: auto;
   padding: 0 8px;
-  background-color: #dc3545;
-  color: #fff;
+  background-color: var(--badge-danger-bg);
+  color: var(--white-color);
   border-radius: 8px;
   font-size: 16px;
   font-weight: 700;
@@ -308,7 +314,7 @@ nav {
   height: 48px;
   padding: 0;
   background: transparent;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--white-color);
   border-radius: 8px;
   cursor: pointer;
   color: var(--white-color);
@@ -320,7 +326,7 @@ nav {
 .hamburger:focus-visible {
   background-color: transparent;
   color: var(--white-color);
-  border-color: #ffffff;
+  border-color: var(--white-color);
 }
 
 .hamburger:focus-visible {
@@ -330,12 +336,12 @@ nav {
 
 .hamburger:active {
   transform: translateY(1px) scale(0.98);
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.12);
+  box-shadow: inset 0 2px 6px var(--shadow-color);
 }
 
 .hamburger[aria-expanded="true"] {
   background-color: transparent;
-  border-color: #ffffff;
+  border-color: var(--white-color);
 }
 
 .hamburger-icon {

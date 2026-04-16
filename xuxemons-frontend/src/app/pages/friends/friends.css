@@ -143,7 +143,6 @@
   font-family: 'Poppins', sans-serif;
   font-size: 1rem;
   background: var(--white-color);
-  min-width: 0;
 }
 
 .search-input:focus {
@@ -163,11 +162,13 @@
   will-change: transform;
 }
 
-.list-card--entering {
-  animation: friendCardScaleIn 0.26s ease-out both;
+.list-card--entering,
+.requests-list-item.list-card--entering {
+  animation: friendCardScaleIn 0.26s ease-in both;
 }
 
-.list-card--exiting {
+.list-card--exiting,
+.requests-list-item.list-card--exiting {
   animation: friendCardScaleOut 0.26s ease-in both;
   pointer-events: none;
 }
@@ -229,7 +230,6 @@
 
 .search-result-info {
   flex: 1;
-  min-width: 0;
 }
 
 .search-result-name {
@@ -386,11 +386,6 @@
     max-width: 100%;
     box-sizing: border-box;
     white-space: normal;
-  }
-
-  .search-result-badge,
-  .btn-send-request,
-  .btn-cancel-request {
     margin-top: 0.5rem;
   }
 }
@@ -404,7 +399,6 @@
 
 .friends-main-col {
   flex: 1;
-  min-width: 0;
   margin-bottom: var(--page-section-gap);
   padding: 1.5rem;
   background-color: var(--primary-color);
@@ -545,48 +539,3 @@
   scrollbar-color: var(--light-gray-color) transparent;
 }
 
-/* ── Confirm overlay ── */
-.confirm-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--modal-overlay-bg);
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-}
-
-.confirm-dialog {
-  background: var(--white-color);
-  border-radius: 18px;
-  padding: 2rem;
-  max-width: 420px;
-  width: 100%;
-  box-shadow: 0 8px 32px var(--shadow-modal);
-}
-
-.confirm-title {
-  font-size: 1.25rem;
-  font-weight: 800;
-  margin: 0 0 0.75rem;
-}
-
-.confirm-text {
-  font-size: 1rem;
-  margin: 0 0 1.5rem;
-}
-
-.confirm-actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.confirm-actions .btn-secondary {
-  flex: 1;
-  min-width: 0;
-}
-
-.confirm-actions .btn-danger {
-  flex: none;
-}

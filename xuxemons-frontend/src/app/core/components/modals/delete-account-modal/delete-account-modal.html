@@ -1,0 +1,34 @@
+<div class="delete-account-modal-backdrop" role="dialog" aria-modal="true" (click)="onBackdropClick()" (keydown)="onModalKeydown($event)">
+  <div #dialogRoot class="delete-account-modal-shell" tabindex="-1">
+    <div class="modal fade show d-block delete-account-modal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="delete-account-title">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content delete-account-content animate-pop" (click)="$event.stopPropagation()">
+          <div class="modal-header border-0 pb-0">
+            <h2 class="modal-title h4 mb-0 d-flex align-items-center gap-2" id="delete-account-title">
+              <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+              Delete Account
+            </h2>
+          </div>
+
+          <div class="modal-body">
+            <p>Are you sure you want to permanently delete your account, including your battle history and Xuxemons? This action cannot be undone.</p>
+            @if (profileContext.deactivateError()) {
+              <p class="form-message form-message-error" role="status" aria-live="polite">{{ profileContext.deactivateError() }}</p>
+            }
+          </div>
+
+          <div class="modal-footer border-0 pt-0 delete-account-footer">
+            <button type="button" class="btn-secondary" (click)="profileContext.closeDeactivateModal()">Cancel</button>
+            <button type="button" class="btn-danger" (click)="profileContext.confirmDeactivateAccount()" [disabled]="profileContext.isDeactivating()" [attr.aria-busy]="profileContext.isDeactivating()">
+              @if (profileContext.isDeactivating()) {
+                <span class="btn-loading-icon" aria-hidden="true"></span>
+              } @else {
+                Remove account
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

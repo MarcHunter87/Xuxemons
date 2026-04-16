@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { AuthService } from '../../services/auth';
-import type { DailyRewardNotification } from '../../interfaces';
+import { AuthService } from '../../../services/auth';
+import type { DailyRewardNotification } from '../../../interfaces';
 
 @Component({
   selector: 'app-daily-noti-modal',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './daily-noti-modal.html',
-  styleUrl: './daily-noti-modal.css',
+  styleUrls: ['./daily-noti-modal.css'],
 })
 export class DailyNotiModal implements OnChanges, AfterViewChecked {
   @Input() open = false;

@@ -193,26 +193,11 @@
 
   <!-- ── Confirm remove dialog ── -->
   @if (confirmRemoveFriend()) {
-    <div
-      class="confirm-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="confirm-title"
-      (click)="cancelRemove()"
-    >
-      <div class="confirm-dialog" #confirmDialog tabindex="-1" (click)="$event.stopPropagation()" (keydown)="onConfirmModalKeydown($event)">
-        <h3 id="confirm-title" class="confirm-title">Remove friend?</h3>
-        <p class="confirm-text">
-          Are you sure you want to remove
-          <strong>{{ confirmRemoveFriend()!.name }}</strong>
-          from your friends? This will also remove you from their list.
-        </p>
-        <div class="confirm-actions">
-          <button type="button" class="btn-secondary" (click)="cancelRemove()">Cancel</button>
-          <button #confirmPrimary type="button" class="btn-danger" (click)="confirmRemove()">Remove friend</button>
-        </div>
-      </div>
-    </div>
+    <app-confirm-remove-friend-modal
+      [friendName]="confirmRemoveFriend()!.name"
+      (closeModal)="cancelRemove()"
+      (confirm)="confirmRemove()">
+    </app-confirm-remove-friend-modal>
   }
 
 </main>

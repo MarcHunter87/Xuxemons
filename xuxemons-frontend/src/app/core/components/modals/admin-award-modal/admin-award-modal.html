@@ -1,0 +1,45 @@
+<div class="award-modal-overlay" role="dialog" aria-modal="true" (click)="onBackdropClick()" (keydown)="onModalKeydown($event)">
+  <div #dialogRoot class="award-modal-shell" tabindex="-1" (click)="$event.stopPropagation()">
+    <div class="award-modal-content animate-pop">
+      <h2 id="award-modal-title" class="award-modal-title">Xuxemon awarded</h2>
+      <div class="award-modal-display">
+        <div
+          class="award-modal-image-wrapper"
+          [style.background-color]="adminContext.getTypeColor(adminContext.awardedXuxemon()?.type?.name ?? '')"
+        >
+          <img
+            [src]="adminContext.awardedXuxemon()?.image_url"
+            [alt]="adminContext.awardedXuxemon()?.name"
+            class="award-modal-image"
+          />
+        </div>
+        <p class="award-modal-name">{{ adminContext.awardedXuxemon()?.name }}</p>
+        <span
+          class="award-modal-type-badge"
+          [style.background-color]="adminContext.getTypeColor(adminContext.awardedXuxemon()?.type?.name ?? '')"
+        >
+          {{ adminContext.awardedXuxemon()?.type?.name }}
+        </span>
+        @if (adminContext.awardedXuxemon()?.hp != null && adminContext.awardedXuxemon()?.attack != null && adminContext.awardedXuxemon()?.defense != null) {
+          <div class="award-modal-stats">
+            <div class="award-stat stat-hp">
+              <span class="stat-label">HP</span>
+              <span class="stat-value">{{ adminContext.awardedXuxemon()?.hp }}</span>
+            </div>
+            <div class="award-stat stat-attack">
+              <span class="stat-label">Attack</span>
+              <span class="stat-value">{{ adminContext.awardedXuxemon()?.attack }}</span>
+            </div>
+            <div class="award-stat stat-defense">
+              <span class="stat-label">Defense</span>
+              <span class="stat-value">{{ adminContext.awardedXuxemon()?.defense }}</span>
+            </div>
+          </div>
+        }
+      </div>
+      <div class="award-modal-actions">
+        <button type="button" (click)="adminContext.closeAwardModal()" class="btn btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -5,27 +5,25 @@ import {
   OnInit,
   inject,
   signal,
-  ElementRef,
-  ViewChild,
-  AfterViewChecked,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth';
 import { FriendsService } from '../../core/services/friends.service';
+import { ConfirmRemoveFriendModal } from '../../core/components/modals/confirm-remove-friend-modal/confirm-remove-friend-modal';
 import { FriendCard } from '../../core/components/friend-card/friend-card';
 import { FriendRequestCard } from '../../core/components/friend-request-card/friend-request-card';
 import type { FriendUser, FriendRequestItem, SearchUser } from '../../core/interfaces';
 
 @Component({
   selector: 'app-friends',
-  imports: [FriendCard, FriendRequestCard, ReactiveFormsModule],
+  imports: [FriendCard, FriendRequestCard, ReactiveFormsModule, ConfirmRemoveFriendModal],
   templateUrl: './friends.html',
   styleUrl: './friends.css',
 })
 export class Friends implements OnInit, OnDestroy {
-  private readonly cardAnimationMs = 180;
+  private readonly cardAnimationMs = 260;
   private auth = inject(AuthService);
   private friendsService = inject(FriendsService);
   private subs = new Subscription();
@@ -51,12 +49,7 @@ export class Friends implements OnInit, OnDestroy {
   busyRequestIds = signal<number[]>([]);
   busyFriendIds = signal<string[]>([]);
 
-  @ViewChild('confirmDialog') confirmDialog?: ElementRef<HTMLElement>;
-  @ViewChild('confirmPrimary') confirmPrimary?: ElementRef<HTMLButtonElement>;
-
   private previousFocusedElement: HTMLElement | null = null;
-  private shouldFocusRoot = false;
-  private shouldFocusPrimaryAction = false;
 
   get pendingCount(): number {
     return this.pendingRequests().length;
@@ -138,17 +131,6 @@ export class Friends implements OnInit, OnDestroy {
     );
 
     this.friendsService.loadAll();
-  }
-
-  ngAfterViewChecked(): void {
-    if (this.shouldFocusRoot && this.confirmDialog?.nativeElement) {
-      this.confirmDialog.nativeElement.focus();
-      this.shouldFocusRoot = false;
-    }
-    if (this.shouldFocusPrimaryAction && this.confirmPrimary?.nativeElement) {
-      this.confirmPrimary.nativeElement.focus();
-      this.shouldFocusPrimaryAction = false;
-    }
   }
 
   ngOnDestroy(): void {
@@ -311,9 +293,6 @@ export class Friends implements OnInit, OnDestroy {
 
         if (res?.auto_accepted) {
           this.friendsService.loadFriends();
-          this.successMessage.set('Friend added!');
-        } else {
-          this.successMessage.set('Friend request sent!');
         }
       },
       error: () => {
@@ -344,7 +323,6 @@ export class Friends implements OnInit, OnDestroy {
       this.friendsService.acceptRequest(request.id).subscribe({
         next: () => {
           this.removeRequestIds(this.busyRequestIds, [request.id]);
-          this.successMessage.set('Friend added!');
         },
         error: () => {
           this.removeRequestIds(this.busyRequestIds, [request.id]);
@@ -372,8 +350,6 @@ export class Friends implements OnInit, OnDestroy {
     this.previousFocusedElement = typeof document !== 'undefined'
       ? (document.activeElement as HTMLElement | null)
       : null;
-    this.shouldFocusRoot = true;
-    this.shouldFocusPrimaryAction = true;
     this.confirmRemoveFriend.set(friend);
   }
 
@@ -434,28 +410,4 @@ export class Friends implements OnInit, OnDestroy {
     if (this.confirmRemoveFriend()) this.cancelRemove();
   }
 
-  onConfirmModalKeydown(event: KeyboardEvent): void {
-    if (!this.confirmRemoveFriend() || event.key !== 'Tab') return;
-    const root = this.confirmDialog?.nativeElement;
-    if (!root) return;
-
-    const focusableSelector = [
-      'a[href]',
-      'button:not([disabled])',
-      'textarea:not([disabled])',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      '[tabindex]:not([tabindex="-1"])',
-    ].join(',');
-
-    const focusable = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
-      .filter(el => !el.hasAttribute('disabled') && el.tabIndex !== -1);
-
-    if (focusable.length === 0) { event.preventDefault(); return; }
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const active = document.activeElement as HTMLElement | null;
-    if (event.shiftKey && active === first) { event.preventDefault(); last.focus(); return; }
-    if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
-  }
 }

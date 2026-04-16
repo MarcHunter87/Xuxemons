@@ -148,50 +148,16 @@
   </div>
 }
 
-  @if (showAwardModal() && awardedXuxemon()) {
-  <div class="award-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="award-modal-title" (keydown)="onModalKeydown($event)" (click)="closeAwardModal()">
-    <div #awardModalRoot class="award-modal-content animate-pop" tabindex="-1" (click)="$event.stopPropagation()">
-      <h2 id="award-modal-title" class="award-modal-title">Xuxemon awarded</h2>
-      <div class="award-modal-display">
-        <div
-          class="award-modal-image-wrapper"
-          [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
-        >
-          <img
-            [src]="awardedXuxemon()?.image_url"
-            [alt]="awardedXuxemon()?.name"
-            class="award-modal-image"
-          />
-        </div>
-        <p class="award-modal-name">{{ awardedXuxemon()?.name }}</p>
-        <span
-          class="award-modal-type-badge"
-          [style.background-color]="getTypeColor(awardedXuxemon()?.type?.name ?? '')"
-        >
-          {{ awardedXuxemon()?.type?.name }}
-        </span>
-        @if (awardedXuxemon()?.hp != null && awardedXuxemon()?.attack != null && awardedXuxemon()?.defense != null) {
-          <div class="award-modal-stats">
-            <div class="award-stat stat-hp">
-              <span class="stat-label">HP</span>
-              <span class="stat-value">{{ awardedXuxemon()?.hp }}</span>
-            </div>
-            <div class="award-stat stat-attack">
-              <span class="stat-label">Attack</span>
-              <span class="stat-value">{{ awardedXuxemon()?.attack }}</span>
-            </div>
-            <div class="award-stat stat-defense">
-              <span class="stat-label">Defense</span>
-              <span class="stat-value">{{ awardedXuxemon()?.defense }}</span>
-            </div>
-          </div>
-        }
-      </div>
-      <div class="award-modal-actions">
-        <button #awardCloseButton type="button" (click)="closeAwardModal()" class="btn btn-primary">Close</button>
-      </div>
-    </div>
-  </div>
+@if (showAwardModal() && awardedXuxemon()) {
+  <app-admin-award-modal [adminContext]="this" (closeModal)="closeAwardModal()"></app-admin-award-modal>
+}
+
+@if (showBanModal() && pendingBanUser()) {
+  <app-admin-ban-modal
+    [userName]="getUserFullName(pendingBanUser()!)"
+    (closeModal)="closeBanModal()"
+    (confirmBan)="confirmBanUser()"
+  ></app-admin-ban-modal>
 }
 
 @if (awardError()) {

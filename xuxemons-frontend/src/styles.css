@@ -8,7 +8,7 @@
     --text-alt-color: #2A2B2B;
 
     --success-color: #28A745;
-    /* Admin nav "Evolution sizes" y acentos de evolución */
+
     --evolve-color: #6F42C1;
     --evolve-glow: rgba(111, 66, 193, 0.45);
     --danger-color: #D0181B;
@@ -112,12 +112,125 @@
     --page-header-title-desc-gap: 1.5rem;
     --page-header-bottom-gap: 1.5rem;
     --page-section-gap: 1.5rem;
+
+    --shadow-button: rgba(0, 0, 0, 0.2);
+    --shadow-input: rgba(0, 0, 0, 0.06);
+    --shadow-card-sm: rgba(0, 0, 0, 0.08);
+    --text-shadow-medium: rgba(0, 0, 0, 0.3);
+
+    --focus-accent-ring: rgba(13, 110, 253, 0.12);
+    --focus-accent-ring-light: #b6d4fe;
+    --focus-accent-bg: #f0f8ff;
+    --focus-danger-ring: rgba(185, 28, 28, 0.16);
+    --outline-accent-strong: rgba(10, 78, 203, 0.35);
+
+    --danger-hover: #991b1b;
+    --btn-disabled-primary-bg: #9aaec4;
+    --btn-disabled-danger-bg: #bda0a0;
+    --badge-danger-bg: #dc3545;
+
+    --noti-heading: #12264f;
+    --noti-link: #0b4fb3;
+    --noti-text-muted: #5f6e8a;
+
+    --reward-icon-overlay-bg: rgba(255, 255, 255, 0.72);
+    --reward-icon-overlay-border: rgba(255, 255, 255, 0.78);
+
+    --overdose-bg: #fbe9f0;
+    --overdose-border: #c2185b;
+    --overdose-text: #880e4f;
+    --gluttony-bg: #fbeaea;
+    --gluttony-border: #e53935;
+    --gluttony-text: #b71c1c;
+    --starving-border: #ffe066;
+    --starving-text: #7c6f1c;
+    --starving-accent: #e6b800;
+
+    --status-chip-bg-start: #f5f3ff;
+    --status-chip-bg-mid: #ede9fe;
+    --status-chip-bg-end: #e9d5ff;
+    --status-chip-border: #6d28d9;
+    --status-chip-text: #5b21b6;
+    --status-chip-shadow: rgba(109, 40, 217, 0.2);
+    --status-chip-target-bg: #86efac;
+    --status-chip-target-text: #064e3b;
+    --status-chip-target-shadow: rgba(16, 185, 129, 0.12);
+    --status-chip-target-glow: rgba(16, 185, 129, 0.18);
+    --status-chip-target-border: rgba(16, 185, 129, 0.45);
+
+    --sideeffect-badge-start: #f9e7a9;
+    --sideeffect-badge-end: #f4cd52;
+    --sideeffect-badge-border: #e7af1f;
+    --sideeffect-badge-shadow: rgba(231, 175, 31, 0.38);
+
+    --stat-hp-border: #f87171;
+    --stat-hp-text: #dc2626;
+    --stat-atk-border: #fb923c;
+    --stat-atk-text: #ea580c;
+    --stat-def-border: #60a5fa;
+    --stat-def-text: #2563eb;
+
+    --stat-hp-bg-start: rgba(34, 197, 94, 0.28);
+    --stat-hp-bg-end: rgba(34, 197, 94, 0.18);
+    --stat-atk-bg-start: rgba(220, 38, 38, 0.28);
+    --stat-atk-bg-end: rgba(220, 38, 38, 0.18);
+    --stat-def-bg-start: rgba(245, 158, 11, 0.28);
+    --stat-def-bg-end: rgba(245, 158, 11, 0.18);
+
+    --type-chart-bg-start: #fcfdff;
+    --type-chart-bg-end: #f3f5f8;
+    --type-chart-border: #d9e0e7;
+    --type-chart-shadow: rgba(31, 41, 55, 0.08);
+    --type-chart-kicker-bg: #e7edf5;
+    --type-chart-kicker-text: #4d627a;
+    --type-chart-heading: #182230;
+    --type-chart-body: #5b6674;
+    --type-chart-card-bg-start: #f1f3f5;
+    --type-chart-card-bg-end: #e9ecef;
+    --type-chart-card-border: #ced4da;
+
+    --type-power-bg: rgba(220, 38, 38, 0.1);
+    --type-power-border: rgba(220, 38, 38, 0.18);
+    --type-power-text: #b42318;
+    --type-technical-bg: rgba(22, 163, 74, 0.1);
+    --type-technical-border: rgba(22, 163, 74, 0.18);
+    --type-technical-text: #166534;
+    --type-speed-bg: rgba(37, 99, 235, 0.1);
+    --type-speed-border: rgba(37, 99, 235, 0.18);
+    --type-speed-text: #1d4ed8;
+
+    --link-btn-bg: #4f8cff;
+    --link-btn-hover: #2563eb;
+    --link-btn-shadow-sm: rgba(182, 208, 255, 0.2);
+    --link-btn-shadow-md: rgba(182, 208, 255, 0.33);
+
+    --starving-bg-start: #fffbe6;
+    --starving-bg-end: #fff7cc;
+    --starving-shadow: rgba(255, 224, 102, 0.1);
+
+    --danger-alpha-50: rgba(208, 24, 27, 0.5);
+
+    --side-effect-chip-start: #10b981;
+    --side-effect-chip-end: #059669;
+
+    --white-alpha-40: rgba(255, 255, 255, 0.4);
+
+    --slot-row-heal-bg: rgba(22, 197, 74, 0.1);
+    --slot-row-mana-bg: rgba(6, 182, 212, 0.1);
+    --slot-row-defense-bg: rgba(234, 88, 12, 0.1);
+    --slot-row-revive-bg: rgba(251, 191, 36, 0.1);
+
+    --danger-separator: rgba(208, 24, 27, 0.22);
+
+    --btn-disabled-slate-bg: #7a8ca3;
+    --btn-disabled-slate-text: #e6eaf1;
 }
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+  scrollbar-color: var(--accent-color) var(--primary-color);
 }
 
 html,
@@ -139,7 +252,6 @@ app-root {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-width: 0;
   max-width: 100%;
 }
 
@@ -272,7 +384,6 @@ button.btn-secondary:disabled {
 .btn-sm.btn-danger,
 .btn-sm.btn-secondary,
 a.btn-sm {
-  min-height: 0;
   padding: 0.625rem 1.25rem;
   font-size: 16px;
   font-weight: 500;
@@ -299,8 +410,6 @@ button.btn-secondary {
  */
 .stat-card {
   flex: 1;
-  min-height: 0;
-  min-width: 0;
   background-color: var(--primary-color);
   border-radius: 16px;
   padding: var(--page-section-gap);
@@ -469,6 +578,3 @@ button.btn-secondary {
   font-size: 1rem !important;
 }
 
-* {
-  scrollbar-color: rgba(13,110,253,0.8) var(--primary-color);
-}

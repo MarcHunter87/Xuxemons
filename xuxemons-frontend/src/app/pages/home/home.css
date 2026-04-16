@@ -17,7 +17,6 @@
 .stats-row app-trainer-lvl,
 .stats-row app-win-streak-v1 {
   flex: 1 1 0;
-  min-width: 0;
   min-height: 200px;
   align-self: stretch;
 }

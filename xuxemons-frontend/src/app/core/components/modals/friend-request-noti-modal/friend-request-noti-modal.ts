@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewChecked, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { AuthService } from '../../services/auth';
-import type { FriendRequestItem } from '../../interfaces';
+import { AuthService } from '../../../services/auth';
+import type { FriendRequestItem } from '../../../interfaces';
 
 @Component({
   selector: 'app-friend-request-noti-modal',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './friend-request-noti-modal.html',
-  styleUrl: './friend-request-noti-modal.css',
+  styleUrls: ['./friend-request-noti-modal.css'],
 })
 export class FriendRequestNotiModal implements OnChanges, AfterViewChecked {
   @Input() open = false;

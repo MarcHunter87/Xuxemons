@@ -19,11 +19,11 @@
 
     <div class="navbar-right nav-desktop">
       @if (user?.role === 'admin') {
-      <a routerLink="/admin" class="icon-btn" aria-label="Admin panel">
+      <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" class="icon-btn" aria-label="Admin panel">
         <i class="bi bi-shield-fill-check"></i>
       </a>
       }
-      <a routerLink="/friends" class="icon-btn" aria-label="Friends">
+      <a routerLink="/friends" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="icon-btn" aria-label="Friends">
         <i class="bi bi-people-fill"></i>
         @if ((friendsService.pendingCount | async) ?? 0; as count) {
           @if (count > 0) {
@@ -107,11 +107,11 @@
         </a>
         <div class="nav-mobile-icons">
           @if (user?.role === 'admin') {
-          <a routerLink="/admin" class="icon-btn" aria-label="Admin panel" (click)="closeMenu()">
+          <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" class="icon-btn" aria-label="Admin panel" (click)="closeMenu()">
             <i class="bi bi-shield-fill-check"></i>
           </a>
           }
-          <a routerLink="/friends" class="icon-btn" aria-label="Friends" (click)="closeMenu()">
+          <a routerLink="/friends" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="icon-btn" aria-label="Friends" (click)="closeMenu()">
             <i class="bi bi-people-fill"></i>
             @if ((friendsService.pendingCount | async) ?? 0; as count) {
               @if (count > 0) {
@@ -124,6 +124,8 @@
           @if (user) {
           <a
             routerLink="/gacha"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
             class="gacha-ticket-badge"
             [attr.aria-label]="'Gacha (' + auth.gachaTicketCount() + ')'"
             (click)="closeMenu()">

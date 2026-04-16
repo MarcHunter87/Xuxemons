@@ -67,7 +67,6 @@
 
 .friend-info {
   flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.05rem;
@@ -78,7 +77,6 @@
   display: flex;
   align-items: baseline;
   gap: 0.35rem;
-  min-width: 0;
   flex-wrap: nowrap;
 }
 

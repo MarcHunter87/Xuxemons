@@ -328,7 +328,6 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-height: 0;
 	border: none;
 	border-radius: 10px;
 	padding: 0.625rem 1.5rem;
@@ -350,33 +349,6 @@
 	justify-content: space-between;
 	align-items: center;
 	gap: 1rem;
-}
-
-.delete-account-modal {
-	z-index: 1070;
-}
-.delete-account-content {
-	border-radius: 12px;
-	background: var(--white-color);
-	padding: 1rem;
-}
-
-.delete-account-content .modal-title {
-	color: var(--danger-color);
-}
-.delete-account-content .modal-title i {
-	color: var(--danger-color);
-}
-.delete-account-footer {
-	display: flex;
-	gap: 0.75rem;
-}
-.delete-account-footer .btn-secondary {
-	flex: 1;
-	min-width: 0;
-}
-.delete-account-footer .btn-danger {
-	flex: none;
 }
 
 .settings-card {

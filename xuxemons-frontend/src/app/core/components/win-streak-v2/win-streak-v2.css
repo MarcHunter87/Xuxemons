@@ -1,12 +1,10 @@
 :host {
   display: flex;
   width: 100%;
-  min-height: 0;
 }
 
 .stats-card {
   flex: 1;
-  min-height: 0;
   background-color: var(--primary-color);
   border-radius: 16px;
   padding: 32px;

@@ -2,13 +2,14 @@ import { AfterViewChecked, Component, HostListener, inject, signal, OnInit, OnDe
 import { Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { GachaAwardModal } from '../../core/components/modals/gacha-award-modal/gacha-award-modal';
 import { XuxemonService, Xuxemon } from '../../core/services/xuxemon.service';
 import { AuthService } from '../../core/services/auth';
 
 @Component({
     selector: 'app-gacha',
     standalone: true,
-    imports: [DatePipe],
+    imports: [DatePipe, GachaAwardModal],
     templateUrl: './gacha.html',
     styleUrl: './gacha.css',
 })
@@ -22,8 +23,6 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     @ViewChild('rouletteBox') rouletteBox!: ElementRef<HTMLElement>;
     @ViewChild('awardDialogRoot') awardDialogRoot?: ElementRef<HTMLElement>;
     @ViewChild('awardCloseButton') awardCloseButton?: ElementRef<HTMLButtonElement>;
-    @ViewChild('spinErrorDialogRoot') spinErrorDialogRoot?: ElementRef<HTMLElement>;
-    @ViewChild('spinErrorOkButton') spinErrorOkButton?: ElementRef<HTMLButtonElement>;
     @ViewChild('gachaAudio') gachaAudio?: ElementRef<HTMLAudioElement>;
     @ViewChild('modalAudio') modalAudio?: ElementRef<HTMLAudioElement>;
     private modalAudioRestoreTimeout?: ReturnType<typeof setTimeout>;
@@ -32,7 +31,6 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     public noTransition = signal(false);
     public awardedXuxemon = signal<Xuxemon | null>(null);
     public showAward = signal(false);
-    public spinError = signal<string | null>(null);
     public rouletteItems = signal<Xuxemon[]>([]);
     public trackTransform = signal<string>('translateX(0)');
     public isDataLoaded = signal(false);
@@ -40,7 +38,6 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     private myXuxemonsList = signal<Xuxemon[]>([]);
     private previousFocusedElement: HTMLElement | null = null;
     private shouldFocusAwardCloseButton = false;
-    private shouldFocusErrorButton = false;
 
     readonly revealRayAngles = Array.from({ length: 14 }, (_, i) => Math.round((i * 360) / 14));
     revealSparkles: Array<{ x: number; y: number; size: number; delay: number; duration: number }> = [];
@@ -60,11 +57,6 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         if (this.shouldFocusAwardCloseButton && this.awardCloseButton?.nativeElement) {
             this.awardCloseButton.nativeElement.focus();
             this.shouldFocusAwardCloseButton = false;
-        }
-
-        if (this.shouldFocusErrorButton && this.spinErrorOkButton?.nativeElement) {
-            this.spinErrorOkButton.nativeElement.focus();
-            this.shouldFocusErrorButton = false;
         }
     }
 
@@ -122,7 +114,6 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
 
         this.showAward.set(false);
         this.awardedXuxemon.set(null);
-        this.spinError.set(null);
         this.isSpinning.set(true);
         this.playGachaAudio();
 
@@ -130,16 +121,13 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         this.trackTransform.set('translateX(0)');
         this.initRoulette();
 
-        const winner = await this.xuxemonService.awardRandomXuxemonGacha();
+        const winner = await this.getWinnerWithRetry();
 
         if (!winner) {
             this.stopGachaAudio();
             this.isSpinning.set(false);
             this.noTransition.set(false);
-            this.spinError.set(
-                "Couldn't complete the spin. Make sure you have tickets and your session is still active."
-            );
-            this.shouldFocusErrorButton = true;
+            this.restorePreviousFocus();
             return;
         }
 
@@ -240,18 +228,8 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         this.restorePreviousFocus();
     }
 
-    closeSpinError(): void {
-        this.stopGachaAudio();
-        this.spinError.set(null);
-        this.restorePreviousFocus();
-    }
-
     @HostListener('document:keydown.escape')
     onEscape(): void {
-        if (this.spinError()) {
-            this.closeSpinError();
-            return;
-        }
         if (this.showAward()) this.closeModal();
     }
 
@@ -261,25 +239,30 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
             return;
         }
 
-        if (this.spinError()) {
-            this.trapFocus(event, this.spinErrorDialogRoot?.nativeElement);
-            return;
-        }
-
         if (this.showAward()) {
             this.trapFocus(event, this.awardDialogRoot?.nativeElement);
         }
     }
 
-    onModalKeydown(event: KeyboardEvent, modal: 'award' | 'error'): void {
+    onModalKeydown(event: KeyboardEvent, modal: 'award'): void {
         if (event.key !== 'Tab') {
             return;
         }
 
         const root = modal === 'award'
             ? this.awardDialogRoot?.nativeElement
-            : this.spinErrorDialogRoot?.nativeElement;
+            : undefined;
         this.trapFocus(event, root);
+    }
+
+    private async getWinnerWithRetry(): Promise<Xuxemon | null> {
+        let winner = await this.xuxemonService.awardRandomXuxemonGacha();
+        if (winner) {
+            return winner;
+        }
+
+        winner = await this.xuxemonService.awardRandomXuxemonGacha();
+        return winner ?? null;
     }
 
     private restorePreviousFocus(): void {

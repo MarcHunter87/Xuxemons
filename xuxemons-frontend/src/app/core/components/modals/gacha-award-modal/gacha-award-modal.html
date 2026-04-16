@@ -1,0 +1,157 @@
+@if (gachaContext.viewAnimations) {
+  <div
+    class="gacha-reveal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="gacha-reveal-title"
+    [style.--type-color]="gachaContext.getTypeColor(gachaContext.awardedXuxemon()?.type?.name ?? '')"
+    [style.--type-glow]="gachaContext.getTypeColorGlow(gachaContext.awardedXuxemon()?.type?.name ?? '')"
+    (click)="gachaContext.closeModal()"
+  >
+    <div class="reveal-effects-layer">
+      <div class="reveal-flash"></div>
+      <div class="reveal-flash-color"></div>
+      <div class="reveal-rays-container">
+        @for (angle of gachaContext.revealRayAngles; track $index) {
+          <div class="reveal-ray" [style.--ray-rot]="angle + 'deg'"></div>
+        }
+      </div>
+      <div class="reveal-ring"></div>
+      <div class="reveal-ring reveal-ring-delay-1"></div>
+      <div class="reveal-ring reveal-ring-delay-2"></div>
+      @for (s of gachaContext.revealSparkles; track $index) {
+        <div
+          class="reveal-sparkle"
+          [style.--sp-x]="s.x + 'vw'"
+          [style.--sp-y]="s.y + 'vh'"
+          [style.--sp-size]="s.size + 'px'"
+          [style.--sp-delay]="s.delay + 's'"
+          [style.--sp-duration]="s.duration + 's'"
+        ></div>
+      }
+    </div>
+
+    <div #dialogRoot class="modal-content animate-pop" tabindex="-1" (click)="$event.stopPropagation()">
+      <h2 id="gacha-reveal-title" class="winner-title">Congratulations!</h2>
+      <div class="winner-display">
+        <button
+          type="button"
+          class="winner-image-button"
+          (click)="gachaContext.goToXuxemonDetailsFromRecent(gachaContext.awardedXuxemon()!.id)"
+          [attr.aria-label]="'View ' + (gachaContext.awardedXuxemon()?.name ?? 'Xuxemon') + ' in My Xuxemons'"
+        >
+          <div
+            class="image-wrapper"
+            [style.background-color]="gachaContext.getTypeColor(gachaContext.awardedXuxemon()?.type?.name ?? '')"
+          >
+            <img
+              [src]="gachaContext.awardedXuxemon()?.image_url"
+              [alt]="gachaContext.awardedXuxemon()?.name"
+              class="animate-float"
+            />
+          </div>
+        </button>
+        <p class="winner-name">{{ gachaContext.awardedXuxemon()?.name }}</p>
+        <span
+          class="type-badge"
+          [style.background-color]="gachaContext.getTypeColor(gachaContext.awardedXuxemon()?.type?.name ?? '')"
+        >
+          {{ gachaContext.awardedXuxemon()?.type?.name }}
+        </span>
+        @if (gachaContext.awardedXuxemon()?.hp != null && gachaContext.awardedXuxemon()?.attack != null && gachaContext.awardedXuxemon()?.defense != null) {
+          <div class="winner-stats">
+            <div class="stat stat-hp">
+              <span class="stat-label">HP</span>
+              <span class="stat-value">{{ gachaContext.awardedXuxemon()?.hp }}</span>
+            </div>
+            <div class="stat stat-attack">
+              <span class="stat-label">Attack</span>
+              <span class="stat-value">{{ gachaContext.awardedXuxemon()?.attack }}</span>
+            </div>
+            <div class="stat stat-defense">
+              <span class="stat-label">Defense</span>
+              <span class="stat-value">{{ gachaContext.awardedXuxemon()?.defense }}</span>
+            </div>
+          </div>
+        }
+      </div>
+      <div class="modal-actions">
+        <button type="button" (click)="gachaContext.closeModal()" class="btn-secondary">Close</button>
+        <button
+          type="button"
+          (click)="gachaContext.spinAgain()"
+          class="btn-primary"
+          [disabled]="gachaContext.auth.gachaTicketCount() < 1"
+        >
+          Spin Again
+        </button>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div
+    class="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="gacha-award-title-simple"
+    [style.--type-color]="gachaContext.getTypeColor(gachaContext.awardedXuxemon()?.type?.name ?? '')"
+    [style.--type-glow]="gachaContext.getTypeColorGlow(gachaContext.awardedXuxemon()?.type?.name ?? '')"
+    (click)="gachaContext.closeModal()"
+  >
+    <div #dialogRoot class="modal-content" tabindex="-1" (click)="$event.stopPropagation()">
+      <h2 id="gacha-award-title-simple" class="winner-title">Congratulations!</h2>
+      <div class="winner-display">
+        <button
+          type="button"
+          class="winner-image-button"
+          (click)="gachaContext.goToXuxemonDetailsFromRecent(gachaContext.awardedXuxemon()!.id)"
+          [attr.aria-label]="'View ' + (gachaContext.awardedXuxemon()?.name ?? 'Xuxemon') + ' in My Xuxemons'"
+        >
+          <div
+            class="image-wrapper"
+            [style.background-color]="gachaContext.getTypeColor(gachaContext.awardedXuxemon()?.type?.name ?? '')"
+          >
+            <img
+              [src]="gachaContext.awardedXuxemon()?.image_url"
+              [alt]="gachaContext.awardedXuxemon()?.name"
+            />
+          </div>
+        </button>
+        <p class="winner-name">{{ gachaContext.awardedXuxemon()?.name }}</p>
+        <span
+          class="type-badge"
+          [style.background-color]="gachaContext.getTypeColor(gachaContext.awardedXuxemon()?.type?.name ?? '')"
+        >
+          {{ gachaContext.awardedXuxemon()?.type?.name }}
+        </span>
+        @if (gachaContext.awardedXuxemon()?.hp != null && gachaContext.awardedXuxemon()?.attack != null && gachaContext.awardedXuxemon()?.defense != null) {
+          <div class="winner-stats">
+            <div class="stat stat-hp">
+              <span class="stat-label">HP</span>
+              <span class="stat-value">{{ gachaContext.awardedXuxemon()?.hp }}</span>
+            </div>
+            <div class="stat stat-attack">
+              <span class="stat-label">Attack</span>
+              <span class="stat-value">{{ gachaContext.awardedXuxemon()?.attack }}</span>
+            </div>
+            <div class="stat stat-defense">
+              <span class="stat-label">Defense</span>
+              <span class="stat-value">{{ gachaContext.awardedXuxemon()?.defense }}</span>
+            </div>
+          </div>
+        }
+      </div>
+      <div class="modal-actions">
+        <button type="button" (click)="gachaContext.closeModal()" class="btn-secondary">Close</button>
+        <button
+          type="button"
+          (click)="gachaContext.spinAgain()"
+          class="btn-primary"
+          [disabled]="gachaContext.auth.gachaTicketCount() < 1"
+        >
+          Spin Again
+        </button>
+      </div>
+    </div>
+  </div>
+}

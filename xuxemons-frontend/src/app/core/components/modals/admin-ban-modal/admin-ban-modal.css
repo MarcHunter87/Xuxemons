@@ -1,0 +1,61 @@
+:host {
+  display: contents;
+}
+
+.admin-ban-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--modal-overlay-bg, rgba(0, 0, 0, 0.5));
+  z-index: 1070;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.admin-ban-modal-shell {
+  width: min(560px, 100%);
+}
+
+.admin-ban-modal {
+  z-index: 1070;
+}
+
+.admin-ban-content {
+  border-radius: 12px;
+  background: var(--white-color);
+  padding: 1rem;
+}
+
+.admin-ban-content .modal-title,
+.admin-ban-content .modal-title i {
+  color: var(--danger-color);
+}
+
+.admin-ban-content .modal-body p {
+  margin: 0;
+  color: var(--text-alt-color);
+  line-height: 1.5;
+}
+
+.admin-ban-footer {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.admin-ban-footer .btn-secondary {
+  flex: 1;
+}
+
+.admin-ban-footer .btn-danger {
+  flex: none;
+}
+
+@keyframes modalPop {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-pop {
+  animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

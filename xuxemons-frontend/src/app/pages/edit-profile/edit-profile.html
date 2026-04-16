@@ -228,37 +228,6 @@
 	</section>
 
 	@if (showDeactivateModal()) {
-		<div class="modal fade show d-block delete-account-modal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="delete-account-title">
-			<div class="modal-dialog modal-dialog-centered">
-				<div class="modal-content delete-account-content" #deleteDialog tabindex="-1" (keydown)="onModalKeydown($event)">
-					<div class="modal-header border-0 pb-0">
-						<h2 class="modal-title h4 mb-0 d-flex align-items-center gap-2" id="delete-account-title">
-							<i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
-							Delete Account
-						</h2>
-					</div>
-
-					<div class="modal-body">
-						<p>Are you sure you want to permanently delete your account, including your battle history and Xuxemons? This action cannot be undone.</p>
-						@if (deactivateError()) {
-							<p class="form-message form-message-error" role="status" aria-live="polite">{{ deactivateError() }}</p>
-						}
-					</div>
-
-					<div class="modal-footer border-0 pt-0 delete-account-footer">
-						<button type="button" class="btn-secondary" (click)="closeDeactivateModal()">Cancel</button>
-						<button #primaryDeactivateButton type="button" class="btn-danger" (click)="confirmDeactivateAccount()" [disabled]="isDeactivating()" [attr.aria-busy]="isDeactivating()">
-							@if (isDeactivating()) {
-								<span class="btn-loading-icon" aria-hidden="true"></span>
-							} @else {
-								Remove account
-							}
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="modal-backdrop fade show"></div>
+		<app-delete-account-modal [profileContext]="this" (closeModal)="closeDeactivateModal()"></app-delete-account-modal>
 	}
 </main>

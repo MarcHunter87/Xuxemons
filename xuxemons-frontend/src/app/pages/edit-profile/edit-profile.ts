@@ -1,10 +1,11 @@
 import { ChangeDetectorRef, Component, signal, ElementRef, ViewChild, HostListener, AfterViewChecked } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DeleteAccountModal } from '../../core/components/modals/delete-account-modal/delete-account-modal';
 import { AuthService, User } from '../../core/services/auth';
 
 @Component({
   selector: 'app-edit-profile',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, DeleteAccountModal],
   templateUrl: './edit-profile.html',
   styleUrl: './edit-profile.css',
 })

@@ -1,0 +1,224 @@
+<div class="use-item-modal-backdrop" role="dialog" aria-modal="true" (click)="onBackdropClick()" (keydown)="onModalKeydown($event)">
+  <div #dialogRoot class="use-item-modal" tabindex="-1" (click)="$event.stopPropagation()">
+    <h2 id="use-item-modal-title" class="use-item-modal-title">Use item on a Xuxemon</h2>
+    <p class="use-item-modal-subtitle">Select a Xuxemon to use {{ inventoryContext.selectedItem()!.name }} on.</p>
+    <div class="use-item-search-wrap">
+      <label for="use-item-search" class="visually-hidden">Search your Xuxemons</label>
+      <input id="use-item-search" type="text" class="use-item-search" placeholder="Search by name..."
+        [ngModel]="inventoryContext.useSearchQuery()" (ngModelChange)="inventoryContext.setUseSearchQuery($event)" />
+    </div>
+    @if (inventoryContext.selectedItem()?.name === 'Special Meat') {
+    <p class="use-item-hint">Special Meat evolves the Xuxemon increasing its size.</p>
+    }
+    <ul class="use-item-xuxemon-list" role="listbox" aria-label="Your Xuxemons">
+      @for (xu of inventoryContext.useModalXuxemons(); track xu.adquired_id ?? xu.id) {
+      <li>
+        <button role="option" type="button" class="use-item-xuxemon-btn"
+          [class.selected]="inventoryContext.selectedXuxemonForUse()?.adquired_id === xu.adquired_id"
+          (click)="inventoryContext.selectXuxemonForUse(xu)" (keydown.enter)="inventoryContext.onXuxemonEnter(xu); $event.preventDefault()" tabindex="0"
+          [attr.aria-selected]="inventoryContext.selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? 'true' : 'false'">
+          <img [src]="xu.image_url" [alt]="xu.name" class="use-item-xuxemon-img">
+          <div class="use-item-xuxemon-info">
+            <span class="use-item-xuxemon-name">{{ xu.name }}</span>
+            @if (inventoryContext.selectedItem()?.effect_type === 'Evolve') {
+            <div class="use-item-xuxemon-stats use-item-xuxemon-stats-evolve">
+              <div class="use-item-evolve-row">
+                <span class="stat-evolve">
+                  {{ xu.size }}
+                  @if (inventoryContext.getEvolvePreview(xu, inventoryContext.selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? inventoryContext.useQuantity() : 1).willEvolve) {
+                    <span class="stat-preview stat-preview-evolve">→ {{ inventoryContext.getEvolvePreview(xu, inventoryContext.selectedXuxemonForUse()?.adquired_id === xu.adquired_id ? inventoryContext.useQuantity() : 1).toSize }}</span>
+                  }
+                </span>
+
+                <div class="use-item-sideeffects-row" role="group" [attr.aria-label]="'Side effects on ' + xu.name">
+                  @if (xu.side_effect_1?.icon_url) {
+                    <span class="use-item-sideeffect-badge" [title]="xu.side_effect_1?.name ?? ''">
+                      <img [src]="xu.side_effect_1?.icon_url ?? ''" [alt]="xu.side_effect_1?.name ?? 'Side effect'" class="use-item-sideeffect-icon" />
+                    </span>
+                  }
+                  @if (xu.side_effect_2?.icon_url) {
+                    <span class="use-item-sideeffect-badge" [title]="xu.side_effect_2?.name ?? ''">
+                      <img [src]="xu.side_effect_2?.icon_url ?? ''" [alt]="xu.side_effect_2?.name ?? 'Side effect'" class="use-item-sideeffect-icon" />
+                    </span>
+                  }
+                  @if (xu.side_effect_3?.icon_url) {
+                    <span class="use-item-sideeffect-badge" [title]="xu.side_effect_3?.name ?? ''">
+                      <img [src]="xu.side_effect_3?.icon_url ?? ''" [alt]="xu.side_effect_3?.name ?? 'Side effect'" class="use-item-sideeffect-icon" />
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+            }
+            @if (inventoryContext.selectedItem()?.effect_type === 'Remove Status Effects') {
+            <div class="use-item-status-block" role="group" [attr.aria-label]="'Status and side effects on ' + xu.name">
+              <div class="use-item-status-chips">
+                @if (xu.statusEffect?.name) {
+                  <span class="use-item-status-chip" [class.is-target]="inventoryContext.isEffectTargeted(xu.statusEffect!.name, true)" [title]="xu.statusEffect!.name">
+                    @if (xu.statusEffect?.icon_url) {
+                      <img [src]="xu.statusEffect!.icon_url" [alt]="xu.statusEffect!.name" class="use-item-status-icon"
+                        width="20" height="20" onerror="this.style.display='none'" />
+                    }
+                    <span class="use-item-status-name">
+                      {{ xu.statusEffect!.name }}
+                      @if (inventoryContext.isEffectTargeted(xu.statusEffect!.name, true)) {
+                        <i class="bi bi-check-circle-fill ms-1 icon-success"></i>
+                      }
+                    </span>
+                  </span>
+                }
+                @if (xu.side_effect_1?.name) {
+                  <span class="use-item-status-chip side-effect" [class.is-target]="inventoryContext.isEffectTargeted(xu.side_effect_1!.name)" [title]="xu.side_effect_1!.name">
+                    <img [src]="xu.side_effect_1!.icon_url" [alt]="xu.side_effect_1!.name" class="use-item-status-icon"
+                      width="20" height="20" onerror="this.style.display='none'" />
+                    <span class="use-item-status-name">
+                      {{ xu.side_effect_1!.name }}
+                      @if (inventoryContext.isEffectTargeted(xu.side_effect_1!.name)) {
+                        <i class="bi bi-check-circle-fill ms-1 icon-success"></i>
+                      }
+                    </span>
+                  </span>
+                }
+                @if (xu.side_effect_2?.name) {
+                  <span class="use-item-status-chip side-effect" [class.is-target]="inventoryContext.isEffectTargeted(xu.side_effect_2!.name)" [title]="xu.side_effect_2!.name">
+                    <img [src]="xu.side_effect_2!.icon_url" [alt]="xu.side_effect_2!.name" class="use-item-status-icon"
+                      width="20" height="20" onerror="this.style.display='none'" />
+                    <span class="use-item-status-name">
+                      {{ xu.side_effect_2!.name }}
+                      @if (inventoryContext.isEffectTargeted(xu.side_effect_2!.name)) {
+                        <i class="bi bi-check-circle-fill ms-1 icon-success"></i>
+                      }
+                    </span>
+                  </span>
+                }
+                @if (xu.side_effect_3?.name) {
+                  <span class="use-item-status-chip side-effect" [class.is-target]="inventoryContext.isEffectTargeted(xu.side_effect_3!.name)" [title]="xu.side_effect_3!.name">
+                    <img [src]="xu.side_effect_3!.icon_url" [alt]="xu.side_effect_3!.name" class="use-item-status-icon"
+                      width="20" height="20" onerror="this.style.display='none'" />
+                    <span class="use-item-status-name">
+                      {{ xu.side_effect_3!.name }}
+                      @if (inventoryContext.isEffectTargeted(xu.side_effect_3!.name)) {
+                        <i class="bi bi-check-circle-fill ms-1 icon-success"></i>
+                      }
+                    </span>
+                  </span>
+                }
+                @if (!xu.statusEffect?.name && !xu.side_effect_1?.name && !xu.side_effect_2?.name && !xu.side_effect_3?.name) {
+                  <span class="use-item-status-none">None</span>
+                }
+              </div>
+            </div>
+            }
+            @if (
+            inventoryContext.selectedItem()?.effect_type === 'Heal' ||
+            inventoryContext.selectedItem()?.effect_type === 'DMG Up' ||
+            inventoryContext.selectedItem()?.effect_type === 'Defense Up'
+            ) {
+            <div class="use-item-xuxemon-stats">
+              @if (inventoryContext.selectedItem()?.effect_type === 'Heal') {
+              <span class="stat-hp">
+                ❤️ {{ xu.current_hp ?? xu.hp }}/{{ xu.hp }}
+                <span class="stat-preview stat-preview-heal">→ {{ inventoryContext.getHealPreview(xu).newHp }}/{{ xu.hp }}</span>
+              </span>
+              }
+              @if (inventoryContext.selectedItem()?.effect_type === 'DMG Up') {
+              <span class="stat-atk">
+                <img src="/icons/attack_logo.png" alt="DMG Up" class="stat-icon" onerror="this.style.display='none'" /> {{ xu.attack }}
+                <span class="stat-preview stat-preview-atk">→ {{ inventoryContext.getStatBuffPreview(xu, 'attack').boosted }}</span>
+              </span>
+              }
+              @if (inventoryContext.selectedItem()?.effect_type === 'Defense Up') {
+              <span class="stat-def">
+                <img src="/icons/defense_logo.png" alt="Defense Up" class="stat-icon" onerror="this.style.display='none'" /> {{ xu.defense }}
+                <span class="stat-preview stat-preview-def">→ {{ inventoryContext.getStatBuffPreview(xu, 'defense').boosted }}</span>
+              </span>
+              }
+            </div>
+            }
+          </div>
+        </button>
+      </li>
+      } @empty {
+      <li class="use-item-empty">No Xuxemons match your search.</li>
+      }
+    </ul>
+    @if (inventoryContext.selectedItem()?.name === 'Special Meat' && inventoryContext.selectedXuxemonForUse()) {
+      <div class="use-item-qty-picker redesigned-qty-picker mt-2">
+        <label for="use-qty-input" class="qty-label mb-2">Quantity to use</label>
+        <div class="qty-controls compact qty-controls-row">
+          <button class="qty-btn qty-btn-use qty-decrease" (click)="inventoryContext.updateUseQuantity(inventoryContext.useQuantity() - inventoryContext.getUseQuantityStep())" [disabled]="inventoryContext.useQuantity() <= inventoryContext.getUseQuantityMin() || inventoryContext.isUsing() || inventoryContext.isSpecialMeatUseBlocked()">
+            <i class="bi bi-dash-lg"></i>
+          </button>
+          <input id="use-qty-input" class="qty-input styled qty-input-use" type="number" [min]="inventoryContext.getUseQuantityMin()" [step]="inventoryContext.getUseQuantityStep()" [max]="inventoryContext.maxUsableSpecialMeat()" [ngModel]="inventoryContext.useQuantity()" (ngModelChange)="inventoryContext.updateUseQuantity($event)" [disabled]="inventoryContext.isUsing() || inventoryContext.isSpecialMeatUseBlocked()" />
+          <button class="qty-btn qty-btn-use qty-increase" (click)="inventoryContext.updateUseQuantity(inventoryContext.useQuantity() + inventoryContext.getUseQuantityStep())" [disabled]="inventoryContext.useQuantity() >= inventoryContext.maxUsableSpecialMeat() || inventoryContext.isUsing() || inventoryContext.isSpecialMeatUseBlocked()">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+        @if (
+          inventoryContext.useOverdoseInfo() ||
+          inventoryContext.isGluttonyBlocked() ||
+          (inventoryContext.maxUsableSpecialMeat() === 0 && !inventoryContext.isSpecialMeatUseBlocked()) ||
+          (inventoryContext.useQuantityError() && !inventoryContext.isSpecialMeatUseBlocked()) ||
+          (inventoryContext.showStarvingMeatError() && !inventoryContext.isSpecialMeatUseBlocked()) ||
+          inventoryContext.useStarvingInfo()
+        ) {
+          <div class="use-item-warning-stack use-item-modal-warning mt-2" role="alert">
+            @if (inventoryContext.useOverdoseInfo()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-octagon-fill overdose-icon"></i>
+                <span class="overdose-text">Your Xuxemon is affected by <strong>Overdose</strong>, cannot eat Special Meat, and its size has been reduced.</span>
+              </div>
+            }
+            @if (inventoryContext.isGluttonyBlocked()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-triangle-fill gluttony-icon"></i>
+                <span class="gluttony-text">Your Xuxemon is affected by <strong>Gluttony</strong> and cannot eat Special Meat.</span>
+              </div>
+            }
+            @if (inventoryContext.maxUsableSpecialMeat() === 0 && !inventoryContext.isSpecialMeatUseBlocked()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-circle"></i>
+                <span>No Special Meat available for this Xuxemon.</span>
+              </div>
+            }
+            @if (inventoryContext.useQuantityError() && !inventoryContext.isSpecialMeatUseBlocked()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>{{ inventoryContext.useQuantityError() }}</span>
+              </div>
+            }
+            @if (inventoryContext.showStarvingMeatError() && !inventoryContext.isSpecialMeatUseBlocked()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>You do not have enough Special Meat: <strong>Starving</strong> consumes 2 Special Meat instead of 1.</span>
+              </div>
+            }
+            @if (inventoryContext.useStarvingInfo()) {
+              <div class="use-item-warning-item">
+                <i class="bi bi-exclamation-triangle-fill starving-icon"></i>
+                <span class="starving-text">This Xuxemon is <strong>Starving</strong> and will consume 2 Special Meat instead of 1 to progress.</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+    @if (inventoryContext.useApiError()) {
+    <div class="use-item-api-error use-item-modal-warning" role="alert">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span>{{ inventoryContext.useApiError() }}</span>
+    </div>
+    }
+    <div class="use-item-actions">
+      <button type="button" class="btn btn-secondary btn-lg" (click)="inventoryContext.closeUseModal()">Cancel</button>
+      <button type="button" class="btn btn-primary btn-lg" [disabled]="inventoryContext.isUseActionDisabled()"
+        [attr.aria-busy]="inventoryContext.isUsing()" (click)="inventoryContext.confirmUseItem()">
+        @if (inventoryContext.isUsing()) {
+        <span class="btn-loading-icon" aria-hidden="true"></span>
+        } @else {
+        Use Item
+        }
+      </button>
+    </div>
+  </div>
+</div>

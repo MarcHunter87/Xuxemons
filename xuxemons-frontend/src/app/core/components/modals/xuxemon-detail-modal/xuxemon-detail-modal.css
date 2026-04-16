@@ -1,0 +1,395 @@
+:host {
+  display: contents;
+}
+
+.xuxemon-modal-shell {
+  width: min(1040px, 100%);
+}
+
+.xuxemon-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--modal-overlay-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1200;
+}
+
+.xuxemon-modal-card {
+  width: min(1040px, 100%);
+  max-height: 90vh;
+  border-radius: 24px;
+  background: linear-gradient(180deg, var(--white-color) 0%, var(--primary-color) 100%);
+  border: 2px solid var(--light-gray-color);
+  box-shadow: 0 16px 40px var(--shadow-card);
+  padding: 1.1rem 1.1rem 1.2rem;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.modal-body {
+  display: block;
+}
+
+.animate-pop {
+  animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalPop {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  z-index: 10;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.modal-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.modal-content {
+  overflow: visible;
+}
+
+.modal-header-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.modal-name {
+  margin: 0;
+  color: var(--text-alt-color);
+  font-size: 2.1rem;
+  font-weight: 800;
+}
+
+.modal-level-inline {
+  font-size: 1em;
+  font-weight: inherit;
+  color: var(--accent-on-light);
+  margin-left: 0.5rem;
+}
+
+.xuxemon-modal-card.power .modal-level-inline {
+  color: var(--danger-color);
+}
+
+.xuxemon-modal-card.speed .modal-level-inline {
+  color: var(--accent-color);
+}
+
+.xuxemon-modal-card.technical .modal-level-inline {
+  color: var(--success-color);
+}
+
+.meta-chips {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.meta-chips .size-label {
+  position: static;
+  top: auto;
+  right: auto;
+  border: 1px solid var(--white-alpha-40);
+}
+
+.modal-type-badge,
+.meta-chips .size-label {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  padding: 0.35rem 0.9rem;
+  min-height: 2.25rem;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 8px;
+  line-height: 1.25;
+}
+
+.modal-type-badge {
+  background: var(--accent-color);
+  color: var(--white-color);
+  text-transform: lowercase;
+}
+
+.xuxemon-modal-card.power .modal-type-badge { background-color: var(--danger-color); }
+.xuxemon-modal-card.speed .modal-type-badge { background-color: var(--accent-color); }
+.xuxemon-modal-card.technical .modal-type-badge { background-color: var(--success-color); }
+
+.modal-type-badge::first-letter {
+  text-transform: uppercase;
+}
+
+.status-effect-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  min-height: 2.25rem;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 8px;
+  line-height: 1.25;
+  border: 1px solid var(--white-alpha-40);
+  background: linear-gradient(135deg, var(--status-chip-border) 0%, var(--status-chip-text) 100%);
+  color: var(--white-color);
+}
+
+.status-effect-chip.side-effect-chip {
+  background: linear-gradient(135deg, var(--side-effect-chip-start) 0%, var(--side-effect-chip-end) 100%);
+}
+
+.status-effect-chip .status-effect-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  min-width: 1.2rem;
+  min-height: 1.2rem;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.modal-description {
+  margin: 0.6rem 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.modal-image-shell {
+  margin: 0;
+  position: relative;
+  align-self: stretch;
+  border-radius: 18px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.xuxemon-modal-card.power .modal-image-shell {
+  background: linear-gradient(135deg, var(--danger-bg-alpha) 0%, var(--danger-bg-alpha-light) 100%);
+  border: 2px solid var(--danger-border-alpha);
+}
+
+.xuxemon-modal-card.speed .modal-image-shell {
+  background: linear-gradient(135deg, var(--accent-alpha-08) 0%, var(--accent-alpha-05) 100%);
+  border: 2px solid var(--accent-border-alpha);
+}
+
+.xuxemon-modal-card.technical .modal-image-shell {
+  background: linear-gradient(135deg, var(--success-bg-alpha) 0%, var(--success-bg-alpha-light) 100%);
+  border: 2px solid var(--success-shadow-alpha);
+}
+
+.modal-image {
+  position: absolute;
+  inset: 1rem;
+  width: calc(100% - 2rem);
+  height: calc(100% - 2rem);
+  object-fit: contain;
+}
+
+.modal-stats {
+  margin-top: 0.85rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.modal-stat {
+  border-radius: 18px;
+  padding: 0.65rem 0.6rem;
+  text-align: center;
+  border: 1px solid var(--light-gray-color);
+}
+
+.stat-label,
+.stat-value {
+  display: block;
+  font-size: 18px;
+  color: var(--text-alt-color);
+}
+
+.stat-label {
+  font-weight: 800;
+  color: var(--black-color);
+}
+
+.stat-value {
+  margin-top: 0.2rem;
+  font-weight: 800;
+}
+
+.stat-hp { background: linear-gradient(135deg, var(--stat-hp-bg-start) 0%, var(--stat-hp-bg-end) 100%); }
+.stat-attack { background: linear-gradient(135deg, var(--stat-atk-bg-start) 0%, var(--stat-atk-bg-end) 100%); }
+.stat-defense { background: linear-gradient(135deg, var(--stat-def-bg-start) 0%, var(--stat-def-bg-end) 100%); }
+
+.modal-attacks {
+  margin-top: 0.85rem;
+}
+
+.attacks-list {
+  list-style: none;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.attack-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent-alpha-08) 0%, var(--accent-alpha-05) 100%);
+  border: 1px solid var(--accent-border-alpha);
+}
+
+.xuxemon-modal-card.power .attack-item {
+  background: linear-gradient(135deg, var(--danger-bg-alpha) 0%, var(--danger-bg-alpha-light) 100%);
+  border-color: var(--danger-border-alpha);
+}
+
+.xuxemon-modal-card.speed .attack-item {
+  background: linear-gradient(135deg, var(--accent-alpha-08) 0%, var(--accent-alpha-05) 100%);
+  border-color: var(--accent-border-alpha);
+}
+
+.xuxemon-modal-card.technical .attack-item {
+  background: linear-gradient(135deg, var(--success-bg-alpha) 0%, var(--success-bg-alpha-light) 100%);
+  border-color: var(--success-shadow-alpha);
+}
+
+.attack-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.attack-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--black-color);
+}
+
+.attack-status-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
+}
+
+.attack-status-chance {
+  font-size: 16px;
+  color: var(--black-color);
+}
+
+.attack-name,
+.attack-dmg {
+  font-size: 16px;
+  color: var(--black-color);
+  font-weight: 700;
+}
+
+.attack-description {
+  margin: 0;
+  color: var(--black-color);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.no-attacks {
+  margin: 0.6rem 0 0;
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 767.98px) {
+  .xuxemon-modal-card {
+    padding: 1rem 1rem 1.1rem;
+  }
+
+  .modal-close {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .modal-layout {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+
+  .modal-image-shell {
+    aspect-ratio: 1;
+  }
+
+  .modal-image {
+    max-width: 100%;
+  }
+
+  .modal-name {
+    font-size: 1.7rem;
+  }
+
+  .modal-stats {
+    gap: 0.5rem;
+  }
+
+  .attack-item {
+    padding: 0.55rem 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-stats {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .modal-stat {
+    padding: 0.55rem 0.5rem;
+    border-radius: 14px;
+  }
+
+  .modal-stats .modal-stat:last-child {
+    width: 100%;
+  }
+
+  .stat-label,
+  .stat-value {
+    font-size: 1.35rem;
+  }
+}

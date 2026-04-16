@@ -10,13 +10,13 @@ import {
     computed,
     OnInit,
     OnDestroy,
-    ViewChild,
-    AfterViewInit,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { EvolutionSequence } from '../../core/components/evolution-sequence/evolution-sequence';
+import { DiscardItemModal } from '../../core/components/modals/discard-item-modal/discard-item-modal';
+import { UseItemModal } from '../../core/components/modals/use-item-modal/use-item-modal';
 import type { InventoryItem, UseItemResponseData, Xuxemon, XuxemonSize } from '../../core/interfaces';
 import { AuthService } from '../../core/services/auth';
 import { InventoryService } from '../../core/services/inventory.service';
@@ -24,7 +24,7 @@ import { XuxemonService } from '../../core/services/xuxemon.service';
 
 @Component({
     selector: 'app-inventory',
-    imports: [NgClass, FormsModule, EvolutionSequence],
+    imports: [NgClass, FormsModule, EvolutionSequence, UseItemModal, DiscardItemModal],
     templateUrl: './inventory.html',
     styleUrl: './inventory.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,12 +39,6 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     private focusUseItemSearch = false;
     private focusDiscardCancelButton = false;
     private previousFocusedElement: HTMLElement | null = null;
-
-    @ViewChild('useModalRoot') useModalRoot?: ElementRef<HTMLElement>;
-    @ViewChild('discardModalRoot') discardModalRoot?: ElementRef<HTMLElement>;
-    @ViewChild('discardCancelButton') discardCancelButton?: ElementRef<HTMLButtonElement>;
-    @ViewChild('plusQtyBtn') plusQtyBtn?: ElementRef<HTMLButtonElement>;
-    @ViewChild('qtyInput') qtyInput?: ElementRef<HTMLInputElement>;
 
     readonly items = signal<InventoryItem[]>([]);
     readonly myXuxemons = signal<Xuxemon[]>([]);
@@ -420,8 +414,11 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
             this.focusUseItemSearch = false;
         }
 
-        if (this.focusDiscardCancelButton && this.discardCancelButton?.nativeElement) {
-            setTimeout(() => this.discardCancelButton?.nativeElement.focus(), 0);
+        if (this.focusDiscardCancelButton) {
+            const cancelButton = this.elementRef.nativeElement.querySelector('.discard-cancel-button');
+            if (cancelButton instanceof HTMLButtonElement) {
+                setTimeout(() => cancelButton.focus(), 0);
+            }
             this.focusDiscardCancelButton = false;
         }
     }
@@ -460,8 +457,11 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         }
         // Foco automático en el botón + si corresponde
         setTimeout(() => {
-            if (item?.name === 'Special Meat' && !this.isSpecialMeatUseBlocked() && this.qtyInput?.nativeElement) {
-                this.qtyInput.nativeElement.focus();
+            if (item?.name === 'Special Meat' && !this.isSpecialMeatUseBlocked()) {
+                const qtyInput = this.elementRef.nativeElement.querySelector('#use-qty-input');
+                if (qtyInput instanceof HTMLInputElement) {
+                    qtyInput.focus();
+                }
             }
         }, 0);
     }
@@ -551,53 +551,6 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     onEscape(): void {
         if (this.useModalOpen()) this.closeUseModal();
         else if (this.discardMode()) this.cancelDiscard();
-    }
-
-    onModalKeydown(event: KeyboardEvent, modal: 'use' | 'discard'): void {
-        if (event.key !== 'Tab') {
-            return;
-        }
-
-        const root = modal === 'use'
-            ? this.useModalRoot?.nativeElement
-            : this.discardModalRoot?.nativeElement;
-        const isOpen = modal === 'use' ? this.useModalOpen() : this.discardMode();
-        if (!isOpen || !root) {
-            return;
-        }
-
-        const focusableSelector = [
-            'a[href]',
-            'button:not([disabled])',
-            'textarea:not([disabled])',
-            'input:not([disabled])',
-            'select:not([disabled])',
-            '[tabindex]:not([tabindex="-1"])',
-        ].join(',');
-
-        const focusableElements = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
-            .filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1);
-
-        if (focusableElements.length === 0) {
-            event.preventDefault();
-            root.focus();
-            return;
-        }
-
-        const first = focusableElements[0];
-        const last = focusableElements[focusableElements.length - 1];
-        const active = document.activeElement as HTMLElement | null;
-
-        if (event.shiftKey && active === first) {
-            event.preventDefault();
-            last.focus();
-            return;
-        }
-
-        if (!event.shiftKey && active === last) {
-            event.preventDefault();
-            first.focus();
-        }
     }
 
     private restorePreviousFocus(): void {

@@ -87,7 +87,6 @@
   background: color-mix(in srgb, var(--accent-glow) 14%, var(--white-color));
   padding: 1.4rem 1rem 1rem;
   margin: 0;
-  min-width: 0;
 }
 
 .form-legend {
@@ -152,7 +151,7 @@
 .item-select-trigger {
   width: 100%;
   display: flex;
-  align-items: center;
+  justify-content: flex-start;
   gap: 0.5rem;
   padding: 0.75rem;
   border: 2px solid var(--light-gray-color);
@@ -169,7 +168,6 @@
 
 .item-select-trigger.form-control {
   height: auto;
-  min-height: 0;
 }
 
 .item-select-trigger:hover:not(:disabled),
@@ -282,9 +280,6 @@
   object-fit: contain;
 }
 
-.item-details-body {
-  min-width: 0;
-}
 
 .item-details-name {
   font-size: 1.125rem;

@@ -2,6 +2,8 @@ import { AfterViewChecked, Component, ElementRef, HostListener, OnInit, ViewChil
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
+import { AdminAwardModal } from '../../../core/components/modals/admin-award-modal/admin-award-modal';
+import { AdminBanModal } from '../../../core/components/modals/admin-ban-modal/admin-ban-modal';
 import { AdminService } from '../../../core/services/admin';
 import { AuthService } from '../../../core/services/auth';
 import { AdminUser, BagStatus } from '../../../core/interfaces';
@@ -19,7 +21,7 @@ export interface AwardedXuxemonDisplay {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AdminAwardModal, AdminBanModal],
   templateUrl: './admin.html',
   styleUrl: './admin.css',
 })
@@ -35,12 +37,11 @@ export class Admin implements OnInit, AfterViewChecked {
   readonly awardedXuxemon = signal<AwardedXuxemonDisplay | null>(null);
   readonly awardLoadingUserId = signal<string | null>(null);
   readonly banLoadingUserId = signal<string | null>(null);
+  readonly showBanModal = signal(false);
+  readonly pendingBanUser = signal<AdminUser | null>(null);
   readonly awardError = signal<string | null>(null);
   private previousFocusedElement: HTMLElement | null = null;
   private shouldFocusAwardCloseButton = false;
-
-  @ViewChild('awardModalRoot') awardModalRoot?: ElementRef<HTMLElement>;
-  @ViewChild('awardCloseButton') awardCloseButton?: ElementRef<HTMLButtonElement>;
   @ViewChild('modalAudio') modalAudio?: ElementRef<HTMLAudioElement>;
 
   readonly hasContent = computed(() => !this.isLoading() && !this.errorMessage());
@@ -50,8 +51,7 @@ export class Admin implements OnInit, AfterViewChecked {
   }
 
   ngAfterViewChecked(): void {
-    if (this.shouldFocusAwardCloseButton && this.awardCloseButton?.nativeElement) {
-      this.awardCloseButton.nativeElement.focus();
+    if (this.shouldFocusAwardCloseButton) {
       this.shouldFocusAwardCloseButton = false;
     }
   }
@@ -136,8 +136,18 @@ export class Admin implements OnInit, AfterViewChecked {
   }
 
   banUser(user: AdminUser): void {
-    const confirmed = window.confirm(`Are you sure you want to ban ${this.getUserFullName(user)}?`);
-    if (!confirmed) {
+    this.pendingBanUser.set(user);
+    this.showBanModal.set(true);
+  }
+
+  closeBanModal(): void {
+    this.showBanModal.set(false);
+    this.pendingBanUser.set(null);
+  }
+
+  confirmBanUser(): void {
+    const user = this.pendingBanUser();
+    if (!user) {
       return;
     }
 
@@ -154,9 +164,11 @@ export class Admin implements OnInit, AfterViewChecked {
             delete next[user.id];
             return next;
           });
+          this.closeBanModal();
         },
         error: (err) => {
           this.errorMessage.set(err?.error?.message ?? 'Failed to ban user');
+          this.closeBanModal();
         },
       });
   }
@@ -184,6 +196,10 @@ export class Admin implements OnInit, AfterViewChecked {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.showBanModal()) {
+      this.closeBanModal();
+      return;
+    }
     if (this.showAwardModal()) {
       this.closeAwardModal();
       return;
@@ -196,7 +212,6 @@ export class Admin implements OnInit, AfterViewChecked {
     if (event.key !== 'Tab' || !this.showAwardModal()) {
       return;
     }
-    this.trapFocus(event, this.awardModalRoot?.nativeElement);
   }
 
   dismissAwardError(): void {
@@ -204,10 +219,7 @@ export class Admin implements OnInit, AfterViewChecked {
   }
 
   onModalKeydown(event: KeyboardEvent): void {
-    if (!this.showAwardModal() || event.key !== 'Tab') {
-      return;
-    }
-    this.trapFocus(event, this.awardModalRoot?.nativeElement);
+    if (!this.showAwardModal() || event.key !== 'Tab') return;
   }
 
   getTypeColor(typeName: string): string {

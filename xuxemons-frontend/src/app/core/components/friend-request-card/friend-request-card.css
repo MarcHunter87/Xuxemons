@@ -51,7 +51,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
-  min-width: 0;
 }
 
 .request-name {
@@ -81,7 +80,6 @@
 
 .request-btn {
   flex: 1 1 0;
-  min-width: 0;
   gap: 0.4rem;
   display: inline-flex;
   align-items: center;
@@ -114,6 +112,5 @@
   .request-btn {
     flex: 0 0 auto;
     width: 100%;
-    min-width: 0;
   }
 }
