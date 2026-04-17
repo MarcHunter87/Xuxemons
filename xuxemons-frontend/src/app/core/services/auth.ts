@@ -4,6 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Observable, of, tap, BehaviorSubject } from 'rxjs';
 import { delay, catchError, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { jwtDecode } from 'jwt-decode';
 import type {
   DailyRewardNotification,
   DailyRewardNotificationResponse,
@@ -20,6 +21,9 @@ import type {
 
 export type { User, RegisterPayload, LoginPayload, UpdatePersonalInfoPayload, UpdatePasswordPayload };
 
+// Sirve para verificar si el token está expirado
+type JwtPayload = { exp?: number };
+
 @Injectable({
   providedIn: 'root'
 })
@@ -29,7 +33,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
 
-  private readonly userSubject = new BehaviorSubject<User | null>(this.getStoredUser());
+  private readonly userSubject = new BehaviorSubject<User | null>(this.readInitialUser());
   user$ = this.userSubject.pipe(delay(0));
 
   readonly gachaTicketCount = signal(0);
@@ -53,7 +57,45 @@ export class AuthService {
     return this.isBrowser ? localStorage : null;
   }
 
+  // Sirve para limpiar la sesión local cuando el token está expirado
+  private clearExpiredLocalAuth(): void {
+    this.getStorage()?.removeItem('token');
+    this.getStorage()?.removeItem('user');
+    this.gachaTicketCount.set(0);
+    this.userSubject.next(null);
+  }
+
+  // Sirve para leer el usuario inicial desde el local storage
+  private readInitialUser(): User | null {
+    const token = this.getStorage()?.getItem('token');
+    if (!token) {
+      return null;
+    }
+    if (!this.isAccessTokenValid(token)) {
+      this.getStorage()?.removeItem('token');
+      this.getStorage()?.removeItem('user');
+      return null;
+    }
+    const raw = this.getStorage()?.getItem('user');
+    return raw ? (JSON.parse(raw) as User) : null;
+  }
+
+  private isAccessTokenValid(token: string): boolean {
+    try {
+      const payload = jwtDecode<JwtPayload>(token);
+      if (typeof payload.exp !== 'number') {
+        return true;
+      }
+      return payload.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
+  }
+
   private getStoredUser(): User | null {
+    if (!this.getToken()) {
+      return null;
+    }
     const raw = this.getStorage()?.getItem('user');
     return raw ? (JSON.parse(raw) as User) : null;
   }
@@ -110,7 +152,15 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return this.getStorage()?.getItem('token') ?? null;
+    const token = this.getStorage()?.getItem('token') ?? null;
+    if (!token) {
+      return null;
+    }
+    if (!this.isAccessTokenValid(token)) {
+      this.clearExpiredLocalAuth();
+      return null;
+    }
+    return token;
   }
   
   getAssetUrl(path: string, cacheBust?: string): string {
@@ -136,7 +186,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return this.getToken() !== null;
+    return !!this.getToken();
   }
 
   isAdmin(): boolean {
