@@ -168,8 +168,7 @@
   justify-content: flex-end;
 }
 
-.modal-actions .btn-primary,
-.modal-actions .btn-secondary {
+.modal-actions :is(.btn-primary, .btn-secondary) {
   flex: 1;
   padding: 0.75rem 1.25rem;
   border-radius: 12px;
@@ -225,7 +224,7 @@
   height: 100%;
   background: var(--modal-overlay-bg);
   backdrop-filter: blur(10px);
-  z-index: 2000;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -258,7 +257,7 @@
 .gacha-reveal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 2000;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -269,7 +268,7 @@
 
 .gacha-reveal-overlay .modal-content {
   position: relative;
-  z-index: 30;
+  z-index: 5;
   animation: reveal-modal-entrance 0.65s 0.45s cubic-bezier(0.22, 1, 0.36, 1) both !important;
 }
 
@@ -321,7 +320,7 @@
   background: white;
   opacity: 0;
   animation: reveal-flash-burst 0.7s 0.08s ease-out forwards;
-  z-index: 5;
+  z-index: 4;
 }
 
 @keyframes reveal-flash-burst {
@@ -337,7 +336,7 @@
   background: var(--type-color, #0D6EFD);
   opacity: 0;
   animation: reveal-flash-color 1s 0.18s ease-out forwards;
-  z-index: 4;
+  z-index: 3;
 }
 
 @keyframes reveal-flash-color {
@@ -399,7 +398,7 @@
   opacity: 0;
   transform: scale(0);
   animation: reveal-ring-expand 1.2s 0.3s ease-out forwards;
-  z-index: 3;
+  z-index: 2;
 }
 
 .reveal-ring-delay-1 {
@@ -431,7 +430,7 @@
     0 0 6px 2px var(--type-color, #0D6EFD),
     0 0 14px 4px var(--type-glow, rgba(13, 110, 253, 0.3));
   animation: sparkle-twinkle var(--sp-duration, 2s) var(--sp-delay, 1.5s) ease-in-out infinite;
-  z-index: 4;
+  z-index: 3;
 }
 
 @keyframes sparkle-twinkle {

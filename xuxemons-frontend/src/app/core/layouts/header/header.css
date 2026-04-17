@@ -9,7 +9,7 @@
   width: 100%;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1;
   padding: 0.5rem 0;
 }
 
@@ -76,8 +76,7 @@ nav {
   transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
 }
 
-.nav-links a:hover,
-.nav-links a:focus-visible {
+.nav-links a:hover {
   background-color: var(--white-color);
   color: var(--accent-color);
   transform: translateY(-1px);
@@ -88,6 +87,9 @@ nav {
 }
 
 .nav-links a:focus-visible {
+  background-color: var(--white-color);
+  color: var(--accent-color);
+  transform: translateY(-1px);
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
 }
@@ -144,13 +146,14 @@ nav {
   line-height: 1;
 }
 
-.gacha-ticket-badge:hover,
-.gacha-ticket-badge:focus-visible {
+.gacha-ticket-badge:hover {
   background-color: var(--white-color);
   color: var(--accent-color);
 }
 
 .gacha-ticket-badge:focus-visible {
+  background-color: var(--white-color);
+  color: var(--accent-color);
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
 }
@@ -181,8 +184,7 @@ nav {
   transition: background-color 0.2s, color 0.2s, transform 0.1s;
 }
 
-.icon-btn:hover,
-.icon-btn:focus-visible {
+.icon-btn:hover {
   background-color: var(--white-color);
   color: var(--accent-color);
 }
@@ -198,6 +200,8 @@ nav {
 }
 
 .icon-btn:focus-visible {
+  background-color: var(--white-color);
+  color: var(--accent-color);
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
 }
@@ -277,8 +281,7 @@ nav {
   transition: color 0.25s ease, opacity 0.25s ease;
 }
 
-.profile-link:hover,
-.profile-link:focus-visible {
+.profile-link:hover {
   background-color: var(--white-color);
 }
 
@@ -291,6 +294,7 @@ nav {
 }
 
 .profile-link:focus-visible {
+  background-color: var(--white-color);
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
 }
@@ -322,14 +326,16 @@ nav {
   transition: background-color 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
 
-.hamburger:hover,
-.hamburger:focus-visible {
+.hamburger:hover {
   background-color: transparent;
   color: var(--white-color);
   border-color: var(--white-color);
 }
 
 .hamburger:focus-visible {
+  background-color: transparent;
+  color: var(--white-color);
+  border-color: var(--white-color);
   outline: 2px solid var(--white-color);
   outline-offset: 2px;
 }
@@ -457,8 +463,7 @@ nav {
   box-sizing: border-box;
 }
 
-.nav-links-mobile a:hover,
-.nav-links-mobile a:focus-visible {
+.nav-links-mobile a:hover {
   background-color: var(--white-color);
   color: var(--accent-color);
   transform: translateY(-1px);
@@ -469,6 +474,9 @@ nav {
 }
 
 .nav-links-mobile a:focus-visible {
+  background-color: var(--white-color);
+  color: var(--accent-color);
+  transform: translateY(-1px);
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
 }

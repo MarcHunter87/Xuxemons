@@ -1,5 +1,9 @@
+.modal-backdrop.fade.show {
+	z-index: 2;
+}
+
 .daily-noti-modal {
-	z-index: 1070;
+	z-index: 3;
 }
 
 .daily-noti-content {

@@ -335,6 +335,7 @@
 }
 
 .btn-cancel-request i,
+
 .btn-cancel-request svg {
   width: 20px;
   height: 20px;
@@ -391,6 +392,7 @@
 }
 
 /* ── Body layout ── */
+
 .friends-body {
   display: flex;
   gap: var(--page-section-gap);
@@ -431,6 +433,7 @@
 }
 
 /* ── Section headings ── */
+
 .section-header {
   padding-bottom: 1rem;
 }
@@ -458,13 +461,12 @@
   gap: 1rem;
 }
 
-@media (max-width: 599px) {
+@media (max-width: 1160px) {
   .friends-grid {
     grid-template-columns: 1fr;
   }
 }
 
-/* allow the friends list or empty state to expand and match sidebar height */
 .friends-main-col .friends-grid,
 .friends-main-col .empty-msg {
   flex: 1;

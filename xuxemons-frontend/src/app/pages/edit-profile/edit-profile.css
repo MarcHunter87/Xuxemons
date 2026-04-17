@@ -124,6 +124,7 @@
 }
 
 .avatar-center-wrap:hover .profile-avatar,
+
 .avatar-center-wrap:focus-within .profile-avatar {
 	opacity: 0.85;
 	border-color: var(--white-color);

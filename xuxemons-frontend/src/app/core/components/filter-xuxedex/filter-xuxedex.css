@@ -120,7 +120,7 @@
 .custom-select-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 20;
+    z-index: 2;
 }
 
 .custom-select-list {
@@ -137,7 +137,7 @@
     box-shadow: 0 4px 16px var(--shadow-color);
     max-height: 280px;
     overflow-y: auto;
-    z-index: 21;
+    z-index: 3;
 }
 
 .custom-select-option {

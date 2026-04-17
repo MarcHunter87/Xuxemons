@@ -77,6 +77,7 @@
     line-height: 1.25;
   }
 
+  .field input[type='file']::-webkit-file-upload-button,
   .field input[type='file']::file-selector-button {
     margin-right: 0.72rem;
     padding: 0.44rem 0.78rem;
@@ -87,22 +88,6 @@
     font: inherit;
     font-weight: 500;
     cursor: pointer;
-    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
-  }
-
-  .field input[type='file']::file-selector-button:hover {
-    border-color: var(--accent-color);
-    background: color-mix(in srgb, var(--accent-glow) 75%, var(--white-color));
-    transform: translateY(-1px);
-  }
-
-  .field input[type='file']::file-selector-button:active {
-    transform: translateY(0);
-  }
-
-  /* WebKit compatibility + stronger press / focus visuals */
-  .field input[type='file']::-webkit-file-upload-button,
-  .field input[type='file']::file-selector-button {
     transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease;
   }
 
@@ -240,7 +225,7 @@
   .custom-select-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 10;
+    z-index: 2;
   }
   
   .custom-select-dropdown {
@@ -257,7 +242,7 @@
     box-shadow: 0 4px 16px var(--shadow-color);
     max-height: 280px;
     overflow-y: auto;
-    z-index: 11;
+    z-index: 3;
   }
   
   .custom-select-option {

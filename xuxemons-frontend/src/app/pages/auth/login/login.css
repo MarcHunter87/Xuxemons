@@ -104,6 +104,7 @@
 }
 
 .toggle-password:hover,
+
 .toggle-password:focus-visible {
   color: var(--text-alt-color);
 }
@@ -200,6 +201,7 @@
 }
 
 .register-link a:hover,
+
 .register-link a:focus-visible {
   text-decoration: underline;
 }

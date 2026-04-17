@@ -74,13 +74,14 @@
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-.footer-col a:hover,
-.footer-col a:focus-visible {
+.footer-col a:hover {
   background-color: var(--secondary-color);
   color: var(--text-alt-color);
 }
 
 .footer-col a:focus-visible {
+  background-color: var(--secondary-color);
+  color: var(--text-alt-color);
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
   border-radius: 2px;

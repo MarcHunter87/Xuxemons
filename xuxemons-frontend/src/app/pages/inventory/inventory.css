@@ -1,6 +1,7 @@
 /* ==========================================
    FILTER SECTION
    ========================================== */
+
 .filter-section {
   margin-bottom: var(--page-section-gap);
   padding: 1.5rem;
@@ -115,6 +116,7 @@
 }
 
 /* Error Message */
+
 .error-message {
   display: flex;
   align-items: center;
@@ -586,6 +588,7 @@ button.item-slot.empty:active {
 }
 
 /* Action Buttons */
+
 .action-buttons {
   margin-top: auto;
   display: flex;
@@ -639,6 +642,14 @@ button.item-slot.empty:active {
   opacity: 1;
 }
 
+.btn-primary.btn-use-disabled-apply:disabled {
+  background: var(--btn-disabled-primary-bg);
+  color: var(--white-color);
+  transform: none;
+  transition: none;
+  cursor: not-allowed;
+}
+
 .btn-danger {
   background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-color-2) 100%);
   border: none;
@@ -670,6 +681,7 @@ button.item-slot.empty:active {
 }
 
 /* Info Message */
+
 .info-message {
   display: flex;
   align-items: center;
@@ -717,6 +729,7 @@ button.item-slot.empty:active {
 }
 
 /* Responsive Design */
+
 @media (max-width: 991px) {
   .item-details {
     position: static;

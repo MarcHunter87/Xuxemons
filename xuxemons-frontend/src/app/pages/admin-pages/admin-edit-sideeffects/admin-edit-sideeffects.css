@@ -112,6 +112,7 @@
 
 .field input:focus-visible,
 .field select:focus-visible,
+
 .field textarea:focus-visible {
 	outline: 3px solid var(--accent-color);
 	outline-offset: 2px;

@@ -1,6 +1,7 @@
 .progress-bar-loading {
   width: 0%;
 }
+
 :host {
   display: flex;
   width: 100%;
@@ -8,6 +9,7 @@
 }
 
 /* Misma caja que el resto de stat-card; XP abajo */
+
 .trainer-stat-card {
   justify-content: space-between;
   min-height: 100%;

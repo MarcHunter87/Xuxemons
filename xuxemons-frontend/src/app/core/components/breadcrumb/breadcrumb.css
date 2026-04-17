@@ -31,13 +31,14 @@
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-.breadcrumb a:hover,
-.breadcrumb a:focus-visible {
+.breadcrumb a:hover {
   background-color: var(--secondary-color);
   color: var(--text-alt-color);
 }
 
 .breadcrumb a:focus-visible {
+  background-color: var(--secondary-color);
+  color: var(--text-alt-color);
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
   border-radius: 2px;

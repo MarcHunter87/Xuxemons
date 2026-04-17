@@ -1,7 +1,7 @@
 :host {
   position: fixed;
   inset: 0;
-  z-index: 1600;
+  z-index: 4;
   display: block;
   background-color: #000;
 }
@@ -46,7 +46,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  z-index: 50;
+  z-index: 5;
 }
 
 .evolution-sprite {
@@ -59,8 +59,7 @@
   will-change: transform, filter, opacity;
 }
 
-.gacha-magic-circle-1,
-.gacha-magic-circle-2 {
+:is(.gacha-magic-circle-1, .gacha-magic-circle-2) {
   position: absolute;
   border-radius: 50%;
   box-sizing: border-box;
@@ -92,7 +91,7 @@
   place-items: center;
   opacity: 0;
   animation: gachaEnergyBall 8.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  z-index: 10;
+  z-index: 3;
 }
 
 .energy-ball {
@@ -146,9 +145,7 @@
   animation: lightningArc4 0.45s steps(2, end) infinite;
 }
 
-.gacha-shockwave-1,
-.gacha-shockwave-2,
-.gacha-shockwave-3 {
+:is(.gacha-shockwave-1, .gacha-shockwave-2, .gacha-shockwave-3) {
   position: absolute;
   width: 100px;
   height: 100px;
@@ -156,7 +153,7 @@
   border-radius: 50%;
   box-shadow: 0 0 40px #00d2ff, inset 0 0 40px #00d2ff;
   opacity: 0;
-  z-index: 40;
+  z-index: 4;
 }
 
 .gacha-shockwave-1 { animation: shockwaveExpand 8.5s ease-out forwards; animation-delay: 5.5s; }
@@ -219,7 +216,7 @@
   inset: 0;
   background: #fff;
   opacity: 0;
-  z-index: 100;
+  z-index: 7;
   pointer-events: none;
   animation: gachaFinalFlash 8.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
 }
@@ -228,7 +225,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 60;
+  z-index: 6;
 }
 
 .particle {

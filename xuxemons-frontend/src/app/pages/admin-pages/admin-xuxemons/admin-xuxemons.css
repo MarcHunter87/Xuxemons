@@ -65,8 +65,7 @@
   gap: 0.5rem;
 }
 
-.col-actions .btn.btn-edit.btn-sm,
-.col-actions .btn.btn-danger.btn-sm {
+.col-actions :is(.btn.btn-edit.btn-sm, .btn.btn-danger.btn-sm) {
   gap: 0;
   width: 40px;
   height: 40px;

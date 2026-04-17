@@ -178,7 +178,7 @@
   border: 1.5px solid var(--surface-light);
   border-radius: 10px;
   box-shadow: 0 4px 20px var(--shadow-color);
-  z-index: 50;
+  z-index: 5;
   overflow: hidden;
 }
 
@@ -261,4 +261,14 @@
   vertical-align: middle;
   height: 100%;
   box-sizing: border-box;
+}
+
+@media (max-width: 500px) {
+  .friend-card-actions {
+    flex-direction: column;
+  }
+
+  .friend-action-btn {
+    width: 100%;
+  }
 }

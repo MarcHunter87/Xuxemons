@@ -1,5 +1,14 @@
+.modal-backdrop.fade.show {
+	z-index: 2;
+}
+
 .friend-req-noti-modal {
-	z-index: 1070;
+	z-index: 3;
+}
+
+.friend-req-noti-modal .modal-dialog {
+	margin: 1rem auto;
+	max-width: min(500px, calc(100% - (var(--page-section-gap, 1.5rem) * 2)));
 }
 
 .friend-req-noti-content {
@@ -25,7 +34,6 @@
 	white-space: nowrap;
 }
 
-/* place the badge at the far right of the modal header */
 .friend-req-noti-content .modal-header .modal-title {
 	display: flex;
 	align-items: center;
@@ -125,17 +133,23 @@
 	flex-wrap: wrap;
 }
 
-.btn-req-accept,
-.btn-req-reject {
-	width: 44px;
-	height: 44px;
-	min-width: 44px;
+.friend-req-actions .btn-req-accept,
+.friend-req-actions .btn-req-reject {
+	flex: 0 0 52px;
 	padding: 0;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	border-radius: 8px;
 	font-size: 1.1rem;
+	line-height: 1;
+	box-sizing: border-box;
+}
+
+.req-btn-label {
+	display: none;
+	font-size: 0.95rem;
+	font-weight: 600;
 	line-height: 1;
 }
 
@@ -166,8 +180,45 @@
 	will-change: transform, opacity;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 575px) {
+	.friend-req-noti-modal .modal-dialog {
+		margin: 0.75rem auto;
+		max-width: calc(100% - (var(--page-section-gap, 1.5rem) * 2));
+	}
+}
+
+@media (max-width: 500px) {
 	.friend-req-noti-content {
 		margin: 0 0.35rem;
+	}
+
+	.friend-req-row {
+		flex-wrap: wrap;
+		align-items: flex-start;
+	}
+
+	.friend-req-actions {
+		flex: 1 0 100%;
+		width: 100%;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.45rem;
+		margin-top: 0.35rem;
+	}
+
+	.friend-req-actions .btn-req-accept,
+	.friend-req-actions .btn-req-reject {
+		flex: 1 1 auto;
+		width: 100%;
+		min-height: 52px;
+		padding: 0.625rem 1.25rem;
+		font-size: 16px;
+		font-weight: 500;
+		gap: 0.45rem;
+		justify-content: center;
+	}
+
+	.req-btn-label {
+		display: inline;
 	}
 }

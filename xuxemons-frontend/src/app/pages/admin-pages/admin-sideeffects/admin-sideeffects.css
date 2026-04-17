@@ -123,6 +123,7 @@
 }
 
 .cell-id,
+
 .cell-num {
 	font-variant-numeric: tabular-nums;
 	color: var(--dark-gray-color);

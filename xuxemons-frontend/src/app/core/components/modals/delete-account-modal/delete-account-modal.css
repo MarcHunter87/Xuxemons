@@ -6,7 +6,7 @@
   position: fixed;
   inset: 0;
   background: var(--modal-overlay-bg, rgba(0, 0, 0, 0.5));
-  z-index: 1070;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -18,7 +18,7 @@
 }
 
 .delete-account-modal {
-  z-index: 1070;
+  z-index: 2;
 }
 
 .delete-account-content {
