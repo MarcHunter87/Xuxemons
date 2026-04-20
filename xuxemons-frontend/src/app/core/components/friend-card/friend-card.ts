@@ -1,7 +1,6 @@
 import { Component, EventEmitter, HostListener, Input, Output, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from '../../services/auth';
-import { BattleService } from '../../services/battle.service';
 import type { FriendUser } from '../../interfaces';
 
 @Component({
@@ -16,7 +15,6 @@ export class FriendCard {
   @Output() challenge = new EventEmitter<void>();
 
   private auth = inject(AuthService);
-  private battleService = inject(BattleService);
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   menuOpen = false;
@@ -46,14 +44,7 @@ export class FriendCard {
   }
 
   onChallenge(): void {
-    this.battleService.requestBattle(this.friend.id).subscribe({
-      next: () => {
-        alert('Battle request sent to ' + this.friend.name);
-      },
-      error: (err) => {
-        alert(err.error?.message || 'Failed to send battle request');
-      }
-    });
+    this.challenge.emit();
   }
 
   @HostListener('document:click')

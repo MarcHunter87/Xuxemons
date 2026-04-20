@@ -34,6 +34,7 @@ export class Friends implements OnInit, OnDestroy {
   private router = inject(Router);
   private subs = new Subscription();
   private timeoutIds: ReturnType<typeof setTimeout>[] = [];
+  private pendingBattlesInterval: ReturnType<typeof setInterval> | null = null;
   private friendsInitialized = false;
   private pendingRequestsInitialized = false;
 
@@ -55,6 +56,11 @@ export class Friends implements OnInit, OnDestroy {
   exitingRequestIds = signal<number[]>([]);
   busyRequestIds = signal<number[]>([]);
   busyFriendIds = signal<string[]>([]);
+  showOutgoingBattleModal = signal(false);
+  outgoingBattleId = signal<number | null>(null);
+  outgoingBattleOpponentName = signal('');
+  outgoingBattleAccepted = signal(false);
+  isProcessingBattleRequest = signal(false);
 
   @ViewChild('confirmDialog') confirmDialog?: ElementRef<HTMLElement>;
   @ViewChild('confirmPrimary') confirmPrimary?: ElementRef<HTMLButtonElement>;
@@ -78,6 +84,10 @@ export class Friends implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadPendingBattles();
+    this.pendingBattlesInterval = setInterval(() => {
+      this.loadPendingBattles();
+      this.checkOutgoingBattleStatus();
+    }, 3000);
     this.subs.add(
       this.friendsService.friends.subscribe(f => {
         const previousIds = this.friends().map(friend => friend.id);
@@ -147,14 +157,18 @@ export class Friends implements OnInit, OnDestroy {
   }
 
   loadPendingBattles(): void {
-    this.battleService.getPendingBattles().subscribe(battles => {
-      this.pendingBattles.set(battles);
-      
-      // Mostrar modal si hay batallas pendientes nuevas
-      if (battles.length > 0 && !this.showBattleRequestModal()) {
-        this.currentBattleRequest.set(battles[0]);
-        this.showBattleRequestModal.set(true);
-      }
+    this.battleService.getPendingBattles().subscribe({
+      next: (battles) => {
+        this.pendingBattles.set(battles);
+
+        if (battles.length > 0 && !this.showBattleRequestModal() && !this.isProcessingBattleRequest()) {
+          this.currentBattleRequest.set(battles[0]);
+          this.showBattleRequestModal.set(true);
+        }
+      },
+      error: () => {
+        this.pendingBattles.set([]);
+      },
     });
   }
 
@@ -164,31 +178,102 @@ export class Friends implements OnInit, OnDestroy {
   closeRequestModal(): void {
     this.showBattleRequestModal.set(false);
     this.currentBattleRequest.set(null);
+    this.isProcessingBattleRequest.set(false);
+  }
+
+  closeOutgoingBattleModal(): void {
+    this.showOutgoingBattleModal.set(false);
+    this.outgoingBattleAccepted.set(false);
+    this.outgoingBattleId.set(null);
+    this.outgoingBattleOpponentName.set('');
   }
 
   onAcceptRequest(): void {
-    if (this.currentBattleRequest()) {
+    if (this.currentBattleRequest() && !this.isProcessingBattleRequest()) {
+      this.isProcessingBattleRequest.set(true);
       this.acceptBattle(this.currentBattleRequest().id);
-      this.closeRequestModal();
     }
   }
 
   onRejectRequest(): void {
-    if (this.currentBattleRequest()) {
+    if (this.currentBattleRequest() && !this.isProcessingBattleRequest()) {
+      this.isProcessingBattleRequest.set(true);
       this.rejectBattle(this.currentBattleRequest().id);
-      this.closeRequestModal();
     }
   }
 
   acceptBattle(battleId: number): void {
-    this.battleService.acceptBattle(battleId).subscribe(() => {
-      this.router.navigate(['/battle', battleId]);
+    this.battleService.acceptBattle(battleId).subscribe({
+      next: () => {
+        this.pendingBattles.set(this.pendingBattles().filter((battle) => battle.id !== battleId));
+        this.closeRequestModal();
+        this.router.navigate(['/battle', battleId]);
+      },
+      error: (error) => {
+        this.isProcessingBattleRequest.set(false);
+        this.errorMessage.set(error?.error?.message ?? 'Failed to accept battle request');
+      },
     });
   }
 
   rejectBattle(battleId: number): void {
-    this.battleService.rejectBattle(battleId).subscribe(() => {
-      this.loadPendingBattles();
+    this.battleService.rejectBattle(battleId).subscribe({
+      next: () => {
+        this.pendingBattles.set(this.pendingBattles().filter((battle) => battle.id !== battleId));
+        this.closeRequestModal();
+        this.loadPendingBattles();
+      },
+      error: (error) => {
+        this.isProcessingBattleRequest.set(false);
+        this.errorMessage.set(error?.error?.message ?? 'Failed to reject battle request');
+      },
+    });
+  }
+
+  challengeFriend(friend: FriendUser): void {
+    this.battleService.requestBattle(friend.id).subscribe({
+      next: (battle) => {
+        this.successMessage.set(`Battle request sent to ${friend.name}.`);
+        this.outgoingBattleId.set(Number(battle.id));
+        this.outgoingBattleOpponentName.set(friend.name);
+        this.outgoingBattleAccepted.set(false);
+        this.showOutgoingBattleModal.set(true);
+      },
+      error: (err) => {
+        this.errorMessage.set(err.error?.message || 'Failed to send battle request');
+      },
+    });
+  }
+
+  joinOutgoingBattle(): void {
+    const battleId = this.outgoingBattleId();
+    if (!battleId) {
+      return;
+    }
+
+    this.router.navigate(['/battle', battleId]);
+  }
+
+  private checkOutgoingBattleStatus(): void {
+    const battleId = this.outgoingBattleId();
+    if (!battleId || this.outgoingBattleAccepted() || !this.showOutgoingBattleModal()) {
+      return;
+    }
+
+    this.battleService.getBattle(battleId).subscribe({
+      next: (battle) => {
+        if (battle?.status === 'accepted') {
+          this.outgoingBattleAccepted.set(true);
+          return;
+        }
+
+        if (battle?.status === 'rejected' || battle?.status === 'completed') {
+          this.closeOutgoingBattleModal();
+        }
+      },
+      error: () => {
+        this.closeOutgoingBattleModal();
+      },
     });
   }
 
@@ -206,6 +291,10 @@ export class Friends implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.unsubscribe();
     this.timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
+    if (this.pendingBattlesInterval) {
+      clearInterval(this.pendingBattlesInterval);
+      this.pendingBattlesInterval = null;
+    }
   }
 
   private scheduleTimeout(callback: () => void, delay: number): void {

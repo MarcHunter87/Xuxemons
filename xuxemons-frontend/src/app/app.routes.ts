@@ -43,11 +43,6 @@ export const routes: Routes = [
     component: Login,
   },
   {
-    path: 'battle',
-    component: Battle,
-    canActivate: [authGuard],
-  },
-  {
     path: 'battle/:id',
     component: Battle,
     canActivate: [authGuard],

@@ -12,7 +12,7 @@ export class BattleService {
   private readonly http = inject(HttpClient);
 
   requestBattle(friendId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/request/${friendId}`, {});
+    return this.http.post(`${this.apiUrl}/request/${encodeURIComponent(friendId)}`, {});
   }
 
   acceptBattle(battleId: number): Observable<any> {
@@ -31,10 +31,40 @@ export class BattleService {
     return this.http.get(`${this.apiUrl}/${battleId}`);
   }
 
-  finishBattle(battleId: number, winnerId: string, loserXuxemonId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${battleId}/finish`, {
-      winner_id: winnerId,
-      loser_xuxemon_id: loserXuxemonId
+  connectBattleStream(battleId: number, token: string): EventSource | null {
+    if (!this.isBrowser || typeof EventSource === 'undefined' || !token) {
+      return null;
+    }
+
+    return new EventSource(`${this.apiUrl}/${battleId}/stream?token=${encodeURIComponent(token)}`);
+  }
+
+  submitAction(battleId: number, payload: Record<string, unknown>): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${battleId}/action`, payload);
+  }
+
+  useBattleItem(battleId: number, bagItemId: number, targetAdquiredXuxemonId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${battleId}/use-item`, {
+      bag_item_id: bagItemId,
+      target_adquired_xuxemon_id: targetAdquiredXuxemonId,
     });
+  }
+
+  usePracticeItem(bagItemId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/practice/use-item`, {
+      bag_item_id: bagItemId,
+    });
+  }
+
+  finishBattle(battleId: number, winnerId: string, loserXuxemonId?: number): Observable<any> {
+    const body: Record<string, string | number> = {
+      winner_id: winnerId,
+    };
+
+    if (typeof loserXuxemonId === 'number') {
+      body['loser_xuxemon_id'] = loserXuxemonId;
+    }
+
+    return this.http.post(`${this.apiUrl}/${battleId}/finish`, body);
   }
 }

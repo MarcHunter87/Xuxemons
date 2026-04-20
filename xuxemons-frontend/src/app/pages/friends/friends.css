@@ -592,10 +592,66 @@
 }
 
 /* Battle Request Modal Specifics */
-.battle-request-modal .modal-content {
+.battle-request-modal {
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+}
+
+.battle-modal-card {
+  position: relative;
+  width: min(100%, 520px);
+  padding: 1.5rem;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top, rgba(255, 209, 102, 0.2), transparent 35%),
+    linear-gradient(160deg, #fffdf6 0%, #ffffff 58%, #fff7e7 100%);
+  border: 1px solid rgba(255, 192, 72, 0.45);
+  box-shadow: 0 24px 70px rgba(16, 24, 40, 0.26);
   text-align: center;
-  border: 4px solid #f6e05e;
+  overflow: hidden;
   animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.battle-modal-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.battle-modal-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 208, 74, 0.16);
+  color: #9a5b00;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.battle-modal-close {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(25, 33, 61, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #1c274c;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.battle-modal-close:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 @keyframes bounceIn {
@@ -605,10 +661,18 @@
   100% { transform: scale(1); }
 }
 
-.request-icon {
-  font-size: 3rem;
-  color: #f6e05e;
-  margin-bottom: 15px;
+.battle-modal-icon {
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 1rem;
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #ffd45b, #ff9a3d);
+  color: #fff;
+  font-size: 2.7rem;
+  box-shadow: 0 16px 30px rgba(255, 170, 47, 0.34);
   animation: lightning 1s infinite;
 }
 
@@ -617,15 +681,93 @@
   50% { opacity: 0.7; transform: scale(1.1); }
 }
 
-.battle-request-modal h2 {
-  color: #2d3748;
+.battle-modal-title {
+  margin: 0;
+  color: #1b2645;
+  font-size: clamp(1.65rem, 3vw, 2.15rem);
   font-weight: 900;
-  letter-spacing: 1px;
+  letter-spacing: -0.03em;
 }
 
-.battle-request-modal .btn-success {
-  background: #48bb78;
-  color: white;
+.battle-modal-text {
+  margin: 0.85rem 0 0;
+  font-size: 1.06rem;
+  color: #334155;
+}
+
+.battle-modal-subtext {
+  margin: 0.55rem 0 1.35rem;
+  color: #64748b;
+  font-size: 0.96rem;
+}
+
+.battle-modal-actions {
+  display: flex;
+  gap: 0.85rem;
+  justify-content: center;
+}
+
+.battle-modal-actions--single {
+  justify-content: stretch;
+}
+
+.battle-btn-primary,
+.battle-btn-secondary {
+  min-width: 160px;
+  min-height: 52px;
+  padding: 0.85rem 1.2rem;
+  border-radius: 16px;
+  border: none;
+  font-size: 1rem;
   font-weight: 800;
-  padding: 10px 25px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.battle-btn-primary {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  color: #fff;
+  box-shadow: 0 14px 26px rgba(37, 99, 235, 0.28);
+}
+
+.battle-btn-secondary {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  box-shadow: 0 14px 26px rgba(220, 38, 38, 0.22);
+}
+
+.battle-btn-primary:hover,
+.battle-btn-secondary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.03);
+}
+
+.battle-modal-actions--single .battle-btn-primary {
+  width: 100%;
+}
+
+.battle-modal-pulse {
+  position: absolute;
+  inset: auto -40px -40px auto;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.16), transparent 68%);
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .battle-modal-card {
+    padding: 1.2rem;
+    border-radius: 22px;
+  }
+
+  .battle-modal-actions {
+    flex-direction: column;
+  }
+
+  .battle-btn-primary,
+  .battle-btn-secondary {
+    width: 100%;
+  }
 }

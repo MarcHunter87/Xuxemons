@@ -30,8 +30,26 @@ export interface InventoryItem {
 export type XuxemonSize = 'Small' | 'Medium' | 'Large';
 
 export interface UseItemResponseData {
+  error?: boolean;
+  message?: string;
+  current_hp?: number;
+  max_hp?: number;
+  current_attack?: number;
+  current_defense?: number;
+  gluttony_blocked?: boolean;
+  overdose_blocked?: boolean;
+  starving_blocked?: boolean;
+  starving_info?: string;
+  overdose_info?: string;
   previous_size?: XuxemonSize;
   xuxemon_size?: XuxemonSize;
-  requirement_progress: number;
-  remaining_quantity: number;
+  requirement_progress?: number;
+  remaining_quantity?: number;
+  applied_status_effect?: {
+    id?: number;
+    name: string;
+    description?: string;
+    icon_path?: string;
+    icon_url?: string;
+  };
 }

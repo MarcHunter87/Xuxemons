@@ -143,6 +143,7 @@
               <app-friend-card
                 [friend]="friend"
                 (remove)="askConfirmRemove(friend)"
+                (challenge)="challengeFriend(friend)"
               ></app-friend-card>
             </li>
           }
@@ -168,20 +169,6 @@
           <p class="empty-msg">No pending requests.</p>
         } @else {
           <ul class="requests-list" role="list" aria-label="Pending requests">
-            <!-- Battle Requests -->
-            @for (battle of pendingBattles(); track battle.id) {
-              <li class="requests-list-item">
-                <div class="card request-card">
-                  <div class="request-info">
-                    <span class="request-name">Battle Request from {{ battle.user.name }}</span>
-                  </div>
-                  <div class="request-actions">
-                    <button type="button" class="btn-success" (click)="acceptBattle(battle.id)">Accept</button>
-                    <button type="button" class="btn-danger" (click)="rejectBattle(battle.id)">Reject</button>
-                  </div>
-                </div>
-              </li>
-            }
             <!-- Friend Requests -->
             @for (request of pendingRequests(); track request.id) {
               <li
@@ -232,17 +219,75 @@
 
   <!-- Battle Request Modal -->
   @if (showBattleRequestModal()) {
-    <div class="modal-overlay battle-request-modal">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="request-icon">
+    <div class="modal-overlay battle-request-modal" (click)="closeRequestModal()">
+      <div class="battle-modal-card" (click)="$event.stopPropagation()">
+        <div class="battle-modal-topbar">
+          <span class="battle-modal-kicker">
+            Incoming Challenge
+          </span>
+          <button type="button" class="battle-modal-close" (click)="closeRequestModal()" aria-label="Close battle modal">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="battle-modal-icon">
           <i class="bi bi-lightning-charge-fill"></i>
         </div>
-        <h2>BATTLE CHALLENGE!</h2>
-        <p><strong>{{ currentBattleRequest()?.user?.name }}</strong> wants to battle with you!</p>
-        <div class="modal-actions">
-          <button type="button" class="btn-success" (click)="onAcceptRequest()">ACCEPT</button>
-          <button type="button" class="btn-danger" (click)="onRejectRequest()">REJECT</button>
+
+        <h2 class="battle-modal-title">Battle Challenge</h2>
+        <p class="battle-modal-text"><strong>{{ currentBattleRequest()?.user?.name }}</strong> wants to battle with you.</p>
+        <p class="battle-modal-subtext">Accept to create the battle room or reject to dismiss the challenge.</p>
+
+        <div class="battle-modal-actions">
+          <button type="button" class="battle-btn-primary" (click)="onAcceptRequest()" [disabled]="isProcessingBattleRequest()">
+            @if (isProcessingBattleRequest()) { Opening... } @else { Accept }
+          </button>
+          <button type="button" class="battle-btn-secondary" (click)="onRejectRequest()" [disabled]="isProcessingBattleRequest()">Reject</button>
         </div>
+
+        <div class="battle-modal-pulse"></div>
+      </div>
+    </div>
+  }
+
+  @if (showOutgoingBattleModal()) {
+    <div class="modal-overlay battle-request-modal" (click)="closeOutgoingBattleModal()">
+      <div class="battle-modal-card" (click)="$event.stopPropagation()">
+        <div class="battle-modal-topbar">
+          <span class="battle-modal-kicker">
+            @if (outgoingBattleAccepted()) {
+              Battle Ready
+            } @else {
+              Challenge Sent
+            }
+          </span>
+          <button type="button" class="battle-modal-close" (click)="closeOutgoingBattleModal()" aria-label="Close outgoing battle modal">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="battle-modal-icon">
+          <i class="bi bi-lightning-charge-fill"></i>
+        </div>
+
+        @if (outgoingBattleAccepted()) {
+          <h2 class="battle-modal-title">Combat Accepted</h2>
+          <p class="battle-modal-text">
+            <strong>{{ outgoingBattleOpponentName() }}</strong> ha aceptado el combate.
+          </p>
+          <p class="battle-modal-subtext">La batalla ya esta lista. Entra cuando quieras.</p>
+          <div class="battle-modal-actions battle-modal-actions--single">
+            <button type="button" class="battle-btn-primary" (click)="joinOutgoingBattle()">Join Battle</button>
+          </div>
+        } @else {
+          <h2 class="battle-modal-title">Challenge Sent</h2>
+          <p class="battle-modal-text">Waiting for <strong>{{ outgoingBattleOpponentName() }}</strong> to accept your challenge.</p>
+          <p class="battle-modal-subtext">Leave this open or stay on Friends. The join button will appear as soon as the other player accepts.</p>
+          <div class="battle-modal-actions battle-modal-actions--single">
+            <button type="button" class="battle-btn-secondary" (click)="closeOutgoingBattleModal()">Close</button>
+          </div>
+          <div class="battle-modal-pulse"></div>
+        }
       </div>
     </div>
   }
