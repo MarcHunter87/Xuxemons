@@ -171,7 +171,7 @@
 .player-name {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--neutral-black);
+  color: var(--accent-on-light);
 }
 
 .player-id {

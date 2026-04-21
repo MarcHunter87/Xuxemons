@@ -82,7 +82,7 @@
 
 .modal-name {
   margin: 0;
-  color: var(--neutral-black);
+  color: var(--accent-on-light);
   font-size: 2.1rem;
   font-weight: 800;
 }
