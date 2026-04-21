@@ -39,6 +39,8 @@
 .register-card {
   width: 100%;
   max-width: 460px;
+  position: relative;
+  z-index: 3;
   background: var(--neutral-white);
   border: 2.5px solid var(--color-gray-light);
   border-radius: 16px;
