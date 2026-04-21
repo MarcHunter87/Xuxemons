@@ -13,8 +13,8 @@
   background-color: var(--primary-color);
   border-radius: 16px;
   padding: var(--page-section-gap);
-  border: 1px solid var(--color-gray-4);
-  box-shadow: 0 4px 6px -1px var(--color-black-12);
+  border: 1px solid var(--color-gray-light);
+  box-shadow: 0 4px 6px -1px var(--color-black-soft);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -95,7 +95,7 @@
 .battle-btn:hover {
   background-color: var(--accent-on-light);
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px var(--color-blue-15);
+  box-shadow: 0 6px 15px var(--color-blue-overlay-medium);
 }
 
 .battle-btn:active {

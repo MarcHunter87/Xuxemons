@@ -9,7 +9,7 @@
 .xuxemon-modal-overlay {
   position: fixed;
   inset: 0;
-  background: var(--color-black-90);
+  background: var(--color-black-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,8 +22,8 @@
   max-height: 90vh;
   border-radius: 24px;
   background: linear-gradient(180deg, var(--neutral-white) 0%, var(--primary-color) 100%);
-  border: 2px solid var(--color-gray-4);
-  box-shadow: 0 16px 40px var(--color-black-12);
+  border: 2px solid var(--color-gray-light);
+  box-shadow: 0 16px 40px var(--color-black-soft);
   padding: 1.1rem 1.1rem 1.2rem;
   position: relative;
   overflow-x: hidden;
@@ -95,7 +95,7 @@
 }
 
 .xuxemon-modal-card.power .modal-level-inline {
-  color: var(--color-red-4);
+  color: var(--color-red-base);
 }
 
 .xuxemon-modal-card.speed .modal-level-inline {
@@ -103,7 +103,7 @@
 }
 
 .xuxemon-modal-card.technical .modal-level-inline {
-  color: var(--color-green-4);
+  color: var(--color-green-base);
 }
 
 .meta-chips {
@@ -127,14 +127,14 @@
   min-height: 2.25rem;
   font-size: 16px;
   font-weight: 700;
-  border: 1px solid var(--color-gray-4);
+  border: 1px solid var(--color-gray-light);
   border-radius: 8px;
   line-height: 1.25;
 }
 
 .xuxemon-modal-card.power .meta-chips .size-label {
   border-width: 2px;
-  border-color: var(--color-red-4);
+  border-color: var(--color-red-base);
 }
 
 .xuxemon-modal-card.speed .meta-chips .size-label {
@@ -144,7 +144,7 @@
 
 .xuxemon-modal-card.technical .meta-chips .size-label {
   border-width: 2px;
-  border-color: var(--color-green-4);
+  border-color: var(--color-green-base);
 }
 
 .modal-type-badge {
@@ -162,9 +162,9 @@
   text-transform: lowercase;
 }
 
-.xuxemon-modal-card.power .modal-type-badge { background-color: var(--color-red-4); }
+.xuxemon-modal-card.power .modal-type-badge { background-color: var(--color-red-base); }
 .xuxemon-modal-card.speed .modal-type-badge { background-color: var(--accent-color); }
-.xuxemon-modal-card.technical .modal-type-badge { background-color: var(--color-green-4); }
+.xuxemon-modal-card.technical .modal-type-badge { background-color: var(--color-green-base); }
 
 .modal-type-badge::first-letter {
   text-transform: uppercase;
@@ -180,13 +180,13 @@
   font-weight: 700;
   border-radius: 8px;
   line-height: 1.25;
-  border: 1px solid var(--color-white-35);
-  background: linear-gradient(135deg, var(--color-purple-5) 0%, var(--color-purple-6) 100%);
+  border: 1px solid var(--color-white-overlay-strong);
+  background: linear-gradient(135deg, var(--color-purple-base) 0%, var(--color-purple-deep) 100%);
   color: var(--neutral-white);
 }
 
 .status-effect-chip.side-effect-chip {
-  background: linear-gradient(135deg, var(--color-green-3) 0%, var(--color-green-5) 100%);
+  background: linear-gradient(135deg, var(--color-green-bright) 0%, var(--color-green-base) 100%);
 }
 
 .status-effect-chip .status-effect-icon {
@@ -216,18 +216,18 @@
 }
 
 .xuxemon-modal-card.power .modal-image-shell {
-  background: linear-gradient(135deg, var(--color-red-12) 0%, var(--color-red-10) 100%);
-  border: 2px solid var(--color-red-35);
+  background: linear-gradient(135deg, var(--color-red-overlay-soft) 0%, var(--color-red-overlay) 100%);
+  border: 2px solid var(--color-red-overlay-strong);
 }
 
 .xuxemon-modal-card.speed .modal-image-shell {
-  background: linear-gradient(135deg, var(--color-blue-10) 0%, var(--color-blue-10) 100%);
-  border: 2px solid var(--color-blue-20);
+  background: linear-gradient(135deg, var(--color-blue-overlay) 0%, var(--color-blue-overlay) 100%);
+  border: 2px solid var(--color-blue-overlay-strong);
 }
 
 .xuxemon-modal-card.technical .modal-image-shell {
-  background: linear-gradient(135deg, var(--color-green-12) 0%, var(--color-green-8) 100%);
-  border: 2px solid var(--color-black-12);
+  background: linear-gradient(135deg, var(--color-green-overlay-soft) 0%, var(--color-green-overlay) 100%);
+  border: 2px solid var(--color-black-soft);
 }
 
 .modal-image {
@@ -249,7 +249,7 @@
   border-radius: 18px;
   padding: 0.65rem 0.6rem;
   text-align: center;
-  border: 1px solid var(--color-gray-4);
+  border: 1px solid var(--color-gray-light);
 }
 
 .stat-label {
@@ -267,9 +267,9 @@
   font-weight: 800;
 }
 
-.stat-hp { background: linear-gradient(135deg, var(--color-green-28) 0%, var(--color-green-18) 100%); }
-.stat-attack { background: linear-gradient(135deg, var(--color-red-18) 0%, var(--color-red-18) 100%); }
-.stat-defense { background: linear-gradient(135deg, var(--color-amber-18) 0%, var(--color-amber-18) 100%); }
+.stat-hp { background: linear-gradient(135deg, var(--color-green-overlay-soft) 0%, var(--color-green-overlay-soft) 100%); }
+.stat-attack { background: linear-gradient(135deg, var(--color-red-overlay-medium) 0%, var(--color-red-overlay-medium) 100%); }
+.stat-defense { background: linear-gradient(135deg, var(--color-amber-overlay) 0%, var(--color-amber-overlay) 100%); }
 
 .modal-attacks {
   margin-top: 0.85rem;
@@ -290,23 +290,23 @@
   gap: 0.35rem;
   padding: 0.6rem 0.75rem;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--color-blue-10) 0%, var(--color-blue-10) 100%);
-  border: 1px solid var(--color-blue-20);
+  background: linear-gradient(135deg, var(--color-blue-overlay) 0%, var(--color-blue-overlay) 100%);
+  border: 1px solid var(--color-blue-overlay-strong);
 }
 
 .xuxemon-modal-card.power .attack-item {
-  background: linear-gradient(135deg, var(--color-red-12) 0%, var(--color-red-10) 100%);
-  border-color: var(--color-red-35);
+  background: linear-gradient(135deg, var(--color-red-overlay-soft) 0%, var(--color-red-overlay) 100%);
+  border-color: var(--color-red-overlay-strong);
 }
 
 .xuxemon-modal-card.speed .attack-item {
-  background: linear-gradient(135deg, var(--color-blue-10) 0%, var(--color-blue-10) 100%);
-  border-color: var(--color-blue-20);
+  background: linear-gradient(135deg, var(--color-blue-overlay) 0%, var(--color-blue-overlay) 100%);
+  border-color: var(--color-blue-overlay-strong);
 }
 
 .xuxemon-modal-card.technical .attack-item {
-  background: linear-gradient(135deg, var(--color-green-12) 0%, var(--color-green-8) 100%);
-  border-color: var(--color-black-12);
+  background: linear-gradient(135deg, var(--color-green-overlay-soft) 0%, var(--color-green-overlay) 100%);
+  border-color: var(--color-black-soft);
 }
 
 .attack-main {

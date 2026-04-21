@@ -15,70 +15,32 @@
   --accent-color: #0D6EFD;
   --accent-on-light: #0A58CA;
   
-  --color-black-90: #141414E6;
-  --color-black-12: #0000001F;
-  --color-black-5: #0000000D;
-  --color-gray-8: #2B2A2B;
-  --color-gray-6: #777777;
-  --color-gray-4: #CED4DA;
-  --color-white-98: #FFFFFFFA;
-  --color-white-72: #FFFFFFB8;
-  --color-white-60: #FFFFFF99;
-  --color-white-35: #FFFFFF59;
-  --color-white-30: #FFFFFF4D;
-  --color-white-10: #FFFFFF1A;
-  --color-red-6: #991B1B;
-  --color-red-5: #B91C1C;
-  --color-red-4: #DC2626;
-  --color-red-3: #EF4444;
-  --color-red-2: #FCA5A5;
-  --color-red-1: #FEE2E2;
-  --color-red-50: #DC262680;
-  --color-red-35: #991B1B59;
-  --color-red-18: #DC26262E;
-  --color-red-16: #B91C1C29;
-  --color-red-15: #DC262626;
-  --color-red-12: #DC26261F;
-  --color-red-10: #DC26261A;
-  --color-amber-6: #C43E00;
-  --color-amber-5: #D97706;
-  --color-amber-4: #F59E0B;
-  --color-amber-3: #FBBF24;
-  --color-amber-2: #FDE68A;
-  --color-amber-1: #FFF3CD;
-  --color-amber-18: #F59E0B2E;
-  --color-amber-15: #F59E0B26;
-  --color-amber-10: #F59E0B1A;
-  --color-green-6: #166534;
-  --color-green-5: #15803D;
-  --color-green-4: #16A34A;
-  --color-green-3: #22C55E;
-  --color-green-2: #86EFAC;
-  --color-green-40: #22C55E66;
-  --color-green-28: #22C55E47;
-  --color-green-18: #22C55E2E;
-  --color-green-12: #22C55E1F;
-  --color-green-10: #22C55E1A;
-  --color-green-8: #22C55E14;
-  --color-cyan-15: #17A2B826;
-  --color-cyan-10: #17A2B81A;
-  --color-blue-3: #60A5FA;
-  --color-blue-2: #BFDBFE;
-  --color-blue-1: #E7F1FF;
-  --color-blue-70: #2563EBB3;
-  --color-blue-20: #0D6EFD33;
-  --color-blue-15: #0D6EFD26;
-  --color-blue-12: #0D6EFD1F;
-  --color-blue-10: #0D6EFD1A;
-  --color-purple-7: #6F42C1;
-  --color-purple-73: #6F42C173;
-  --color-purple-6: #5B21B6;
-  --color-purple-5: #6D28D9;
-  --color-purple-4: #A855F7;
-  --color-purple-3: #C084FC;
-  --color-purple-2: #E9D5FF;
-  --color-purple-1: #F5F3FF;
-  --color-purple-10: #A855F71A;
+  --color-black-soft: #0000001F;
+  --color-gray-medium: #777777;
+  --color-gray-light: #CED4DA;
+  --color-white-overlay-strong: #FFFFFF59;
+  --color-white-overlay: #FFFFFF4D;
+  --color-red-deep: #991B1B;
+  --color-red-base: #DC2626;
+  --color-red-bright: #EF4444;
+  --color-red-overlay-strong: #991B1B59;
+  --color-red-overlay-medium: #DC26262E;
+  --color-red-overlay-soft: #DC26261F;
+  --color-red-overlay: #DC26261A;
+  --color-amber-deep: #D97706;
+  --color-amber-base: #F59E0B;
+  --color-amber-bright: #FBBF24;
+  --color-amber-overlay: #F59E0B1A;
+  --color-green-base: #16A34A;
+  --color-green-bright: #22C55E;
+  --color-green-glow-strong: #22C55E66;
+  --color-green-overlay-soft: #22C55E1F;
+  --color-green-overlay: #22C55E14;
+  --color-blue-overlay-strong: #0D6EFD33;
+  --color-blue-overlay-medium: #0D6EFD26;
+  --color-blue-overlay: #0D6EFD1A;
+  --color-purple-deep: #5B21B6;
+  --color-purple-base: #6D28D9;
 }
 
 *,
@@ -145,7 +107,7 @@ textarea:focus-visible,
 }
 
 .btn-secondary {
-  background-color: var(--color-gray-6);
+  background-color: var(--color-gray-medium);
   color: var(--neutral-white);
 }
 
@@ -160,7 +122,7 @@ textarea:focus-visible,
   box-shadow: none;
   filter: none;
   transform: none;
-  background-color: var(--color-gray-6);
+  background-color: var(--color-gray-medium);
   color: var(--neutral-white);
 }
 
@@ -190,7 +152,7 @@ textarea:focus-visible,
 }
 
 .btn-danger {
-  background-color: var(--color-red-4);
+  background-color: var(--color-red-base);
   color: var(--neutral-white);
 }
 
@@ -205,7 +167,7 @@ textarea:focus-visible,
   box-shadow: none;
   filter: none;
   transform: none;
-  background-color: var(--color-red-4);
+  background-color: var(--color-red-base);
   color: var(--neutral-white);
 }
 
@@ -268,9 +230,9 @@ button.btn-secondary {
   background-color: var(--primary-color);
   border-radius: 16px;
   padding: var(--page-section-gap);
-  border: 1px solid var(--color-gray-4);
+  border: 1px solid var(--color-gray-light);
   width: 100%;
-  box-shadow: 0 4px 6px -1px var(--color-black-12);
+  box-shadow: 0 4px 6px -1px var(--color-black-soft);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -298,7 +260,7 @@ button.btn-secondary {
   display: inline-block;
   width: 36px;
   height: 36px;
-  border: 3px solid var(--color-blue-15);
+  border: 3px solid var(--color-blue-overlay-medium);
   border-top-color: var(--accent-color);
   border-radius: 50%;
   animation: btn-spin 0.7s linear infinite;
@@ -322,7 +284,7 @@ button.btn-secondary {
   display: inline-block;
   width: 24px;
   height: 24px;
-  border: 3px solid var(--color-white-35);
+  border: 3px solid var(--color-white-overlay-strong);
   border-top-color: var(--neutral-white);
   border-radius: 50%;
   animation: btn-spin 0.7s linear infinite;
@@ -370,7 +332,7 @@ button.btn-secondary {
   width: 60px;
   height: 60px;
   margin: 0 auto 1rem;
-  border: 4px solid var(--color-blue-20);
+  border: 4px solid var(--color-blue-overlay-strong);
   border-top-color: var(--accent-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;

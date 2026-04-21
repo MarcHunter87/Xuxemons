@@ -5,7 +5,7 @@
 .request-card {
   background: var(--neutral-white);
   border-radius: 12px;
-  border: 1px solid var(--color-gray-4);
+  border: 1px solid var(--color-gray-light);
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -20,7 +20,7 @@
 }
 
 .request-card--animated:hover {
-  box-shadow: 0 2px 12px var(--color-black-12);
+  box-shadow: 0 2px 12px var(--color-black-soft);
 }
 
 .request-card-info {
@@ -40,7 +40,7 @@
   justify-content: center;
   font-size: 1.3rem;
   color: var(--neutral-black);
-  border: 1px solid var(--color-gray-4);
+  border: 1px solid var(--color-gray-light);
   flex-shrink: 0;
 }
 
@@ -79,7 +79,7 @@
   display: flex;
   gap: 0.5rem;
   flex-wrap: nowrap;
-  border-top: 1.5px solid var(--color-gray-4);
+  border-top: 1.5px solid var(--color-gray-light);
   padding-top: 16px;
 }
 

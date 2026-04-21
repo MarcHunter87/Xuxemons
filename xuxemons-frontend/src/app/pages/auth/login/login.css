@@ -40,10 +40,10 @@
   width: 100%;
   max-width: 460px;
   background: var(--neutral-white);
-  border: 2.5px solid var(--color-gray-4);
+  border: 2.5px solid var(--color-gray-light);
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 8px 32px var(--color-black-12);
+  box-shadow: 0 8px 32px var(--color-black-soft);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -120,7 +120,7 @@
 
 .input:focus {
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px var(--color-blue-15);
+  box-shadow: 0 0 0 3px var(--color-blue-overlay-medium);
 }
 
 .input::placeholder {
@@ -128,13 +128,13 @@
 }
 
 .input-error {
-  border-color: var(--color-red-4) !important;
+  border-color: var(--color-red-base) !important;
 }
 
 .input-error:focus {
-  outline: 3px solid var(--color-red-4);
+  outline: 3px solid var(--color-red-base);
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px var(--color-red-10) !important;
+  box-shadow: 0 0 0 3px var(--color-red-overlay) !important;
 }
 
 .alert {
@@ -149,20 +149,20 @@
 }
 
 .alert-danger {
-  background-color: var(--color-red-12);
-  border: 1px solid var(--color-red-35);
-  color: var(--color-red-6);
+  background-color: var(--color-red-overlay-soft);
+  border: 1px solid var(--color-red-overlay-strong);
+  color: var(--color-red-deep);
 }
 
 .alert-danger .bi {
   font-size: 18px;
   flex-shrink: 0;
-  color: var(--color-red-6);
+  color: var(--color-red-deep);
 }
 
 .error-message {
   font-size: 16px;
-  color: var(--color-red-4);
+  color: var(--color-red-base);
   font-weight: 500;
   animation: slideDown 0.25s ease;
 }

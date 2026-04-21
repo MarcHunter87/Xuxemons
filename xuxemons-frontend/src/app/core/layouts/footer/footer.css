@@ -2,7 +2,7 @@
   background-color: var(--primary-color);
   width: 100%;
   margin-top: auto;
-  border-top: 1px solid var(--color-gray-4);
+  border-top: 1px solid var(--color-gray-light);
 }
 
 .footer-inner {
@@ -91,7 +91,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid var(--color-gray-4);
+  border-top: 1px solid var(--color-gray-light);
   padding: 1rem 0 1.5rem;
   gap: 1rem;
 }
@@ -115,7 +115,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: var(--color-green-4);
+  background-color: var(--color-green-base);
   display: inline-block;
 }
 

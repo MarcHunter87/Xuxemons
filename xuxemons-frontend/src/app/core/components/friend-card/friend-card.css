@@ -5,8 +5,8 @@
 .friend-card {
   background: var(--neutral-white);
   border-radius: 14px;
-  border: 1px solid var(--color-gray-4);
-  box-shadow: 0 2px 10px var(--color-black-12);
+  border: 1px solid var(--color-gray-light);
+  box-shadow: 0 2px 10px var(--color-black-soft);
   padding: 1.25rem 1rem 1rem;
   display: flex;
   flex-direction: column;
@@ -41,7 +41,7 @@
   justify-content: center;
   font-size: 1.6rem;
   color: var(--neutral-black);
-  border: 1px solid var(--color-gray-4);
+  border: 1px solid var(--color-gray-light);
 }
 
 .friend-avatar img {
@@ -58,12 +58,12 @@
   height: 13px;
   border-radius: 50%;
   border: 2px solid var(--neutral-white);
-  background: var(--color-gray-6);
+  background: var(--color-gray-medium);
 }
 
-.status-dot--online  { background: var(--color-green-4); }
-.status-dot--away    { background: var(--color-red-4); }
-.status-dot--offline { background: var(--color-gray-6); }
+.status-dot--online  { background: var(--color-green-base); }
+.status-dot--away    { background: var(--color-red-base); }
+.status-dot--offline { background: var(--color-gray-medium); }
 
 .friend-info {
   flex: 1;
@@ -162,7 +162,7 @@
 }
 
 .friend-menu-btn:hover {
-  background: var(--color-gray-4);
+  background: var(--color-gray-light);
 }
 
 .friend-menu-btn:active {
@@ -175,9 +175,9 @@
   right: 0;
   min-width: 168px;
   background: var(--neutral-white);
-  border: 1.5px solid var(--color-gray-4);
+  border: 1.5px solid var(--color-gray-light);
   border-radius: 10px;
-  box-shadow: 0 4px 20px var(--color-black-12);
+  box-shadow: 0 4px 20px var(--color-black-soft);
   z-index: 5;
   overflow: hidden;
 }
@@ -199,7 +199,7 @@
 }
 
 .friend-dropdown-item:hover {
-  background: var(--color-red-12);
+  background: var(--color-red-overlay-soft);
 }
 
 .friend-dropdown-item:active {
@@ -211,7 +211,7 @@
 .friend-card-actions {
   display: flex;
   gap: 0.5rem;
-  border-top: 1.5px solid var(--color-gray-4);
+  border-top: 1.5px solid var(--color-gray-light);
   padding-top: 16px;
 }
 

@@ -24,7 +24,7 @@
     background: var(--primary-color);
     margin-top: 0;
     margin-bottom: var(--page-section-gap);
-    box-shadow: 0 8px 18px var(--color-black-12);
+    box-shadow: 0 8px 18px var(--color-black-soft);
 }
 
 .roulette-track {
@@ -49,16 +49,16 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-right: 2px solid var(--color-white-35);
+    border-right: 2px solid var(--color-white-overlay-strong);
     color: var(--neutral-white);
-    text-shadow: 1px 1px 2px var(--color-black-12);
+    text-shadow: 1px 1px 2px var(--color-black-soft);
 }
 
 .roulette-item img {
     width: 112px;
     height: 112px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 4px var(--color-black-12));
+    filter: drop-shadow(0 2px 4px var(--color-black-soft));
 }
 
 .roulette-item span {
@@ -75,7 +75,7 @@
     height: 100%;
     background: var(--neutral-white);
     z-index: 2;
-    box-shadow: 0 0 15px var(--color-white-35);
+    box-shadow: 0 0 15px var(--color-white-overlay-strong);
 }
 
 button.btn-primary.spin-button {
@@ -120,7 +120,7 @@ button.btn-primary.spin-button {
     height: 26px;
     object-fit: contain;
     flex-shrink: 0;
-    filter: drop-shadow(0 1px 2px var(--color-black-12));
+    filter: drop-shadow(0 1px 2px var(--color-black-soft));
 }
 
 .spin-cost-amount {
@@ -152,7 +152,7 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
 .btn-loading-icon {
     width: 24px;
     height: 24px;
-    border: 3px solid var(--color-white-35);
+    border: 3px solid var(--color-white-overlay-strong);
     border-top-color: var(--neutral-white);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -169,11 +169,11 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: var(--color-black-90);
+    background: var(--color-black-soft);
     color: var(--neutral-white);
     padding: 12px 16px;
     border-radius: 12px;
-    box-shadow: 0 8px 24px var(--color-black-12);
+    box-shadow: 0 8px 24px var(--color-black-soft);
     animation: toast-in 300ms ease-out;
 }
 
@@ -182,7 +182,7 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
     height: 48px;
     object-fit: contain;
     border-radius: 8px;
-    background: var(--color-white-10);
+    background: var(--color-white-overlay);
 }
 
 .toast-text {
@@ -215,7 +215,7 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
     font-weight: 800;
     text-transform: capitalize;
     font-size: 1.3rem;
-    box-shadow: 0 4px 10px var(--color-black-12);
+    box-shadow: 0 4px 10px var(--color-black-soft);
 }
 
 .recoger-button {
@@ -229,8 +229,8 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
     padding: 1.5rem;
     background: var(--primary-color);
     border-radius: 16px;
-    border: 1px solid var(--color-gray-4);
-    box-shadow: 0 4px 12px var(--color-black-12);
+    border: 1px solid var(--color-gray-light);
+    box-shadow: 0 4px 12px var(--color-black-soft);
     width: 100%;
 }
 
@@ -253,10 +253,10 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 1px solid var(--color-gray-4);
+    border: 1px solid var(--color-gray-light);
     background: var(--neutral-white);
     border-radius: 14px;
-    box-shadow: 0 2px 8px var(--color-black-12);
+    box-shadow: 0 2px 8px var(--color-black-soft);
     padding: 0.65rem 0.5rem 0.75rem;
     text-align: center;
     width: 140px;
@@ -272,7 +272,7 @@ button.btn-primary.spin-button:disabled .spin-button-cost {
 .recent-image-box {
     padding: 0.75rem;
     border-radius: 12px;
-    box-shadow: 0 2px 8px var(--color-black-12);
+    box-shadow: 0 2px 8px var(--color-black-soft);
     margin-bottom: 0.5rem;
     transition: transform 0.3s ease;
 }

@@ -64,7 +64,7 @@
 	width: 100%;
 	min-height: 280px;
 	border-radius: 10px;
-	border: 2px solid var(--color-gray-4);
+	border: 2px solid var(--color-gray-light);
 	background: linear-gradient(145deg, var(--accent-color) 0%, var(--accent-color) 100%);
 	background-size: cover;
 	background-position: center;
@@ -99,7 +99,7 @@
 .upload-spinner {
 	width: 46px;
 	height: 46px;
-	border: 4px solid var(--color-white-35);
+	border: 4px solid var(--color-white-overlay-strong);
 	border-top-color: var(--neutral-white);
 	border-radius: 50%;
 	animation: spin 0.8s linear infinite;
@@ -108,7 +108,7 @@
 .upload-spinner-small {
 	width: 14px;
 	height: 14px;
-	border: 2px solid var(--color-blue-15);
+	border: 2px solid var(--color-blue-overlay-medium);
 	border-top-color: var(--accent-color);
 	border-radius: 50%;
 	animation: spin 0.8s linear infinite;
@@ -182,7 +182,7 @@
 	bottom: 8px;
 	width: 28px;
 	height: 28px;
-	border: 1px solid var(--color-gray-4);
+	border: 1px solid var(--color-gray-light);
 	border-radius: 50%;
 	background: var(--neutral-white);
 	color: var(--accent-color);
@@ -209,7 +209,7 @@
 
 .edit-card {
 	background: var(--primary-color);
-	border: 1px solid var(--color-gray-4);
+	border: 1px solid var(--color-gray-light);
 	border-radius: 14px;
 	padding: 1.15rem 0.95rem 0.9rem;
 }
@@ -239,7 +239,7 @@
 .field-group input {
 	width: 100%;
 	min-height: 52px;
-	border: 1px solid var(--color-gray-6);
+	border: 1px solid var(--color-gray-medium);
 	border-radius: 8px;
 	padding: 0.7rem 0.75rem;
 	font-family: inherit;
@@ -294,7 +294,7 @@
 }
 
 .form-message-error {
-	color: var(--color-red-4);
+	color: var(--color-red-base);
 }
 
 .form-message-error::before {
@@ -303,12 +303,12 @@
 }
 
 .form-message-success {
-	color: var(--color-green-4);
+	color: var(--color-green-base);
 }
 
 .section-divider {
 	border: 0;
-	border-top: 1px solid var(--color-gray-6);
+	border-top: 1px solid var(--color-gray-medium);
 	margin: var(--page-section-gap) 0;
 }
 
@@ -342,8 +342,8 @@
 
 .danger-card {
 	margin-top: var(--page-section-gap);
-	border: 1px solid var(--color-red-35);
-	background: var(--color-red-12);
+	border: 1px solid var(--color-red-overlay-strong);
+	background: var(--color-red-overlay-soft);
 	border-radius: 12px;
 	padding: 0.95rem 0.9rem;
 	display: flex;
@@ -354,7 +354,7 @@
 
 .settings-card {
 	background: var(--primary-color);
-	border: 1px solid var(--color-gray-4);
+	border: 1px solid var(--color-gray-light);
 	border-radius: 14px;
 	padding: 1.15rem 0.95rem 0.9rem;
 	margin-top: 1rem;
@@ -402,7 +402,7 @@
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background-color: var(--color-gray-6);
+	background-color: var(--color-gray-medium);
 	transition: .4s;
 	border-radius: 34px;
 }
@@ -433,14 +433,14 @@ input:checked + .slider:before {
 
 .danger-card h3 {
 	margin: 0;
-	color: var(--color-red-4);
+	color: var(--color-red-base);
 	font-size: 18px;
 	font-weight: 700;
 }
 
 .danger-card p {
 	margin: 0.3rem 0 0;
-	color: var(--color-red-4);
+	color: var(--color-red-base);
 	font-size: 16px;
 }
 
@@ -448,7 +448,7 @@ input:checked + .slider:before {
 	margin-top: 0.5rem;
 	font-size: 16px;
 	font-weight: 600;
-	color: var(--color-red-4);
+	color: var(--color-red-base);
 }
 
 .danger-error::before {

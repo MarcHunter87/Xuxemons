@@ -15,12 +15,12 @@
   padding: 3rem 2rem;
   border-radius: 12px;
   background-color: var(--neutral-white);
-  border: 1px solid var(--color-gray-4);
+  border: 1px solid var(--color-gray-light);
   animation: slideInUp 0.4s ease-out;
 }
 
 .error-message {
-  color: var(--color-red-4);
+  color: var(--color-red-base);
   font-weight: 500;
   margin: 0;
 }
@@ -37,9 +37,9 @@
   overflow-x: auto;
   width: 100%;
   background-color: var(--neutral-white);
-  border: 1px solid var(--color-gray-4);
+  border: 1px solid var(--color-gray-light);
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-black-12);
+  box-shadow: 0 2px 8px var(--color-black-soft);
   animation: slideInUp 0.4s ease-out;
 }
 
@@ -73,13 +73,13 @@
 }
 
 .admin-nav-btn-daily-all {
-  background-color: var(--color-amber-6, #c43e00);
+  background-color: var(--color-amber-deep, #c43e00);
   color: var(--neutral-white);
 }
 
 .admin-nav-btn-daily-all:hover:not(:disabled) {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-amber-6, #c43e00) 45%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-amber-deep, #c43e00) 45%, transparent);
 }
 
 .admin-nav-btn-daily-all:active:not(:disabled) {
@@ -87,13 +87,13 @@
 }
 
 .admin-nav-btn-daily-xuxemon {
-  background-color: var(--color-green-4, #28a745);
+  background-color: var(--color-green-base, #28a745);
   color: var(--neutral-white);
 }
 
 .admin-nav-btn-daily-xuxemon:hover:not(:disabled) {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px var(--color-green-40);
+  box-shadow: 0 2px 8px var(--color-green-glow-strong);
 }
 
 .admin-nav-btn-daily-xuxemon:active:not(:disabled) {
@@ -107,7 +107,7 @@
 
 .admin-nav-btn-daily-items:hover:not(:disabled) {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px var(--color-blue-15);
+  box-shadow: 0 2px 8px var(--color-blue-overlay-medium);
 }
 
 .admin-nav-btn-daily-items:active:not(:disabled) {
@@ -117,7 +117,7 @@
 .btn-loading-icon {
   width: 16px;
   height: 16px;
-  border: 2px solid var(--color-white-30);
+  border: 2px solid var(--color-white-overlay);
   border-top-color: var(--neutral-white);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -185,12 +185,12 @@
   color: var(--neutral-white);
   letter-spacing: 0.01em;
   padding: 0.9rem 1rem;
-  border-bottom: 1px solid var(--color-gray-4);
+  border-bottom: 1px solid var(--color-gray-light);
 }
 
 .players-table td {
   padding: 0.9rem 1rem;
-  border-bottom: 1px solid var(--color-gray-4);
+  border-bottom: 1px solid var(--color-gray-light);
   vertical-align: middle;
 }
 
@@ -199,7 +199,7 @@
 }
 
 .players-table tbody tr:hover {
-  background-color: color-mix(in srgb, var(--color-blue-15) 20%, var(--neutral-white));
+  background-color: color-mix(in srgb, var(--color-blue-overlay-medium) 20%, var(--neutral-white));
 }
 
 .cell-id,
@@ -229,7 +229,7 @@
   width: 40px;
   height: 40px;
   margin: 0 auto 1rem;
-  border: 3px solid var(--color-blue-20);
+  border: 3px solid var(--color-blue-overlay-strong);
   border-top-color: var(--accent-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;

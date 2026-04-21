@@ -8,9 +8,9 @@
   background-color: var(--primary-color);
   border-radius: 16px;
   padding: 32px;
-  border: 1px solid var(--color-gray-4);
+  border: 1px solid var(--color-gray-light);
   width: 100%;
-  box-shadow: 0 4px 6px -1px var(--color-black-12);
+  box-shadow: 0 4px 6px -1px var(--color-black-soft);
   display: flex;
   flex-direction: column;
 }

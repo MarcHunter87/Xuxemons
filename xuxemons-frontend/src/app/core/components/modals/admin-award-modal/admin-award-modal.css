@@ -12,7 +12,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: var(--color-black-90, rgba(0, 0, 0, 0.5));
+  background: var(--color-black-soft, rgba(0, 0, 0, 0.5));
   backdrop-filter: blur(10px);
   z-index: 5;
   display: flex;
@@ -27,8 +27,8 @@
   width: min(520px, 92vw);
   max-width: 520px;
   border-radius: 20px;
-  border: 2px solid var(--color-gray-4);
-  box-shadow: 0 20px 40px var(--color-black-12);
+  border: 2px solid var(--color-gray-light);
+  box-shadow: 0 20px 40px var(--color-black-soft);
   position: relative;
 }
 
@@ -65,7 +65,7 @@
   justify-content: center;
   padding: 1.7rem;
   border-radius: 16px;
-  box-shadow: 0 8px 24px var(--color-black-12);
+  box-shadow: 0 8px 24px var(--color-black-soft);
 }
 
 .award-modal-image {
@@ -115,21 +115,21 @@
   min-height: 64px;
   padding: 0.5rem 0.4rem;
   border-radius: 12px;
-  box-shadow: 0 4px 10px var(--color-black-12);
+  box-shadow: 0 4px 10px var(--color-black-soft);
 }
 
 .award-modal-stats .stat-hp {
-  background: var(--color-green-4);
+  background: var(--color-green-base);
   color: var(--neutral-white);
 }
 
 .award-modal-stats .stat-attack {
-  background: var(--color-red-4);
+  background: var(--color-red-base);
   color: var(--neutral-white);
 }
 
 .award-modal-stats .stat-defense {
-  background: var(--color-amber-5);
+  background: var(--color-amber-deep);
   color: var(--neutral-white);
 }
 

@@ -19,13 +19,13 @@
 }
 
 .admin-nav-btn-xuxemons {
-  background-color: var(--color-green-4);
+  background-color: var(--color-green-base);
   color: var(--neutral-white);
 }
 
 .admin-nav-btn-xuxemons:hover {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px var(--color-green-40);
+  box-shadow: 0 2px 8px var(--color-green-glow-strong);
 }
 
 .admin-nav-btn-xuxemons:active {
@@ -39,7 +39,7 @@
 
 .admin-nav-btn-items:hover {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px var(--color-blue-15);
+  box-shadow: 0 2px 8px var(--color-blue-overlay-medium);
 }
 
 .admin-nav-btn-items:active {
@@ -47,13 +47,13 @@
 }
 
 .admin-nav-btn-evolve {
-  background-color: var(--color-purple-7);
+  background-color: var(--color-purple-base);
   color: var(--neutral-white);
 }
 
 .admin-nav-btn-evolve:hover {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px var(--color-purple-73);
+  box-shadow: 0 2px 8px var(--color-blue-overlay);
 }
 
 .admin-nav-btn-evolve:active {
@@ -61,13 +61,13 @@
 }
 
 .admin-nav-btn-daily-rewards {
-  background-color: var(--color-amber-6);
+  background-color: var(--color-amber-deep);
   color: var(--neutral-white);
 }
 
 .admin-nav-btn-daily-rewards:hover {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-amber-6) 45%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-amber-deep) 45%, transparent);
 }
 
 .admin-nav-btn-daily-rewards:active {
@@ -75,7 +75,7 @@
 }
 
 .admin-nav-btn-side-effects {
-  background-color: var(--color-red-4);
+  background-color: var(--color-red-base);
   color: var(--neutral-white);
 }
 
@@ -87,7 +87,7 @@
 
 .admin-nav-btn-side-effects:hover {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-red-4) 45%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-red-base) 45%, transparent);
 }
 
 .admin-nav-btn-side-effects:active {
@@ -101,13 +101,13 @@
   padding: 3rem 2rem;
   border-radius: 12px;
   background-color: var(--neutral-white);
-  border: 1px solid var(--color-gray-4);
+  border: 1px solid var(--color-gray-light);
   animation: slideInUp 0.4s ease-out;
   margin-bottom: var(--page-section-gap);
 }
 
 .error-message {
-  color: var(--color-red-4);
+  color: var(--color-red-base);
   font-weight: 500;
   margin: 0;
 }
@@ -122,9 +122,9 @@
 .players-table-wrapper {
   overflow-x: auto;
   background-color: var(--neutral-white);
-  border: 1px solid var(--color-gray-4);
+  border: 1px solid var(--color-gray-light);
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--color-black-12);
+  box-shadow: 0 2px 8px var(--color-black-soft);
   animation: slideInUp 0.4s ease-out;
 }
 
@@ -145,12 +145,12 @@
   color: var(--neutral-white);
   letter-spacing: 0.01em;
   padding: 0.9rem 1rem;
-  border-bottom: 1px solid var(--color-gray-4);
+  border-bottom: 1px solid var(--color-gray-light);
 }
 
 .players-table td {
   padding: 0.9rem 1rem;
-  border-bottom: 1px solid var(--color-gray-4);
+  border-bottom: 1px solid var(--color-gray-light);
   vertical-align: middle;
 }
 
@@ -159,7 +159,7 @@
 }
 
 .players-table tbody tr:hover {
-  background-color: color-mix(in srgb, var(--color-blue-15) 20%, var(--neutral-white));
+  background-color: color-mix(in srgb, var(--color-blue-overlay-medium) 20%, var(--neutral-white));
 }
 
 .table-user {
@@ -195,7 +195,7 @@
 .spinner-cell {
   width: 20px;
   height: 20px;
-  border: 2px solid var(--color-blue-20);
+  border: 2px solid var(--color-blue-overlay-strong);
   border-top-color: var(--accent-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -225,7 +225,7 @@
 .slots-badge {
   display: inline-flex;
   align-items: center;
-  background-color: var(--color-blue-15);
+  background-color: var(--color-blue-overlay-medium);
   color: var(--accent-on-light);
   font-size: 1rem;
   font-weight: 600;
@@ -261,7 +261,7 @@
 
 .give-item-btn:hover:not(:disabled) {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px var(--color-blue-15);
+  box-shadow: 0 2px 8px var(--color-blue-overlay-medium);
 }
 
 .backpack-icon {
@@ -273,20 +273,20 @@
 }
 
 .give-item-btn:disabled {
-  background-color: var(--color-gray-6);
+  background-color: var(--color-gray-medium);
   cursor: not-allowed;
   opacity: 0.9;
   color: var(--neutral-white);
 }
 
 .give-xuxemon-btn {
-  background-color: var(--color-green-4);
+  background-color: var(--color-green-base);
   color: var(--neutral-white);
 }
 
 .give-xuxemon-btn:hover:not(:disabled) {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px var(--color-green-40);
+  box-shadow: 0 2px 8px var(--color-green-glow-strong);
 }
 
 .give-xuxemon-btn:active:not(:disabled) {
@@ -294,19 +294,19 @@
 }
 
 .give-xuxemon-btn:disabled {
-  background-color: var(--color-gray-6);
+  background-color: var(--color-gray-medium);
   cursor: not-allowed;
   opacity: 0.9;
 }
 
 .ban-user-btn {
-  background-color: var(--color-red-4);
+  background-color: var(--color-red-base);
   color: var(--neutral-white);
 }
 
 .ban-user-btn:hover:not(:disabled) {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px var(--color-red-10);
+  box-shadow: 0 2px 8px var(--color-red-overlay);
 }
 
 .ban-user-btn:active:not(:disabled) {
@@ -314,7 +314,7 @@
 }
 
 .ban-user-btn:disabled {
-  background-color: var(--color-gray-6);
+  background-color: var(--color-gray-medium);
   cursor: not-allowed;
   opacity: 0.9;
 }
@@ -322,7 +322,7 @@
 .btn-loading-icon {
   width: 20px;
   height: 20px;
-  border: 2px solid var(--color-white-30);
+  border: 2px solid var(--color-white-overlay);
   border-top-color: var(--neutral-white);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -341,12 +341,12 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  background: var(--color-red-4);
+  background: var(--color-red-base);
   color: var(--neutral-white);
   border-radius: 12px;
   font-weight: 600;
   z-index: 6;
-  box-shadow: 0 8px 24px var(--color-black-12);
+  box-shadow: 0 8px 24px var(--color-black-soft);
 }
 
 .award-error-toast button {

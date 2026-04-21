@@ -14,7 +14,7 @@
 .friend-req-noti-content {
 	border: 0;
 	border-radius: 12px;
-	box-shadow: 0 20px 48px var(--color-black-12, rgba(0, 0, 0, 0.18));
+	box-shadow: 0 20px 48px var(--color-black-soft, rgba(0, 0, 0, 0.18));
 	background: var(--primary-color, #f1f3f5);
 	color: var(--neutral-black);
 }
@@ -29,9 +29,9 @@
 	padding: 0.5rem 0.9rem;
 	min-height: 40px;
 	border-radius: 8px;
-	background: var(--color-red-10, rgba(220,38,38,0.1));
-	border: 1.5px solid var(--color-red-4, #e03131);
-	color: var(--color-red-4, #e03131);
+	background: var(--color-red-overlay, rgba(220,38,38,0.1));
+	border: 1.5px solid var(--color-red-base, #e03131);
+	color: var(--color-red-base, #e03131);
 	white-space: nowrap;
 }
 
@@ -73,14 +73,14 @@
 	align-items: center;
 	gap: 0.6rem;
 	background: var(--neutral-white, #ffffff);
-	border: 1px solid var(--color-gray-4, #d9dee3);
+	border: 1px solid var(--color-gray-light, #d9dee3);
 	border-radius: 8px;
 	padding: 0.55rem 0.65rem;
 }
 
 .friend-req-row {
 	background: var(--neutral-white);
-	border-color: var(--color-gray-4);
+	border-color: var(--color-gray-light);
 }
 
 .friend-req-avatar {
@@ -93,7 +93,7 @@
 	justify-content: center;
 	flex-shrink: 0;
 	overflow: hidden;
-	border: 1px solid var(--color-gray-4);
+	border: 1px solid var(--color-gray-light);
 	color: var(--neutral-black);
 	font-size: 1.3rem;
 }

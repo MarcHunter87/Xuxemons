@@ -72,7 +72,7 @@
 
 .progress-container {
   height: 12px;
-  background-color: var(--color-gray-4);
+  background-color: var(--color-gray-light);
   border-radius: 6px;
   overflow: hidden;
   width: 100%;

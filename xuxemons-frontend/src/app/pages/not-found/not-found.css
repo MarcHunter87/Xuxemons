@@ -14,7 +14,7 @@
 	height: 160px;
 	object-fit: contain;
 	margin-bottom: 1.5rem;
-	filter: drop-shadow(0 2px 12px var(--color-gray-4));
+	filter: drop-shadow(0 2px 12px var(--color-gray-light));
 	animation: walkXuxemon 2.2s ease-in-out infinite alternate;
 }
 
@@ -55,13 +55,13 @@
 	text-decoration: none;
 	font-size: 1.1rem;
 	transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
-	box-shadow: 0 2px 12px var(--color-black-12);
+	box-shadow: 0 2px 12px var(--color-black-soft);
 }
 
 .not-found-home-link:hover {
 	background: var(--accent-color);
 	transform: translateY(-2px) scale(1.04);
-	box-shadow: 0 4px 18px var(--color-black-12);
+	box-shadow: 0 4px 18px var(--color-black-soft);
 }
 
 /* When using global button class, adopt global sizing and radius */
