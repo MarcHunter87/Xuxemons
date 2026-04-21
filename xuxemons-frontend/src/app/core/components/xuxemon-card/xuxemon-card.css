@@ -79,7 +79,7 @@
     font-size: 16px;
     font-weight: 600;
     color: var(--neutral-white);
-    background-color: var(--accent-on-light);
+    background-color: var(--neutral-black);
     border: 1px solid var(--light-gray-color);
     border-radius: 8px;
     box-sizing: border-box;
