@@ -29,7 +29,7 @@
 }
 
 .discard-modal .discard-picker {
-  box-shadow: 0 20px 45px var(--shadow-modal);
+  box-shadow: 0 20px 45px var(--shadow-color);
   border-color: var(--danger-border-alpha-35);
   background: linear-gradient(135deg, var(--modal-content-bg-start) 0%, var(--modal-content-bg-end) 100%);
 }
@@ -56,8 +56,8 @@
   min-width: 40px;
   border-radius: 8px;
   border: 1px solid var(--light-gray-color, #d1d5db);
-  background: linear-gradient(180deg, var(--white-color) 0%, var(--primary-color) 100%);
-  color: var(--text-alt-color);
+  background: linear-gradient(180deg, var(--neutral-white) 0%, var(--primary-color) 100%);
+  color: var(--neutral-black);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -67,7 +67,7 @@
 
 .qty-btn.qty-btn-use:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 12px var(--shadow-input);
+  box-shadow: 0 6px 12px var(--shadow-color);
 }
 
 .qty-btn.qty-btn-use:active:not(:disabled) {
@@ -83,7 +83,7 @@
   text-align: center;
   font-weight: 700;
   font-size: 1rem;
-  background: var(--white-color);
+  background: var(--neutral-white);
   box-shadow: none;
 }
 
@@ -102,7 +102,7 @@
   justify-content: center;
   background: var(--danger-color);
   border-color: var(--danger-color-2);
-  color: var(--white-color);
+  color: var(--neutral-white);
   font-weight: 500;
 }
 
@@ -119,10 +119,10 @@
 
 .qty-btn.qty-decrease i,
 .qty-btn.qty-increase i {
-  color: var(--white-color);
+  color: var(--neutral-white);
   font-weight: 900;
   font-size: 1.2rem;
-  text-shadow: 0 1px 0 var(--text-shadow-medium);
+  text-shadow: 0 1px 0 var(--shadow-color);
 }
 
 .qty-input.qty-input-use::-webkit-outer-spin-button,
@@ -171,7 +171,7 @@
 
 .discard-hint {
   font-size: 1rem;
-  color: var(--text-muted);
+  color: var(--neutral-black);
   text-align: center;
   margin: 0 0 0.75rem;
 }
@@ -196,7 +196,7 @@
   padding: 0.85rem;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 4px 12px var(--danger-glow);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .btn-danger:hover {
@@ -211,7 +211,7 @@
 
 .btn-danger:disabled {
   background: var(--btn-disabled-danger-bg);
-  color: var(--white-color);
+  color: var(--neutral-white);
   box-shadow: none;
   transform: none;
   cursor: not-allowed;

@@ -3,7 +3,7 @@
 }
 
 .request-card {
-  background: var(--white-color);
+  background: var(--neutral-white);
   border-radius: 12px;
   border: 1px solid var(--light-gray-color);
   padding: 1rem;
@@ -39,7 +39,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
-  color: var(--black-color);
+  color: var(--neutral-black);
   border: 1px solid var(--light-gray-color);
   flex-shrink: 0;
 }
@@ -61,7 +61,7 @@
 .request-name {
   font-weight: 700;
   font-size: 1.125rem;
-  color: var(--bs-body-color);
+  color: var(--neutral-black);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -70,7 +70,7 @@
 .request-level {
   font-size: 1rem;
   font-weight: var(--bs-body-font-weight);
-  color: var(--bs-body-color);
+  color: var(--neutral-black);
   text-transform: none;
   letter-spacing: 0;
 }

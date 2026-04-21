@@ -27,7 +27,7 @@
   position: absolute;
   top: 1.25rem;
   right: max(2rem, calc((100vw - var(--layout-max-width)) / 2 + 2rem));
-  border: 2px solid var(--white-color);
+  border: 2px solid var(--neutral-white);
   box-shadow: 0 2px 8px var(--shadow-color);
 }
 
@@ -92,7 +92,7 @@
 .profile-username {
   font-size: 32px;
   font-weight: 700;
-  color: var(--black-color);
+  color: var(--neutral-black);
   margin-top: 10px;
   margin-bottom: 0;
 }
@@ -111,18 +111,18 @@
 .profile-section-title {
   font-size: 28px;
   font-weight: 700;
-  color: var(--black-color);
+  color: var(--neutral-black);
   margin: 12px 0 0;
 }
 
 .profile-section-label {
   font-size: 16px;
-  color: var(--dark-gray-color);
+  color: var(--neutral-black);
   margin-bottom: var(--page-section-gap);
 }
 
 .profile-card {
-  background-color: var(--white-color);
+  background-color: var(--neutral-white);
   border-radius: 8px;
   box-shadow: 0 4px 8px var(--shadow-color);
   padding: var(--page-section-gap) 1.25rem;

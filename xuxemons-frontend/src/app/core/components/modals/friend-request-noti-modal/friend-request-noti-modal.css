@@ -76,7 +76,7 @@
 }
 
 .friend-req-row {
-	background: var(--white-color);
+	background: var(--neutral-white);
 	border-color: var(--light-gray-color);
 }
 
@@ -91,7 +91,7 @@
 	flex-shrink: 0;
 	overflow: hidden;
 	border: 1px solid var(--light-gray-color);
-	color: var(--black-color);
+	color: var(--neutral-black);
 	font-size: 1.3rem;
 }
 
@@ -115,14 +115,14 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	color: var(--bs-body-color);
+	color: var(--neutral-black);
 }
 
 .friend-req-level {
 	margin: 0.2rem 0 0;
 	font-weight: var(--bs-body-font-weight);
 	font-size: 1rem;
-	color: var(--bs-body-color);
+	color: var(--neutral-black);
 }
 
 .friend-req-actions {

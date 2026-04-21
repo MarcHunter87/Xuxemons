@@ -19,13 +19,13 @@
   width: min(480px, 100%);
   max-height: 85vh;
   overflow: auto;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--white-color) 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--neutral-white) 100%);
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 20px 45px var(--shadow-color);
   border: 1px solid var(--black-alpha-05);
   animation: popupIn 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
 }
 
 @keyframes fadeInOverlay {
@@ -71,8 +71,8 @@
   min-width: 40px;
   border-radius: 8px;
   border: 1px solid var(--light-gray-color, #d1d5db);
-  background: linear-gradient(180deg, var(--white-color) 0%, var(--primary-color) 100%);
-  color: var(--text-alt-color);
+  background: linear-gradient(180deg, var(--neutral-white) 0%, var(--primary-color) 100%);
+  color: var(--neutral-black);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -82,7 +82,7 @@
 
 .qty-btn.qty-btn-use:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 12px var(--shadow-input);
+  box-shadow: 0 6px 12px var(--shadow-color);
 }
 
 .qty-btn.qty-btn-use:active:not(:disabled) {
@@ -98,7 +98,7 @@
   text-align: center;
   font-weight: 700;
   font-size: 1rem;
-  background: var(--white-color);
+  background: var(--neutral-white);
   box-shadow: none;
 }
 
@@ -117,7 +117,7 @@
   justify-content: center;
   background: var(--danger-color);
   border-color: var(--danger-color-2);
-  color: var(--white-color);
+  color: var(--neutral-white);
   font-weight: 500;
 }
 
@@ -134,15 +134,15 @@
 
 .qty-btn.qty-decrease i,
 .qty-btn.qty-increase i {
-  color: var(--white-color);
+  color: var(--neutral-white);
   font-weight: 900;
   font-size: 1.4rem;
-  text-shadow: 0 1px 0 var(--text-shadow-medium);
+  text-shadow: 0 1px 0 var(--shadow-color);
 }
 
 .qty-badge {
   background: var(--danger-alpha-50);
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   font-weight: 700;
   border-radius: 8px;
   padding: 0.25em 0.8em;
@@ -223,7 +223,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  box-shadow: 0 2px 8px 0 var(--starving-shadow);
+  box-shadow: 0 2px 8px 0 var(--shadow-color);
   font-size: 1.08rem;
   color: var(--starving-text);
 }
@@ -277,13 +277,13 @@
   margin: 0 0 0.25rem;
   font-size: max(1.25rem, 18px);
   font-weight: 700;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
 }
 
 .use-item-modal-subtitle {
   margin: 0 0 1rem;
   font-size: max(1rem, 16px);
-  color: var(--black-color);
+  color: var(--neutral-black);
 }
 
 .use-item-search-wrap {
@@ -298,29 +298,29 @@
   font-size: max(1rem, 16px);
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  background: var(--white-color);
-  color: var(--text-alt-color);
+  background: var(--neutral-white);
+  color: var(--neutral-black);
 }
 
 .use-item-search::placeholder {
-  color: var(--text-muted);
+  color: var(--neutral-black);
 }
 
 .use-item-search:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px var(--white-color), 0 0 0 5px var(--accent-color);
+  box-shadow: 0 0 0 2px var(--neutral-white), 0 0 0 5px var(--accent-color);
 }
 
 .use-item-search:focus-visible {
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px var(--white-color), 0 0 0 5px var(--accent-color);
+  box-shadow: 0 0 0 2px var(--neutral-white), 0 0 0 5px var(--accent-color);
 }
 
 .use-item-hint {
   margin: 0 0 0.75rem;
   font-size: max(1rem, 16px);
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
 }
 
 .use-item-modal .qty-label,
@@ -329,7 +329,7 @@
 .use-item-modal .use-item-xuxemon-name,
 .use-item-modal .use-item-modal-subtitle,
 .use-item-modal .use-item-hint {
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
 }
 
 .use-item-xuxemon-list {
@@ -340,7 +340,7 @@
   overflow-y: auto;
   border: 1px solid var(--light-gray-color);
   border-radius: 10px;
-  background: var(--white-color);
+  background: var(--neutral-white);
 }
 
 .use-item-xuxemon-list li {
@@ -397,12 +397,12 @@
 .use-item-xuxemon-name {
   font-weight: 700;
   font-size: max(1rem, 16px);
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
 }
 
 .use-item-xuxemon-size {
   font-size: max(1rem, 16px);
-  color: var(--text-muted);
+  color: var(--neutral-black);
 }
 
 .icon-success {
@@ -433,7 +433,7 @@
   border-radius: 6px;
   line-height: 1.25;
   border: 1px solid var(--status-chip-border);
-  box-shadow: 0 2px 8px var(--purple-shadow);
+  box-shadow: 0 2px 8px var(--shadow-color);
   background: linear-gradient(135deg, var(--status-chip-bg-start) 0%, var(--status-chip-bg-mid) 55%, var(--status-chip-bg-end) 100%);
   color: var(--status-chip-text);
 }
@@ -455,15 +455,15 @@
 
 .use-item-status-none {
   font-size: max(1rem, 16px);
-  color: var(--text-muted);
+  color: var(--neutral-black);
   font-style: italic;
 }
 
 .use-item-status-chip.is-target {
   border: 1px solid var(--status-chip-border);
   animation: target-subtle-pulse 3s infinite ease-in-out;
-  background: linear-gradient(135deg, var(--white-color) 0%, var(--status-chip-bg-start) 100%);
-  box-shadow: 0 2px 10px var(--status-chip-shadow);
+  background: linear-gradient(135deg, var(--neutral-white) 0%, var(--status-chip-bg-start) 100%);
+  box-shadow: 0 2px 10px var(--shadow-color);
   position: relative;
   transform: scale(1.02);
 }
@@ -471,7 +471,7 @@
 .use-item-status-block .use-item-status-chip.is-target {
   border-color: var(--status-chip-target-border);
   background: var(--status-chip-target-bg);
-  box-shadow: 0 6px 16px var(--status-chip-target-shadow);
+  box-shadow: 0 6px 16px var(--shadow-color);
   color: var(--status-chip-target-text);
 }
 
@@ -485,7 +485,7 @@
 }
 
 @keyframes target-subtle-pulse {
-  0%, 100% { transform: scale(1.02); box-shadow: 0 2px 10px var(--status-chip-target-shadow); }
+  0%, 100% { transform: scale(1.02); box-shadow: 0 2px 10px var(--shadow-color); }
   50% { transform: scale(1.04); box-shadow: 0 4px 15px var(--status-chip-target-glow); }
 }
 
@@ -528,7 +528,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 9px var(--sideeffect-badge-shadow);
+  box-shadow: 0 2px 9px var(--shadow-color);
   transition: none;
   pointer-events: none;
   box-sizing: border-box;
@@ -547,7 +547,7 @@
   border-radius: 6px;
   background: var(--primary-color);
   border: 1px solid var(--light-gray-color);
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   white-space: nowrap;
 }
 
@@ -555,8 +555,8 @@
 .use-item-sideeffects-row .use-item-sideeffect-badge {
   background: linear-gradient(135deg, var(--sideeffect-badge-start) 0%, var(--sideeffect-badge-end) 100%);
   border: 1px solid var(--sideeffect-badge-border);
-  box-shadow: 0 2px 9px var(--sideeffect-badge-shadow);
-  color: var(--text-alt-color);
+  box-shadow: 0 2px 9px var(--shadow-color);
+  color: var(--neutral-black);
   pointer-events: none;
 }
 
@@ -565,7 +565,7 @@
 .stat-def  { border-color: var(--stat-def-border) !important; color: var(--stat-def-text) !important; }
 .stat-evolve {
   border-color: var(--warning-color) !important;
-  color: var(--text-alt-color) !important;
+  color: var(--neutral-black);
   background: linear-gradient(135deg, var(--sideeffect-badge-start) 0%, var(--sideeffect-badge-end) 100%) !important;
 }
 
@@ -610,7 +610,7 @@
 .use-item-empty {
   padding: 1rem;
   text-align: center;
-  color: var(--text-muted);
+  color: var(--neutral-black);
   font-size: max(1rem, 16px);
 }
 
@@ -640,7 +640,7 @@
   border-radius: 12px;
   background: linear-gradient(135deg, var(--danger-bg-alpha) 0%, var(--danger-bg-alpha-light) 100%);
   color: var(--danger-color-2);
-  box-shadow: 0 10px 24px -18px var(--danger-shadow-alpha);
+  box-shadow: 0 10px 24px -18px var(--shadow-color);
   font-size: max(1rem, 16px);
   font-weight: 600;
 }
@@ -718,7 +718,7 @@
   padding: 0.85rem;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 4px 12px var(--accent-glow);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .btn-primary:hover {
@@ -733,7 +733,7 @@
 
 .btn-primary:disabled {
   background: var(--btn-disabled-primary-bg);
-  color: var(--white-color);
+  color: var(--neutral-white);
   box-shadow: none;
   transform: none;
   cursor: not-allowed;

@@ -3,7 +3,7 @@
 }
 
 .friends-main {
-  background-color: var(--white-color);
+  background-color: var(--neutral-white);
 }
 
 /* ── Page header ── */
@@ -15,7 +15,7 @@
   margin: 0 0 var(--page-header-title-desc-gap);
   font-size: 44px;
   font-weight: 800;
-  color: var(--black-color);
+  color: var(--neutral-black);
 }
 
 .friends-subtitle {
@@ -51,7 +51,7 @@
   text-align: center;
   padding: 1rem;
   border-radius: 12px;
-  background-color: var(--white-color);
+  background-color: var(--neutral-white);
   border: 1px solid var(--light-gray-color);
   animation: slideInUp 0.4s ease-out;
   margin-bottom: var(--page-section-gap);
@@ -68,7 +68,7 @@
   background: var(--danger-bg-alpha);
   border: 1px solid var(--danger-border-alpha);
   color: var(--danger-color);
-  box-shadow: 0 2px 8px var(--danger-shadow-alpha);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .error-state--danger .error-message {
@@ -127,7 +127,7 @@
   align-items: center;
   padding: 0 0.85rem;
   background: var(--accent-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
   font-size: 1.05rem;
   border: none;
   box-shadow: none;
@@ -142,7 +142,7 @@
   padding: 0.8rem 1rem;
   font-family: 'Poppins', sans-serif;
   font-size: 1rem;
-  background: var(--white-color);
+  background: var(--neutral-white);
 }
 
 .search-input:focus {
@@ -197,7 +197,7 @@
 }
 
 .search-result-item {
-  background: var(--white-color);
+  background: var(--neutral-white);
   border: 1px solid var(--light-gray-color);
   border-radius: 8px;
   padding: 0.75rem 1rem;
@@ -217,7 +217,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  color: var(--medium-gray-color);
+  color: var(--neutral-black);
   border: 1px solid var(--surface-light);
   flex-shrink: 0;
 }
@@ -270,7 +270,7 @@
   font-weight: 500;
   background: var(--warning-alpha-10);
   border-color: var(--warning-color);
-  color: var(--warning-dark);
+  color: var(--neutral-black);
 }
 
 .btn-send-request {
@@ -278,7 +278,7 @@
   align-items: center;
   justify-content: center;
   background: var(--accent-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
   border: none;
   border-radius: 8px;
   padding: 0.75rem 1.5rem;

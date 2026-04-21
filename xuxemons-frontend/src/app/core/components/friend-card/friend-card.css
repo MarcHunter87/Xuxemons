@@ -3,7 +3,7 @@
 }
 
 .friend-card {
-  background: var(--white-color);
+  background: var(--neutral-white);
   border-radius: 14px;
   border: 1px solid var(--light-gray-color);
   box-shadow: 0 2px 10px var(--shadow-color);
@@ -40,7 +40,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
-  color: var(--black-color);
+  color: var(--neutral-black);
   border: 1px solid var(--light-gray-color);
 }
 
@@ -57,7 +57,7 @@
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  border: 2px solid var(--white-color);
+  border: 2px solid var(--neutral-white);
   background: var(--medium-gray-color);
 }
 
@@ -86,13 +86,13 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--bs-body-color);
+  color: var(--neutral-black);
 }
 
 .friend-level {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--bs-body-color);
+  color: var(--neutral-black);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -100,7 +100,7 @@
 .friend-id {
   font-size: 1rem;
   font-weight: var(--bs-body-font-weight);
-  color: var(--bs-body-color);
+  color: var(--neutral-black);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -174,7 +174,7 @@
   top: calc(100% + 4px);
   right: 0;
   min-width: 168px;
-  background: var(--white-color);
+  background: var(--neutral-white);
   border: 1.5px solid var(--surface-light);
   border-radius: 10px;
   box-shadow: 0 4px 20px var(--shadow-color);

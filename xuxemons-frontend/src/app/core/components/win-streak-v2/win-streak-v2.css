@@ -27,7 +27,7 @@
 }
 
 .label {
-  color: var(--black-color);
+  color: var(--neutral-black);
   font-size: 16px;
   font-weight: 500;
   text-transform: capitalize;
@@ -35,7 +35,7 @@
 }
 
 .streak-text {
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   font-size: 44px;
   font-weight: 800;
   margin: 0;

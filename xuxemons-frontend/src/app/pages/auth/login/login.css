@@ -6,7 +6,7 @@
   justify-content: center;
   background-color: var(--secondary-color);
   font-family: 'Poppins', sans-serif;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   padding: 2rem 1rem;
   box-sizing: border-box;
 }
@@ -26,20 +26,20 @@
   margin: 0 0 0.25rem;
   font-size: 28px;
   font-weight: 800;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
 }
 
 .brand p {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
 }
 
 .login-card {
   width: 100%;
   max-width: 460px;
-  background: var(--white-color);
+  background: var(--neutral-white);
   border: 2.5px solid var(--light-gray-color);
   border-radius: 16px;
   padding: 2rem;
@@ -59,18 +59,18 @@
 .label {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
 }
 
 .input {
   height: 48px;
   border-radius: 8px;
-  border: 2.5px solid var(--black-color);
+  border: 2.5px solid var(--neutral-black);
   padding: 0 0.875rem;
   font-size: 16px;
   font-family: 'Poppins', sans-serif;
-  color: var(--text-alt-color);
-  background: var(--white-color);
+  color: var(--neutral-black);
+  background: var(--neutral-white);
   transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
   width: 100%;
@@ -95,7 +95,7 @@
   min-width: 44px;
   min-height: 44px;
   cursor: pointer;
-  color: var(--dark-gray-color);
+  color: var(--neutral-black);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,7 +106,7 @@
 .toggle-password:hover,
 
 .toggle-password:focus-visible {
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
 }
 
 .toggle-password:active {
@@ -124,7 +124,7 @@
 }
 
 .input::placeholder {
-  color: var(--text-muted);
+  color: var(--neutral-black);
 }
 
 .input-error {
@@ -172,7 +172,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 16px;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   cursor: pointer;
 }
 
@@ -185,13 +185,14 @@
 
 .login-card .btn-primary {
   margin-top: 0.25rem;
+  color: var(--neutral-white);
 }
 
 .register-link {
   text-align: center;
   margin: 0.25rem 0 0;
   font-size: 16px;
-  color: var(--dark-gray-color);
+  color: var(--neutral-black);
 }
 
 .register-link a {

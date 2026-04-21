@@ -37,12 +37,12 @@
 .brand-name {
   font-size: 16px;
   font-weight: 700;
-  color: var(--black-color);
+  color: var(--neutral-black);
 }
 
 .brand-desc {
   font-size: 16px;
-  color: var(--dark-gray-color);
+  color: var(--neutral-black);
   line-height: 1.6;
   margin: 0;
 }
@@ -50,7 +50,7 @@
 .footer-col-title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--black-color);
+  color: var(--neutral-black);
   margin: 0 0 0.75rem;
 }
 
@@ -76,12 +76,12 @@
 
 .footer-col a:hover {
   background-color: var(--secondary-color);
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
 }
 
 .footer-col a:focus-visible {
   background-color: var(--secondary-color);
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
   border-radius: 2px;

@@ -21,7 +21,7 @@
 }
 
 .award-modal-content {
-  background: linear-gradient(180deg, var(--white-color) 0%, var(--primary-color) 100%);
+  background: linear-gradient(180deg, var(--neutral-white) 0%, var(--primary-color) 100%);
   padding: var(--page-section-gap) 2.5rem var(--page-section-gap);
   text-align: center;
   width: min(520px, 92vw);
@@ -44,7 +44,7 @@
 .award-modal-title {
   font-size: 2rem;
   font-weight: 900;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   margin: 0 0 var(--page-section-gap);
 }
 
@@ -83,13 +83,13 @@
 .award-modal-name {
   font-size: 2rem;
   font-weight: 800;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   margin: 0;
 }
 
 .award-modal-type-badge {
   padding: 0.5rem 1.5rem;
-  color: var(--white-color);
+  color: var(--neutral-white);
   border-radius: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -120,21 +120,21 @@
 
 .award-modal-stats .stat-hp {
   background: var(--potion-heal);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .award-modal-stats .stat-attack {
   background: var(--potion-dmg);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .award-modal-stats .stat-defense {
   background: var(--potion-defense);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .award-modal-stats .stat-label {
-  color: var(--white-color);
+  color: var(--neutral-white);
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -143,7 +143,7 @@
 }
 
 .award-modal-stats .stat-value {
-  color: var(--white-color);
+  color: var(--neutral-white);
   font-size: 1.125rem;
   font-weight: 800;
   line-height: 1.15;

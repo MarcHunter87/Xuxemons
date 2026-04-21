@@ -21,7 +21,7 @@
 
 .breadcrumb a {
   font-size: 16px;
-  color: var(--dark-gray-color);
+  color: var(--neutral-black);
   text-decoration: none;
   font-weight: 500;
   display: inline-block;
@@ -33,12 +33,12 @@
 
 .breadcrumb a:hover {
   background-color: var(--secondary-color);
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
 }
 
 .breadcrumb a:focus-visible {
   background-color: var(--secondary-color);
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
   border-radius: 2px;
@@ -52,7 +52,7 @@
 
 .separator {
   font-size: 16px;
-  color: var(--text-muted);
+  color: var(--neutral-black);
   user-select: none;
 }
 

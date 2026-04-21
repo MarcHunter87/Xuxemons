@@ -1,229 +1,205 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --primary-color: #F3F5F4;
-    --secondary-color: #ACDBFD;
-    --accent-color: #0D6EFD;
-    --accent-on-light: #0A58CA;
-    --text-alt-color: #2A2B2B;
+  --page-header-title-desc-gap: 1.5rem;
+  --page-header-bottom-gap: 1.5rem;
+  --page-section-gap: 1.5rem;
+  --layout-max-width: 1400px;
+  --page-content-padding-top: 1rem;
 
-    --success-color: #28A745;
+  --neutral-black: #2A2B2B;
+  --neutral-white: #FFFFFF;
 
-    --evolve-color: #6F42C1;
-    --evolve-glow: rgba(111, 66, 193, 0.45);
-    --danger-color: #D0181B;
-    --danger-color-2: #9E0B0B;
-    --warning-color: #FFC107;
-    --warning-dark: #C43E00;
-    --potion-heal: #16a34a;
-    --potion-dmg: #dc2626;
-    --potion-defense: #ea580c;
-    --info-color: #33445C;
+  --primary-color: #F3F5F4;
+  --secondary-color: #ACDBFD;
+  --accent-color: #0D6EFD;
+  --accent-on-light: #0A58CA;
+  --text-alt-color: #2A2B2B;
 
-    --white-color: #FFFFFF;
-    --light-gray-color: #C8C8C8;
-    --medium-gray-color: #9C9C9C;
-    --dark-gray-color: #777777;
-    --text-muted: #595959;
-    --black-color: #000000;
+  --success-color: #28A745;
+  --evolve-color: #6F42C1;
+  --evolve-glow: rgba(111, 66, 193, 0.45);
+  --danger-color: #D0181B;
+  --danger-color-2: #9E0B0B;
+  --warning-color: #FFC107;
+  --warning-dark: #C43E00;
+  --potion-heal: #16a34a;
+  --potion-dmg: #dc2626;
+  --potion-defense: #ea580c;
+  --info-color: #33445C;
 
-    --shadow-color: rgba(0, 0, 0, 0.12);
-    --accent-glow: rgba(13, 110, 253, 0.15);
-    --danger-glow: rgba(208, 24, 27, 0.1);
-    --success-glow: rgba(40, 167, 69, 0.4);
-    --danger-bg-alpha: rgba(208, 24, 27, 0.12);
-    --danger-border-alpha: rgba(158, 11, 11, 0.35);
-    --white-alpha-35: rgba(255, 255, 255, 0.35);
+  --light-gray-color: #C8C8C8;
+  --medium-gray-color: #9C9C9C;
+  --dark-gray-color: #777777;
+  --text-muted: #595959;
+  --shadow-color: rgba(0, 0, 0, 0.12);
+  --accent-glow: rgba(13, 110, 253, 0.15);
+  --danger-glow: rgba(208, 24, 27, 0.1);
+  --success-glow: rgba(40, 167, 69, 0.4);
+  --danger-bg-alpha: rgba(208, 24, 27, 0.12);
+  --danger-border-alpha: rgba(158, 11, 11, 0.35);
+  --white-alpha-35: rgba(255, 255, 255, 0.35);
 
-    --layout-max-width: 1400px;
-    --page-content-padding-top: 1rem;
+  --overlay-bg: rgba(0, 0, 0, 0.75);
+  --toast-bg: rgba(20, 20, 20, 0.9);
+  --white-alpha-10: rgba(255, 255, 255, 0.1);
+  --accent-border-alpha: rgba(13, 110, 253, 0.2);
+  --accent-alpha-10: rgba(13, 110, 253, 0.1);
+  --accent-alpha-08: rgba(13, 110, 253, 0.08);
+  --accent-alpha-05: rgba(13, 110, 253, 0.05);
+  --surface-light: #e9ecef;
+  --badge-muted-bg: #fce7f3;
+  --badge-muted-text: #be185d;
+  --badge-muted-border: #f472b6;
 
-    --overlay-bg: rgba(0, 0, 0, 0.75);
-    --toast-bg: rgba(20, 20, 20, 0.9);
-    --white-alpha-10: rgba(255, 255, 255, 0.1);
-    --accent-border-alpha: rgba(13, 110, 253, 0.2);
-    --accent-alpha-10: rgba(13, 110, 253, 0.1);
-    --accent-alpha-08: rgba(13, 110, 253, 0.08);
-    --accent-alpha-05: rgba(13, 110, 253, 0.05);
-    --surface-light: #e9ecef;
-    --badge-muted-bg: #fce7f3;
-    --badge-muted-text: #be185d;
-    --badge-muted-border: #f472b6;
-    --text-shadow-dark: rgba(0, 0, 0, 0.5);
+  --modal-overlay-bg: rgba(0, 0, 0, 0.85);
+  --black-alpha-05: rgba(0, 0, 0, 0.05);
+  --black-alpha-07: rgba(0, 0, 0, 0.7);
+  --white-alpha-20: rgba(255, 255, 255, 0.2);
+  --white-alpha-30: rgba(255, 255, 255, 0.3);
+  --white-alpha-60: rgba(255, 255, 255, 0.6);
+  --potion-heal-light: #22c55e;
+  --potion-dmg-light: #ef4444;
+  --potion-defense-light: #fb923c;
+  --tag-defense: #ff8c42;
+  --tag-revive: #f59e0b;
+  --tag-info: #2563eb;
+  --tag-purple: #a855f7;
+  --success-bg-alpha: rgba(34, 197, 94, 0.12);
+  --success-bg-alpha-light: rgba(34, 197, 94, 0.08);
+  --danger-bg-alpha-light: rgba(208, 24, 27, 0.08);
+  --danger-bg-alpha-15: rgba(220, 38, 38, 0.15);
+  --danger-bg-alpha-10: rgba(220, 38, 38, 0.1);
+  --danger-bg-alpha-07: rgba(220, 38, 38, 0.07);
+  --danger-bg-alpha-04: rgba(220, 38, 38, 0.04);
+  --danger-border-alpha-25: rgba(220, 38, 38, 0.25);
+  --danger-border-alpha-35: rgba(220, 38, 38, 0.35);
+  --tag-defense-alpha-15: rgba(255, 140, 66, 0.15);
+  --tag-defense-alpha-10: rgba(255, 140, 66, 0.1);
+  --success-glow-15: rgba(40, 167, 69, 0.15);
+  --success-glow-10: rgba(40, 167, 69, 0.1);
+  --mana-alpha-15: rgba(23, 162, 184, 0.15);
+  --mana-alpha-10: rgba(23, 162, 184, 0.1);
+  --info-alpha-15: rgba(59, 130, 246, 0.15);
+  --info-alpha-10: rgba(37, 99, 235, 0.1);
+  --slot-info-start: rgba(59, 130, 246, 0.55);
+  --slot-info-end: rgba(37, 99, 235, 0.7);
+  --warning-alpha-15: rgba(245, 158, 11, 0.15);
+  --warning-alpha-10: rgba(245, 158, 11, 0.1);
+  --purple-alpha-15: rgba(168, 85, 247, 0.15);
+  --purple-alpha-10: rgba(168, 85, 247, 0.1);
+  --slot-mana-start: #06b6d4;
+  --slot-mana-end: #0891b2;
+  --slot-status-start: #c084fc;
+  --slot-status-end: #a855f7;
+  --slot-revive-start: #fbbf24;
+  --slot-revive-end: #d97706;
+  --discard-backdrop: rgba(10, 20, 35, 0.55);
+  --modal-content-bg-start: rgba(255, 255, 255, 0.98);
+  --modal-content-bg-end: rgba(255, 245, 245, 0.95);
+  --black-alpha-inset: rgba(0, 0, 0, 0.05);
+  --white-alpha-0: rgba(255, 255, 255, 0);
 
-    --modal-overlay-bg: rgba(0, 0, 0, 0.85);
-    --shadow-card: rgba(0, 0, 0, 0.18);
-    --black-alpha-05: rgba(0, 0, 0, 0.05);
-    --black-alpha-07: rgba(0, 0, 0, 0.7);
-    --white-alpha-20: rgba(255, 255, 255, 0.2);
-    --white-alpha-30: rgba(255, 255, 255, 0.3);
-    --white-alpha-60: rgba(255, 255, 255, 0.6);
-    --potion-heal-light: #22c55e;
-    --potion-dmg-light: #ef4444;
-    --potion-defense-light: #fb923c;
-    --tag-defense: #ff8c42;
-    --tag-revive: #f59e0b;
-    --tag-info: #2563eb;
-    --tag-purple: #a855f7;
-    --success-bg-alpha: rgba(34, 197, 94, 0.12);
-    --success-bg-alpha-light: rgba(34, 197, 94, 0.08);
-    --danger-bg-alpha-light: rgba(208, 24, 27, 0.08);
-    --danger-bg-alpha-15: rgba(220, 38, 38, 0.15);
-    --danger-bg-alpha-10: rgba(220, 38, 38, 0.1);
-    --danger-shadow-alpha: rgba(220, 38, 38, 0.2);
-    --danger-bg-alpha-07: rgba(220, 38, 38, 0.07);
-    --danger-bg-alpha-04: rgba(220, 38, 38, 0.04);
-    --danger-border-alpha-25: rgba(220, 38, 38, 0.25);
-    --danger-border-alpha-35: rgba(220, 38, 38, 0.35);
-    --tag-defense-alpha-15: rgba(255, 140, 66, 0.15);
-    --tag-defense-alpha-10: rgba(255, 140, 66, 0.1);
-    --tag-defense-shadow: rgba(255, 140, 66, 0.2);
-    --success-glow-15: rgba(40, 167, 69, 0.15);
-    --success-glow-10: rgba(40, 167, 69, 0.1);
-    --success-shadow-alpha: rgba(40, 167, 69, 0.2);
-    --mana-alpha-15: rgba(23, 162, 184, 0.15);
-    --mana-alpha-10: rgba(23, 162, 184, 0.1);
-    --mana-shadow: rgba(23, 162, 184, 0.2);
-    --info-alpha-15: rgba(59, 130, 246, 0.15);
-    --info-alpha-10: rgba(37, 99, 235, 0.1);
-    --info-shadow-alpha: rgba(59, 130, 246, 0.2);
-    --slot-info-start: rgba(59, 130, 246, 0.55);
-    --slot-info-end: rgba(37, 99, 235, 0.7);
-    --warning-alpha-15: rgba(245, 158, 11, 0.15);
-    --warning-alpha-10: rgba(245, 158, 11, 0.1);
-    --warning-shadow-alpha: rgba(245, 158, 11, 0.2);
-    --purple-alpha-15: rgba(168, 85, 247, 0.15);
-    --purple-alpha-10: rgba(168, 85, 247, 0.1);
-    --purple-shadow: rgba(168, 85, 247, 0.2);
-    --slot-mana-start: #06b6d4;
-    --slot-mana-end: #0891b2;
-    --slot-status-start: #c084fc;
-    --slot-status-end: #a855f7;
-    --slot-revive-start: #fbbf24;
-    --slot-revive-end: #d97706;
-    --discard-backdrop: rgba(10, 20, 35, 0.55);
-    --shadow-modal: rgba(0, 0, 0, 0.28);
-    --modal-content-bg-start: rgba(255, 255, 255, 0.98);
-    --modal-content-bg-end: rgba(255, 245, 245, 0.95);
-    --black-alpha-inset: rgba(0, 0, 0, 0.05);
-    --shadow-sm: rgba(0, 0, 0, 0.1);
-    --white-alpha-0: rgba(255, 255, 255, 0);
 
-    --page-header-title-desc-gap: 1.5rem;
-    --page-header-bottom-gap: 1.5rem;
-    --page-section-gap: 1.5rem;
+  --focus-accent-ring: rgba(13, 110, 253, 0.12);
+  --focus-accent-ring-light: #b6d4fe;
+  --focus-accent-bg: #f0f8ff;
+  --focus-danger-ring: rgba(185, 28, 28, 0.16);
+  --outline-accent-strong: rgba(10, 78, 203, 0.35);
 
-    --shadow-button: rgba(0, 0, 0, 0.2);
-    --shadow-input: rgba(0, 0, 0, 0.06);
-    --shadow-card-sm: rgba(0, 0, 0, 0.08);
-    --text-shadow-medium: rgba(0, 0, 0, 0.3);
+  --danger-hover: #991b1b;
+  --btn-disabled-primary-bg: #9aaec4;
+  --btn-disabled-danger-bg: #bda0a0;
+  --badge-danger-bg: #dc3545;
 
-    --focus-accent-ring: rgba(13, 110, 253, 0.12);
-    --focus-accent-ring-light: #b6d4fe;
-    --focus-accent-bg: #f0f8ff;
-    --focus-danger-ring: rgba(185, 28, 28, 0.16);
-    --outline-accent-strong: rgba(10, 78, 203, 0.35);
+  --noti-heading: #12264f;
+  --noti-link: #0b4fb3;
+  --noti-text-muted: #5f6e8a;
 
-    --danger-hover: #991b1b;
-    --btn-disabled-primary-bg: #9aaec4;
-    --btn-disabled-danger-bg: #bda0a0;
-    --badge-danger-bg: #dc3545;
+  --reward-icon-overlay-bg: rgba(255, 255, 255, 0.72);
+  --reward-icon-overlay-border: rgba(255, 255, 255, 0.78);
 
-    --noti-heading: #12264f;
-    --noti-link: #0b4fb3;
-    --noti-text-muted: #5f6e8a;
+  --overdose-bg: #fbe9f0;
+  --overdose-border: #c2185b;
+  --overdose-text: #880e4f;
+  --gluttony-bg: #fbeaea;
+  --gluttony-border: #e53935;
+  --gluttony-text: #b71c1c;
+  --starving-border: #ffe066;
+  --starving-text: #7c6f1c;
+  --starving-accent: #e6b800;
 
-    --reward-icon-overlay-bg: rgba(255, 255, 255, 0.72);
-    --reward-icon-overlay-border: rgba(255, 255, 255, 0.78);
+  --status-chip-bg-start: #f5f3ff;
+  --status-chip-bg-mid: #ede9fe;
+  --status-chip-bg-end: #e9d5ff;
+  --status-chip-border: #6d28d9;
+  --status-chip-text: #5b21b6;
+  --status-chip-target-bg: #86efac;
+  --status-chip-target-text: #064e3b;
+  --status-chip-target-glow: rgba(16, 185, 129, 0.18);
+  --status-chip-target-border: rgba(16, 185, 129, 0.45);
 
-    --overdose-bg: #fbe9f0;
-    --overdose-border: #c2185b;
-    --overdose-text: #880e4f;
-    --gluttony-bg: #fbeaea;
-    --gluttony-border: #e53935;
-    --gluttony-text: #b71c1c;
-    --starving-border: #ffe066;
-    --starving-text: #7c6f1c;
-    --starving-accent: #e6b800;
+  --sideeffect-badge-start: #f9e7a9;
+  --sideeffect-badge-end: #f4cd52;
+  --sideeffect-badge-border: #e7af1f;
 
-    --status-chip-bg-start: #f5f3ff;
-    --status-chip-bg-mid: #ede9fe;
-    --status-chip-bg-end: #e9d5ff;
-    --status-chip-border: #6d28d9;
-    --status-chip-text: #5b21b6;
-    --status-chip-shadow: rgba(109, 40, 217, 0.2);
-    --status-chip-target-bg: #86efac;
-    --status-chip-target-text: #064e3b;
-    --status-chip-target-shadow: rgba(16, 185, 129, 0.12);
-    --status-chip-target-glow: rgba(16, 185, 129, 0.18);
-    --status-chip-target-border: rgba(16, 185, 129, 0.45);
+  --stat-hp-border: #f87171;
+  --stat-hp-text: #dc2626;
+  --stat-atk-border: #fb923c;
+  --stat-atk-text: #ea580c;
+  --stat-def-border: #60a5fa;
+  --stat-def-text: #2563eb;
 
-    --sideeffect-badge-start: #f9e7a9;
-    --sideeffect-badge-end: #f4cd52;
-    --sideeffect-badge-border: #e7af1f;
-    --sideeffect-badge-shadow: rgba(231, 175, 31, 0.38);
+  --stat-hp-bg-start: rgba(34, 197, 94, 0.28);
+  --stat-hp-bg-end: rgba(34, 197, 94, 0.18);
+  --stat-atk-bg-start: rgba(220, 38, 38, 0.28);
+  --stat-atk-bg-end: rgba(220, 38, 38, 0.18);
+  --stat-def-bg-start: rgba(245, 158, 11, 0.28);
+  --stat-def-bg-end: rgba(245, 158, 11, 0.18);
 
-    --stat-hp-border: #f87171;
-    --stat-hp-text: #dc2626;
-    --stat-atk-border: #fb923c;
-    --stat-atk-text: #ea580c;
-    --stat-def-border: #60a5fa;
-    --stat-def-text: #2563eb;
+  --type-chart-bg-start: #fcfdff;
+  --type-chart-bg-end: #f3f5f8;
+  --type-chart-border: #d9e0e7;
+  --type-chart-kicker-bg: #e7edf5;
+  --type-chart-kicker-text: #4d627a;
+  --type-chart-heading: #182230;
+  --type-chart-body: #5b6674;
+  --type-chart-card-bg-start: #f1f3f5;
+  --type-chart-card-bg-end: #e9ecef;
+  --type-chart-card-border: #ced4da;
 
-    --stat-hp-bg-start: rgba(34, 197, 94, 0.28);
-    --stat-hp-bg-end: rgba(34, 197, 94, 0.18);
-    --stat-atk-bg-start: rgba(220, 38, 38, 0.28);
-    --stat-atk-bg-end: rgba(220, 38, 38, 0.18);
-    --stat-def-bg-start: rgba(245, 158, 11, 0.28);
-    --stat-def-bg-end: rgba(245, 158, 11, 0.18);
+  --type-power-bg: rgba(220, 38, 38, 0.1);
+  --type-power-border: rgba(220, 38, 38, 0.18);
+  --type-power-text: #b42318;
+  --type-technical-bg: rgba(22, 163, 74, 0.1);
+  --type-technical-border: rgba(22, 163, 74, 0.18);
+  --type-technical-text: #166534;
+  --type-speed-bg: rgba(37, 99, 235, 0.1);
+  --type-speed-border: rgba(37, 99, 235, 0.18);
+  --type-speed-text: #1d4ed8;
 
-    --type-chart-bg-start: #fcfdff;
-    --type-chart-bg-end: #f3f5f8;
-    --type-chart-border: #d9e0e7;
-    --type-chart-shadow: rgba(31, 41, 55, 0.08);
-    --type-chart-kicker-bg: #e7edf5;
-    --type-chart-kicker-text: #4d627a;
-    --type-chart-heading: #182230;
-    --type-chart-body: #5b6674;
-    --type-chart-card-bg-start: #f1f3f5;
-    --type-chart-card-bg-end: #e9ecef;
-    --type-chart-card-border: #ced4da;
+  --link-btn-bg: #4f8cff;
+  --link-btn-hover: #2563eb;
 
-    --type-power-bg: rgba(220, 38, 38, 0.1);
-    --type-power-border: rgba(220, 38, 38, 0.18);
-    --type-power-text: #b42318;
-    --type-technical-bg: rgba(22, 163, 74, 0.1);
-    --type-technical-border: rgba(22, 163, 74, 0.18);
-    --type-technical-text: #166534;
-    --type-speed-bg: rgba(37, 99, 235, 0.1);
-    --type-speed-border: rgba(37, 99, 235, 0.18);
-    --type-speed-text: #1d4ed8;
+  --starving-bg-start: #fffbe6;
+  --starving-bg-end: #fff7cc;
 
-    --link-btn-bg: #4f8cff;
-    --link-btn-hover: #2563eb;
-    --link-btn-shadow-sm: rgba(182, 208, 255, 0.2);
-    --link-btn-shadow-md: rgba(182, 208, 255, 0.33);
+  --danger-alpha-50: rgba(208, 24, 27, 0.5);
 
-    --starving-bg-start: #fffbe6;
-    --starving-bg-end: #fff7cc;
-    --starving-shadow: rgba(255, 224, 102, 0.1);
+  --side-effect-chip-start: #10b981;
+  --side-effect-chip-end: #059669;
+  
+  --white-alpha-40: rgba(255, 255, 255, 0.4);
 
-    --danger-alpha-50: rgba(208, 24, 27, 0.5);
+  --slot-row-heal-bg: rgba(22, 197, 74, 0.1);
+  --slot-row-mana-bg: rgba(6, 182, 212, 0.1);
+  --slot-row-defense-bg: rgba(234, 88, 12, 0.1);
+  --slot-row-revive-bg: rgba(251, 191, 36, 0.1);
 
-    --side-effect-chip-start: #10b981;
-    --side-effect-chip-end: #059669;
+  --danger-separator: rgba(208, 24, 27, 0.22);
 
-    --white-alpha-40: rgba(255, 255, 255, 0.4);
-
-    --slot-row-heal-bg: rgba(22, 197, 74, 0.1);
-    --slot-row-mana-bg: rgba(6, 182, 212, 0.1);
-    --slot-row-defense-bg: rgba(234, 88, 12, 0.1);
-    --slot-row-revive-bg: rgba(251, 191, 36, 0.1);
-
-    --danger-separator: rgba(208, 24, 27, 0.22);
-
-    --btn-disabled-slate-bg: #7a8ca3;
-    --btn-disabled-slate-text: #e6eaf1;
+  --btn-disabled-slate-bg: #7a8ca3;
+  --btn-disabled-slate-text: #e6eaf1;
 }
 
 *,
@@ -286,12 +262,12 @@ textarea:focus-visible,
 
 .btn-primary {
   background-color: var(--accent-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .btn-secondary {
   background-color: var(--dark-gray-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -306,7 +282,7 @@ textarea:focus-visible,
   filter: none;
   transform: none;
   background-color: var(--dark-gray-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .btn-secondary:active:not(:disabled) {
@@ -326,7 +302,7 @@ textarea:focus-visible,
   filter: none;
   transform: none;
   background-color: var(--accent-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -336,7 +312,7 @@ textarea:focus-visible,
 
 .btn-danger {
   background-color: var(--danger-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .btn-danger:hover:not(:disabled) {
@@ -351,7 +327,7 @@ textarea:focus-visible,
   filter: none;
   transform: none;
   background-color: var(--danger-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .btn-danger:active:not(:disabled) {
@@ -369,7 +345,7 @@ input.btn:focus-visible:not(:disabled) {
 
 a.btn.btn-edit:focus-visible {
   background-color: var(--accent-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
   border-color: var(--accent-color);
 }
 
@@ -423,7 +399,7 @@ button.btn-secondary {
 }
 
 .stat-card__label {
-  color: var(--black-color);
+  color: var(--neutral-black);
   font-size: 16px;
   font-weight: 500;
   text-transform: capitalize;
@@ -431,7 +407,7 @@ button.btn-secondary {
 }
 
 .stat-card__value {
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   font-size: 44px;
   font-weight: 800;
   margin: 0;
@@ -468,7 +444,7 @@ button.btn-secondary {
   width: 24px;
   height: 24px;
   border: 3px solid var(--white-alpha-35);
-  border-top-color: var(--white-color);
+  border-top-color: var(--neutral-white);
   border-radius: 50%;
   animation: btn-spin 0.7s linear infinite;
   flex-shrink: 0;
@@ -492,6 +468,7 @@ button.btn-secondary {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -503,6 +480,7 @@ button.btn-secondary {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -523,7 +501,7 @@ button.btn-secondary {
   font-size: 1rem;
   font-weight: 500;
   margin: 0;
-  color: var(--text-muted);
+  color: var(--neutral-black);
 }
 
 .page-hero {
@@ -551,7 +529,7 @@ button.btn-secondary {
 .page-hero-title-black {
   font-size: 44px;
   font-weight: 800;
-  color: var(--black-color);
+  color: var(--neutral-black);
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -565,7 +543,7 @@ button.btn-secondary {
 .page-hero-desc {
   font-size: 16px;
   font-weight: 400;
-  color: var(--black-color);
+  color: var(--neutral-black);
   line-height: 1.7;
   max-width: 520px;
   margin: 0;
@@ -577,4 +555,3 @@ button.btn-secondary {
 .text-xs {
   font-size: 1rem !important;
 }
-

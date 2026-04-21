@@ -18,12 +18,12 @@
 }
 
 .confirm-dialog {
-  background: var(--white-color);
+  background: var(--neutral-white);
   border-radius: 18px;
   padding: 2rem;
   max-width: 420px;
   width: 100%;
-  box-shadow: 0 8px 32px var(--shadow-modal);
+  box-shadow: 0 8px 32px var(--shadow-color);
 }
 
 .confirm-title {

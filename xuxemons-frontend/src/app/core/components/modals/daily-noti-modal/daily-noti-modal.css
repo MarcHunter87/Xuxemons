@@ -23,7 +23,7 @@
 .reward-section-title {
 	font-size: 0.95rem;
 	font-weight: 700;
-	color: var(--text-alt-color, #2A2B2B);
+	color: var(--neutral-black);
 	margin: 0 0 0.65rem;
 }
 
@@ -101,7 +101,7 @@
 
 .reward-empty {
 	margin: 0;
-	color: var(--noti-text-muted);
+	color: var(--neutral-black);
 	font-size: 0.95rem;
 }
 
@@ -146,7 +146,7 @@
 	justify-content: center;
 	background: var(--accent-color);
 	border: 1px solid var(--accent-on-light);
-	color: var(--white-color);
+	color: var(--neutral-white);
 	box-shadow: none;
 }
 
@@ -154,7 +154,7 @@
 .daily-cta-btn:active {
 	background: var(--accent-color);
 	border-color: var(--accent-on-light);
-	color: var(--white-color);
+	color: var(--neutral-white);
 	filter: brightness(0.95);
 }
 

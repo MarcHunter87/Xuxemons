@@ -12,7 +12,7 @@
     display: block;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-alt-color);
+    color: var(--neutral-black);
     margin-bottom: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -34,7 +34,7 @@
     left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--medium-gray-color);
+    color: var(--neutral-black);
     pointer-events: none;
 }
 
@@ -44,14 +44,14 @@
     padding: 0.9rem 1rem 0.9rem 2.65rem;
     border-radius: 8px;
     border: 1px solid var(--light-gray-color);
-    background-color: var(--white-color);
-    color: var(--black-color);
+    background-color: var(--neutral-white);
+    color: var(--neutral-black);
     font-size: 1rem;
     transition: all 0.2s ease;
 }
 
 .search-box input::placeholder {
-    color: var(--text-muted);
+    color: var(--neutral-black);
 }
 
 .search-box input:focus {
@@ -61,7 +61,7 @@
 .search-box input:focus-visible {
     border-color: var(--accent-color);
     box-shadow:
-        0 0 0 2px var(--white-color),
+        0 0 0 2px var(--neutral-white),
         0 0 0 5px var(--accent-color);
 }
 
@@ -80,8 +80,8 @@
     padding: 0.9rem 1rem;
     border-radius: 8px;
     border: 1px solid var(--light-gray-color);
-    background: var(--white-color);
-    color: var(--black-color);
+    background: var(--neutral-white);
+    color: var(--neutral-black);
     font-size: 1rem;
     font-family: inherit;
     cursor: pointer;
@@ -102,19 +102,19 @@
 }
 
 .custom-select-trigger .bi {
-    color: var(--dark-gray-color);
+    color: var(--neutral-black);
     flex-shrink: 0;
 }
 
 .custom-select-trigger:focus-visible {
     border-color: var(--accent-color);
     box-shadow:
-        0 0 0 2px var(--white-color),
+        0 0 0 2px var(--neutral-white),
         0 0 0 5px var(--accent-color);
 }
 
 .custom-select-placeholder {
-    color: var(--text-muted);
+    color: var(--neutral-black);
 }
 
 .custom-select-backdrop {
@@ -131,7 +131,7 @@
     margin: 0.25rem 0 0;
     padding: 0.25rem 0;
     list-style: none;
-    background: var(--white-color);
+    background: var(--neutral-white);
     border: 1px solid var(--light-gray-color);
     border-radius: 8px;
     box-shadow: 0 4px 16px var(--shadow-color);
@@ -147,7 +147,7 @@
     padding: 0.65rem 1rem;
     cursor: pointer;
     font-size: 1rem;
-    color: var(--black-color);
+    color: var(--neutral-black);
     transition: background 0.15s;
 }
 
@@ -163,7 +163,7 @@
 
 .custom-select-option[aria-selected="true"] {
     background: var(--surface-light);
-    color: var(--black-color);
+    color: var(--neutral-black);
     font-weight: 600;
 }
 

@@ -10,7 +10,7 @@
 .winner-title {
   font-size: 2rem;
   font-weight: 900;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   margin: 0 0 var(--page-section-gap);
 }
 
@@ -82,13 +82,13 @@
 .winner-name {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   margin: 0;
 }
 
 .modal-content .type-badge {
   padding: 0.5rem 1.5rem;
-  color: var(--white-color);
+  color: var(--neutral-white);
   border-radius: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -118,32 +118,32 @@
 
 .winner-stats .stat-hp {
   background: var(--potion-heal);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .winner-stats .stat-hp .stat-label,
 .winner-stats .stat-hp .stat-value {
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .winner-stats .stat-attack {
   background: var(--potion-dmg);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .winner-stats .stat-attack .stat-label,
 .winner-stats .stat-attack .stat-value {
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .winner-stats .stat-defense {
   background: var(--potion-defense);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .winner-stats .stat-defense .stat-label,
 .winner-stats .stat-defense .stat-value {
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .winner-stats .stat-label {
@@ -194,7 +194,7 @@
 }
 
 .modal-actions .btn-secondary {
-  background: var(--white-color);
+  background: var(--neutral-white);
   color: var(--accent-color);
   border: 2px solid var(--accent-color);
 }
@@ -206,7 +206,7 @@
 }
 
 .modal-actions .btn-secondary:focus-visible:not(:disabled) {
-  background: var(--white-color);
+  background: var(--neutral-white);
   box-shadow: none;
   transform: none;
 }
@@ -242,7 +242,7 @@
 }
 
 .modal-content {
-  background: linear-gradient(180deg, var(--white-color) 0%, var(--primary-color) 100%);
+  background: linear-gradient(180deg, var(--neutral-white) 0%, var(--primary-color) 100%);
   padding: var(--page-section-gap) 1.5rem;
   text-align: center;
   width: min(520px, 92vw);

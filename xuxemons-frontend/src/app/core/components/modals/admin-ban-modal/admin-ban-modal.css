@@ -23,7 +23,7 @@
 
 .admin-ban-content {
   border-radius: 12px;
-  background: var(--white-color);
+  background: var(--neutral-white);
   padding: 1rem;
 }
 
@@ -34,7 +34,7 @@
 
 .admin-ban-content .modal-body p {
   margin: 0;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   line-height: 1.5;
 }
 

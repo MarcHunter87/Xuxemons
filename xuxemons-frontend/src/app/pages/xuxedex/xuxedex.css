@@ -29,7 +29,7 @@
 .locked-text {
   font-size: 3rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--neutral-black);
   margin: 0;
 }
 
@@ -52,13 +52,13 @@
   margin: 0 0 var(--page-header-title-desc-gap);
   font-size: 44px;
   font-weight: 800;
-  color: var(--black-color);
+  color: var(--neutral-black);
 }
 
 .xuxedex-subtitle {
   margin: 0;
   font-size: 1rem;
-  color: var(--black-color);
+  color: var(--neutral-black);
 }
 
 .no-results {
@@ -81,7 +81,7 @@
   font-size: 1rem;
   border: none;
   background-color: var(--accent-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
   border-radius: 0.375rem;
   cursor: pointer;
   font-weight: 600;
@@ -112,7 +112,7 @@
 
 .pagination-info {
   font-weight: 700;
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   min-width: 180px;
   text-align: center;
   font-size: 1.1rem;
@@ -138,7 +138,7 @@
   border-radius: 24px;
   background: linear-gradient(180deg, var(--type-chart-bg-start) 0%, var(--type-chart-bg-end) 100%);
   border: 1px solid var(--type-chart-border);
-  box-shadow: 0 10px 24px var(--type-chart-shadow);
+  box-shadow: 0 10px 24px var(--shadow-color);
 }
 
 .type-chart-copy {
