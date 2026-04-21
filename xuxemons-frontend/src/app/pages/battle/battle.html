@@ -6,40 +6,14 @@
       <!-- Turn Indicator -->
       <div class="turn-indicator" [class.player-turn]="currentTurn() === 'player'" [class.opponent-turn]="currentTurn() === 'opponent'">
         {{ currentTurn() === 'player' ? 'YOUR TURN' : 'OPPONENT TURN' }}
-        <span class="sync-pill" [class.sync-pill--fallback]="realtimeStatus() !== 'live'">
-          {{ realtimeStatus() === 'live' ? 'LIVE' : 'SYNC' }}
-        </span>
       </div>
 
       <div class="battle-screen" [style.background-image]="'url(' + getAssetUrl('/fondo batalla.jfif') + ')'">
+      @if (attackImpactSide()) {
+        <div class="impact-burst" [class.impact-burst--player]="attackImpactSide() === 'player'" [class.impact-burst--opponent]="attackImpactSide() === 'opponent'"></div>
+      }
       @if (selectedXuxemon() && opponentXuxemon()) {
         <div class="battle-grid">
-          <div class="team-roster team-roster--opponent">
-            @for (xuxemon of opponentTeam(); track xuxemon.adquired_id || xuxemon.id) {
-              <div class="team-slot" [class.team-slot--active]="isOpponentActiveXuxemon(xuxemon)" [class.team-slot--fainted]="(xuxemon.current_hp ?? xuxemon.hp ?? 0) <= 0">
-                <img [src]="xuxemon.image_url" [alt]="xuxemon.name">
-                <div class="team-slot-copy">
-                  <span class="team-slot-name">{{ xuxemon.name }}</span>
-                  <span class="team-slot-hp">HP {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}</span>
-                </div>
-                <span class="team-slot-badge">{{ isOpponentActiveXuxemon(xuxemon) ? 'ACTIVE' : ((xuxemon.current_hp ?? xuxemon.hp ?? 0) <= 0 ? 'KO' : 'BENCH') }}</span>
-              </div>
-            }
-          </div>
-
-          <div class="team-roster team-roster--player">
-            @for (xuxemon of myXuxemons(); track xuxemon.adquired_id || xuxemon.id) {
-              <div class="team-slot" [class.team-slot--active]="isPlayerActiveXuxemon(xuxemon)" [class.team-slot--fainted]="(xuxemon.current_hp ?? xuxemon.hp ?? 0) <= 0">
-                <img [src]="xuxemon.image_url" [alt]="xuxemon.name">
-                <div class="team-slot-copy">
-                  <span class="team-slot-name">{{ xuxemon.name }}</span>
-                  <span class="team-slot-hp">HP {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}</span>
-                </div>
-                <span class="team-slot-badge">{{ isPlayerActiveXuxemon(xuxemon) ? 'ACTIVE' : ((xuxemon.current_hp ?? xuxemon.hp ?? 0) <= 0 ? 'KO' : 'BENCH') }}</span>
-              </div>
-            }
-          </div>
-
           <!-- Opponent Position -->
           <div class="opponent-pos">
             <!-- Opponent Status Card -->
@@ -175,7 +149,7 @@
         } @else if (currentSubMenu() === 'bag') {
           <div class="bag-panel">
             <div class="bag-items-grid">
-            @for (item of myItems(); track item.id) {
+            @for (item of paginatedBagItems(); track item.id) {
               <button class="atk-btn bag-item-btn" (click)="chooseBagItem(item)">
                 <img class="bag-item-icon" [src]="item.iconPath" [alt]="item.name">
                 <span class="bag-item-copy">
@@ -187,6 +161,13 @@
               <p class="no-items">No items available</p>
             }
             </div>
+            @if (bagPageCount() > 1) {
+              <div class="bag-pagination">
+                <button class="back-btn bag-pagination-btn" (click)="previousBagPage()" [disabled]="!canGoToPreviousBagPage()">PREV</button>
+                <span class="bag-pagination-status">Page {{ bagPage() + 1 }} / {{ bagPageCount() }}</span>
+                <button class="back-btn bag-pagination-btn" (click)="nextBagPage()" [disabled]="!canGoToNextBagPage()">NEXT</button>
+              </div>
+            }
             <button class="back-btn" (click)="showSubMenu(null)">BACK</button>
           </div>
         } @else if (currentSubMenu() === 'bag-target') {

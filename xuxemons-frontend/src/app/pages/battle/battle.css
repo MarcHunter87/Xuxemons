@@ -1,11 +1,11 @@
 .battle-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 100%;
+  align-items: stretch;
+  min-height: 100dvh;
   background-color: transparent;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  overflow: hidden;
+  overflow-x: hidden;
   padding: 0;
 }
 
@@ -15,7 +15,7 @@
   align-items: center;
   gap: 0;
   width: 100%;
-  height: 100%;
+  min-height: 100dvh;
   max-width: none;
 }
 
@@ -85,6 +85,8 @@
   position: relative;
   background-size: cover;
   background-position: center;
+  overflow: hidden;
+  min-height: clamp(440px, 58vh, 780px);
 }
 
 .battle-screen::after {
@@ -92,7 +94,9 @@
 }
 
 .battle-grid {
+  display: block;
   height: 100%;
+  min-height: inherit;
   position: relative;
   z-index: 2;
 }
@@ -100,8 +104,8 @@
 /* Pokémon Positions */
 .opponent-pos {
   position: absolute;
-  top: 10%;
-  right: 10%;
+  top: clamp(82px, 12%, 126px);
+  right: clamp(16px, 8vw, 110px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -109,8 +113,8 @@
 
 .player-pos {
   position: absolute;
-  bottom: 5%;
-  left: 10%;
+  bottom: clamp(18px, 5%, 52px);
+  left: clamp(16px, 8vw, 110px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -122,7 +126,7 @@
   border: 4px solid #4a5568;
   border-radius: 10px 0 20px 0;
   padding: 12px 18px;
-  width: 280px;
+  width: clamp(220px, 25vw, 300px);
   box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
   position: absolute;
   z-index: 10;
@@ -243,8 +247,8 @@
 }
 
 .sprite-container img {
-  width: 360px;
-  height: 360px;
+  width: clamp(220px, 30vw, 360px);
+  height: clamp(220px, 30vw, 360px);
   object-fit: contain;
   filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
   z-index: 5;
@@ -253,8 +257,8 @@
 .platform {
   position: absolute;
   bottom: -40px;
-  width: 400px;
-  height: 120px;
+  width: clamp(240px, 34vw, 400px);
+  height: clamp(74px, 10vw, 120px);
   background: rgba(0,0,0,0.15);
   border-radius: 50%;
   transform: rotateX(60deg);
@@ -357,6 +361,25 @@
   overflow-y: auto;
   align-content: start;
   padding-right: 4px;
+}
+
+.bag-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bag-pagination-btn {
+  min-width: 88px;
+}
+
+.bag-pagination-status {
+  color: #edf2f7;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .atk-btn {
@@ -470,118 +493,29 @@
   letter-spacing: 2px;
 }
 
-.sync-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 12px;
-  padding: 0.18rem 0.6rem;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.28);
-  font-size: 0.72rem;
-  letter-spacing: 1.2px;
-  vertical-align: middle;
-}
-
-.sync-pill--fallback {
-  background: rgba(127, 29, 29, 0.45);
-}
-
 .player-turn { background: #48bb78; }
 .opponent-turn { background: #f56565; }
 
-.team-roster {
+.impact-burst {
   position: absolute;
-  z-index: 6;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: min(270px, 24vw);
+  top: 50%;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 8;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.2);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.92) 0%, rgba(250, 204, 21, 0.7) 28%, rgba(248, 113, 113, 0.2) 62%, rgba(255, 255, 255, 0) 100%);
+  animation: impactBurst 0.36s ease-out forwards;
 }
 
-.team-roster--opponent {
-  top: 78px;
-  left: 18px;
+.impact-burst--player {
+  left: 28%;
 }
 
-.team-roster--player {
-  right: 18px;
-  bottom: 24px;
-}
-
-.team-slot {
-  display: grid;
-  grid-template-columns: 44px 1fr auto;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.72);
-  border: 2px solid rgba(226, 232, 240, 0.25);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.2);
-  backdrop-filter: blur(10px);
-  color: #e2e8f0;
-}
-
-.team-slot img {
-  width: 44px;
-  height: 44px;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
-}
-
-.team-slot-copy {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.team-slot-name {
-  font-size: 0.9rem;
-  font-weight: 800;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.team-slot-hp {
-  font-size: 0.74rem;
-  color: #cbd5e1;
-}
-
-.team-slot-badge {
-  font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-  color: #f8fafc;
-  background: rgba(59, 130, 246, 0.65);
-  border-radius: 999px;
-  padding: 0.2rem 0.55rem;
-}
-
-.team-slot--active {
-  border-color: rgba(250, 204, 21, 0.9);
-  background: rgba(30, 41, 59, 0.88);
-  transform: translateX(-4px);
-}
-
-.team-slot--active .team-slot-badge {
-  background: linear-gradient(135deg, #f59e0b, #facc15);
-  color: #1e293b;
-}
-
-.team-slot--fainted {
-  opacity: 0.55;
-  border-color: rgba(248, 113, 113, 0.65);
-}
-
-.team-slot--fainted img {
-  filter: grayscale(1) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
-}
-
-.team-slot--fainted .team-slot-badge {
-  background: rgba(239, 68, 68, 0.72);
-  color: #fff;
+.impact-burst--opponent {
+  left: 72%;
 }
 
 /* Xuxemon Card in Sidebar */
@@ -746,18 +680,29 @@
 }
 
 @media (max-width: 900px) {
-  .team-roster {
-    width: min(220px, 34vw);
-  }
-
-  .team-roster--opponent {
-    top: 74px;
+  .battle-arena {
+    min-height: 620px;
   }
 
   .battle-footer {
     grid-template-columns: 1fr;
     grid-template-rows: minmax(88px, auto) 1fr;
     height: min(42vh, 340px);
+  }
+
+  .status-box {
+    width: 244px;
+    padding: 10px 14px;
+  }
+
+  .sprite-container img {
+    width: 300px;
+    height: 300px;
+  }
+
+  .platform {
+    width: 320px;
+    height: 96px;
   }
 
   .battle-logs {
@@ -772,30 +717,52 @@
   }
 }
 
-@media (max-width: 640px) {
-  .team-roster {
-    position: static;
-    width: 100%;
-    margin-bottom: 12px;
+@media (max-width: 768px) {
+  .battle-container {
+    overflow-y: auto;
+  }
+
+  .battle-wrapper {
+    min-height: auto;
+  }
+
+  .battle-arena {
+    flex: none;
+    min-height: 760px;
   }
 
   .battle-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 64px 12px 12px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    align-content: start;
+    min-height: 100%;
+    padding: 76px 12px 16px;
   }
 
   .opponent-pos,
   .player-pos {
     position: static;
+    width: 100%;
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .opponent-pos {
+    order: 1;
+  }
+
+  .player-pos {
+    order: 2;
   }
 
   .status-box {
     position: static;
-    width: 100%;
+    width: min(100%, 360px);
     transform: none;
-    margin-bottom: 12px;
+    margin-bottom: 0;
   }
 
   .opponent-status,
@@ -806,16 +773,23 @@
   }
 
   .sprite-container img {
-    width: 220px;
-    height: 220px;
+    width: min(72vw, 260px);
+    height: min(72vw, 260px);
   }
 
   .platform {
-    width: 240px;
+    width: min(78vw, 300px);
+    height: 88px;
+    bottom: -20px;
   }
 
   .battle-footer {
-    height: min(46vh, 380px);
+    height: auto;
+    min-height: 320px;
+  }
+
+  .battle-actions {
+    min-height: 220px;
   }
 
   .bag-items-grid,
@@ -826,6 +800,45 @@
   .back-btn,
   .no-items {
     grid-column: span 1;
+  }
+
+  .turn-indicator {
+    top: 12px;
+    width: calc(100% - 24px);
+    max-width: 320px;
+    padding: 8px 18px;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  .impact-burst--player {
+    left: 50%;
+    top: 68%;
+  }
+
+  .impact-burst--opponent {
+    left: 50%;
+    top: 34%;
+  }
+}
+
+@media (max-width: 480px) {
+  .battle-arena {
+    min-height: 700px;
+  }
+
+  .battle-actions,
+  .battle-logs {
+    padding: 12px;
+  }
+
+  .menu-grid {
+    gap: 10px;
+  }
+
+  .menu-btn {
+    font-size: 1.05rem;
   }
 }
 
@@ -919,15 +932,17 @@
 
 /* Animations */
 @keyframes playerAttack {
-  0% { transform: translate(0,0); }
-  40% { transform: translate(30px, -30px) scale(1.1); }
-  100% { transform: translate(0,0); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  35% { transform: translate3d(48px, -38px, 0) scale(1.08) rotate(-4deg); }
+  65% { transform: translate3d(18px, -12px, 0) scale(1.04); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes opponentAttack {
-  0% { transform: translate(0,0); }
-  40% { transform: translate(-30px, 30px) scale(1.1); }
-  100% { transform: translate(0,0); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  35% { transform: translate3d(-48px, 38px, 0) scale(1.08) rotate(4deg); }
+  65% { transform: translate3d(-18px, 12px, 0) scale(1.04); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 .player-sprite img.attacking { animation: playerAttack 0.5s ease-in-out; }
@@ -938,6 +953,21 @@
   25% { transform: translateX(-8px); }
   75% { transform: translateX(8px); }
   100% { transform: translateX(0); }
+}
+
+@keyframes impactBurst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.4);
+  }
 }
 
 .sprite-container.hit img { animation: shakeHit 0.1s linear 3, hitFlash 0.3s ease; }

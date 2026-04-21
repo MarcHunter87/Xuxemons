@@ -397,6 +397,10 @@ class BattleController extends Controller
             return response()->json(['message' => 'Invalid winner'], 422);
         }
 
+        if ($viewerId !== $winnerId) {
+            return response()->json(['message' => 'Only the winner can claim the battle reward'], 403);
+        }
+
         $loserId = $winnerId === $battle->user_id ? $battle->opponent_user_id : $battle->user_id;
         $loserXuxemonId = $request->filled('loser_xuxemon_id') ? (int) $request->input('loser_xuxemon_id') : null;
 
@@ -611,11 +615,15 @@ class BattleController extends Controller
         $attackerStat = $attacker->attack ?: 10;
         $defenderStat = $defender->defense ?: 5;
         $modifiers = $this->calculateBattleModifiers($attacker, $defender);
-        $baseDamage = $attack->dmg ?: 10;
-        $rawDamage = $baseDamage + $roll + ($attackerStat / 2) - ($defenderStat / 4) + $modifiers;
-        $damagePercent = max(5, min(60, $rawDamage * 0.4));
         $defenderMaxHp = $defender->hp ?: 100;
-        $damageAmount = max(1, (int) round(($damagePercent / 100) * $defenderMaxHp));
+        $damageAmount = $this->calculateBattleDamageAmount(
+            $attackerStat,
+            $defenderStat,
+            $attack->dmg,
+            $roll,
+            $modifiers,
+            $defenderMaxHp,
+        );
 
         $defender->current_hp = max(0, (int) $defender->current_hp - $damageAmount);
         $defender->save();
@@ -628,6 +636,8 @@ class BattleController extends Controller
             $this->appendBattleLog($battle, 'It\'s not very effective...');
         }
 
+        $this->applyAttackStatusEffectIfNeeded($battle, $attack, $defender);
+
         if ((int) $defender->current_hp <= 0) {
             $this->appendBattleLog($battle, sprintf('%s fainted!', $defender->name));
 
@@ -635,7 +645,6 @@ class BattleController extends Controller
                 $battle->turn = (int) $battle->turn + 1;
             } else {
                 $battle->winner_id = $context['player_id'];
-                $battle->status = 'completed';
                 $this->appendBattleLog($battle, sprintf('%s wins the battle!', $attacker->name));
             }
         } else {
@@ -858,6 +867,51 @@ class BattleController extends Controller
         return $modifiers;
     }
 
+    private function calculateBattleDamageAmount(
+        int $attackerStat,
+        int $defenderStat,
+        ?int $attackDamage,
+        int $roll,
+        int $modifiers,
+        int $defenderMaxHp,
+    ): int {
+        $normalizedAttackPower = max(6, (int) round(($attackDamage ?? 36) / 10));
+        $rawDamage = $normalizedAttackPower
+            + ($attackerStat * 0.35)
+            + $roll
+            + ($modifiers * 2)
+            - ($defenderStat * 0.18);
+
+        $damageAmount = max(1, (int) round($rawDamage));
+        $damageCap = max(18, (int) round($defenderMaxHp * 0.18));
+
+        return min($damageAmount, $damageCap);
+    }
+
+    private function applyAttackStatusEffectIfNeeded(Battle $battle, Attack $attack, AdquiredXuxemon $defender): void
+    {
+        if ((int) ($defender->current_hp ?? 0) <= 0 || $defender->status_effect_id) {
+            return;
+        }
+
+        $attack->loadMissing('statusEffect');
+
+        $statusEffect = $attack->statusEffect;
+        $statusChance = (int) ($attack->status_chance ?? 0);
+
+        if (! $statusEffect || $statusChance <= 0) {
+            return;
+        }
+
+        if (random_int(1, 100) > $statusChance) {
+            return;
+        }
+
+        $defender->status_effect_id = $statusEffect->id;
+        $defender->save();
+        $this->appendBattleLog($battle, sprintf('%s is now affected by %s!', $defender->name, $statusEffect->name));
+    }
+
     private function resolvePreAttackStatus(Battle $battle, AdquiredXuxemon $xuxemon, string $playerId): bool|JsonResponse
     {
         $statusName = $xuxemon->statusEffect?->name;
@@ -901,7 +955,6 @@ class BattleController extends Controller
                 }
 
                 $battle->winner_id = $playerId === $battle->user_id ? $battle->opponent_user_id : $battle->user_id;
-                $battle->status = 'completed';
                 $battle->save();
 
                 return false;

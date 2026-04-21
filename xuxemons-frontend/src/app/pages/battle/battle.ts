@@ -86,6 +86,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   showRunConfirmModal = signal(false);
   showRunawayResultModal = signal(false);
   realtimeStatus = signal<'live' | 'syncing'>('syncing');
+  attackImpactSide = signal<'player' | 'opponent' | null>(null);
   isSubmittingBattleResult = signal(false);
   isSubmittingRun = signal(false);
   runawayResultMessage = signal('');
@@ -468,26 +469,22 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       const defenderStat = defender.defense || 5;
       const modifiers = this.calculateModifiers(attacker, defender);
       const roll = this.diceValue() || 0;
-      const baseDamage = attackObj.dmg || 10;
-      const rawDamage = baseDamage + roll + (attackerStat / 2) - (defenderStat / 4) + modifiers;
-      const damagePercent = Math.max(5, Math.min(60, rawDamage * 0.4));
       const defenderMaxHp = defender.hp || 100;
       const defenderCurrentHp = this.getCurrentHpValue(defender);
-      const damageAmount = Math.max(1, Math.round((damagePercent / 100) * defenderMaxHp));
+      const damageAmount = this.calculateDamageAmount(attackerStat, defenderStat, attackObj.dmg, roll, modifiers, defenderMaxHp);
       const newHpValue = Math.max(0, defenderCurrentHp - damageAmount);
       const newHpPercent = defenderMaxHp > 0 ? (newHpValue / defenderMaxHp) * 100 : 0;
+      const updatedDefender = this.applyAttackStatusEffectToTarget({ ...defender, current_hp: newHpValue }, attackObj);
 
-      this.addLog(`${attacker.name} used ${attackObj.name}! (Roll: ${roll}, Atk: ${attackerStat}, Def: ${defenderStat})`);
+      this.addLog(`${attacker.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`);
 
       setTimeout(() => {
         this.playerAttacking.set(false);
-        this.opponentHit.set(true);
+        this.showAttackImpact('opponent');
         this.opponentHP.set(newHpPercent);
-        this.updateOpponentTeamHp(defender, newHpValue);
+        this.updateOpponentStateAfterItem(updatedDefender);
 
         setTimeout(() => {
-          this.opponentHit.set(false);
-
           if (newHpValue <= 0) {
             this.handleOpponentFaint();
             return;
@@ -528,31 +525,29 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       const playerDefense = player.defense || 5;
       const availableAttacks = opponent.attacks && opponent.attacks.length > 0
         ? opponent.attacks
-        : [{ name: 'Tackle', dmg: 10 }];
+        : [{ name: 'Tackle', dmg: 10, status_chance: null, statusEffect: undefined }];
       const randomAttack = availableAttacks[Math.floor(Math.random() * availableAttacks.length)];
-      const rawDamage = (randomAttack.dmg || 10) + (opponentAttack / 2) - (playerDefense / 4) + Math.floor(Math.random() * 5);
-      const damagePercent = Math.max(5, Math.min(50, rawDamage * 0.4));
+      const roll = Math.floor(Math.random() * 6) + 1;
       const playerMaxHp = player.hp || 100;
       const playerCurrentHp = this.getCurrentHpValue(player);
-      const damageAmount = Math.max(1, Math.round((damagePercent / 100) * playerMaxHp));
+      const damageAmount = this.calculateDamageAmount(opponentAttack, playerDefense, randomAttack.dmg, roll, this.calculateModifiers(opponent, player), playerMaxHp);
       const newHpValue = Math.max(0, playerCurrentHp - damageAmount);
       const newHpPercent = playerMaxHp > 0 ? (newHpValue / playerMaxHp) * 100 : 0;
+      const updatedPlayer = this.applyAttackStatusEffectToTarget({ ...player, current_hp: newHpValue }, randomAttack);
 
-      this.addLog(`${opponent.name} used ${randomAttack.name}! (Atk: ${opponentAttack}, Def: ${playerDefense})`);
+      this.addLog(`${opponent.name} used ${randomAttack.name}! (Roll: ${roll}, -${damageAmount} HP)`);
 
       setTimeout(() => {
         this.opponentAttacking.set(false);
-        this.playerHit.set(true);
+        this.showAttackImpact('player');
         this.playerHP.set(newHpPercent);
-        this.updateMyTeamHp(player, newHpValue);
+        this.updateMyTeamHp(updatedPlayer, newHpValue);
 
-        if (player.adquired_id) {
-          this.subs.add(this.xuxemonService.updateCurrentHp(player.adquired_id, newHpValue).subscribe());
+        if (updatedPlayer.adquired_id) {
+          this.subs.add(this.xuxemonService.updateCurrentHp(updatedPlayer.adquired_id, newHpValue).subscribe());
         }
 
         setTimeout(() => {
-          this.playerHit.set(false);
-
           if (newHpValue <= 0) {
             this.handlePlayerFaint();
             return;
@@ -589,6 +584,26 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     return modifiers;
+  }
+
+  calculateDamageAmount(
+    attackerStat: number,
+    defenderStat: number,
+    attackDamage: number | undefined,
+    roll: number,
+    modifiers: number,
+    defenderMaxHp: number,
+  ): number {
+    const normalizedAttackPower = Math.max(6, Math.round((attackDamage ?? 36) / 10));
+    const rawDamage = normalizedAttackPower
+      + (attackerStat * 0.35)
+      + roll
+      + (modifiers * 2)
+      - (defenderStat * 0.18);
+    const damageAmount = Math.max(1, Math.round(rawDamage));
+    const damageCap = Math.max(18, Math.round(defenderMaxHp * 0.18));
+
+    return Math.min(damageAmount, damageCap);
   }
 
   addLog(message: string): void {
@@ -654,22 +669,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.stopBattleSync();
 
     if (playerWon) {
-      this.showConfetti.set(true);
       this.addLog('VICTORY! You won the battle.');
-
-      if (!this.isPractice()) {
-        const options = this.getStealOptions();
-        if (options.length > 0) {
-          this.stealOptions.set(options);
-          this.showStealModal.set(true);
-          return;
-        }
-
-        this.skipPrizeSelection();
-        return;
-      }
-
-      this.showVictoryModal.set(true);
+      this.presentVictoryFlow();
       return;
     }
 
@@ -1032,8 +1033,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.playerAttacking.set(true);
       setTimeout(() => {
         this.playerAttacking.set(false);
-        this.opponentHit.set(true);
-        setTimeout(() => this.opponentHit.set(false), 320);
+        this.showAttackImpact('opponent');
       }, 320);
       return;
     }
@@ -1041,9 +1041,27 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.opponentAttacking.set(true);
     setTimeout(() => {
       this.opponentAttacking.set(false);
-      this.playerHit.set(true);
-      setTimeout(() => this.playerHit.set(false), 320);
+      this.showAttackImpact('player');
     }, 320);
+  }
+
+  private showAttackImpact(targetSide: 'player' | 'opponent'): void {
+    this.attackImpactSide.set(targetSide);
+
+    if (targetSide === 'player') {
+      this.playerHit.set(true);
+      setTimeout(() => {
+        this.playerHit.set(false);
+        this.attackImpactSide.set(null);
+      }, 360);
+      return;
+    }
+
+    this.opponentHit.set(true);
+    setTimeout(() => {
+      this.opponentHit.set(false);
+      this.attackImpactSide.set(null);
+    }, 360);
   }
 
   private startBattleMusic(): void {
@@ -1294,9 +1312,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (playerWon) {
-      this.showConfetti.set(true);
-      this.showVictoryModal.set(true);
-      this.addLog('The battle was already completed in your favor.');
+      this.addLog('The battle ended in your favor.');
+      this.presentVictoryFlow();
       return;
     }
 
@@ -1368,6 +1385,46 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return null;
     }
     return data.user_id === userId ? data.opponent_user_id : data.user_id;
+  }
+
+  private applyAttackStatusEffectToTarget(
+    xuxemon: Xuxemon,
+    attackObj: { status_chance?: number | null; statusEffect?: { name: string; icon_url: string } },
+  ): Xuxemon {
+    const statusChance = attackObj.status_chance ?? 0;
+
+    if (!attackObj.statusEffect?.name || !statusChance || xuxemon.statusEffect?.name || this.getCurrentHpValue(xuxemon) <= 0) {
+      return xuxemon;
+    }
+
+    if ((Math.random() * 100) > statusChance) {
+      return xuxemon;
+    }
+
+    this.addLog(`${xuxemon.name} is now affected by ${attackObj.statusEffect.name}!`);
+
+    return {
+      ...xuxemon,
+      statusEffect: attackObj.statusEffect,
+    };
+  }
+
+  private presentVictoryFlow(): void {
+    this.showConfetti.set(true);
+
+    if (!this.isPractice()) {
+      const options = this.getStealOptions();
+      if (options.length > 0) {
+        this.stealOptions.set(options);
+        this.showStealModal.set(true);
+        return;
+      }
+
+      this.skipPrizeSelection();
+      return;
+    }
+
+    this.showVictoryModal.set(true);
   }
 
   private canUseStatusItemOnTarget(item: InventoryItem, xuxemon: Xuxemon): boolean {
