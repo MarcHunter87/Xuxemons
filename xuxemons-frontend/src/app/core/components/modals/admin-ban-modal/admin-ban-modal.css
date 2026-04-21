@@ -5,7 +5,7 @@
 .admin-ban-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: var(--modal-overlay-bg, rgba(0, 0, 0, 0.5));
+  background: var(--color-black-90, rgba(0, 0, 0, 0.5));
   z-index: 2;
   display: flex;
   align-items: center;
@@ -29,7 +29,7 @@
 
 .admin-ban-content .modal-title,
 .admin-ban-content .modal-title i {
-  color: var(--danger-color);
+  color: var(--color-red-4);
 }
 
 .admin-ban-content .modal-body p {

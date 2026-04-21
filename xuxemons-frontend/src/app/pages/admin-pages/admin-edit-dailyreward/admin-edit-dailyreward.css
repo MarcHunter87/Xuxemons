@@ -7,7 +7,7 @@
   padding: 3rem 2rem;
   border-radius: 12px;
   background-color: var(--neutral-white);
-  border: 1px solid var(--light-gray-color);
+  border: 1px solid var(--color-gray-4);
 }
 
 .loading-state .stat-card__spinner {
@@ -24,9 +24,9 @@
 
 .form-card {
   background: var(--neutral-white);
-  border: 1px solid var(--light-gray-color);
+  border: 1px solid var(--color-gray-4);
   border-radius: 14px;
-  box-shadow: 0 2px 8px var(--shadow-color);
+  box-shadow: 0 2px 8px var(--color-black-12);
   padding: var(--page-section-gap);
   margin-bottom: var(--page-section-gap);
 }
@@ -43,9 +43,9 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(220px, 1fr));
   gap: calc(var(--page-section-gap) * 0.75);
-  border: 1px solid color-mix(in srgb, var(--accent-color) 18%, var(--light-gray-color));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 18%, var(--color-gray-4));
   border-radius: 12px;
-  background: color-mix(in srgb, var(--accent-glow) 16%, var(--neutral-white));
+  background: color-mix(in srgb, var(--color-blue-15) 16%, var(--neutral-white));
   padding: 1.4rem 1rem 1rem;
   margin: 0;
 }
@@ -66,7 +66,7 @@
   margin: 0;
   line-height: 1.1;
   background: var(--primary-color);
-  border: 1px solid color-mix(in srgb, var(--accent-color) 35%, var(--light-gray-color));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 35%, var(--color-gray-4));
   border-radius: 6px;
 }
 
@@ -91,7 +91,7 @@
 .field textarea {
   width: 100%;
   padding: 0.65rem 0.75rem;
-  border: 1px solid var(--light-gray-color);
+  border: 1px solid var(--color-gray-4);
   border-radius: 8px;
   font-size: 1rem;
   font-family: inherit;
@@ -99,7 +99,7 @@
 }
 
 .field .form-control {
-  border: 1px solid var(--light-gray-color);
+  border: 1px solid var(--color-gray-4);
   border-radius: 8px;
   font-size: 1rem;
 }
@@ -118,7 +118,7 @@
 
 .field-error {
   margin: 0;
-  color: var(--danger-color);
+  color: var(--color-red-4);
   font-size: 1rem;
 }
 
@@ -129,13 +129,13 @@
 }
 
 .error-message {
-  color: var(--danger-color);
+  color: var(--color-red-4);
   margin: 0 0 var(--page-section-gap);
   font-size: 1rem;
 }
 
 .success-message {
-  color: var(--success-color);
+  color: var(--color-green-4);
   margin: 0 0 var(--page-section-gap);
   font-size: 1rem;
 }

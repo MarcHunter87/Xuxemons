@@ -7,8 +7,8 @@
   padding: 1.5rem;
   background-color: var(--primary-color);
   border-radius: 15px;
-  box-shadow: 0 2px 8px var(--shadow-color);
-  border: 1px solid var(--light-gray-color);
+  box-shadow: 0 2px 8px var(--color-black-12);
+  border: 1px solid var(--color-gray-4);
   animation: slideInUp 0.5s ease-out;
 }
 
@@ -35,7 +35,7 @@
   padding: 0.5rem 1rem;
   background-color: var(--neutral-white);
   color: var(--neutral-black);
-  border: 2px solid var(--light-gray-color);
+  border: 2px solid var(--color-gray-4);
   border-radius: 8px;
   font-weight: 500;
   font-size: 1rem;
@@ -45,14 +45,14 @@
 }
 
 .filter-btn:hover {
-  background-color: var(--accent-alpha-05);
+  background-color: var(--color-blue-10);
   color: var(--accent-color);
   border-color: var(--accent-color);
   transform: translateY(-2px);
 }
 
 .filter-btn:active:not(:disabled) {
-  background-color: var(--accent-alpha-10);
+  background-color: var(--color-blue-10);
   color: var(--accent-color);
   border-color: var(--accent-on-light);
   transform: translateY(0) scale(0.98);
@@ -62,7 +62,7 @@
   background-color: var(--accent-color);
   color: var(--neutral-white);
   border-color: var(--accent-on-light);
-  box-shadow: 0 4px 12px var(--accent-glow);
+  box-shadow: 0 4px 12px var(--color-blue-15);
 }
 
 /* Row Alignment */
@@ -89,7 +89,7 @@
 .loading-container .spinner {
   width: 60px;
   height: 60px;
-  border: 4px solid var(--accent-border-alpha);
+  border: 4px solid var(--color-blue-20);
   border-top-color: var(--accent-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -122,10 +122,10 @@
   align-items: center;
   gap: 1rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, var(--danger-bg-alpha) 0%, var(--danger-bg-alpha-light) 100%);
-  border: 1px solid var(--danger-color);
+  background: linear-gradient(135deg, var(--color-red-12) 0%, var(--color-red-10) 100%);
+  border: 1px solid var(--color-red-4);
   border-radius: 12px;
-  color: var(--danger-color);
+  color: var(--color-red-4);
   margin-bottom: var(--page-section-gap);
   animation: slideDown 0.4s ease;
 }
@@ -145,8 +145,8 @@
   padding: 1.25rem;
   background: var(--primary-color);
   border-radius: 16px;
-  box-shadow: 0 2px 8px var(--shadow-color);
-  border: 1px solid var(--light-gray-color);
+  box-shadow: 0 2px 8px var(--color-black-12);
+  border: 1px solid var(--color-gray-4);
   transition: box-shadow 0.3s ease;
   flex: 1;
   animation: fadeInUp 0.5s ease;
@@ -161,7 +161,7 @@
 }
 
 .items-grid:hover {
-  box-shadow: 0 4px 12px var(--shadow-color);
+  box-shadow: 0 4px 12px var(--color-black-12);
 }
 
 .item-slot {
@@ -192,40 +192,40 @@ button.item-slot:focus {
 
 .item-slot.filled {
   background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-on-light) 100%);
-  border: 2px solid var(--white-alpha-30);
+  border: 2px solid var(--color-white-30);
 }
 
 /* Slot colors by effect type */
 .item-slot.filled.slot-bg-heal {
-  background: linear-gradient(135deg, var(--potion-heal-light) 0%, var(--potion-heal) 100%);
+  background: linear-gradient(135deg, var(--color-green-3) 0%, var(--color-green-4) 100%);
 }
 
 .item-slot.filled.slot-bg-mana {
-  background: linear-gradient(135deg, var(--slot-mana-start) 0%, var(--slot-mana-end) 100%);
+  background: linear-gradient(135deg, var(--color-blue-3) 0%, var(--accent-color) 100%);
 }
 
 .item-slot.filled.slot-bg-dmg-up {
-  background: linear-gradient(135deg, var(--potion-dmg-light) 0%, var(--potion-dmg) 100%);
+  background: linear-gradient(135deg, var(--color-red-3) 0%, var(--color-red-4) 100%);
 }
 
 .item-slot.filled.slot-bg-defense-up {
-  background: linear-gradient(135deg, var(--potion-defense-light) 0%, var(--potion-defense) 100%);
+  background: linear-gradient(135deg, var(--color-amber-3) 0%, var(--color-amber-5) 100%);
 }
 
 .item-slot.filled.slot-bg-remove-status-effects {
-  background: linear-gradient(135deg, var(--slot-info-start) 0%, var(--slot-info-end) 100%);
+  background: linear-gradient(135deg, var(--color-blue-70) 0%, var(--color-blue-70) 100%);
 }
 
 .item-slot.filled.slot-bg-apply-status-effects {
-  background: linear-gradient(135deg, var(--slot-status-start) 0%, var(--slot-status-end) 100%);
+  background: linear-gradient(135deg, var(--color-purple-3) 0%, var(--color-purple-4) 100%);
 }
 
 .item-slot.filled.slot-bg-revive {
-  background: linear-gradient(135deg, var(--slot-revive-start) 0%, var(--slot-revive-end) 100%);
+  background: linear-gradient(135deg, var(--color-amber-3) 0%, var(--color-amber-5) 100%);
 }
 
 .item-slot.filled.slot-bg-evolve {
-  background: linear-gradient(135deg, var(--slot-revive-start) 0%, var(--slot-revive-end) 100%);
+  background: linear-gradient(135deg, var(--color-amber-3) 0%, var(--color-amber-5) 100%);
 }
 
 .item-slot.filled::before {
@@ -235,20 +235,20 @@ button.item-slot:focus {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, var(--white-alpha-20) 0%, var(--white-alpha-0) 100%);
+  background: linear-gradient(135deg, var(--color-white-30) 0%, transparent 100%);
   pointer-events: none;
 }
 
 .item-slot.filled:hover {
   transform: translateY(-4px) scale(1.06);
-  box-shadow: 0 12px 24px var(--accent-glow);
-  border-color: var(--white-alpha-60);
+  box-shadow: 0 12px 24px var(--color-blue-15);
+  border-color: var(--color-white-60);
 }
 
 .item-slot.filled:active,
 button.item-slot.filled:active {
   transform: translateY(-1px) scale(0.98);
-  box-shadow: 0 6px 14px var(--shadow-color);
+  box-shadow: 0 6px 14px var(--color-black-12);
   transition: transform 0.08s ease, box-shadow 0.12s ease;
 }
 
@@ -262,12 +262,12 @@ button.item-slot.filled:active .item-icon {
 button.item-slot.empty:active {
   transform: translateY(0);
   box-shadow: none;
-  border-color: var(--light-gray-color);
+  border-color: var(--color-gray-4);
 }
 
 .item-slot.filled.selected {
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px var(--accent-glow), 0 8px 20px var(--accent-glow);
+  box-shadow: 0 0 0 3px var(--color-blue-15), 0 8px 20px var(--color-blue-15);
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -275,10 +275,10 @@ button.item-slot.empty:active {
   outline: none;
   transform: translateY(-4px) scale(1.06);
   box-shadow:
-    0 12px 24px var(--accent-glow),
+    0 12px 24px var(--color-blue-15),
     0 0 0 2px var(--neutral-white),
     0 0 0 5px var(--accent-color);
-  border-color: var(--white-alpha-60);
+  border-color: var(--color-white-60);
 }
 
 .item-slot.filled:focus-visible .item-icon {
@@ -289,17 +289,17 @@ button.item-slot.empty:active {
 
   0%,
   100% {
-    box-shadow: 0 0 0 4px var(--accent-glow);
+    box-shadow: 0 0 0 4px var(--color-blue-15);
   }
 
   50% {
-    box-shadow: 0 0 0 8px var(--accent-glow);
+    box-shadow: 0 0 0 8px var(--color-blue-15);
   }
 }
 
 .item-slot.empty {
   background: var(--primary-color);
-  border: 2px dashed var(--light-gray-color);
+  border: 2px dashed var(--color-gray-4);
 }
 
 .item-icon {
@@ -330,8 +330,8 @@ button.item-slot.empty:active {
   align-items: center;
   justify-content: center;
   text-align: center;
-  border: 2px solid var(--light-gray-color);
-  box-shadow: 0 1px 4px var(--shadow-color);
+  border: 2px solid var(--color-gray-4);
+  box-shadow: 0 1px 4px var(--color-black-12);
   z-index: 2;
 }
 
@@ -349,8 +349,8 @@ button.item-slot.empty:active {
   background: var(--primary-color);
   padding: 2rem;
   border-radius: 16px;
-  box-shadow: 0 2px 8px var(--shadow-color);
-  border: 1px solid var(--light-gray-color);
+  box-shadow: 0 2px 8px var(--color-black-12);
+  border: 1px solid var(--color-gray-4);
   animation: fadeInUp 0.5s ease;
   transition: all 0.3s ease;
   flex: 1;
@@ -360,7 +360,7 @@ button.item-slot.empty:active {
 }
 
 .detail-card:hover {
-  box-shadow: 0 8px 16px var(--shadow-color);
+  box-shadow: 0 8px 16px var(--color-black-12);
 }
 
 @keyframes fadeInUp {
@@ -386,7 +386,7 @@ button.item-slot.empty:active {
   max-width: min(300px, 100%);
   box-sizing: border-box;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border: 1.5px solid var(--light-gray-color);
+  border: 1.5px solid var(--color-gray-4);
 }
 
 .detail-icon {
@@ -431,8 +431,8 @@ button.item-slot.empty:active {
   font-size: 1rem;
   font-weight: 600;
   border-radius: 20px;
-  box-shadow: 0 2px 8px var(--shadow-color);
-  border: 1px solid var(--white-alpha-30);
+  box-shadow: 0 2px 8px var(--color-black-12);
+  border: 1px solid var(--color-white-30);
   color: var(--neutral-white);
   transition: all 0.3s ease;
   display: inline-block;
@@ -440,17 +440,17 @@ button.item-slot.empty:active {
 
 /* Dynamic Effect Type Tags */
 .tag-dmg-up {
-  background: var(--danger-color);
+  background: var(--color-red-4);
   color: var(--neutral-white);
 }
 
 .tag-defense-up {
-  background: var(--tag-defense);
+  background: var(--color-amber-4);
   color: var(--neutral-white);
 }
 
 .tag-heal {
-  background: var(--success-color);
+  background: var(--color-green-4);
   color: var(--neutral-white);
 }
 
@@ -460,22 +460,22 @@ button.item-slot.empty:active {
 }
 
 .tag-remove-status-effects {
-  background: var(--tag-info);
+  background: var(--accent-color);
   color: var(--neutral-white);
 }
 
 .tag-revive {
-  background: var(--tag-revive);
+  background: var(--color-amber-4);
   color: var(--neutral-white);
 }
 
 .tag-evolve {
-  background: var(--tag-revive);
+  background: var(--color-amber-4);
   color: var(--neutral-white);
 }
 
 .tag-apply-status-effects {
-  background: var(--tag-purple);
+  background: var(--color-purple-4);
   color: var(--neutral-white);
 }
 
@@ -486,48 +486,48 @@ button.item-slot.empty:active {
 
 /* Icon Background Classes - Dynamic Based on Effect Type */
 .icon-bg-dmg-up {
-  background: linear-gradient(135deg, var(--danger-bg-alpha-15) 0%, var(--danger-bg-alpha-10) 100%);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  background: linear-gradient(135deg, var(--color-red-15) 0%, var(--color-red-10) 100%);
+  box-shadow: 0 4px 12px var(--color-black-12);
 }
 
 .icon-bg-defense-up {
-  background: linear-gradient(135deg, var(--tag-defense-alpha-15) 0%, var(--tag-defense-alpha-10) 100%);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  background: linear-gradient(135deg, var(--color-amber-15) 0%, var(--color-amber-10) 100%);
+  box-shadow: 0 4px 12px var(--color-black-12);
 }
 
 .icon-bg-heal {
-  background: linear-gradient(135deg, var(--success-glow-15) 0%, var(--success-glow-10) 100%);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  background: linear-gradient(135deg, var(--color-green-12) 0%, var(--color-green-10) 100%);
+  box-shadow: 0 4px 12px var(--color-black-12);
 }
 
 .icon-bg-mana {
-  background: linear-gradient(135deg, var(--mana-alpha-15) 0%, var(--mana-alpha-10) 100%);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  background: linear-gradient(135deg, var(--color-cyan-15) 0%, var(--color-cyan-10) 100%);
+  box-shadow: 0 4px 12px var(--color-black-12);
 }
 
 .icon-bg-remove-status-effects {
-  background: linear-gradient(135deg, var(--info-alpha-15) 0%, var(--info-alpha-10) 100%);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  background: linear-gradient(135deg, var(--color-blue-15) 0%, var(--color-blue-10) 100%);
+  box-shadow: 0 4px 12px var(--color-black-12);
 }
 
 .icon-bg-revive {
-  background: linear-gradient(135deg, var(--warning-alpha-15) 0%, var(--warning-alpha-10) 100%);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  background: linear-gradient(135deg, var(--color-amber-15) 0%, var(--color-amber-10) 100%);
+  box-shadow: 0 4px 12px var(--color-black-12);
 }
 
 .icon-bg-evolve {
-  background: linear-gradient(135deg, var(--warning-alpha-15) 0%, var(--warning-alpha-10) 100%);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  background: linear-gradient(135deg, var(--color-amber-15) 0%, var(--color-amber-10) 100%);
+  box-shadow: 0 4px 12px var(--color-black-12);
 }
 
 .icon-bg-apply-status-effects {
-  background: linear-gradient(135deg, var(--purple-alpha-15) 0%, var(--purple-alpha-10) 100%);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  background: linear-gradient(135deg, var(--color-purple-10) 0%, var(--color-purple-10) 100%);
+  box-shadow: 0 4px 12px var(--color-black-12);
 }
 
 .icon-bg-default {
-  background: linear-gradient(135deg, var(--accent-glow) 0%, var(--accent-alpha-10) 100%);
-  box-shadow: 0 4px 12px var(--accent-border-alpha);
+  background: linear-gradient(135deg, var(--color-blue-15) 0%, var(--color-blue-10) 100%);
+  box-shadow: 0 4px 12px var(--color-blue-20);
 }
 
 .item-description {
@@ -541,7 +541,7 @@ button.item-slot.empty:active {
 .effect-text {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--success-color);
+  color: var(--color-green-4);
   margin: 0;
 }
 
@@ -604,7 +604,7 @@ button.item-slot.empty:active {
 
 .action-buttons .btn-danger:focus-visible:not(:disabled) {
   transform: none;
-  background: var(--danger-color);
+  background: var(--color-red-4);
   background-image: none;
 }
 
@@ -619,13 +619,13 @@ button.item-slot.empty:active {
   border-radius: 12px;
   padding: 0.85rem;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 4px 12px var(--accent-glow);
+  box-shadow: 0 4px 12px var(--color-blue-15);
   color: var(--neutral-white);
 }
 
 .btn-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px var(--accent-glow);
+  box-shadow: 0 8px 20px var(--color-blue-15);
   background: linear-gradient(135deg, var(--accent-on-light) 0%, var(--accent-color) 100%);
 }
 
@@ -634,7 +634,7 @@ button.item-slot.empty:active {
 }
 
 .btn-primary:disabled {
-  background: var(--btn-disabled-primary-bg);
+  background: var(--color-gray-6);
   color: var(--neutral-white);
   box-shadow: none;
   transform: none;
@@ -643,7 +643,7 @@ button.item-slot.empty:active {
 }
 
 .btn-primary.btn-use-disabled-apply:disabled {
-  background: var(--btn-disabled-primary-bg);
+  background: var(--color-gray-6);
   color: var(--neutral-white);
   transform: none;
   transition: none;
@@ -651,20 +651,20 @@ button.item-slot.empty:active {
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-color-2) 100%);
+  background: linear-gradient(135deg, var(--color-red-4) 0%, var(--color-red-6) 100%);
   border: none;
   font-weight: 600;
   border-radius: 12px;
   padding: 0.85rem;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 4px 12px var(--danger-glow);
+  box-shadow: 0 4px 12px var(--color-red-10);
   color: var(--neutral-white);
 }
 
 .btn-danger:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px var(--danger-glow);
-  background: linear-gradient(135deg, var(--danger-color-2) 0%, var(--danger-color-2) 100%);
+  box-shadow: 0 8px 20px var(--color-red-10);
+  background: linear-gradient(135deg, var(--color-red-6) 0%, var(--color-red-6) 100%);
 }
 
 .btn-danger:active:not(:disabled) {
@@ -672,7 +672,7 @@ button.item-slot.empty:active {
 }
 
 .btn-danger:disabled {
-  background: var(--btn-disabled-danger-bg);
+  background: var(--color-gray-6);
   color: var(--neutral-white);
   box-shadow: none;
   transform: none;
@@ -688,13 +688,13 @@ button.item-slot.empty:active {
   justify-content: center;
   gap: 0.75rem;
   padding: 1rem 1.25rem;
-  background: linear-gradient(135deg, var(--accent-alpha-08) 0%, var(--accent-alpha-05) 100%);
+  background: linear-gradient(135deg, var(--color-blue-10) 0%, var(--color-blue-10) 100%);
   border-radius: 12px;
   font-size: 1rem;
   color: var(--accent-color);
   line-height: 1.5;
-  border: 1px solid var(--accent-glow);
-  box-shadow: inset 0 2px 4px var(--black-alpha-inset);
+  border: 1px solid var(--color-blue-15);
+  box-shadow: inset 0 2px 4px var(--color-black-5);
   text-align: center;
 }
 

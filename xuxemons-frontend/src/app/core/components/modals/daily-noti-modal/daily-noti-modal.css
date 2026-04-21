@@ -9,13 +9,13 @@
 .daily-noti-content {
 	border: 0;
 	border-radius: 12px;
-	box-shadow: 0 20px 48px var(--shadow-color, rgba(0, 0, 0, 0.18));
-	background: var(--primary-color, #f1f3f5);
+	box-shadow: 0 20px 48px var(--color-black-12);
+	background: var(--primary-color);
 }
 
 .reward-section {
-	background: var(--white-color, #ffffff);
-	border: 1px solid var(--light-gray-color, #d9dee3);
+	background: var(--neutral-white);
+	border: 1px solid var(--color-gray-4);
 	border-radius: 10px;
 	padding: 0.9rem;
 }
@@ -45,19 +45,19 @@
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
-	background: var(--white-color, #ffffff);
-	border: 1px solid var(--light-gray-color, #d9dee3);
+	background: var(--neutral-white);
+	border: 1px solid var(--color-gray-4);
 	border-radius: 8px;
 	padding: 0.55rem 0.65rem;
 }
 
-.reward-row.slot-bg-heal { background: var(--slot-row-heal-bg); }
-.reward-row.slot-bg-mana { background: var(--slot-row-mana-bg); }
-.reward-row.slot-bg-dmg-up { background: var(--danger-bg-alpha-10); }
-.reward-row.slot-bg-defense-up { background: var(--slot-row-defense-bg); }
-.reward-row.slot-bg-remove-status-effects { background: var(--type-speed-bg); }
-.reward-row.slot-bg-apply-status-effects { background: var(--purple-alpha-10); }
-.reward-row.slot-bg-revive, .reward-row.slot-bg-evolve, .reward-row.slot-bg-gacha-ticket { background: var(--slot-row-revive-bg); }
+.reward-row.slot-bg-heal { background: var(--color-green-10); }
+.reward-row.slot-bg-mana { background: var(--color-blue-10); }
+.reward-row.slot-bg-dmg-up { background: var(--color-red-10); }
+.reward-row.slot-bg-defense-up { background: var(--color-amber-10); }
+.reward-row.slot-bg-remove-status-effects { background: var(--color-blue-10); }
+.reward-row.slot-bg-apply-status-effects { background: var(--color-purple-10); }
+.reward-row.slot-bg-revive, .reward-row.slot-bg-evolve, .reward-row.slot-bg-gacha-ticket { background: var(--color-amber-10); }
 
 .reward-icon-slot {
 	width: 44px;
@@ -68,7 +68,7 @@
 	justify-content: center;
 	flex-shrink: 0;
 	overflow: hidden;
-	border: 1px solid var(--white-alpha-30, rgba(255, 255, 255, 0.3));
+	border: 1px solid var(--color-white-30);
 	background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-on-light) 100%);
 }
 
@@ -77,8 +77,8 @@
 	height: 36px;
 	border-radius: 6px;
 	object-fit: contain;
-	background: var(--reward-icon-overlay-bg);
-	border: 1px solid var(--reward-icon-overlay-border);
+	background: var(--color-white-72);
+	border: 1px solid var(--color-white-72);
 }
 
 .reward-meta {
@@ -106,33 +106,33 @@
 }
 
 .reward-icon-slot.slot-bg-heal {
-	background: linear-gradient(135deg, var(--potion-heal-light) 0%, var(--potion-heal) 100%);
+	background: linear-gradient(135deg, var(--color-green-3) 0%, var(--color-green-4) 100%);
 }
 
 .reward-icon-slot.slot-bg-mana {
-	background: linear-gradient(135deg, var(--slot-mana-start) 0%, var(--slot-mana-end) 100%);
+	background: linear-gradient(135deg, var(--color-blue-3) 0%, var(--accent-color) 100%);
 }
 
 .reward-icon-slot.slot-bg-dmg-up {
-	background: linear-gradient(135deg, var(--potion-dmg-light) 0%, var(--potion-dmg) 100%);
+	background: linear-gradient(135deg, var(--color-red-3) 0%, var(--color-red-4) 100%);
 }
 
 .reward-icon-slot.slot-bg-defense-up {
-	background: linear-gradient(135deg, var(--potion-defense-light) 0%, var(--potion-defense) 100%);
+	background: linear-gradient(135deg, var(--color-amber-3) 0%, var(--color-amber-5) 100%);
 }
 
 .reward-icon-slot.slot-bg-remove-status-effects {
-	background: linear-gradient(135deg, var(--slot-info-start) 0%, var(--slot-info-end) 100%);
+	background: linear-gradient(135deg, var(--color-blue-70) 0%, var(--color-blue-70) 100%);
 }
 
 .reward-icon-slot.slot-bg-apply-status-effects {
-	background: linear-gradient(135deg, var(--slot-status-start) 0%, var(--slot-status-end) 100%);
+	background: linear-gradient(135deg, var(--color-purple-3) 0%, var(--color-purple-4) 100%);
 }
 
 .reward-icon-slot.slot-bg-revive,
 .reward-icon-slot.slot-bg-evolve,
 .reward-icon-slot.slot-bg-gacha-ticket {
-	background: linear-gradient(135deg, var(--slot-revive-start) 0%, var(--slot-revive-end) 100%);
+	background: linear-gradient(135deg, var(--color-amber-3) 0%, var(--color-amber-5) 100%);
 }
 
 .daily-cta-btn {
@@ -159,7 +159,7 @@
 }
 
 .daily-cta-btn:focus-visible {
-	outline: 3px solid var(--outline-accent-strong);
+	outline: 3px solid var(--color-blue-20);
 	outline-offset: 2px;
 }
 

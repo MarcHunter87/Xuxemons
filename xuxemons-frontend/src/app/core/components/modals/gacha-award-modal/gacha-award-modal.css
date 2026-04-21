@@ -52,7 +52,7 @@
   justify-content: center;
   padding: 1.7rem;
   border-radius: 16px;
-  box-shadow: 0 8px 24px var(--shadow-color);
+  box-shadow: 0 8px 24px var(--color-black-12);
 }
 
 .image-wrapper img {
@@ -113,11 +113,11 @@
   min-height: 64px;
   padding: 0.5rem 0.4rem;
   border-radius: 12px;
-  box-shadow: 0 4px 10px var(--shadow-color);
+  box-shadow: 0 4px 10px var(--color-black-12);
 }
 
 .winner-stats .stat-hp {
-  background: var(--potion-heal);
+  background: var(--color-green-4);
   color: var(--neutral-white);
 }
 
@@ -127,7 +127,7 @@
 }
 
 .winner-stats .stat-attack {
-  background: var(--potion-dmg);
+  background: var(--color-red-4);
   color: var(--neutral-white);
 }
 
@@ -137,7 +137,7 @@
 }
 
 .winner-stats .stat-defense {
-  background: var(--potion-defense);
+  background: var(--color-amber-5);
   color: var(--neutral-white);
 }
 
@@ -183,7 +183,7 @@
 
 .modal-actions .btn-primary:hover:not(:disabled) {
   background-color: var(--accent-on-light);
-  box-shadow: 0 4px 12px var(--accent-glow);
+  box-shadow: 0 4px 12px var(--color-blue-15);
   transform: translateY(-2px);
 }
 
@@ -200,8 +200,8 @@
 }
 
 .modal-actions .btn-secondary:hover:not(:disabled) {
-  background: var(--accent-alpha-10);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  background: var(--color-blue-10);
+  box-shadow: 0 0 0 3px var(--color-blue-15);
   transform: translateY(-2px);
 }
 
@@ -222,7 +222,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: var(--modal-overlay-bg);
+  background: var(--color-black-90);
   backdrop-filter: blur(10px);
   z-index: 5;
   display: flex;
@@ -249,8 +249,8 @@
   max-width: 520px;
   margin: 1rem;
   border-radius: 20px;
-  border: 2px solid var(--light-gray-color);
-  box-shadow: 0 20px 40px var(--shadow-color);
+  border: 2px solid var(--color-gray-4);
+  box-shadow: 0 20px 40px var(--color-black-12);
   position: relative;
 }
 

@@ -5,7 +5,7 @@
 .discard-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: var(--discard-backdrop, rgba(0, 0, 0, 0.6));
+  background: var(--color-black-90, rgba(0, 0, 0, 0.6));
   backdrop-filter: blur(2px);
   z-index: 3;
   display: flex;
@@ -21,23 +21,23 @@
 }
 
 .discard-picker {
-  background: linear-gradient(135deg, var(--danger-bg-alpha-07) 0%, var(--danger-bg-alpha-04) 100%);
-  border: 1px solid var(--danger-border-alpha-25);
+  background: linear-gradient(135deg, var(--color-red-10) 0%, var(--color-red-4) 100%);
+  border: 1px solid var(--color-red-18);
   border-radius: 14px;
   padding: 1rem 1.25rem;
   animation: fadeInUp 0.2s ease;
 }
 
 .discard-modal .discard-picker {
-  box-shadow: 0 20px 45px var(--shadow-color);
-  border-color: var(--danger-border-alpha-35);
-  background: linear-gradient(135deg, var(--modal-content-bg-start) 0%, var(--modal-content-bg-end) 100%);
+  box-shadow: 0 20px 45px var(--color-black-12);
+  border-color: var(--color-red-35);
+  background: linear-gradient(135deg, var(--color-white-98) 0%, var(--color-white-98) 100%);
 }
 
 .discard-label {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--danger-color);
+  color: var(--color-red-4);
   text-align: center;
   margin-bottom: 0.75rem;
 }
@@ -55,7 +55,7 @@
   height: 40px;
   min-width: 40px;
   border-radius: 8px;
-  border: 1px solid var(--light-gray-color, #d1d5db);
+  border: 1px solid var(--color-gray-4, #d1d5db);
   background: linear-gradient(180deg, var(--neutral-white) 0%, var(--primary-color) 100%);
   color: var(--neutral-black);
   display: inline-flex;
@@ -67,7 +67,7 @@
 
 .qty-btn.qty-btn-use:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 12px var(--shadow-color);
+  box-shadow: 0 6px 12px var(--color-black-12);
 }
 
 .qty-btn.qty-btn-use:active:not(:disabled) {
@@ -79,7 +79,7 @@
   height: 40px;
   padding: 0.25rem 0.5rem;
   border-radius: 8px;
-  border: 1px solid var(--light-gray-color);
+  border: 1px solid var(--color-gray-4);
   text-align: center;
   font-weight: 700;
   font-size: 1rem;
@@ -90,7 +90,7 @@
 .qty-input.qty-input-use:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 4px var(--focus-accent-ring);
+  box-shadow: 0 0 0 4px var(--color-blue-12);
 }
 
 .qty-btn.qty-decrease,
@@ -100,21 +100,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--danger-color);
-  border-color: var(--danger-color-2);
+  background: var(--color-red-4);
+  border-color: var(--color-red-6);
   color: var(--neutral-white);
   font-weight: 500;
 }
 
 .qty-btn.qty-decrease:hover:not(:disabled),
 .qty-btn.qty-increase:hover:not(:disabled) {
-  background: var(--danger-hover);
+  background: var(--color-red-5);
 }
 
 .qty-btn.qty-decrease:focus-visible,
 .qty-btn.qty-increase:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 4px var(--focus-danger-ring);
+  box-shadow: 0 0 0 4px var(--color-red-16);
 }
 
 .qty-btn.qty-decrease i,
@@ -122,7 +122,7 @@
   color: var(--neutral-white);
   font-weight: 900;
   font-size: 1.2rem;
-  text-shadow: 0 1px 0 var(--shadow-color);
+  text-shadow: 0 1px 0 var(--color-black-12);
 }
 
 .qty-input.qty-input-use::-webkit-outer-spin-button,
@@ -144,7 +144,7 @@
 .discard-error {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--potion-dmg);
+  color: var(--color-red-4);
   text-align: center;
   margin: 0 0 0.4rem;
 }
@@ -153,14 +153,14 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, var(--danger-bg-alpha-10) 0%, var(--danger-bg-alpha-04) 100%);
-  border: 1px solid var(--danger-border-alpha-35);
+  background: linear-gradient(135deg, var(--color-red-10) 0%, var(--color-red-4) 100%);
+  border: 1px solid var(--color-red-35);
   border-radius: 8px;
   padding: 0.6rem 0.85rem;
   margin-bottom: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--potion-dmg);
+  color: var(--color-red-4);
   animation: slideDown 0.25s ease;
 }
 
@@ -189,20 +189,20 @@
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-color-2) 100%);
+  background: linear-gradient(135deg, var(--color-red-4) 0%, var(--color-red-6) 100%);
   border: none;
   font-weight: 600;
   border-radius: 12px;
   padding: 0.85rem;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 4px 12px var(--danger-glow);
+  box-shadow: 0 4px 12px var(--color-red-10);
   color: var(--neutral-white);
 }
 
 .btn-danger:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px var(--danger-glow);
-  background: linear-gradient(135deg, var(--danger-color-2) 0%, var(--danger-color-2) 100%);
+  box-shadow: 0 8px 20px var(--color-red-10);
+  background: linear-gradient(135deg, var(--color-red-6) 0%, var(--color-red-6) 100%);
 }
 
 .btn-danger:active:not(:disabled) {
@@ -210,7 +210,7 @@
 }
 
 .btn-danger:disabled {
-  background: var(--btn-disabled-danger-bg);
+  background: var(--color-gray-6);
   color: var(--neutral-white);
   box-shadow: none;
   transform: none;

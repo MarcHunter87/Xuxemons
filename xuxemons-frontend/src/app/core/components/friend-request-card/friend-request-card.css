@@ -5,7 +5,7 @@
 .request-card {
   background: var(--neutral-white);
   border-radius: 12px;
-  border: 1px solid var(--light-gray-color);
+  border: 1px solid var(--color-gray-4);
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -20,7 +20,7 @@
 }
 
 .request-card--animated:hover {
-  box-shadow: 0 2px 12px var(--shadow-color);
+  box-shadow: 0 2px 12px var(--color-black-12);
 }
 
 .request-card-info {
@@ -40,7 +40,7 @@
   justify-content: center;
   font-size: 1.3rem;
   color: var(--neutral-black);
-  border: 1px solid var(--light-gray-color);
+  border: 1px solid var(--color-gray-4);
   flex-shrink: 0;
 }
 
@@ -69,7 +69,7 @@
 
 .request-level {
   font-size: 1rem;
-  font-weight: var(--bs-body-font-weight);
+  font-weight: 400;
   color: var(--neutral-black);
   text-transform: none;
   letter-spacing: 0;
@@ -79,7 +79,7 @@
   display: flex;
   gap: 0.5rem;
   flex-wrap: nowrap;
-  border-top: 1.5px solid var(--light-gray-color);
+  border-top: 1.5px solid var(--color-gray-4);
   padding-top: 16px;
 }
 

@@ -14,189 +14,71 @@
   --secondary-color: #ACDBFD;
   --accent-color: #0D6EFD;
   --accent-on-light: #0A58CA;
-
-  /* Evolve */
-  --evolve-color: #6F42C1;
-  --evolve-glow: rgba(111, 66, 193, 0.45);
-
-  /* Estados generales */
-  --danger-alpha-50: rgba(208, 24, 27, 0.5);
-  --danger-bg-alpha: rgba(208, 24, 27, 0.12);
-  --danger-bg-alpha-04: rgba(220, 38, 38, 0.04);
-  --danger-bg-alpha-07: rgba(220, 38, 38, 0.07);
-  --danger-bg-alpha-10: rgba(220, 38, 38, 0.1);
-  --danger-bg-alpha-15: rgba(220, 38, 38, 0.15);
-  --danger-bg-alpha-light: rgba(208, 24, 27, 0.08);
-  --danger-border-alpha: rgba(158, 11, 11, 0.35);
-  --danger-border-alpha-25: rgba(220, 38, 38, 0.25);
-  --danger-border-alpha-35: rgba(220, 38, 38, 0.35);
-  --danger-color: #D0181B;
-  --danger-color-2: #9E0B0B;
-  --danger-glow: rgba(208, 24, 27, 0.1);
-  --danger-hover: #991b1b;
-  --danger-separator: rgba(208, 24, 27, 0.22);
-  --info-alpha-10: rgba(37, 99, 235, 0.1);
-  --info-alpha-15: rgba(59, 130, 246, 0.15);
-  --success-bg-alpha: rgba(34, 197, 94, 0.12);
-  --success-bg-alpha-light: rgba(34, 197, 94, 0.08);
-  --success-color: #28A745;
-  --success-glow: rgba(40, 167, 69, 0.4);
-  --success-glow-10: rgba(40, 167, 69, 0.1);
-  --success-glow-15: rgba(40, 167, 69, 0.15);
-  --warning-alpha-10: rgba(245, 158, 11, 0.1);
-  --warning-alpha-15: rgba(245, 158, 11, 0.15);
-  --warning-color: #FFC107;
-  --warning-dark: #C43E00;
-
-  /* Neutros y texto */
-  --dark-gray-color: #777777;
-  --light-gray-color: #C8C8C8;
-  --medium-gray-color: #9C9C9C;
-  --text-muted: #595959;
-
-  /* Sombras y alfas base */
-  --black-alpha-05: rgba(0, 0, 0, 0.05);
-  --black-alpha-07: rgba(0, 0, 0, 0.7);
-  --black-alpha-inset: rgba(0, 0, 0, 0.05);
-  --shadow-color: rgba(0, 0, 0, 0.12);
-  --white-alpha-0: rgba(255, 255, 255, 0);
-  --white-alpha-10: rgba(255, 255, 255, 0.1);
-  --white-alpha-20: rgba(255, 255, 255, 0.2);
-  --white-alpha-30: rgba(255, 255, 255, 0.3);
-  --white-alpha-35: rgba(255, 255, 255, 0.35);
-  --white-alpha-40: rgba(255, 255, 255, 0.4);
-  --white-alpha-60: rgba(255, 255, 255, 0.6);
-
-  /* Accent y focus */
-  --accent-alpha-05: rgba(13, 110, 253, 0.05);
-  --accent-alpha-08: rgba(13, 110, 253, 0.08);
-  --accent-alpha-10: rgba(13, 110, 253, 0.1);
-  --accent-border-alpha: rgba(13, 110, 253, 0.2);
-  --accent-glow: rgba(13, 110, 253, 0.15);
-  --focus-accent-bg: #f0f8ff;
-  --focus-accent-ring: rgba(13, 110, 253, 0.12);
-  --focus-accent-ring-light: #b6d4fe;
-  --focus-danger-ring: rgba(185, 28, 28, 0.16);
-  --outline-accent-strong: rgba(10, 78, 203, 0.35);
-
-  /* UI base */
-  --badge-danger-bg: #dc3545;
-  --badge-muted-bg: #fce7f3;
-  --badge-muted-border: #f472b6;
-  --badge-muted-text: #be185d;
-  --btn-disabled-danger-bg: #bda0a0;
-  --btn-disabled-primary-bg: #9aaec4;
-  --btn-disabled-slate-bg: #7a8ca3;
-  --btn-disabled-slate-text: #e6eaf1;
-  --modal-content-bg-end: rgba(255, 245, 245, 0.95);
-  --modal-content-bg-start: rgba(255, 255, 255, 0.98);
-  --modal-overlay-bg: rgba(0, 0, 0, 0.85);
-  --overlay-bg: rgba(0, 0, 0, 0.75);
-  --surface-light: #e9ecef;
-  --toast-bg: rgba(20, 20, 20, 0.9);
-
-  /* Notificaciones y rewards */
-  --reward-icon-overlay-bg: rgba(255, 255, 255, 0.72);
-  --reward-icon-overlay-border: rgba(255, 255, 255, 0.78);
-
-  /* Objetos e items */
-  --potion-defense: #ea580c;
-  --potion-defense-light: #fb923c;
-  --potion-dmg: #dc2626;
-  --potion-dmg-light: #ef4444;
-  --potion-heal: #16a34a;
-  --potion-heal-light: #22c55e;
-  --side-effect-chip-end: #059669;
-  --side-effect-chip-start: #10b981;
-  --slot-info-end: rgba(37, 99, 235, 0.7);
-  --slot-info-start: rgba(59, 130, 246, 0.55);
-  --slot-mana-end: #0891b2;
-  --slot-mana-start: #06b6d4;
-  --slot-revive-end: #d97706;
-  --slot-revive-start: #fbbf24;
-  --slot-row-defense-bg: rgba(234, 88, 12, 0.1);
-  --slot-row-heal-bg: rgba(22, 197, 74, 0.1);
-  --slot-row-mana-bg: rgba(6, 182, 212, 0.1);
-  --slot-row-revive-bg: rgba(251, 191, 36, 0.1);
-  --slot-status-end: #a855f7;
-  --slot-status-start: #c084fc;
-  --tag-defense: #ff8c42;
-  --tag-defense-alpha-10: rgba(255, 140, 66, 0.1);
-  --tag-defense-alpha-15: rgba(255, 140, 66, 0.15);
-  --tag-info: #2563eb;
-  --tag-purple: #a855f7;
-  --tag-revive: #f59e0b;
-
-  /* Estados especiales */
-  --gluttony-bg: #fbeaea;
-  --gluttony-border: #e53935;
-  --gluttony-text: #b71c1c;
-  --overdose-bg: #fbe9f0;
-  --overdose-border: #c2185b;
-  --overdose-text: #880e4f;
-  --starving-accent: #e6b800;
-  --starving-bg-end: #fff7cc;
-  --starving-bg-start: #fffbe6;
-  --starving-border: #ffe066;
-  --starving-text: #7c6f1c;
-  --status-chip-bg-end: #e9d5ff;
-  --status-chip-bg-mid: #ede9fe;
-  --status-chip-bg-start: #f5f3ff;
-  --status-chip-border: #6d28d9;
-  --status-chip-target-bg: #86efac;
-  --status-chip-target-border: rgba(16, 185, 129, 0.45);
-  --status-chip-target-glow: rgba(16, 185, 129, 0.18);
-  --status-chip-target-text: #064e3b;
-  --status-chip-text: #5b21b6;
-
-  /* Stats */
-  --stat-atk-bg-end: rgba(220, 38, 38, 0.18);
-  --stat-atk-bg-start: rgba(220, 38, 38, 0.28);
-  --stat-atk-border: #fb923c;
-  --stat-atk-text: #ea580c;
-  --stat-def-bg-end: rgba(245, 158, 11, 0.18);
-  --stat-def-bg-start: rgba(245, 158, 11, 0.28);
-  --stat-def-border: #60a5fa;
-  --stat-def-text: #2563eb;
-  --stat-hp-bg-end: rgba(34, 197, 94, 0.18);
-  --stat-hp-bg-start: rgba(34, 197, 94, 0.28);
-  --stat-hp-border: #f87171;
-  --stat-hp-text: #dc2626;
-
-  /* Tipos */
-  --type-chart-bg-end: #f3f5f8;
-  --type-chart-bg-start: #fcfdff;
-  --type-chart-body: #5b6674;
-  --type-chart-border: #d9e0e7;
-  --type-chart-card-bg-end: #e9ecef;
-  --type-chart-card-bg-start: #f1f3f5;
-  --type-chart-card-border: #ced4da;
-  --type-chart-heading: #182230;
-  --type-chart-kicker-bg: #e7edf5;
-  --type-chart-kicker-text: #4d627a;
-  --type-power-bg: rgba(220, 38, 38, 0.1);
-  --type-power-border: rgba(220, 38, 38, 0.18);
-  --type-power-text: #b42318;
-  --type-speed-bg: rgba(37, 99, 235, 0.1);
-  --type-speed-border: rgba(37, 99, 235, 0.18);
-  --type-speed-text: #1d4ed8;
-  --type-technical-bg: rgba(22, 163, 74, 0.1);
-  --type-technical-border: rgba(22, 163, 74, 0.18);
-  --type-technical-text: #166534;
-
-  /* Links */
-  --link-btn-bg: #4f8cff;
-  --link-btn-hover: #2563eb;
-
-  /* Otros */
-  --discard-backdrop: rgba(10, 20, 35, 0.55);
-  --mana-alpha-10: rgba(23, 162, 184, 0.1);
-  --mana-alpha-15: rgba(23, 162, 184, 0.15);
-  --purple-alpha-10: rgba(168, 85, 247, 0.1);
-  --purple-alpha-15: rgba(168, 85, 247, 0.15);
-  --sideeffect-badge-border: #e7af1f;
-  --sideeffect-badge-end: #f4cd52;
-  --sideeffect-badge-start: #f9e7a9;
+  
+  --color-black-90: #141414E6;
+  --color-black-12: #0000001F;
+  --color-black-5: #0000000D;
+  --color-gray-8: #2B2A2B;
+  --color-gray-6: #777777;
+  --color-gray-4: #CED4DA;
+  --color-white-98: #FFFFFFFA;
+  --color-white-72: #FFFFFFB8;
+  --color-white-60: #FFFFFF99;
+  --color-white-35: #FFFFFF59;
+  --color-white-30: #FFFFFF4D;
+  --color-white-10: #FFFFFF1A;
+  --color-red-6: #991B1B;
+  --color-red-5: #B91C1C;
+  --color-red-4: #DC2626;
+  --color-red-3: #EF4444;
+  --color-red-2: #FCA5A5;
+  --color-red-1: #FEE2E2;
+  --color-red-50: #DC262680;
+  --color-red-35: #991B1B59;
+  --color-red-18: #DC26262E;
+  --color-red-16: #B91C1C29;
+  --color-red-15: #DC262626;
+  --color-red-12: #DC26261F;
+  --color-red-10: #DC26261A;
+  --color-amber-6: #C43E00;
+  --color-amber-5: #D97706;
+  --color-amber-4: #F59E0B;
+  --color-amber-3: #FBBF24;
+  --color-amber-2: #FDE68A;
+  --color-amber-1: #FFF3CD;
+  --color-amber-18: #F59E0B2E;
+  --color-amber-15: #F59E0B26;
+  --color-amber-10: #F59E0B1A;
+  --color-green-6: #166534;
+  --color-green-5: #15803D;
+  --color-green-4: #16A34A;
+  --color-green-3: #22C55E;
+  --color-green-2: #86EFAC;
+  --color-green-40: #22C55E66;
+  --color-green-28: #22C55E47;
+  --color-green-18: #22C55E2E;
+  --color-green-12: #22C55E1F;
+  --color-green-10: #22C55E1A;
+  --color-green-8: #22C55E14;
+  --color-cyan-15: #17A2B826;
+  --color-cyan-10: #17A2B81A;
+  --color-blue-3: #60A5FA;
+  --color-blue-2: #BFDBFE;
+  --color-blue-1: #E7F1FF;
+  --color-blue-70: #2563EBB3;
+  --color-blue-20: #0D6EFD33;
+  --color-blue-15: #0D6EFD26;
+  --color-blue-12: #0D6EFD1F;
+  --color-blue-10: #0D6EFD1A;
+  --color-purple-7: #6F42C1;
+  --color-purple-73: #6F42C173;
+  --color-purple-6: #5B21B6;
+  --color-purple-5: #6D28D9;
+  --color-purple-4: #A855F7;
+  --color-purple-3: #C084FC;
+  --color-purple-2: #E9D5FF;
+  --color-purple-1: #F5F3FF;
+  --color-purple-10: #A855F71A;
 }
 
 *,
@@ -263,7 +145,7 @@ textarea:focus-visible,
 }
 
 .btn-secondary {
-  background-color: var(--dark-gray-color);
+  background-color: var(--color-gray-6);
   color: var(--neutral-white);
 }
 
@@ -278,7 +160,7 @@ textarea:focus-visible,
   box-shadow: none;
   filter: none;
   transform: none;
-  background-color: var(--dark-gray-color);
+  background-color: var(--color-gray-6);
   color: var(--neutral-white);
 }
 
@@ -308,7 +190,7 @@ textarea:focus-visible,
 }
 
 .btn-danger {
-  background-color: var(--danger-color);
+  background-color: var(--color-red-4);
   color: var(--neutral-white);
 }
 
@@ -323,7 +205,7 @@ textarea:focus-visible,
   box-shadow: none;
   filter: none;
   transform: none;
-  background-color: var(--danger-color);
+  background-color: var(--color-red-4);
   color: var(--neutral-white);
 }
 
@@ -386,9 +268,9 @@ button.btn-secondary {
   background-color: var(--primary-color);
   border-radius: 16px;
   padding: var(--page-section-gap);
-  border: 1px solid var(--light-gray-color);
+  border: 1px solid var(--color-gray-4);
   width: 100%;
-  box-shadow: 0 4px 6px -1px var(--shadow-color);
+  box-shadow: 0 4px 6px -1px var(--color-black-12);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -416,7 +298,7 @@ button.btn-secondary {
   display: inline-block;
   width: 36px;
   height: 36px;
-  border: 3px solid var(--accent-glow);
+  border: 3px solid var(--color-blue-15);
   border-top-color: var(--accent-color);
   border-radius: 50%;
   animation: btn-spin 0.7s linear infinite;
@@ -440,7 +322,7 @@ button.btn-secondary {
   display: inline-block;
   width: 24px;
   height: 24px;
-  border: 3px solid var(--white-alpha-35);
+  border: 3px solid var(--color-white-35);
   border-top-color: var(--neutral-white);
   border-radius: 50%;
   animation: btn-spin 0.7s linear infinite;
@@ -488,7 +370,7 @@ button.btn-secondary {
   width: 60px;
   height: 60px;
   margin: 0 auto 1rem;
-  border: 4px solid var(--accent-border-alpha);
+  border: 4px solid var(--color-blue-20);
   border-top-color: var(--accent-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
