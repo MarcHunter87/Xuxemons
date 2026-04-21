@@ -1,6 +1,6 @@
 import { Component, signal, OnInit, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, interval, Subscription } from 'rxjs';
 import { Header } from './core/layouts/header/header';
 import { Footer } from './core/layouts/footer/footer';
@@ -11,6 +11,7 @@ import { AuthService } from './core/services/auth';
 import { FriendsService } from './core/services/friends.service';
 import type { DailyRewardNotification, FriendRequestItem } from './core/interfaces';
 import { LoadingService } from './core/services/loading.service';
+import { Meta, Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -34,6 +35,9 @@ export class App implements OnInit, OnDestroy {
   private isCheckingPendingDailyRewards = false;
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   protected readonly loadingService = inject(LoadingService);
+  private readonly meta = inject(Meta);
+  private readonly title = inject(Title);
+  private readonly activatedRoute = inject(ActivatedRoute);
 
   constructor(private router: Router, private authService: AuthService, private friendsService: FriendsService) { }
 
@@ -46,6 +50,7 @@ export class App implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.updateShowLayout();
+    this.updateMetaTags();
     this.checkPendingDailyRewards();
 
     this.friendSub = this.friendsService.pendingRequests.subscribe(requests => {
@@ -67,9 +72,10 @@ export class App implements OnInit, OnDestroy {
     }
 
     this.sub = this.router.events.pipe(
-      filter(e => e.constructor.name === 'NavigationEnd')
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.updateShowLayout();
+      this.updateMetaTags();
       this.checkPendingDailyRewards();
       if (this.showLayout()) {
         setTimeout(() => {
@@ -161,5 +167,28 @@ export class App implements OnInit, OnDestroy {
     const gachaQty = notification.gacha_ticket?.quantity ?? 0;
     const itemCount = notification.items?.length ?? 0;
     return gachaQty > 0 || itemCount > 0;
+  }
+
+  private updateMetaTags(): void {
+    const route = this.getDeepestRoute(this.activatedRoute);
+    const pageTitle = route.snapshot.title ?? 'Xuxemons';
+    const appTitle = pageTitle === 'Xuxemons' ? 'Xuxemons' : `${pageTitle} | Xuxemons`;
+    const description = `Explore the ${pageTitle} page in Xuxemons.`;
+    const url = typeof window !== 'undefined' ? window.location.href : 'https://xuxemons.com';
+
+    this.title.setTitle(appTitle);
+    this.meta.updateTag({ name: 'description', content: description });
+    this.meta.updateTag({ property: 'og:title', content: appTitle });
+    this.meta.updateTag({ property: 'og:description', content: description });
+    this.meta.updateTag({ property: 'og:type', content: 'website' });
+    this.meta.updateTag({ property: 'og:url', content: url });
+  }
+
+  private getDeepestRoute(route: ActivatedRoute): ActivatedRoute {
+    let current = route;
+    while (current.firstChild) {
+      current = current.firstChild;
+    }
+    return current;
   }
 }

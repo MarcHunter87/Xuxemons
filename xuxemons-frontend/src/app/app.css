@@ -26,8 +26,6 @@
 
 .global-loading-overlay {
   position: fixed;
-  inset: 0;
-  background: color-mix(in srgb, var(--neutral-white) 55%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
