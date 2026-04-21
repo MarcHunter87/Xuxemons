@@ -88,14 +88,14 @@
 
 .reward-name {
 	margin: 0;
-	color: var(--noti-heading);
+	color: var(--neutral-black);
 	font-weight: 600;
 	line-height: 1.1;
 }
 
 .reward-qty {
 	margin: 0.2rem 0 0;
-	color: var(--noti-link);
+	color: var(--neutral-black);
 	font-weight: 700;
 }
 

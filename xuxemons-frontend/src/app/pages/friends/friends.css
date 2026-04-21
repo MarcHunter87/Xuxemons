@@ -4,6 +4,7 @@
 
 .friends-main {
   background-color: var(--neutral-white);
+  color: var(--neutral-black);
 }
 
 /* ── Page header ── */
@@ -21,6 +22,7 @@
 .friends-subtitle {
   margin: 0;
   font-size: 1rem;
+  color: var(--neutral-black);
 }
 
 /* ── Toast ── */
@@ -107,6 +109,7 @@
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: var(--neutral-black);
 }
 
 .search-input-group {
@@ -143,6 +146,7 @@
   font-family: 'Poppins', sans-serif;
   font-size: 1rem;
   background: var(--neutral-white);
+  color: var(--neutral-black);
 }
 
 .search-input:focus {
@@ -181,6 +185,7 @@
   font-size: 1rem;
   margin: 0;
   padding: 0.35rem 0;
+  color: var(--neutral-black);
 }
 
 .search-results-list {
@@ -239,11 +244,13 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--neutral-black);
 }
 
 .search-result-id {
   display: block;
   font-size: 1rem;
+  color: var(--neutral-black);
 }
 
 .search-result-badge {
@@ -444,11 +451,13 @@
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: var(--neutral-black);
 }
 
 .empty-msg {
   font-size: 1rem;
   margin: 0;
+  color: var(--neutral-black);
 }
 
 /* ── Friends grid ── */
@@ -509,6 +518,7 @@
   flex: 1;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: var(--neutral-black);
 }
 
 .badge-pending {

@@ -19,6 +19,7 @@
 
 .confirm-dialog {
   background: var(--neutral-white);
+  color: var(--neutral-black);
   border-radius: 18px;
   padding: 2rem;
   max-width: 420px;
@@ -30,11 +31,13 @@
   font-size: 1.25rem;
   font-weight: 800;
   margin: 0 0 0.75rem;
+  color: var(--neutral-black);
 }
 
 .confirm-text {
   font-size: 1rem;
   margin: 0 0 1.5rem;
+  color: var(--neutral-black);
 }
 
 .confirm-actions {

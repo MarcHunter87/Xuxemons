@@ -7,14 +7,13 @@
   --layout-max-width: 1400px;
   --page-content-padding-top: 1rem;
 
-  --neutral-black: #2A2B2B;
+  --neutral-black: #2b2a2b;
   --neutral-white: #FFFFFF;
 
   --primary-color: #F3F5F4;
   --secondary-color: #ACDBFD;
   --accent-color: #0D6EFD;
   --accent-on-light: #0A58CA;
-  --text-alt-color: #2A2B2B;
 
   /* Evolve */
   --evolve-color: #6F42C1;
@@ -97,9 +96,6 @@
   --toast-bg: rgba(20, 20, 20, 0.9);
 
   /* Notificaciones y rewards */
-  --noti-heading: #12264f;
-  --noti-link: #0b4fb3;
-  --noti-text-muted: #5f6e8a;
   --reward-icon-overlay-bg: rgba(255, 255, 255, 0.72);
   --reward-icon-overlay-border: rgba(255, 255, 255, 0.78);
 

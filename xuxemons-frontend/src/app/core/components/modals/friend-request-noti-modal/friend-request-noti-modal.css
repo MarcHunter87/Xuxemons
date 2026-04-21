@@ -16,6 +16,7 @@
 	border-radius: 12px;
 	box-shadow: 0 20px 48px var(--shadow-color, rgba(0, 0, 0, 0.18));
 	background: var(--primary-color, #f1f3f5);
+	color: var(--neutral-black);
 }
 
 .badge-noti-count {
@@ -39,6 +40,7 @@
 	align-items: center;
 	width: 100%;
 	gap: 0.5rem;
+	color: var(--neutral-black);
 }
 
 .friend-req-noti-content .badge-noti-count {
@@ -49,6 +51,7 @@
 	font-size: 1rem;
 	font-weight: 700;
 	margin: 0 0 0.65rem;
+	color: var(--neutral-black);
 }
 
 .reward-items-scroll {

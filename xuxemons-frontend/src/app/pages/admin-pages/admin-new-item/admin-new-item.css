@@ -149,7 +149,14 @@
     border-radius: 8px;
     font-size: 1rem;
     font-family: inherit;
+    color: var(--neutral-black);
     box-sizing: border-box;
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: var(--neutral-black);
+    opacity: 1;
   }
 
   .field .form-control {
