@@ -5,12 +5,7 @@
   <p class="page-hero-desc">Edit the item.</p>
 </section>
 
-@if (isLoadingItem()) {
-  <div class="loading-state">
-    <span class="stat-card__spinner" aria-hidden="true"></span>
-    <p class="loading-text">Loading item...</p>
-  </div>
-}
+
 
 @if (!isLoadingItem()) {
 <section class="form-card card">

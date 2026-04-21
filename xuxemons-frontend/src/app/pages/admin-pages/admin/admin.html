@@ -30,12 +30,7 @@
   </a>
 </nav>
 
-@if (isLoading()) {
-  <div class="loading-state">
-    <div class="spinner"></div>
-    <p class="loading-text">Loading players...</p>
-  </div>
-}
+
 
 @if (errorMessage() && !isLoading()) {
   <div class="error-state">

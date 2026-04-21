@@ -94,7 +94,6 @@
   transform: translateY(0) scale(0.98);
 }
 
-.loading-state,
 .error-state,
 .empty-state {
   text-align: center;

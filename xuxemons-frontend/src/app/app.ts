@@ -10,6 +10,7 @@ import { FriendRequestNotiModal } from './core/components/modals/friend-request-
 import { AuthService } from './core/services/auth';
 import { FriendsService } from './core/services/friends.service';
 import type { DailyRewardNotification, FriendRequestItem } from './core/interfaces';
+import { LoadingService } from './core/services/loading.service';
 
 @Component({
   selector: 'app-root',
@@ -32,6 +33,7 @@ export class App implements OnInit, OnDestroy {
   private periodicSyncSub: Subscription | null = null;
   private isCheckingPendingDailyRewards = false;
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  protected readonly loadingService = inject(LoadingService);
 
   constructor(private router: Router, private authService: AuthService, private friendsService: FriendsService) { }
 

@@ -47,7 +47,6 @@
 }
 
 /* ── Error / success state (matching other pages) ── */
-.loading-state,
 .error-state,
 .empty-state {
   text-align: center;

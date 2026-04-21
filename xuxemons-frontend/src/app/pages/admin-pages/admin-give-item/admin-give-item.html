@@ -5,12 +5,7 @@
   <p class="page-hero-desc">Select an item and quantity to distribute.</p>
 </section>
 
-@if (isLoading()) {
-  <div class="loading-state" aria-busy="true" aria-live="polite">
-    <div class="spinner" aria-hidden="true"></div>
-    <p class="loading-text">Loading items...</p>
-  </div>
-}
+
 
 @if (errorMessage() || successMessage()) {
   <div class="message-section" aria-live="polite" aria-atomic="true">

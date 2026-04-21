@@ -5,12 +5,7 @@
   <p class="page-hero-desc">Update distribution time and amount for this daily reward.</p>
 </section>
 
-@if (isLoadingReward()) {
-  <div class="loading-state">
-    <span class="stat-card__spinner" aria-hidden="true"></span>
-    <p class="loading-text">Loading daily reward...</p>
-  </div>
-}
+
 
 @if (!isLoadingReward()) {
   <section class="form-card card">

@@ -5,12 +5,7 @@
   <p class="page-hero-desc">Adjust the progress required to reach this size when using Evolve items.</p>
 </section>
 
-@if (isLoadingSize()) {
-  <div class="loading-state">
-    <span class="stat-card__spinner" aria-hidden="true"></span>
-    <p class="loading-text">Loading size...</p>
-  </div>
-}
+
 
 @if (!isLoadingSize()) {
 <section class="form-card card">

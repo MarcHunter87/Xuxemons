@@ -9,12 +9,7 @@
   <a routerLink="/admin/items/new-item" class="btn-primary">New Item</a>
 </div>
 
-@if (isLoading()) {
-  <div class="loading-state">
-    <div class="spinner"></div>
-    <p class="loading-text">Loading items...</p>
-  </div>
-}
+
 
 @if (errorMessage() && !isLoading()) {
   <div class="error-state">

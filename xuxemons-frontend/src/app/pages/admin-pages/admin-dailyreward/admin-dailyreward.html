@@ -5,12 +5,7 @@
   <p class="page-hero-desc">Configure when daily rewards are distributed and how many are granted.</p>
 </section>
 
-@if (isLoading()) {
-  <div class="loading-state">
-    <div class="spinner"></div>
-    <p class="loading-text">Loading daily rewards...</p>
-  </div>
-}
+
 
 @if (errorMessage() && !isLoading()) {
   <div class="error-state">

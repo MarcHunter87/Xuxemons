@@ -2,26 +2,6 @@
 	max-width: none;
 }
 
-.loading-state {
-	text-align: center;
-	padding: 3rem 2rem;
-	border-radius: 12px;
-	background-color: var(--neutral-white);
-	border: 1px solid var(--color-gray-light);
-}
-
-.loading-state .stat-card__spinner {
-	display: block;
-	margin: 0 auto 1rem;
-}
-
-.loading-state .loading-text {
-	font-size: 1rem;
-	font-weight: 500;
-	margin: 0;
-	color: var(--neutral-black);
-}
-
 .form-card {
 	background: var(--neutral-white);
 	border: 1px solid var(--color-gray-light);
