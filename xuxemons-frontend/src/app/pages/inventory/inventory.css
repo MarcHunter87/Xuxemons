@@ -174,7 +174,7 @@ button.item-slot:focus {
 }
 
 .item-slot.filled.slot-bg-remove-status-effects {
-  background: linear-gradient(135deg, var(--color-blue-overlay-strong) 0%, var(--color-blue-overlay-strong) 100%);
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-color) 100%);
 }
 
 .item-slot.filled.slot-bg-apply-status-effects {
@@ -482,7 +482,7 @@ button.item-slot.empty:active {
 }
 
 .icon-bg-apply-status-effects {
-  background: linear-gradient(135deg, var(--color-blue-overlay) 0%, var(--color-blue-overlay) 100%);
+  background: linear-gradient(135deg, var(--color-purple-overlay) 0%, var(--color-purple-overlay) 100%);
   box-shadow: 0 4px 12px var(--color-black-soft);
 }
 
