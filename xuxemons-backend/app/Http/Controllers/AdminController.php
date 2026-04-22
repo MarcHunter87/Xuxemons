@@ -943,6 +943,7 @@ class AdminController extends Controller
 
             // Se obtiene el archivo de la imagen
             $iconFile = $request->file('icon');
+            $shouldTouchUpdatedAt = false;
             // Si el archivo de la imagen existe, se procesa
             if ($iconFile) {
                 // Se obtiene la ruta pública
@@ -967,11 +968,15 @@ class AdminController extends Controller
 
                 $this->saveImageAsWebp($iconFile->getRealPath(), public_path($targetPath));
                 $update['icon_path'] = $targetPath;
-                $update['updated_at'] = now();
+                $shouldTouchUpdatedAt = true;
             }
 
             // Se actualiza el item
             $item->update($update);
+            if ($shouldTouchUpdatedAt) {
+                $item->updated_at = now();
+                $item->save();
+            }
             // Se devuelve la respuesta
 
             return response()->json([
@@ -1044,6 +1049,7 @@ class AdminController extends Controller
 
             // Se obtiene el archivo de la imagen
             $iconFile = $request->file('icon');
+            $shouldTouchUpdatedAt = false;
             // Si el archivo de la imagen existe, se procesa
             if ($iconFile) {
                 // Se obtiene la ruta pública
@@ -1068,11 +1074,15 @@ class AdminController extends Controller
 
                 $this->saveImageAsWebp($iconFile->getRealPath(), public_path($targetPath));
                 $update['icon_path'] = $targetPath;
-                $update['updated_at'] = now();
+                $shouldTouchUpdatedAt = true;
             }
 
             // Se actualiza el xuxemon
             $xuxemon->update($update);
+            if ($shouldTouchUpdatedAt) {
+                $xuxemon->updated_at = now();
+                $xuxemon->save();
+            }
             // Se devuelve la respuesta
 
             return response()->json([
@@ -1129,6 +1139,7 @@ class AdminController extends Controller
             if (! @copy($sourcePath, $targetPath)) {
                 throw new \RuntimeException('Could not persist uploaded webp file.');
             }
+
             return;
         }
 

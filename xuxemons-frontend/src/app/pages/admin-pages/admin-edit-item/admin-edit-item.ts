@@ -349,8 +349,7 @@ export class AdminEditItem implements OnInit {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_+|_+$/g, '') || 'new_item';
-    const ext = (originalName?.split('.').pop()?.toLowerCase() ?? 'webp').replace(/[^a-z0-9]/g, '') || 'webp';
-    return `${safeBase}.${ext}`;
+    return `${safeBase}.webp`;
   }
 
   // Sirve para actualizar el control de cantidad máxima

@@ -10,6 +10,7 @@ export interface ApiInventoryItem {
   is_stackable: boolean;
   max_quantity: number;
   bag_item_id?: number;
+  updated_at?: string;
 }
 
 // Sirve para definir la interfaz de un item del inventario

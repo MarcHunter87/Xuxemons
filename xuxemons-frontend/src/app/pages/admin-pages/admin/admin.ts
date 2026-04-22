@@ -123,7 +123,9 @@ export class Admin implements OnInit, AfterViewChecked {
       finalize(() => this.awardLoadingUserId.set(null))
     ).subscribe({
       next: (raw) => {
-        const image_url = raw?.icon_path ? this.auth.getAssetUrl(`/${raw.icon_path}`) : '';
+        const image_url = raw?.icon_path
+          ? this.auth.getAssetUrl(`/${raw.icon_path}`, raw?.updated_at)
+          : '';
         this.awardedXuxemon.set({
           id: raw?.id,
           name: raw?.name ?? '',

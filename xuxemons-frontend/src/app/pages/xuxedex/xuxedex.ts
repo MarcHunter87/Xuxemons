@@ -100,7 +100,9 @@ export class Xuxedex implements OnInit, OnDestroy {
     this.xuxemonService.setTypeInventory('all');
     this.xuxemonService.loadAllXuxemons();
     this.xuxemonService.loadMyXuxemons();
-    this.subs.add(this.xuxemonService.displayXuxemons.subscribe(list => this.displayXuxemons.set(list)));
+    this.subs.add(this.xuxemonService.displayXuxemons.subscribe(list => {
+      this.displayXuxemons.set(list);
+    }));
     this.subs.add(this.xuxemonService.myXuxemonsList.subscribe(list => {
       this.myXuxemons.set(list);
       if (!this.hasInitializedFiltered) {

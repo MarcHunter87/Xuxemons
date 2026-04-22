@@ -140,6 +140,7 @@ class InventoryController extends Controller
                             'is_stackable' => $bagItem->item->is_stackable,
                             'max_quantity' => $bagItem->item->max_quantity,
                             'bag_item_id' => $bagItem->id, // ID real del BagItem
+                            'updated_at' => $bagItem->item->updated_at,
                         ];
                         $remaining -= $qty;
                         $stackIndex++;
@@ -158,6 +159,7 @@ class InventoryController extends Controller
                             'is_stackable' => $bagItem->item->is_stackable,
                             'max_quantity' => $bagItem->item->max_quantity,
                             'bag_item_id' => $bagItem->id, // ID real del BagItem
+                            'updated_at' => $bagItem->item->updated_at,
                         ];
                     }
                 }

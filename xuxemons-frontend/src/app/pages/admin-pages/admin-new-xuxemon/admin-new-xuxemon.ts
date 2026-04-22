@@ -298,8 +298,7 @@ export class AdminNewXuxemon implements OnInit {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_+|_+$/g, '') || 'new_xuxemon';
-    const ext = (originalName?.split('.').pop()?.toLowerCase() ?? 'webp').replace(/[^a-z0-9]/g, '') || 'webp';
-    return `${safeBase}.${ext}`;
+    return `${safeBase}.webp`;
   }
 
   // Sirve para obtener el primer error de backend

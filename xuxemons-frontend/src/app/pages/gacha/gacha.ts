@@ -47,7 +47,9 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         this.auth.refreshGachaTickets();
         this.loadRoulette();
         this.xuxemonService.loadMyXuxemons();
-        this.subs.add(this.xuxemonService.myXuxemonsList.subscribe(list => this.myXuxemonsList.set(list)));
+        this.subs.add(this.xuxemonService.myXuxemonsList.subscribe(list => {
+            this.myXuxemonsList.set(list);
+        }));
     }
 
     // Sirve para destruir el componente

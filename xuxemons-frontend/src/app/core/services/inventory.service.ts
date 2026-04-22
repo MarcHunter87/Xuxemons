@@ -110,12 +110,12 @@ export class InventoryService {
 
     // Sirve para transformar los items de la API a los items del inventario
     private transformApiItems(apiItems: ApiInventoryItem[]): InventoryItem[] {
-        return apiItems.map((item) => {
+        const transformed = apiItems.map((item) => {
             const path = item.icon_path.startsWith('/') ? item.icon_path : `/${item.icon_path}`;
             return {
                 id: item.id,
                 name: item.name,
-                iconPath: this.auth.getAssetUrl(path),
+                iconPath: this.auth.getAssetUrl(path, item.updated_at),
                 category: item.effect_type,
                 type: item.effect_type,
                 description: item.description,
@@ -128,6 +128,7 @@ export class InventoryService {
                 bag_item_id: item.bag_item_id,
             };
         });
+        return transformed;
     }
 
     // Sirve para extraer los tipos de efectos
