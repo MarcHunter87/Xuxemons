@@ -51,6 +51,7 @@ export class Xuxedex implements OnInit, OnDestroy {
   });
   xuxemonsTotalPages = computed(() => Math.ceil(this.xuxemons().length / this.itemsPerPage));
 
+  // Sirve para filtrar los Xuxemons de My Team
   onMyXuxemonsFilteredChange(xuxemons: Xuxemon[]): void {
     this.filteredMyXuxemons.set(xuxemons);
     this.myXuxemonsCurrentPage.set(0);
@@ -58,36 +59,43 @@ export class Xuxedex implements OnInit, OnDestroy {
     this.tryOpenPendingXuxemon();
   }
 
+  // Sirve para navegar entre las páginas de My Team
   nextMyXuPage() {
     if (this.myXuxemonsCurrentPage() < this.myXuxemonsTotalPages() - 1) {
       this.myXuxemonsCurrentPage.update(p => p + 1);
     }
   }
 
+  // Sirve para navegar entre las páginas de My Team
   prevMyXuPage() {
     if (this.myXuxemonsCurrentPage() > 0) {
       this.myXuxemonsCurrentPage.update(p => p - 1);
     }
   }
 
+  // Sirve para navegar entre las páginas de Xuxedex
   nextXuPage() {
     if (this.xuxemonsCurrentPage() < this.xuxemonsTotalPages() - 1) {
       this.xuxemonsCurrentPage.update(p => p + 1);
     }
   }
 
+  // Sirve para navegar entre las páginas de Xuxedex
   prevXuPage() {
     if (this.xuxemonsCurrentPage() > 0) {
       this.xuxemonsCurrentPage.update(p => p - 1);
     }
   }
 
+  // Sirve para verificar si un Xuxemon está capturado
   userXuxemonIds = computed(() => new Set(this.myXuxemons().map(x => x.id)));
 
+  // Sirve para verificar si un Xuxemon está capturado
   isXuxemonCaptured(xuxemonId: number): boolean {
     return this.userXuxemonIds().has(xuxemonId);
   }
 
+  // Sirve para inicializar el componente
   ngOnInit() {
     this.xuxemonService.setTypeInventory('all');
     this.xuxemonService.loadAllXuxemons();
@@ -108,10 +116,12 @@ export class Xuxedex implements OnInit, OnDestroy {
     }));
   }
 
+  // Sirve para destruir el componente
   ngOnDestroy() {
     this.subs.unsubscribe();
   }
 
+  // Sirve para abrir el Xuxemon pendiente
   private tryOpenPendingXuxemon(): void {
     const targetId = this.pendingOpenXuxemonId();
     if (!targetId) return;
@@ -125,6 +135,7 @@ export class Xuxedex implements OnInit, OnDestroy {
       this.myXuxemonsCurrentPage.set(targetPage);
     }
 
+    // Sirve para abrir el Xuxemon pendiente
     setTimeout(() => {
       const trigger = document.querySelector(`[data-my-xuxemon-id="${targetId}"] .card-button`) as HTMLElement | null;
       if (!trigger) return;

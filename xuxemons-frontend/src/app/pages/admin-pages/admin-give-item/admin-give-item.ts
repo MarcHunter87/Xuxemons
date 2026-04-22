@@ -30,6 +30,7 @@ export class AdminGiveItem implements OnInit {
   readonly successMessage = signal<string | null>(null);
   readonly dropdownOpen = signal(false);
 
+  // Sirve para inicializar el formulario de entrega de items
   constructor() {
     this.form = this.fb.group({
       itemId: ['', [Validators.required]],
@@ -37,6 +38,7 @@ export class AdminGiveItem implements OnInit {
     });
   }
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     const raw = this.route.snapshot.paramMap.get('userId');
     const userId = raw ? decodeURIComponent(raw) : null;
@@ -50,6 +52,7 @@ export class AdminGiveItem implements OnInit {
     this.loadFormData();
   }
 
+  // Sirve para cargar los datos del formulario
   private loadFormData(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -73,6 +76,7 @@ export class AdminGiveItem implements OnInit {
       });
   }
 
+  // Sirve para manejar el cambio de item
   onItemChange(): void {
     const itemIdControl = this.form.get('itemId');
     const quantityControl = this.form.get('quantity');
@@ -92,17 +96,20 @@ export class AdminGiveItem implements OnInit {
     }
   }
 
+  // Sirve para obtener el item seleccionado
   getSelectedItem(): Item | undefined {
     const itemIdControl = this.form.get('itemId');
     if (!itemIdControl?.value) return undefined;
     return this.items().find((item) => item.id === parseInt(itemIdControl.value));
   }
 
+  // Sirve para obtener la URL del icono del item
   getItemImageUrl(item: Item): string {
     const path = item.icon_path?.startsWith('/') ? item.icon_path : `/${item.icon_path || ''}`;
     return this.authService.getAssetUrl(path);
   }
 
+  // Sirve para obtener el label del efecto del item
   getEffectLabel(item: Item): string {
     const type = item.effect_type || '';
     const value = item.effect_value;
@@ -112,21 +119,25 @@ export class AdminGiveItem implements OnInit {
     return '';
   }
 
+  // Sirve para seleccionar un item
   selectItem(item: Item): void {
     this.form.get('itemId')?.setValue(String(item.id));
     this.onItemChange();
     this.dropdownOpen.set(false);
   }
 
+  // Sirve para cerrar el dropdown
   closeDropdown(): void {
     this.dropdownOpen.set(false);
   }
 
+  // Sirve para manejar el escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.dropdownOpen()) this.closeDropdown();
   }
 
+  // Sirve para enviar el formulario
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -166,11 +177,13 @@ export class AdminGiveItem implements OnInit {
       });
   }
 
+  // Sirve para verificar si un campo es inválido
   isFieldInvalid(fieldName: string): boolean {
     const control = this.form.get(fieldName);
     return !!(control && control.invalid && control.touched);
   }
 
+  // Sirve para obtener el mensaje de error de un campo
   getErrorMessage(fieldName: string): string {
     const control = this.form.get(fieldName);
 

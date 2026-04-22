@@ -22,10 +22,12 @@ export class AdminItems implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly hasContent = computed(() => !this.isLoading() && !this.errorMessage());
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.loadItems();
   }
 
+  // Sirve para cargar los items
   private loadItems(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -47,11 +49,13 @@ export class AdminItems implements OnInit {
       });
   }
 
+  // Sirve para obtener la URL del icono
   getIconUrl(iconPath: string): string {
     const path = iconPath.startsWith('/') ? iconPath : `/${iconPath}`;
     return this.auth.getAssetUrl(path);
   }
 
+  // Sirve para eliminar un item
   onDeleteItem(item: Item): void {
     if (!confirm(`Delete item "${item.name}"? This action cannot be undone.`)) return;
     this.adminService.deleteItem(item.id).subscribe({

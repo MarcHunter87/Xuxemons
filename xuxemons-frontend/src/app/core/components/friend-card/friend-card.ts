@@ -19,29 +19,35 @@ export class FriendCard {
   menuOpen = false;
   iconError = false;
 
+  // Sirve para verificar si las animaciones están habilitadas
   get animationsEnabled(): boolean {
     return this.auth.getUser()?.view_animations ?? true;
   }
 
+  // Sirve para obtener la URL del icono
   getIconUrl(): string {
     if (this.iconError || !this.friend?.icon_path) return '';
     return this.auth.getAssetUrl(this.friend.icon_path);
   }
 
+  // Sirve para obtener el texto del estado
   getStatusText(): string {
     return this.friend.status === 'online' ? 'Online' : 'Offline';
   }
 
+  // Sirve para alternar el menú
   toggleMenu(event: Event): void {
     event.stopPropagation();
     this.menuOpen = !this.menuOpen;
   }
 
+  // Sirve para eliminar al amigo
   onRemove(): void {
     this.menuOpen = false;
     this.remove.emit();
   }
 
+  // Sirve para manejar el clic en el documento
   @HostListener('document:click')
   onDocumentClick(): void {
     if (this.menuOpen) this.menuOpen = false;

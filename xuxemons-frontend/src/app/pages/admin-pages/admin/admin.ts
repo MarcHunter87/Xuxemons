@@ -46,16 +46,19 @@ export class Admin implements OnInit, AfterViewChecked {
 
   readonly hasContent = computed(() => !this.isLoading() && !this.errorMessage());
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.loadAllUsers();
   }
 
+  // Sirve para manejar el focus del modal de recompensa
   ngAfterViewChecked(): void {
     if (this.shouldFocusAwardCloseButton) {
       this.shouldFocusAwardCloseButton = false;
     }
   }
 
+  // Sirve para cargar todos los usuarios
   private loadAllUsers(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -82,6 +85,7 @@ export class Admin implements OnInit, AfterViewChecked {
       });
   }
 
+  // Sirve para verificar el estado de la bolsa del usuario
   private checkBagStatus(userId: string): void {
     this.adminService.checkBagStatus(userId).subscribe({
       next: (response) => {
@@ -91,20 +95,24 @@ export class Admin implements OnInit, AfterViewChecked {
     });
   }
 
+  // Sirve para verificar si se puede dar items al usuario
   canGiveItems(userId: string): boolean {
     const status = this.bagStatusMap()[userId];
     if (!status) return false;
     return status.available_slots > 0;
   }
 
+  // Sirve para obtener el nombre completo del usuario
   getUserFullName(user: AdminUser): string {
     return `${user.name} ${user.surname}`;
   }
 
+  // Sirve para obtener el ID del usuario codificado
   getEncodedUserId(id: string): string {
     return encodeURIComponent(id);
   }
 
+  // Sirve para dar un Xuxemon aleatorio al usuario
   giveRandomXuxemon(user: AdminUser): void {
     this.previousFocusedElement = typeof document !== 'undefined'
       ? (document.activeElement as HTMLElement | null)
@@ -135,16 +143,19 @@ export class Admin implements OnInit, AfterViewChecked {
     });
   }
 
+  // Sirve para banear al usuario
   banUser(user: AdminUser): void {
     this.pendingBanUser.set(user);
     this.showBanModal.set(true);
   }
 
+  // Sirve para cerrar el modal de ban
   closeBanModal(): void {
     this.showBanModal.set(false);
     this.pendingBanUser.set(null);
   }
 
+  // Sirve para confirmar el ban del usuario
   confirmBanUser(): void {
     const user = this.pendingBanUser();
     if (!user) {
@@ -173,6 +184,7 @@ export class Admin implements OnInit, AfterViewChecked {
       });
   }
 
+  // Sirve para cerrar el modal de recompensa
   closeAwardModal(): void {
     const sfx = this.modalAudio?.nativeElement;
     if (sfx) { sfx.pause(); sfx.currentTime = 0; }
@@ -185,6 +197,7 @@ export class Admin implements OnInit, AfterViewChecked {
     }
   }
 
+  // Sirve para reproducir el audio de la modal de revelación
   private playModalRevealAudio(): void {
     const sfx = this.modalAudio?.nativeElement;
     if (sfx) {
@@ -194,6 +207,7 @@ export class Admin implements OnInit, AfterViewChecked {
     }
   }
 
+  // Sirve para manejar el escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.showBanModal()) {
@@ -207,6 +221,7 @@ export class Admin implements OnInit, AfterViewChecked {
     if (this.awardError()) this.dismissAwardError();
   }
 
+  // Sirve para manejar el teclado
   @HostListener('document:keydown', ['$event'])
   onDocumentKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Tab' || !this.showAwardModal()) {
@@ -214,14 +229,17 @@ export class Admin implements OnInit, AfterViewChecked {
     }
   }
 
+  // Sirve para cerrar el error de recompensa
   dismissAwardError(): void {
     this.awardError.set(null);
   }
 
+  // Sirve para manejar el teclado en la modal de recompensa
   onModalKeydown(event: KeyboardEvent): void {
     if (!this.showAwardModal() || event.key !== 'Tab') return;
   }
 
+  // Sirve para obtener el color del tipo de Xuxemon
   getTypeColor(typeName: string): string {
     switch (typeName) {
       case 'Power': return '#D0181B';
@@ -231,6 +249,7 @@ export class Admin implements OnInit, AfterViewChecked {
     }
   }
 
+  // Sirve para atrapar el focus
   private trapFocus(event: KeyboardEvent, root?: HTMLElement): void {
     if (!root) {
       return;

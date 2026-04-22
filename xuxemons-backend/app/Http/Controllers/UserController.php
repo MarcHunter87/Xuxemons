@@ -12,12 +12,15 @@ use Throwable;
 
 class UserController extends Controller
 {
+    // Sirve para actualizar la información personal del usuario
     public function updatePersonalInfo(Request $request)
     {
         try {
+            // Se obtiene el usuario autenticado
             /** @var User $user */
             $user = Auth::guard('api')->user();
 
+            // Se valida la información del usuario
             $validated = $request->validate([
                 'name' => 'sometimes|string|max:30',
                 'surname' => 'sometimes|string|max:30',
@@ -29,6 +32,7 @@ class UserController extends Controller
                 'email.email' => 'Please provide a valid email address.',
             ]);
 
+            // Si no se proporciona información, se devuelve un error
             if (empty($validated)) {
                 return response()->json([
                     'message' => 'No personal information provided to update',
@@ -38,6 +42,7 @@ class UserController extends Controller
                 ], 422);
             }
 
+            // Se actualiza la información del usuario
             $user->update($validated);
 
             return response()->json([
@@ -59,12 +64,15 @@ class UserController extends Controller
         }
     }
 
+    // Sirve para actualizar la contraseña del usuario
     public function updatePassword(Request $request)
     {
         try {
+            // Se obtiene el usuario autenticado
             /** @var User $user */
             $user = Auth::guard('api')->user();
 
+            // Se valida la información del usuario
             $validated = $request->validate([
                 'current_password' => 'required|string|min:6',
                 'new_password' => 'required|string|min:6',
@@ -74,6 +82,7 @@ class UserController extends Controller
                 'new_password.min' => 'New password must be at least 6 characters.',
             ]);
 
+            // Si la contraseña actual no es correcta, se devuelve un error
             if (! Hash::check($validated['current_password'], $user->password)) {
                 return response()->json([
                     'message' => 'Current password is not correct.',
@@ -83,9 +92,11 @@ class UserController extends Controller
                 ], 422);
             }
 
+            // Se actualiza la contraseña del usuario
             $user->password = Hash::make($validated['new_password']);
             $user->save();
 
+            // Se devuelve la respuesta
             return response()->json([
                 'message' => 'Password updated successfully.',
             ]);
@@ -104,16 +115,21 @@ class UserController extends Controller
         }
     }
 
+    // Sirve para desactivar la cuenta del usuario
     public function deactivateAccount(Request $request)
     {
         try {
+            // Se obtiene el usuario autenticado
             /** @var User $user */
             $user = Auth::guard('api')->user();
 
+            // Se desactiva la cuenta del usuario
             $user->update(['is_active' => false, 'email' => '']);
 
+            // Se cierra la sesión del usuario
             Auth::guard('api')->logout();
 
+            // Se devuelve la respuesta
             return response()->json([
                 'message' => 'Account deleted successfully.',
             ]);
@@ -127,22 +143,27 @@ class UserController extends Controller
         }
     }
 
+    // Sirve para subir el banner del usuario
     public function uploadBanner(Request $request)
     {
         return $this->uploadProfileImage($request, 'banner', 'banner_path', 'banners', 15360, 'Banner', 'Couldn\'t upload banner');
     }
 
+    // Sirve para subir el icono del usuario
     public function uploadIcon(Request $request)
     {
         return $this->uploadProfileImage($request, 'icon', 'icon_path', 'icons', 10240, 'Icon', 'Couldn\'t upload icon');
     }
 
+    // Sirve para subir la imagen de perfil del usuario
     private function uploadProfileImage(Request $request, string $field, string $pathKey, string $dir, int $maxKb, string $label, string $errorMessage): JsonResponse
     {
         try {
+            // Se obtiene el usuario autenticado
             /** @var User $user */
             $user = Auth::guard('api')->user();
 
+            // Se valida la imagen de perfil
             $request->validate([
                 $field => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:'.$maxKb,
             ], [
@@ -152,24 +173,30 @@ class UserController extends Controller
                 "{$field}.max" => "{$label} must be less than ".round($maxKb / 1024).'MB.',
             ]);
 
+            // Se obtiene el archivo
             $file = $request->file($field);
             $ext = $file->getClientOriginalExtension();
             $filename = $user->id.'.'.$ext;
+            // Se obtiene la ruta pública
             $publicPath = public_path("users/{$dir}");
+            // Si la ruta pública no existe, se crea
 
             if (! file_exists($publicPath)) {
                 mkdir($publicPath, 0755, true);
             }
 
+            // Se obtiene la ruta antigua
             $oldPath = $user->{$pathKey} ? public_path($user->{$pathKey}) : null;
             if ($oldPath && file_exists($oldPath)) {
                 unlink($oldPath);
             }
 
+            // Se mueve el archivo a la ruta pública
             $file->move($publicPath, $filename);
             $user->{$pathKey} = "/users/{$dir}/{$filename}";
             $user->save();
 
+            // Se devuelve la respuesta
             return response()->json([
                 'message' => "{$label} uploaded successfully.",
                 'user' => $user->fresh(),

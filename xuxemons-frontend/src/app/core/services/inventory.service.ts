@@ -2,22 +2,10 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import type { ApiInventoryItem, InventoryItem, UseItemResponseData } from '../interfaces';
+import type { ApiInventoryItem, InventoryApiResponse, InventoryItem, UseItemResponseData } from '../interfaces';
 import { AuthService } from './auth';
 
 export type { ApiInventoryItem, InventoryItem };
-
-interface InventoryApiResponse {
-    message?: string;
-    data: {
-        items: ApiInventoryItem[];
-        max_slots?: number;
-        used_slots?: number;
-        available_slots?: number;
-        max_capacity?: number;
-        capacity?: number;
-    };
-}
 
 @Injectable({
     providedIn: 'root',
@@ -62,26 +50,32 @@ export class InventoryService {
     readonly discardApiError: Observable<string | null> = this.discardApiError$.asObservable();
     readonly isDiscarding: Observable<boolean> = this.isDiscarding$.asObservable();
 
+    // Sirve para obtener la lista de items
     getItems(): InventoryItem[] {
         return this.items$.getValue();
     }
 
+    // Sirve para obtener la lista de items filtrados
     getFilteredItems(): InventoryItem[] {
         return this.filteredItems$.getValue();
     }
 
+    // Sirve para obtener el item seleccionado
     getSelectedItem(): InventoryItem | null {
         return this.selectedItem$.getValue();
     }
 
+    // Sirve para obtener el número máximo de slots desde el backend
     getMaxSlotsFromBackend(): number {
         return this.maxSlotsFromBackend$.getValue();
     }
 
+    // Sirve para obtener el número de slots usados desde el backend
     getUsedSlotsFromBackend(): number {
         return this.usedSlotsFromBackend$.getValue();
     }
 
+    // Sirve para obtener el efecto de un item
     private getEffectString(effectType: string, effectValue?: number, itemName?: string): string {
         // Items whose effect does not depend on a numeric value
         const noValueEffectMap: Record<string, string> = {
@@ -114,6 +108,7 @@ export class InventoryService {
         return effectMap[effectType] ?? `Effect: ${effectValue}`;
     }
 
+    // Sirve para transformar los items de la API a los items del inventario
     private transformApiItems(apiItems: ApiInventoryItem[]): InventoryItem[] {
         return apiItems.map((item) => {
             const path = item.icon_path.startsWith('/') ? item.icon_path : `/${item.icon_path}`;
@@ -135,6 +130,7 @@ export class InventoryService {
         });
     }
 
+    // Sirve para extraer los tipos de efectos
     private extractEffectTypes(items: InventoryItem[]): void {
         const effectTypes = new Set<string>();
         items.forEach((item) => {
@@ -143,6 +139,7 @@ export class InventoryService {
         this.availableEffectTypes$.next(Array.from(effectTypes).sort());
     }
 
+    // Sirve para cargar el inventario
     loadInventory(): void {
         if (!isPlatformBrowser(this.platformId)) return;
         this.isLoading$.next(true);
@@ -175,6 +172,7 @@ export class InventoryService {
         });
     }
 
+    // Sirve para aplicar el filtro
     applyFilter(effectType: string): void {
         this.selectedFilter$.next(effectType);
         const items = this.items$.getValue();
@@ -186,10 +184,12 @@ export class InventoryService {
         this.selectedItem$.next(null);
     }
 
+    // Sirve para seleccionar un item
     selectItem(item: InventoryItem): void {
         this.selectedItem$.next(item);
     }
 
+    // Sirve para descartar un item
     discardItem(): void {
         const item = this.selectedItem$.getValue();
         if (!item?.bag_item_id) return;
@@ -199,6 +199,7 @@ export class InventoryService {
         this.discardMode$.next(true);
     }
 
+    // Sirve para actualizar la cantidad de descartar
     updateDiscardQuantity(val: number): void {
         const max = this.selectedItem$.getValue()?.quantity ?? 1;
         const parsed = Math.floor(val);
@@ -215,6 +216,7 @@ export class InventoryService {
         }
     }
 
+    // Sirve para confirmar el descarte
     confirmDiscard(): void {
         const item = this.selectedItem$.getValue();
         if (!item?.bag_item_id) return;
@@ -223,12 +225,14 @@ export class InventoryService {
         this.callDiscardApi(item.bag_item_id, qty);
     }
 
+    // Sirve para cancelar el descarte
     cancelDiscard(): void {
         this.discardMode$.next(false);
         this.discardError$.next(null);
         this.discardApiError$.next(null);
     }
 
+    // Sirve para llamar a la API de descarte
     private callDiscardApi(bagItemId: number, quantity: number): void {
         this.isDiscarding$.next(true);
         this.http
@@ -253,6 +257,7 @@ export class InventoryService {
             });
     }
 
+    // Sirve para usar un item
     useItem(
         bagItemId: number,
         adquiredXuxemonId: number,

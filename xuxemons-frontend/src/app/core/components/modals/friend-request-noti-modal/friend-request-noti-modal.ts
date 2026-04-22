@@ -25,8 +25,10 @@ export class FriendRequestNotiModal implements OnChanges, AfterViewChecked {
   private shouldFocusPrimaryAction = false;
   iconErrors: Record<string, boolean> = {};
 
+  // Sirve para inyectar el servicio de autenticación
   constructor(public auth: AuthService) {}
 
+  // Sirve para manejar los cambios de apertura del modal
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['open']?.currentValue && !changes['open']?.previousValue) {
       this.previousFocusedElement = typeof document !== 'undefined'
@@ -38,6 +40,7 @@ export class FriendRequestNotiModal implements OnChanges, AfterViewChecked {
     }
   }
 
+  // Sirve para verificar si el foco debe enfocarse en el elemento raíz
   ngAfterViewChecked(): void {
     if (this.shouldFocusRoot && this.dialogRoot?.nativeElement) {
       this.dialogRoot.nativeElement.focus();
@@ -49,11 +52,13 @@ export class FriendRequestNotiModal implements OnChanges, AfterViewChecked {
     }
   }
 
+  // Sirve para manejar la tecla Escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.open) this.handleClose();
   }
 
+  // Sirve para manejar la tecla Tab
   onModalKeydown(event: KeyboardEvent): void {
     if (!this.open || event.key !== 'Tab') return;
     const root = this.dialogRoot?.nativeElement;
@@ -79,6 +84,7 @@ export class FriendRequestNotiModal implements OnChanges, AfterViewChecked {
     if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
   }
 
+  // Sirve para verificar si el usuario debe animar
   shouldAnimate(): boolean {
     const user = this.auth.getUser();
     if (!user) return true;
@@ -87,6 +93,7 @@ export class FriendRequestNotiModal implements OnChanges, AfterViewChecked {
     return true;
   }
 
+  // Sirve para cerrar el modal
   handleClose(): void {
     this.closeModal.emit();
     if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
@@ -94,19 +101,23 @@ export class FriendRequestNotiModal implements OnChanges, AfterViewChecked {
     }
   }
 
+  // Sirve para aceptar la solicitud de amistad
   onAccept(req: FriendRequestItem): void {
     this.acceptRequest.emit(req);
   }
 
+  // Sirve para rechazar la solicitud de amistad
   onReject(req: FriendRequestItem): void {
     this.rejectRequest.emit(req);
   }
 
+  // Sirve para obtener la URL de la imagen del icono
   getIconUrl(iconPath: string | null | undefined): string {
     if (!iconPath) return '';
     return this.auth.getAssetUrl(iconPath);
   }
 
+  // Sirve para manejar el error de la imagen del icono
   onIconError(id: string): void {
     this.iconErrors[id] = true;
   }

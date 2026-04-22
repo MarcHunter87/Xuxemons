@@ -39,8 +39,10 @@ export class App implements OnInit, OnDestroy {
   private readonly title = inject(Title);
   private readonly activatedRoute = inject(ActivatedRoute);
 
+  // Sirve para inyectar los servicios principales de la app
   constructor(private router: Router, private authService: AuthService, private friendsService: FriendsService) { }
 
+  // Sirve para actualizar la visibilidad de la layout y el breadcrumb
   private updateShowLayout(): void {
     const url = this.router.url.split('?')[0];
     this.showLayout.set(url !== '/login' && url !== '/register');
@@ -48,6 +50,7 @@ export class App implements OnInit, OnDestroy {
     this.isProfilePage.set(url === '/profile');
   }
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.updateShowLayout();
     this.updateMetaTags();
@@ -90,12 +93,14 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para destruir el componente
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
     this.friendSub?.unsubscribe();
     this.periodicSyncSub?.unsubscribe();
   }
 
+  // Sirve para cerrar el modal de recompensas diarias
   onCloseDailyRewardsModal(): void {
     const pending = this.pendingDailyRewards();
 
@@ -112,6 +117,7 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para verificar si hay recompensas pendientes
   private checkPendingDailyRewards(): void {
     const user = this.authService.getUser();
 
@@ -135,12 +141,14 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para cerrar el modal de solicitudes de amistad
   onCloseFriendRequestModal(): void {
     const pending = this.pendingFriendRequests();
     pending.forEach(r => { this.dismissedFriendRequestIds[String(r.id)] = true; });
     this.showFriendRequestModal.set(false);
   }
 
+  // Sirve para aceptar una solicitud de amistad
   onAcceptFriendRequest(req: FriendRequestItem): void {
     this.friendsService.acceptRequest(req.id).subscribe({
       next: () => {
@@ -152,6 +160,7 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para rechazar una solicitud de amistad
   onRejectFriendRequest(req: FriendRequestItem): void {
     this.friendsService.rejectRequest(req.id).subscribe({
       next: () => {
@@ -163,12 +172,14 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para verificar si hay recompensas pendientes
   private hasAnyDailyRewards(notification: DailyRewardNotification): boolean {
     const gachaQty = notification.gacha_ticket?.quantity ?? 0;
     const itemCount = notification.items?.length ?? 0;
     return gachaQty > 0 || itemCount > 0;
   }
 
+  // Sirve para actualizar las meta tags
   private updateMetaTags(): void {
     const route = this.getDeepestRoute(this.activatedRoute);
     const pageTitle = route.snapshot.title ?? 'Xuxemons';
@@ -184,6 +195,7 @@ export class App implements OnInit, OnDestroy {
     this.meta.updateTag({ property: 'og:url', content: url });
   }
 
+  // Sirve para obtener la ruta más profunda
   private getDeepestRoute(route: ActivatedRoute): ActivatedRoute {
     let current = route;
     while (current.firstChild) {

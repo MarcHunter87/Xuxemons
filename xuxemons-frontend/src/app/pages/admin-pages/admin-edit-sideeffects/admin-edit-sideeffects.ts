@@ -31,6 +31,7 @@ export class AdminEditSideeffects implements OnInit {
     apply_chance: ['', [Validators.pattern(/^\d+$/), Validators.min(0), Validators.max(100)]],
   });
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? parseInt(idParam, 10) : NaN;
@@ -62,6 +63,7 @@ export class AdminEditSideeffects implements OnInit {
       });
   }
 
+  // Sirve para actualizar el formulario con los datos del efecto secundario
   private patchForm(sideEffect: SideEffect): void {
     this.sideEffectName.set(sideEffect.name);
     this.sideEffectDescription.set(sideEffect.description ?? null);
@@ -73,11 +75,13 @@ export class AdminEditSideeffects implements OnInit {
     );
   }
 
+  // Sirve para verificar si un campo es inválido
   isFieldInvalid(fieldName: string): boolean {
     const control = this.form.get(fieldName);
     return !!(control && control.invalid && control.touched);
   }
 
+  // Sirve para obtener el mensaje de error de un campo
   getErrorMessage(fieldName: string): string {
     const control = this.form.get(fieldName);
     if (!control || !control.errors || !control.touched) {
@@ -90,6 +94,7 @@ export class AdminEditSideeffects implements OnInit {
     return 'Invalid value.';
   }
 
+  // Sirve para enviar el formulario
   submit(): void {
     this.errorMessage.set(null);
     this.successMessage.set(null);
@@ -113,6 +118,7 @@ export class AdminEditSideeffects implements OnInit {
     };
 
     this.isSaving.set(true);
+    // Sirve para actualizar el efecto secundario
     this.adminService
       .updateSideEffect(id, payload)
       .pipe(finalize(() => this.isSaving.set(false)))
@@ -127,6 +133,7 @@ export class AdminEditSideeffects implements OnInit {
       });
   }
 
+  // Sirve para volver a la página de efectos secundarios
   goBack(): void {
     this.router.navigateByUrl('/admin/side-effects');
   }

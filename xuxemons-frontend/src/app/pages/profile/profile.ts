@@ -23,12 +23,14 @@ export class Profile implements OnInit, OnDestroy {
   statsReady = signal(false);
   private sub: { unsubscribe: () => void } | null = null;
 
+  // Sirve para inyectar servicios de perfil
   constructor(
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
   ) {}
 
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.user = this.authService.getUser();
     this.sub = this.authService.user$.subscribe(u => {
@@ -41,6 +43,7 @@ export class Profile implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para obtener la URL del banner
   getBannerUrl(): string {
     if (this.bannerLoadError || !this.user?.banner_path) {
       return '/images/default_banner.png';
@@ -48,16 +51,19 @@ export class Profile implements OnInit, OnDestroy {
     return this.authService.getAssetUrl(this.user.banner_path, this.user.updated_at);
   }
 
+  // Sirve para obtener la URL del icono
   getIconUrl(): string | null {
     return this.user?.icon_path && !this.iconLoadError
       ? this.authService.getAssetUrl(this.user.icon_path, this.user.updated_at)
       : null;
   }
 
+  // Sirve para destruir el componente
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
   }
 
+  // Sirve para cerrar sesión
   logout(): void {
     this.isLoggingOut.set(true);
     this.authService.logout().subscribe({

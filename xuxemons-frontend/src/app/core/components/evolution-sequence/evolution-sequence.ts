@@ -21,6 +21,7 @@ export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
     private audioStartTimeoutId: ReturnType<typeof setTimeout> | null = null;
     private previousFocusedElement: HTMLElement | null = null;
 
+    // Sirve para inicializar el componente
     ngOnInit(): void {
         this.previousFocusedElement = typeof document !== 'undefined'
             ? (document.activeElement as HTMLElement | null)
@@ -28,6 +29,7 @@ export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
         this.finishTimeoutId = setTimeout(() => this.finish(), 10000);
     }
 
+    // Sirve para inicializar el componente después de la vista
     ngAfterViewInit(): void {
         if (this.dialogRoot?.nativeElement) {
             setTimeout(() => this.dialogRoot?.nativeElement.focus(), 0);
@@ -42,6 +44,7 @@ export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
+    // Sirve para destruir el componente
     ngOnDestroy(): void {
         if (this.finishTimeoutId) {
             clearTimeout(this.finishTimeoutId);
@@ -52,11 +55,13 @@ export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
+    // Sirve para manejar la tecla Escape
     @HostListener('document:keydown.escape')
     onEscape(): void {
         this.finish();
     }
 
+    // Sirve para manejar la tecla Tab
     onModalKeydown(event: KeyboardEvent): void {
         if (event.key === 'Tab') {
             event.preventDefault();
@@ -64,14 +69,17 @@ export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
+    // Sirve para obtener el factor de escala del tamaño de origen
     get fromScale(): number {
         return this.getSizeScale(this.fromSize);
     }
 
+    // Sirve para obtener el factor de escala del tamaño de destino
     get toScale(): number {
         return this.getSizeScale(this.toSize);
     }
 
+    // Sirve para finalizar la secuencia
     private finish(): void {
         if (this.finishTimeoutId) {
             clearTimeout(this.finishTimeoutId);
@@ -83,6 +91,7 @@ export class EvolutionSequence implements OnInit, OnDestroy, AfterViewInit {
         this.finished.emit();
     }
 
+    // Sirve para obtener el factor de escala del tamaño
     private getSizeScale(size: XuxemonSize): number {
         if (size === 'Large') return 1.28;
         if (size === 'Medium') return 1;

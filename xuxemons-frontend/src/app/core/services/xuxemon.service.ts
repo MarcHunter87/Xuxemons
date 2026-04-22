@@ -31,6 +31,7 @@ export class XuxemonService {
     readonly sizeXuxemon: Observable<string> = this.sizeXuxemon$.asObservable();
     readonly searchQuery: Observable<string> = this.searchQuery$.asObservable();
 
+    // Sirve para filtrar los Xuxemons
     readonly displayXuxemons: Observable<Xuxemon[]> = combineLatest([
         this.xuxemonsList$,
         this.myXuxemonsList$,
@@ -53,14 +54,17 @@ export class XuxemonService {
         })
     );
 
+    // Sirve para obtener la lista de Xuxemons
     getXuxemonsList(): Xuxemon[] {
         return this.xuxemonsList$.getValue();
     }
 
+    // Sirve para obtener la lista de Xuxemons de mi inventario
     getMyXuxemonsList(): Xuxemon[] {
         return this.myXuxemonsList$.getValue();
     }
 
+    // Sirve para filtrar los Xuxemons
     getDisplayXuxemons(): Xuxemon[] {
         const typeInv = this.typeInventory$.getValue();
         const typeXuxe = this.typeXuxemon$.getValue();
@@ -77,22 +81,27 @@ export class XuxemonService {
         });
     }
 
+    // Sirve para establecer el tipo de inventario
     setTypeInventory(value: string): void {
         this.typeInventory$.next(value);
     }
 
+    // Sirve para establecer el tipo de Xuxemon
     setTypeXuxemon(value: string): void {
         this.typeXuxemon$.next(value);
     }
 
+    // Sirve para establecer el tamaño de Xuxemon
     setSizeXuxemon(value: string): void {
         this.sizeXuxemon$.next(value);
     }
 
+    // Sirve para establecer la consulta de búsqueda
     setSearchQuery(value: string): void {
         this.searchQuery$.next(value);
     }
 
+    // Sirve para mapear el efecto de estado
     private mapStatusEffect(status: any): { name: string; icon_url: string } | undefined {
         if (!status?.name || !status?.icon_path) return undefined;
         return {
@@ -101,6 +110,7 @@ export class XuxemonService {
         };
     }
 
+    // Sirve para mapear el efecto lateral
     private mapSideEffect(side: any): { name: string; description?: string; icon_url: string } | undefined {
         if (!side?.name || !side?.icon_path) return undefined;
         return {
@@ -110,6 +120,7 @@ export class XuxemonService {
         };
     }
 
+    // Sirve para mapear los ataques
     private mapAttacks(x: any): Xuxemon['attacks'] {
         const a1 = x.attack1 ?? x.attack_1;
         const a2 = x.attack2 ?? x.attack_2;
@@ -124,6 +135,7 @@ export class XuxemonService {
         }));
     }
 
+    // Sirve para cargar todos los Xuxemons
     async loadAllXuxemons(): Promise<void> {
         if (!isPlatformBrowser(this.platformId)) return;
         try {
@@ -153,6 +165,7 @@ export class XuxemonService {
         }
     }
 
+    // Sirve para cargar los Xuxemons de mi inventario
     async loadMyXuxemons(): Promise<void> {
         if (!isPlatformBrowser(this.platformId)) return;
         try {
@@ -190,6 +203,7 @@ export class XuxemonService {
         }
     }
 
+    // Sirve para cargar las estadísticas de la colección
     async loadCollectionStats(): Promise<{ acquired: number; total: number } | null> {
         if (!isPlatformBrowser(this.platformId)) return null;
         try {
@@ -231,6 +245,7 @@ export class XuxemonService {
         }
     }
 
+    // Sirve para dar un Xuxemon aleatorio de la gacha
     async awardRandomXuxemonGacha(): Promise<Xuxemon | null> {
         if (!isPlatformBrowser(this.platformId)) {
             return null;

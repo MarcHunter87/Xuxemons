@@ -12,16 +12,19 @@ export class UseItemModal implements AfterViewInit {
   @Output() closeModal = new EventEmitter<void>();
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
 
+  // Sirve para enfocar el primer elemento
   ngAfterViewInit(): void {
     queueMicrotask(() => {
       this.focusFirstElement();
     });
   }
 
+  // Sirve para cerrar el modal
   onBackdropClick(): void {
     this.closeModal.emit();
   }
 
+  // Sirve para manejar la tecla Escape
   onModalKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       this.closeModal.emit();
@@ -60,6 +63,7 @@ export class UseItemModal implements AfterViewInit {
     }
   }
 
+  // Sirve para enfocar el primer elemento
   private focusFirstElement(): void {
     const root = this.dialogRoot?.nativeElement;
     if (!root) {
@@ -70,6 +74,7 @@ export class UseItemModal implements AfterViewInit {
     (focusableElements[0] ?? root).focus();
   }
 
+  // Sirve para obtener los elementos focables
   private getFocusableElements(root: HTMLElement): HTMLElement[] {
     const focusableSelector = [
       'a[href]',

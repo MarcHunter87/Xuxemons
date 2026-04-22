@@ -57,6 +57,7 @@ export class AdminEditItem implements OnInit {
     icon_path: [{ value: this.iconPathPreview(), disabled: true }],
   });
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.bindFormLogic();
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -93,6 +94,7 @@ export class AdminEditItem implements OnInit {
     });
   }
 
+  // Sirve para actualizar el formulario con los datos del item
   private patchFormWithItem(item: Item): void {
     this.form.patchValue({
       name: item.name,
@@ -116,6 +118,7 @@ export class AdminEditItem implements OnInit {
     this.imagePreview.set(url);
   }
 
+  // Sirve para vincular la lógica del formulario
   private bindFormLogic(): void {
     this.form.controls.is_stackable.valueChanges.subscribe((stackable) => {
       this.updateMaxQuantityControl(stackable);
@@ -138,6 +141,7 @@ export class AdminEditItem implements OnInit {
     this.form.controls.name.valueChanges.subscribe(() => this.refreshIconPathPreview());
   }
 
+  // Sirve para actualizar los validadores del efecto de estado
   private updateStatusEffectValidators(): void {
     const isApplyStatus = this.form.controls.effect_type.value === 'Apply Status Effects';
     const statusCtrl = this.form.controls.status_effect_id;
@@ -149,6 +153,7 @@ export class AdminEditItem implements OnInit {
     statusCtrl.updateValueAndValidity({ emitEvent: false });
   }
 
+  // Sirve para seleccionar una imagen
   onImageSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0] ?? null;
     if (!file) return;
@@ -169,11 +174,13 @@ export class AdminEditItem implements OnInit {
     reader.readAsDataURL(file);
   }
 
+  // Sirve para verificar si un campo es inválido
   isFieldInvalid(fieldName: string): boolean {
     const control = this.form.get(fieldName);
     return !!(control && control.invalid && control.touched);
   }
 
+  // Sirve para obtener el mensaje de error de un campo
   getErrorMessage(fieldName: string): string {
     const control = this.form.get(fieldName);
     if (!control || !control.errors || !control.touched) {
@@ -190,26 +197,31 @@ export class AdminEditItem implements OnInit {
     return 'Invalid value.';
   }
 
+  // Sirve para obtener el tipo de efecto seleccionado
   getSelectedEffectType(): string {
     return this.form.controls.effect_type.value ?? '';
   }
 
+  // Sirve para obtener el límite de cantidad máxima
   getMaxQuantityLimit(): number {
     return this.getSelectedEffectType() === 'Gacha Ticket'
       ? this.gachaTicketMaxQuantityLimit
       : this.defaultMaxQuantityLimit;
   }
 
+  // Sirve para seleccionar un tipo de efecto
   selectEffectType(effectType: string): void {
     this.form.controls.effect_type.setValue(effectType);
     this.form.controls.effect_type.markAsTouched();
     this.effectTypeDropdownOpen.set(false);
   }
 
+  // Sirve para cerrar el dropdown de tipos de efecto
   closeEffectTypeDropdown(): void {
     this.effectTypeDropdownOpen.set(false);
   }
 
+  // Sirve para manejar el focus out del dropdown de tipos de efecto
   onEffectTypeFocusOut(event: FocusEvent): void {
     const wrapper = event.currentTarget as HTMLElement | null;
     const next = event.relatedTarget as Node | null;
@@ -217,28 +229,33 @@ export class AdminEditItem implements OnInit {
     this.closeEffectTypeDropdown();
   }
 
+  // Sirve para obtener el efecto de estado seleccionado
   getSelectedStatusEffect(): AdminDropdownOption | undefined {
     const id = this.form.controls.status_effect_id.value;
     if (id == null) return undefined;
     return this.statusEffects().find((e) => e.id === id);
   }
 
+  // Sirve para obtener la URL del icono del efecto de estado
   getStatusEffectIconUrl(iconPath: string | undefined): string {
     if (!iconPath) return '';
     const path = iconPath.startsWith('/') ? iconPath : `/${iconPath}`;
     return this.auth.getAssetUrl(path);
   }
 
+  // Sirve para seleccionar un efecto de estado
   selectStatusEffect(effect: AdminDropdownOption | null): void {
     this.form.controls.status_effect_id.setValue(effect?.id ?? null);
     this.form.controls.status_effect_id.markAsTouched();
     this.statusEffectDropdownOpen.set(false);
   }
 
+  // Sirve para cerrar el dropdown de efectos de estado
   closeStatusEffectDropdown(): void {
     this.statusEffectDropdownOpen.set(false);
   }
 
+  // Sirve para manejar el focus out del dropdown de efectos de estado
   onStatusEffectFocusOut(event: FocusEvent): void {
     const wrapper = event.currentTarget as HTMLElement | null;
     const next = event.relatedTarget as Node | null;
@@ -248,12 +265,14 @@ export class AdminEditItem implements OnInit {
 
   readonly statusEffectDropdownOpen = signal(false);
 
+  // Sirve para manejar el escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.effectTypeDropdownOpen()) this.closeEffectTypeDropdown();
     if (this.statusEffectDropdownOpen()) this.closeStatusEffectDropdown();
   }
 
+  // Sirve para enviar el formulario
   submit(): void {
     this.errorMessage.set(null);
     this.successMessage.set(null);
@@ -304,10 +323,12 @@ export class AdminEditItem implements OnInit {
       });
   }
 
+  // Sirve para volver a la página de items
   goBack(): void {
     this.router.navigateByUrl('/admin/items');
   }
 
+  // Sirve para actualizar el preview del icono
   private refreshIconPathPreview(): void {
     const name = this.form.controls.name.value ?? 'new_item';
     const currentIcon = this.selectedImage();
@@ -316,6 +337,7 @@ export class AdminEditItem implements OnInit {
     this.form.controls.icon_path.setValue(this.iconPathPreview(), { emitEvent: false });
   }
 
+  // Sirve para construir el nombre del archivo del icono
   private buildFileName(rawName: string, originalName?: string): string {
     const safeBase = (rawName || 'new_item')
       .trim()
@@ -326,6 +348,7 @@ export class AdminEditItem implements OnInit {
     return `${safeBase}.${ext}`;
   }
 
+  // Sirve para actualizar el control de cantidad máxima
   private updateMaxQuantityControl(stackable: boolean | null): void {
     const maxQuantityCtrl = this.form.controls.max_quantity;
     const limit = this.getMaxQuantityLimit();

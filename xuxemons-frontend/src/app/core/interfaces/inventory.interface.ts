@@ -1,3 +1,4 @@
+// Sirve para definir la interfaz de un item de la API
 export interface ApiInventoryItem {
   id: string | number;
   name: string;
@@ -11,6 +12,7 @@ export interface ApiInventoryItem {
   bag_item_id?: number;
 }
 
+// Sirve para definir la interfaz de un item del inventario
 export interface InventoryItem {
   id: string | number;
   name: string;
@@ -29,9 +31,23 @@ export interface InventoryItem {
 
 export type XuxemonSize = 'Small' | 'Medium' | 'Large';
 
+// Sirve para definir la interfaz de los datos de respuesta al usar un item
 export interface UseItemResponseData {
   previous_size?: XuxemonSize;
   xuxemon_size?: XuxemonSize;
   requirement_progress: number;
   remaining_quantity: number;
+}
+
+// Sirve para definir la interfaz de la respuesta de la API del inventario
+export interface InventoryApiResponse {
+  message?: string;
+  data: {
+    items: ApiInventoryItem[];
+    max_slots?: number;
+    used_slots?: number;
+    available_slots?: number;
+    max_capacity?: number;
+    capacity?: number;
+  };
 }

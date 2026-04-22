@@ -64,6 +64,7 @@ export class Friends implements OnInit, OnDestroy {
     return q.length >= 3;
   }
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.subs.add(
       this.friendsService.friends.subscribe(f => {
@@ -133,11 +134,13 @@ export class Friends implements OnInit, OnDestroy {
     this.friendsService.loadAll();
   }
 
+  // Sirve para destruir el componente
   ngOnDestroy(): void {
     this.subs.unsubscribe();
     this.timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
   }
 
+  // Sirve para programar un timeout
   private scheduleTimeout(callback: () => void, delay: number): void {
     const timeoutId = setTimeout(() => {
       this.timeoutIds = this.timeoutIds.filter(id => id !== timeoutId);
@@ -146,6 +149,7 @@ export class Friends implements OnInit, OnDestroy {
     this.timeoutIds.push(timeoutId);
   }
 
+  // Sirve para agregar IDs de amigos
   private addFriendIds(target: ReturnType<typeof signal<string[]>>, ids: string[]): void {
     if (ids.length === 0) return;
     const merged = [...target()];
@@ -155,11 +159,13 @@ export class Friends implements OnInit, OnDestroy {
     target.set(merged);
   }
 
+  // Sirve para remover IDs de amigos
   private removeFriendIds(target: ReturnType<typeof signal<string[]>>, ids: string[]): void {
     if (ids.length === 0) return;
     target.set(target().filter(id => !ids.includes(id)));
   }
 
+  // Sirve para agregar IDs de solicitudes de amistad
   private addRequestIds(target: ReturnType<typeof signal<number[]>>, ids: number[]): void {
     if (ids.length === 0) return;
     const merged = [...target()];
@@ -169,11 +175,13 @@ export class Friends implements OnInit, OnDestroy {
     target.set(merged);
   }
 
+  // Sirve para remover IDs de solicitudes de amistad
   private removeRequestIds(target: ReturnType<typeof signal<number[]>>, ids: number[]): void {
     if (ids.length === 0) return;
     target.set(target().filter(id => !ids.includes(id)));
   }
 
+  // Sirve para animar las entradas de amigos
   private animateFriendEntries(previousIds: string[], nextFriends: FriendUser[]): void {
     const shouldAnimateEntries = this.friendsInitialized && this.animationsEnabled;
     this.friendsInitialized = true;
@@ -187,6 +195,7 @@ export class Friends implements OnInit, OnDestroy {
     this.scheduleTimeout(() => this.removeFriendIds(this.enteringFriendIds, enteringIds), this.cardAnimationMs);
   }
 
+  // Sirve para animar las entradas de solicitudes de amistad
   private animateRequestEntries(previousIds: number[], nextRequests: FriendRequestItem[]): void {
     const shouldAnimateEntries = this.pendingRequestsInitialized && this.animationsEnabled;
     this.pendingRequestsInitialized = true;
@@ -200,14 +209,17 @@ export class Friends implements OnInit, OnDestroy {
     this.scheduleTimeout(() => this.removeRequestIds(this.enteringRequestIds, enteringIds), this.cardAnimationMs);
   }
 
+  // Sirve para remover una solicitud de amistad visible
   private removeVisibleRequest(requestId: number): void {
     this.pendingRequests.set(this.pendingRequests().filter(request => request.id !== requestId));
   }
 
+  // Sirve para remover un amigo visible
   private removeVisibleFriend(friendId: string): void {
     this.friends.set(this.friends().filter(friend => friend.id !== friendId));
   }
 
+  // Sirve para animar la eliminación de una solicitud de amistad
   private animateRequestRemoval(requestId: number, callback: () => void): void {
     this.addRequestIds(this.busyRequestIds, [requestId]);
     if (!this.animationsEnabled) {
@@ -224,6 +236,7 @@ export class Friends implements OnInit, OnDestroy {
     }, this.cardAnimationMs);
   }
 
+  // Sirve para animar la eliminación de un amigo
   private animateFriendRemoval(friendId: string, callback: () => void): void {
     this.addFriendIds(this.busyFriendIds, [friendId]);
     if (!this.animationsEnabled) {
@@ -240,30 +253,37 @@ export class Friends implements OnInit, OnDestroy {
     }, this.cardAnimationMs);
   }
 
+  // Sirve para verificar si un amigo está entrando
   isFriendEntering(friendId: string): boolean {
     return this.enteringFriendIds().includes(friendId);
   }
 
+  // Sirve para verificar si un amigo está saliendo
   isFriendExiting(friendId: string): boolean {
     return this.exitingFriendIds().includes(friendId);
   }
 
+  // Sirve para verificar si una solicitud de amistad está entrando
   isRequestEntering(requestId: number): boolean {
     return this.enteringRequestIds().includes(requestId);
   }
 
+  // Sirve para verificar si una solicitud de amistad está saliendo
   isRequestExiting(requestId: number): boolean {
     return this.exitingRequestIds().includes(requestId);
   }
 
+  // Sirve para verificar si una solicitud de amistad está ocupada
   isRequestBusy(requestId: number): boolean {
     return this.busyRequestIds().includes(requestId);
   }
 
+  // Sirve para verificar si un amigo está ocupado
   isFriendBusy(friendId: string): boolean {
     return this.busyFriendIds().includes(friendId);
   }
 
+  // Sirve para recargar todos los datos
   private reloadAll(): void {
     this.friendsService.loadFriends();
     this.friendsService.loadPendingRequests();
@@ -275,6 +295,7 @@ export class Friends implements OnInit, OnDestroy {
     }
   }
 
+  // Sirve para enviar una solicitud de amistad
   sendRequest(user: SearchUser): void {
     const current = [...this.sendingRequestTo()];
     if (!current.includes(user.id)) current.push(user.id);
@@ -303,6 +324,7 @@ export class Friends implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para cancelar una solicitud de amistad enviada
   cancelSentRequest(user: SearchUser): void {
     this.errorMessage.set(null);
     this.friendsService.cancelRequest(user.id).subscribe({
@@ -316,6 +338,7 @@ export class Friends implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para aceptar una solicitud de amistad
   acceptRequest(request: FriendRequestItem): void {
     if (this.isRequestBusy(request.id)) return;
     this.errorMessage.set(null);
@@ -332,6 +355,7 @@ export class Friends implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para rechazar una solicitud de amistad
   rejectRequest(request: FriendRequestItem): void {
     if (this.isRequestBusy(request.id)) return;
     this.errorMessage.set(null);
@@ -346,6 +370,7 @@ export class Friends implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para preguntar si se desea remover un amigo
   askConfirmRemove(friend: FriendUser): void {
     this.previousFocusedElement = typeof document !== 'undefined'
       ? (document.activeElement as HTMLElement | null)
@@ -353,6 +378,7 @@ export class Friends implements OnInit, OnDestroy {
     this.confirmRemoveFriend.set(friend);
   }
 
+  // Sirve para confirmar la eliminación de un amigo
   confirmRemove(): void {
     const friend = this.confirmRemoveFriend();
     if (!friend) return;
@@ -375,6 +401,7 @@ export class Friends implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para cancelar la eliminación de un amigo
   cancelRemove(): void {
     this.confirmRemoveFriend.set(null);
     if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
@@ -382,29 +409,35 @@ export class Friends implements OnInit, OnDestroy {
     }
   }
 
+  // Sirve para verificar si se está enviando una solicitud de amistad a un usuario
   isSendingTo(userId: string): boolean {
     return this.sendingRequestTo().includes(userId);
   }
 
+  // Sirve para obtener un amigo por su ID
   getFriendById(userId: string): FriendUser | undefined {
     return this.friends().find(f => f.id === userId);
   }
 
+  // Sirve para obtener la URL del icono de un usuario
   getIconUrl(iconPath: string | null | undefined): string {
     if (!iconPath) return '';
     return this.auth.getAssetUrl(iconPath);
   }
 
+  // Sirve para manejar el error de un icono de búsqueda
   onSearchIconError(userId: string): void {
     const cur = [...this.searchIconErrors()];
     if (!cur.includes(userId)) cur.push(userId);
     this.searchIconErrors.set(cur);
   }
 
+  // Sirve para verificar si hay un error de icono de búsqueda
   hasSearchIconError(userId: string): boolean {
     return this.searchIconErrors().includes(userId);
   }
 
+  // Sirve para cerrar la modal de eliminación de amigo al presionar Escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.confirmRemoveFriend()) this.cancelRemove();

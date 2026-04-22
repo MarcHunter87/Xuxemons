@@ -57,6 +57,7 @@ export class AdminEditXuxemon implements OnInit {
     this.attacks().filter((a) => !['Power Attack', 'Speed Attack', 'Technical Attack'].includes(a.name))
   );
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.form.controls.name.valueChanges.subscribe(() => this.refreshIconPathPreview());
     this.form.controls.type_id.valueChanges.subscribe(() => this.updateAttack1ForSelectedType());
@@ -72,6 +73,7 @@ export class AdminEditXuxemon implements OnInit {
     this.isLoadingMeta.set(true);
     this.isLoadingXuxemon.set(true);
     this.errorMessage.set(null);
+    // Sirve para cargar los metadatos de creación
     this.adminService.getCreationMeta().pipe(
       finalize(() => this.isLoadingMeta.set(false)),
       switchMap((metaRes) => {
@@ -96,6 +98,7 @@ export class AdminEditXuxemon implements OnInit {
     });
   }
 
+  // Sirve para actualizar el formulario con los datos del Xuxemon
   private patchFormWithXuxemon(x: {
     name: string;
     description?: string | null;
@@ -125,6 +128,7 @@ export class AdminEditXuxemon implements OnInit {
     this.imagePreview.set(url);
   }
 
+  // Sirve para manejar la selección de imagen
   onImageSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0] ?? null;
     if (!file) return;
@@ -145,11 +149,13 @@ export class AdminEditXuxemon implements OnInit {
     reader.readAsDataURL(file);
   }
 
+  // Sirve para verificar si un campo es inválido
   isFieldInvalid(fieldName: string): boolean {
     const control = this.form.get(fieldName);
     return !!(control && control.invalid && control.touched);
   }
 
+  // Sirve para obtener el mensaje de error de un campo
   getErrorMessage(fieldName: string): string {
     const control = this.form.get(fieldName);
     if (!control || !control.errors || !control.touched) {
@@ -163,6 +169,7 @@ export class AdminEditXuxemon implements OnInit {
     return 'Invalid value.';
   }
 
+  // Sirve para enviar el formulario
   submit(): void {
     this.errorMessage.set(null);
     this.successMessage.set(null);
@@ -190,6 +197,7 @@ export class AdminEditXuxemon implements OnInit {
       return;
     }
 
+    // Sirve para crear el formulario de datos
     const formData = new FormData();
     formData.append('name', (raw.name ?? '').trim());
     formData.append('description', (raw.description ?? '').trim());
@@ -224,22 +232,26 @@ export class AdminEditXuxemon implements OnInit {
       });
   }
 
+  // Sirve para volver a la página de Xuxemons
   goBack(): void {
     this.router.navigateByUrl('/admin/xuxemons');
   }
 
+  // Sirve para obtener el tipo seleccionado
   getSelectedType(): AdminDropdownOption | undefined {
     const id = this.form.controls.type_id.value;
     if (id == null) return undefined;
     return this.types().find((t) => t.id === id);
   }
 
+  // Sirve para obtener la URL del icono del tipo
   getTypeIconUrl(iconPath: string | undefined): string {
     if (!iconPath) return '';
     const path = iconPath.startsWith('/') ? iconPath : `/${iconPath}`;
     return this.auth.getAssetUrl(path);
   }
 
+  // Sirve para seleccionar un tipo
   selectType(type: AdminDropdownOption | null): void {
     this.form.controls.type_id.setValue(type?.id ?? null);
     this.form.controls.type_id.markAsTouched();
@@ -247,10 +259,12 @@ export class AdminEditXuxemon implements OnInit {
     this.updateAttack1ForSelectedType();
   }
 
+  // Sirve para cerrar el dropdown de tipos
   closeTypeDropdown(): void {
     this.typeDropdownOpen.set(false);
   }
 
+  // Sirve para manejar el focus out del dropdown de tipos
   onTypeFocusOut(event: FocusEvent): void {
     const wrapper = event.currentTarget as HTMLElement | null;
     const next = event.relatedTarget as Node | null;
@@ -258,22 +272,26 @@ export class AdminEditXuxemon implements OnInit {
     this.closeTypeDropdown();
   }
 
+  // Sirve para obtener el ataque 2 seleccionado
   getSelectedAttack2(): AdminDropdownOption | undefined {
     const id = this.form.controls.attack_2_id.value;
     if (id == null) return undefined;
     return this.attacks().find((a) => a.id === id);
   }
 
+  // Sirve para seleccionar un ataque 2
   selectAttack2(attack: AdminDropdownOption | null): void {
     this.form.controls.attack_2_id.setValue(attack?.id ?? null);
     this.form.controls.attack_2_id.markAsTouched();
     this.attack2DropdownOpen.set(false);
   }
 
+  // Sirve para cerrar el dropdown de ataques 2
   closeAttack2Dropdown(): void {
     this.attack2DropdownOpen.set(false);
   }
 
+  // Sirve para manejar el focus out del dropdown de ataques 2
   onAttack2FocusOut(event: FocusEvent): void {
     const wrapper = event.currentTarget as HTMLElement | null;
     const next = event.relatedTarget as Node | null;
@@ -281,12 +299,14 @@ export class AdminEditXuxemon implements OnInit {
     this.closeAttack2Dropdown();
   }
 
+  // Sirve para manejar el escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.typeDropdownOpen()) this.closeTypeDropdown();
     if (this.attack2DropdownOpen()) this.closeAttack2Dropdown();
   }
 
+  // Sirve para actualizar la ruta del icono de previsualización
   private refreshIconPathPreview(): void {
     const name = this.form.controls.name.value ?? 'new_xuxemon';
     const currentImage = this.selectedImage();
@@ -295,6 +315,7 @@ export class AdminEditXuxemon implements OnInit {
     this.form.controls.icon_path.setValue(this.iconPathPreview(), { emitEvent: false });
   }
 
+  // Sirve para actualizar el ataque 1 para el tipo seleccionado
   private updateAttack1ForSelectedType(): void {
     const typeId = this.form.controls.type_id.value;
     const selectedType = this.types().find((type) => type.id === Number(typeId));
@@ -311,6 +332,7 @@ export class AdminEditXuxemon implements OnInit {
     this.attack1Label.set(selectedType ? 'No base attack found for this type' : 'Select type first');
   }
 
+  // Sirve para obtener el nombre del ataque base para el tipo
   private getBaseAttackNameForType(typeName: string): string {
     switch ((typeName || '').trim().toLowerCase()) {
       case 'power':
@@ -324,6 +346,7 @@ export class AdminEditXuxemon implements OnInit {
     }
   }
 
+  // Sirve para construir el nombre del archivo
   private buildFileName(rawName: string, originalName?: string): string {
     const safeBase = (rawName || 'new_xuxemon')
       .trim()
@@ -334,6 +357,7 @@ export class AdminEditXuxemon implements OnInit {
     return `${safeBase}.${ext}`;
   }
 
+  // Sirve para obtener el primer error del backend
   private getFirstBackendError(
     errors: Record<string, string[]> | undefined,
     preferredKeys: string[],

@@ -13,18 +13,22 @@ export class TrainerLvl {
     user$ = inject(AuthService).user$;
     statsReady = input(true);
 
+    // Sirve para obtener el nivel del usuario
     getLevel(user: User | null): number {
         return user?.level ?? 1;
     }
 
+    // Sirve para obtener la XP actual del usuario
     getCurrentXp(user: User | null): number {
         return user?.xp ?? 0;
     }
 
+    // Sirve para obtener la XP necesaria para el siguiente nivel
     getNextLevelXp(user: User | null): number {
         return (user?.level ?? 1) * 100;
     }
 
+    // Sirve para obtener el porcentaje de progreso
     getProgressPercentage(user: User | null): number {
         const next = this.getNextLevelXp(user);
         if (!next) return 0;

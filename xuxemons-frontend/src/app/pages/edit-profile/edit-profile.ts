@@ -46,6 +46,7 @@ export class EditProfile {
   private shouldFocusRoot = false;
   private shouldFocusPrimaryAction = false;
 
+  // Sirve para inicializar formularios y estado del perfil
   constructor(
     private authService: AuthService,
     private fb: FormBuilder,
@@ -92,6 +93,7 @@ export class EditProfile {
     }
   }
 
+  // Sirve para verificar si el botón de cerrar el modal de eliminación de cuenta debe ser enfocado
   ngAfterViewChecked(): void {
     if (this.shouldFocusRoot && this.deleteDialog?.nativeElement) {
       this.deleteDialog.nativeElement.focus();
@@ -103,11 +105,13 @@ export class EditProfile {
     }
   }
 
+  // Sirve para cerrar la modal de eliminación de cuenta al presionar Escape
   @HostListener('document:keydown.escape')
   onEscapeModal(): void {
     if (this.showDeactivateModal()) this.closeDeactivateModal();
   }
 
+  // Sirve para cerrar la modal de eliminación de cuenta al presionar Tab
   onModalKeydown(event: KeyboardEvent): void {
     if (!this.showDeactivateModal() || event.key !== 'Tab') return;
     const root = this.deleteDialog?.nativeElement;
@@ -133,6 +137,7 @@ export class EditProfile {
     if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
   }
 
+  // Sirve para actualizar la información personal
   updatePersonalInformation(): void {
     this.personalInfoError.set('');
     this.personalInfoSuccess.set('');
@@ -178,6 +183,7 @@ export class EditProfile {
     });
   }
 
+  // Sirve para actualizar la configuración
   updateSettings(): void {
     this.settingsError.set('');
     this.settingsSuccess.set('');
@@ -205,11 +211,13 @@ export class EditProfile {
     });
   }
 
+  // Sirve para alternar la animación de las vistas
   onViewAnimationsToggle(): void {
     if (this.isSavingSettings()) return;
     this.updateSettings();
   }
 
+  // Sirve para actualizar la contraseña
   updatePassword(): void {
     this.passwordError.set('');
     this.passwordSuccess.set('');
@@ -260,6 +268,7 @@ export class EditProfile {
     });
   }
 
+  // Sirve para reiniciar el formulario de contraseña
   resetPasswordForm(clearMessages: boolean = true): void {
     if (clearMessages) {
       this.passwordError.set('');
@@ -280,14 +289,17 @@ export class EditProfile {
     this.showPassword.confirm_password = false;
   }
 
+  // Sirve para alternar la visibilidad de la contraseña
   togglePasswordVisibility(controlName: 'current_password' | 'new_password' | 'confirm_password'): void {
     this.showPassword[controlName] = !this.showPassword[controlName];
   }
 
+  // Sirve para obtener el tipo de input de la contraseña
   passwordInputType(controlName: 'current_password' | 'new_password' | 'confirm_password'): 'text' | 'password' {
     return this.showPassword[controlName] ? 'text' : 'password';
   }
 
+  // Sirve para obtener el error de un control
   controlError(scope: 'personal' | 'password', controlName: string): string | null {
     const form = scope === 'personal' ? this.personalInfoForm : this.passwordForm;
     const control = form.get(controlName);
@@ -324,6 +336,7 @@ export class EditProfile {
     return null;
   }
 
+  // Sirve para reiniciar los formularios de información personal
   resetFormsPersonal(): void {
     this.personalInfoError.set('');
     this.personalInfoSuccess.set('');
@@ -338,6 +351,7 @@ export class EditProfile {
     this.personalInfoForm.markAsUntouched();
   }
 
+  // Sirve para confirmar la eliminación de la cuenta
   confirmDeactivateAccount(): void {
     // Perform delete action (called from modal confirm)
     this.deactivateError.set('');
@@ -362,6 +376,7 @@ export class EditProfile {
     });
   }
 
+  // Sirve para abrir la modal de eliminación de cuenta
   openDeactivateModal(): void {
     this.deactivateError.set('');
     this.previousFocusedElement = typeof document !== 'undefined'
@@ -372,6 +387,7 @@ export class EditProfile {
     this.showDeactivateModal.set(true);
   }
 
+  // Sirve para cerrar la modal de eliminación de cuenta
   closeDeactivateModal(): void {
     this.showDeactivateModal.set(false);
     if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
@@ -379,14 +395,17 @@ export class EditProfile {
     }
   }
 
+  // Sirve para abrir el selector de banner
   openBannerPicker(): void {
     this.bannerInput.nativeElement.click();
   }
 
+  // Sirve para abrir el selector de icono
   openIconPicker(): void {
     this.iconInput.nativeElement.click();
   }
 
+  // Sirve para seleccionar un banner
   onBannerSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file?.type.startsWith('image/')) {
@@ -396,6 +415,7 @@ export class EditProfile {
     }
   }
 
+  // Sirve para seleccionar un icono
   onIconSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file?.type.startsWith('image/')) {
@@ -405,6 +425,7 @@ export class EditProfile {
     }
   }
 
+  // Sirve para subir una imagen
   private uploadImage(file: File, type: 'banner' | 'icon', maxBytes: number, sizeError: string): void {
     if (file.size > maxBytes) {
       this.uploadError.set(sizeError);
@@ -422,9 +443,11 @@ export class EditProfile {
     };
     reader.readAsDataURL(file);
 
+    // Sirve para subir la imagen
     const req = type === 'banner' ? this.authService.uploadBanner(file) : this.authService.uploadIcon(file);
     req.subscribe({
       next: () => {
+        // Sirve para actualizar el usuario
         this.user = this.authService.getUser();
         const path = type === 'banner' ? this.user?.banner_path : this.user?.icon_path;
         if (path && this.user?.updated_at) {

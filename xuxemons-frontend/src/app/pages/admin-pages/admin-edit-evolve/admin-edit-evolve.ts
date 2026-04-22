@@ -30,6 +30,7 @@ export class AdminEditEvolve implements OnInit {
     requirement_progress: [0, [Validators.required, Validators.pattern(/^\d+$/), Validators.min(0)]],
   });
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? parseInt(idParam, 10) : NaN;
@@ -68,11 +69,13 @@ export class AdminEditEvolve implements OnInit {
       });
   }
 
+  // Sirve para verificar si un campo es inválido
   isFieldInvalid(fieldName: string): boolean {
     const control = this.form.get(fieldName);
     return !!(control && control.invalid && control.touched);
   }
 
+  // Sirve para obtener el mensaje de error de un campo
   getErrorMessage(fieldName: string): string {
     const control = this.form.get(fieldName);
     if (!control || !control.errors || !control.touched) {
@@ -85,6 +88,7 @@ export class AdminEditEvolve implements OnInit {
     return 'Invalid value.';
   }
 
+  // Sirve para enviar el formulario
   submit(): void {
     this.errorMessage.set(null);
     this.successMessage.set(null);
@@ -123,6 +127,7 @@ export class AdminEditEvolve implements OnInit {
       });
   }
 
+  // Sirve para volver a la página de evoluciones
   goBack(): void {
     this.router.navigateByUrl('/admin/evolve');
   }

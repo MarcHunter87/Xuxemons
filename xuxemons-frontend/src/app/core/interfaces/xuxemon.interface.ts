@@ -1,3 +1,4 @@
+// Sirve para definir la interfaz de un Xuxemon
 export interface Xuxemon {
   id: number;
   name: string;

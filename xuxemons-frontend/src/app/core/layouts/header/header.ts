@@ -27,6 +27,7 @@ export class Header {
   private readonly router = inject(Router);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
+  // Sirve para suscribirse al usuario y a la navegación
   constructor() {
     this.auth.user$.pipe(takeUntilDestroyed()).subscribe((u) => {
       this.user = u;
@@ -54,14 +55,17 @@ export class Header {
       });
   }
 
+  // Sirve para alternar el menú
   toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
   }
 
+  // Sirve para cerrar el menú
   closeMenu(): void {
     this.menuOpen = false;
   }
 
+  // Sirve para manejar la tecla Escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
     this.menuOpen = false;

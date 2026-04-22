@@ -23,8 +23,10 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
   private shouldFocusPrimaryAction = false;
   private shouldFocusRoot = false;
 
+  // Sirve para inyectar el servicio de autenticación
   constructor(public auth: AuthService) {}
-  
+
+  // Sirve para manejar los cambios de apertura del modal
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['open']?.currentValue && !changes['open']?.previousValue) {
       this.previousFocusedElement = typeof document !== 'undefined'
@@ -36,6 +38,7 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
     }
   }
 
+  // Sirve para verificar si el foco debe enfocarse en el elemento raíz
   ngAfterViewChecked(): void {
     if (this.shouldFocusRoot && this.dialogRoot?.nativeElement) {
       this.dialogRoot.nativeElement.focus();
@@ -47,6 +50,7 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
     }
   }
 
+  // Sirve para manejar la tecla Escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.open) {
@@ -54,6 +58,7 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
     }
   }
 
+  // Sirve para manejar la tecla Tab
   onModalKeydown(event: KeyboardEvent): void {
     if (!this.open || event.key !== 'Tab') {
       return;
@@ -64,6 +69,7 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
       return;
     }
 
+    // Sirve para obtener los elementos focables
     const focusableSelector = [
       'a[href]',
       'button:not([disabled])',
@@ -97,6 +103,7 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
     }
   }
 
+  // Sirve para verificar si el usuario debe animar
   shouldAnimate(): boolean {
     const user = this.auth.getUser();
     if (!user) return true;
@@ -107,6 +114,7 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
     return true;
   }
 
+  // Sirve para cerrar el modal
   handleClose(): void {
     const sfx = this.modalAudio?.nativeElement;
     if (sfx) { sfx.pause(); sfx.currentTime = 0; }
@@ -118,6 +126,7 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
     }
   }
 
+  // Sirve para reproducir el audio del modal
   private playModalRevealAudio(): void {
     const sfx = this.modalAudio?.nativeElement;
     if (sfx) {
@@ -127,18 +136,22 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
     }
   }
 
+  // Sirve para verificar si hay recompensas de gacha
   hasGachaRewards(): boolean {
     return (this.notification?.gacha_ticket?.quantity ?? 0) > 0;
   }
 
+  // Sirve para verificar si hay recompensas de items
   hasItemRewards(): boolean {
     return (this.notification?.items?.length ?? 0) > 0;
   }
 
+  // Sirve para verificar si hay recompensas
   hasAnyRewards(): boolean {
     return this.hasGachaRewards() || this.hasItemRewards();
   }
 
+  // Sirve para obtener la clase del slot
   getSlotClass(effectType?: string | null): string {
     const normalized = (effectType || 'default').toLowerCase().trim().replace(/ /g, '-');
     return `slot-bg-${normalized}`;

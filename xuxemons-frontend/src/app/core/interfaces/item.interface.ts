@@ -1,3 +1,4 @@
+// Sirve para definir la interfaz de un item
 export interface Item {
   id: number;
   name: string;

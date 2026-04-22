@@ -11,14 +11,17 @@ export class AdminAwardModal implements AfterViewInit {
   @Output() closeModal = new EventEmitter<void>();
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
 
+  // Sirve para enfocar el primer elemento
   ngAfterViewInit(): void {
     queueMicrotask(() => this.focusFirstElement());
   }
 
+  // Sirve para cerrar el modal
   onBackdropClick(): void {
     this.closeModal.emit();
   }
 
+  // Sirve para manejar la tecla Escape
   onModalKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       this.closeModal.emit();
@@ -28,6 +31,7 @@ export class AdminAwardModal implements AfterViewInit {
     this.trapFocus(event);
   }
 
+  // Sirve para enfocar el primer elemento
   private focusFirstElement(): void {
     const root = this.dialogRoot?.nativeElement;
     if (!root) return;
@@ -35,6 +39,7 @@ export class AdminAwardModal implements AfterViewInit {
     (focusable[0] ?? root).focus();
   }
 
+  // Sirve para atrapar el foco
   private trapFocus(event: KeyboardEvent): void {
     const root = this.dialogRoot?.nativeElement;
     if (!root) return;
@@ -56,6 +61,7 @@ export class AdminAwardModal implements AfterViewInit {
     }
   }
 
+  // Sirve para obtener los elementos focables
   private getFocusableElements(root: HTMLElement): HTMLElement[] {
     const selector = [
       'a[href]',

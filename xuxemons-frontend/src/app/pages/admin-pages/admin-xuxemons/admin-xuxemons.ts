@@ -34,10 +34,12 @@ export class AdminXuxemons implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly hasContent = computed(() => !this.isLoading() && !this.errorMessage());
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.loadXuxemons();
   }
 
+  // Sirve para cargar los Xuxemons
   private loadXuxemons(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -67,6 +69,7 @@ export class AdminXuxemons implements OnInit {
       });
   }
 
+  // Sirve para obtener el color del tipo de Xuxemon
   getTypeColor(typeName: string): string {
     switch (typeName) {
       case 'Power': return 'var(--danger-color)';
@@ -76,6 +79,7 @@ export class AdminXuxemons implements OnInit {
     }
   }
 
+  // Sirve para eliminar un Xuxemon
   onDeleteXuxemon(row: XuxemonRow): void {
     if (!confirm(`Delete Xuxemon "${row.name}"? This action cannot be undone.`)) return;
     this.adminService.deleteXuxemon(row.id).subscribe({

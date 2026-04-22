@@ -20,6 +20,7 @@ export class Register implements OnInit {
   showConfirmPassword = false;
   idSuffix = '';
 
+  // Sirve para inicializar el formulario de registro e inyectar dependencias
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -35,10 +36,12 @@ export class Register implements OnInit {
     }, { validators: this.passwordMatchValidator });
   }
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.idSuffix = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
   }
 
+  // Sirve para validar la contraseña
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password');
     const confirmPassword = control.get('confirmPassword');
@@ -46,36 +49,43 @@ export class Register implements OnInit {
     return password.value === confirmPassword.value ? null : { passwordMismatch: true };
   }
 
+  // Sirve para alternar la visibilidad de la contraseña
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
+  // Sirve para alternar la visibilidad de la contraseña de confirmación
   toggleConfirmPassword(): void {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
+  // Sirve para verificar si un campo es inválido
   isFieldInvalid(fieldName: string): boolean {
     const control = this.registerForm.get(fieldName);
     return !!(control && control.invalid && control.touched);
   }
 
+  // Sirve para obtener el preview del ID
   get idPreview(): string {
     const name = this.registerForm.get('name')?.value ?? '';
     const nom = String(name).replace(/\s+/g, '');
     return nom ? `#${nom}${this.idSuffix}` : `#${this.idSuffix}`;
   }
 
+  // Sirve para generar el ID
   getGeneratedId(): string {
     const name = this.registerForm.get('name')?.value ?? '';
     const nom = String(name).replace(/\s+/g, '') || 'User';
     return `#${nom}${this.idSuffix}`;
   }
 
+  // Sirve para obtener el error de registro
   private getRegisterError(err: { error?: { message?: string; errors?: Record<string, string[]> } }): string {
     const msg = (Object.values(err?.error?.errors ?? {}) as string[][]).flat()[0];
     return msg ?? err?.error?.message ?? 'Registration failed. Please try again.';
   }
 
+  // Sirve para obtener el mensaje de error de un campo
   getErrorMessage(fieldName: string): string {
     const control = this.registerForm.get(fieldName);
     if (!control || !control.errors || !control.touched) return '';
@@ -88,6 +98,7 @@ export class Register implements OnInit {
     return 'Unknown error';
   }
 
+  // Sirve para enviar el formulario de registro
   onSubmit(): void {
     if (this.isLoading) return;
     if (this.registerForm.invalid) {
@@ -97,6 +108,7 @@ export class Register implements OnInit {
     this.isLoading = true;
     this.errorMessage = null;
 
+    // Sirve para registrar el usuario
     this.authService.register({
       id: this.getGeneratedId(),
       name: this.registerForm.get('name')!.value,

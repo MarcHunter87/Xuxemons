@@ -23,10 +23,12 @@ export class AdminDailyreward implements OnInit {
   readonly isProcessingXux = signal(false);
   readonly isProcessingItems = signal(false);
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.loadRewards();
   }
 
+  // Sirve para cargar las recompensas diarias
   private loadRewards(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -49,6 +51,7 @@ export class AdminDailyreward implements OnInit {
       });
   }
 
+  // Sirve para ejecutar todas las recompensas diarias
   runAll(): void {
     if (this.isProcessing()) return;
     this.isProcessing.set(true);
@@ -61,6 +64,7 @@ export class AdminDailyreward implements OnInit {
       });
   }
 
+  // Sirve para ejecutar la recompensa diaria de Xuxemon
   runXuxemon(): void {
     if (this.isProcessingXux()) return;
     this.isProcessingXux.set(true);
@@ -73,6 +77,7 @@ export class AdminDailyreward implements OnInit {
       });
   }
 
+  // Sirve para ejecutar la recompensa diaria de Items
   runItems(): void {
     if (this.isProcessingItems()) return;
     this.isProcessingItems.set(true);
