@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class XuxemonController extends Controller
 {
+    // Sirve para obtener la lista de Xuxemons
     public function index(Request $request)
     {
         $query = Xuxemon::with(['type', 'attack1.statusEffect', 'attack2.statusEffect']);
@@ -26,6 +27,7 @@ class XuxemonController extends Controller
         return response()->json($list->map(fn ($x) => array_merge($x->toArray(), ['size' => 'Small'])));
     }
 
+    // Sirve para obtener las estadísticas de la colección
     public function collectionStats()
     {
         $userId = Auth::guard('api')->id();
@@ -44,6 +46,7 @@ class XuxemonController extends Controller
         ]);
     }
 
+    // Sirve para obtener los Xuxemons del usuario
     public function myXuxemons(Request $request)
     {
         $userId = Auth::guard('api')->id();
@@ -107,6 +110,7 @@ class XuxemonController extends Controller
         return response()->json($myXuxemons);
     }
 
+    // Sirve para obtener un Xuxemon aleatorio
     private function getRandomXuxemon(string $userId): ?array
     {
         $randomXuxemon = Xuxemon::with(['type', 'attack1.statusEffect', 'attack2.statusEffect'])->inRandomOrder()->first();
@@ -137,6 +141,7 @@ class XuxemonController extends Controller
         return $xuxemon;
     }
 
+    // Sirve para otorgar un Xuxemon aleatorio al usuario
     public function awardRandomXuxemon()
     {
         try {
@@ -200,6 +205,7 @@ class XuxemonController extends Controller
         }
     }
 
+    // Sirve para otorgar un Xuxemon aleatorio a un usuario
     public function awardRandomXuxemonToUser(string $userId)
     {
         try {
@@ -219,6 +225,7 @@ class XuxemonController extends Controller
         }
     }
 
+    // Sirve para actualizar un Xuxemon
     public function update(Request $request, $id)
     {
         try {
@@ -250,6 +257,7 @@ class XuxemonController extends Controller
         }
     }
 
+    // Sirve para eliminar un Xuxemon
     public function delete($id)
     {
         try {
