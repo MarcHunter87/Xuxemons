@@ -612,12 +612,12 @@ class InventoryController extends Controller
 
             // Se aplica el efecto del item
             $data = match ($item->effect_type) {
-                'Evolve'      => $this->useSpecialMeat($bagItem, $adquired, $quantity),
-                'Heal'        => $this->applyHealing($bagItem, $adquired),
-                'Defense Up'  => $this->applyDefenseUp($bagItem, $adquired),
-                'DMG Up'      => $this->applyAttackUp($bagItem, $adquired),
+                'Evolve' => $this->useSpecialMeat($bagItem, $adquired, $quantity),
+                'Heal' => $this->applyHealing($bagItem, $adquired),
+                'Defense Up' => $this->applyDefenseUp($bagItem, $adquired),
+                'DMG Up' => $this->applyAttackUp($bagItem, $adquired),
                 'Remove Status Effects' => $this->applyRemoveStatusEffects($bagItem, $adquired),
-                default       => null,
+                default => null,
             };
 
             // Si el efecto del item no es válido, se devuelve un error
@@ -682,7 +682,9 @@ class InventoryController extends Controller
 
         // Se aplican los efectos secundarios hasta que se agotan los slots libres o los efectos
         foreach ($sideEffects as $effect) {
-            if (count($freeSlots) === 0) break;
+            if (count($freeSlots) === 0) {
+                break;
+            }
 
             $effectId = (int) $effect->id;
 
@@ -692,7 +694,9 @@ class InventoryController extends Controller
             }
 
             $chance = (int) ($effect->apply_chance ?? 0);
-            if ($chance <= 0) continue;
+            if ($chance <= 0) {
+                continue;
+            }
 
             // Se obtiene un número aleatorio
             $roll = random_int(1, 100);
@@ -731,7 +735,7 @@ class InventoryController extends Controller
     private function applyOverdoseSizeReduction(AdquiredXuxemon $adquired): void
     {
         $currentSizeId = (int) $adquired->size_id;
-        $prevSize = \App\Models\Size::where('id', '<', $currentSizeId)->orderByDesc('id')->first();
+        $prevSize = Size::where('id', '<', $currentSizeId)->orderByDesc('id')->first();
         if ($prevSize) {
             $adquired->size_id = $prevSize->id;
             $adquired->save();
@@ -741,7 +745,7 @@ class InventoryController extends Controller
     // Sirve para recalcular el tamaño del Xuxemon desde el progreso
     private function recalculateSizeFromProgress(AdquiredXuxemon $adquired): void
     {
-        $correctSize = \App\Models\Size::resolveForProgress((int) $adquired->requirement_progress);
+        $correctSize = Size::resolveForProgress((int) $adquired->requirement_progress);
         if ($correctSize && (int) $adquired->size_id !== (int) $correctSize->id) {
             $adquired->size_id = $correctSize->id;
             $adquired->save();
@@ -775,19 +779,31 @@ class InventoryController extends Controller
             }
         }
         // Si el item es Yellow Mushroom, se aplica el efecto de gluttony
-        elseif ($name === 'Yellow Mushroom'){
+        elseif ($name === 'Yellow Mushroom') {
             $adquired->load(['sideEffect1', 'sideEffect2', 'sideEffect3']);
-            if ($adquired->sideEffect1?->name === 'Gluttony') $adquired->side_effect_id_1 = null;
-            if ($adquired->sideEffect2?->name === 'Gluttony') $adquired->side_effect_id_2 = null;
-            if ($adquired->sideEffect3?->name === 'Gluttony') $adquired->side_effect_id_3 = null;
+            if ($adquired->sideEffect1?->name === 'Gluttony') {
+                $adquired->side_effect_id_1 = null;
+            }
+            if ($adquired->sideEffect2?->name === 'Gluttony') {
+                $adquired->side_effect_id_2 = null;
+            }
+            if ($adquired->sideEffect3?->name === 'Gluttony') {
+                $adquired->side_effect_id_3 = null;
+            }
             $adquired->save();
         }
         // Si el item es Red Mushroom, se aplica el efecto de starving
         elseif ($name === 'Red Mushroom') {
             $adquired->load(['sideEffect1', 'sideEffect2', 'sideEffect3']);
-            if ($adquired->sideEffect1?->name === 'Starving') $adquired->side_effect_id_1 = null;
-            if ($adquired->sideEffect2?->name === 'Starving') $adquired->side_effect_id_2 = null;
-            if ($adquired->sideEffect3?->name === 'Starving') $adquired->side_effect_id_3 = null;
+            if ($adquired->sideEffect1?->name === 'Starving') {
+                $adquired->side_effect_id_1 = null;
+            }
+            if ($adquired->sideEffect2?->name === 'Starving') {
+                $adquired->side_effect_id_2 = null;
+            }
+            if ($adquired->sideEffect3?->name === 'Starving') {
+                $adquired->side_effect_id_3 = null;
+            }
             $adquired->save();
         }
 
@@ -815,9 +831,9 @@ class InventoryController extends Controller
         $amount = max(0, (int) $item->effect_value);
 
         // Se obtiene el bonus de ataque anterior
-        $previousBonus  = (int) $adquired->bonus_attack;
+        $previousBonus = (int) $adquired->bonus_attack;
         // Se obtiene el nuevo bonus de ataque
-        $newBonus       = $previousBonus + $amount;
+        $newBonus = $previousBonus + $amount;
 
         // Se actualiza el bonus de ataque
         $adquired->bonus_attack = $newBonus;
@@ -830,9 +846,9 @@ class InventoryController extends Controller
 
         // Se devuelve la respuesta
         return [
-            'previous_attack'   => $previousBonus,
-            'attack_gained'     => $amount,
-            'current_attack'    => $adquired->attack,
+            'previous_attack' => $previousBonus,
+            'attack_gained' => $amount,
+            'current_attack' => $adquired->attack,
             'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
         ];
     }
@@ -852,9 +868,9 @@ class InventoryController extends Controller
         $amount = max(0, (int) $item->effect_value);
 
         // Se obtiene el bonus de defensa anterior
-        $previousBonus  = (int) $adquired->bonus_defense;
+        $previousBonus = (int) $adquired->bonus_defense;
         // Se obtiene el nuevo bonus de defensa
-        $newBonus       = $previousBonus + $amount;
+        $newBonus = $previousBonus + $amount;
 
         // Se actualiza el bonus de defensa
         $adquired->bonus_defense = $newBonus;
@@ -867,11 +883,11 @@ class InventoryController extends Controller
 
         // Se devuelve la respuesta
         return [
-            'previous_defense'   => $adquired->getOriginal('bonus_defense') !== null
+            'previous_defense' => $adquired->getOriginal('bonus_defense') !== null
                                         ? ($adquired->xuxemon?->defense ?? 0) + (int) round(($adquired->level - 1) * 1.2) + $previousBonus
                                         : $previousBonus,
-            'defense_gained'     => $amount,
-            'current_defense'    => $adquired->defense,
+            'defense_gained' => $amount,
+            'current_defense' => $adquired->defense,
             'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
         ];
     }
@@ -890,8 +906,8 @@ class InventoryController extends Controller
         $percentage = max(0, (int) $item->effect_value);
 
         // Se obtiene la vida máxima
-        $maxHp      = $adquired->hp;
-        $currentHp  = (int) $adquired->current_hp;
+        $maxHp = $adquired->hp;
+        $currentHp = (int) $adquired->current_hp;
 
         // Se calcula la cantidad curada
         $healAmount = (int) round($maxHp * $percentage / 100);
@@ -909,10 +925,10 @@ class InventoryController extends Controller
         $bagItem->reduceQuantity(1);
 
         return [
-            'previous_hp'        => $currentHp,
-            'healed_amount'      => $newHp - $currentHp,
-            'current_hp'         => $newHp,
-            'max_hp'             => $maxHp,
+            'previous_hp' => $currentHp,
+            'healed_amount' => $newHp - $currentHp,
+            'current_hp' => $newHp,
+            'max_hp' => $maxHp,
             'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
         ];
     }
@@ -941,11 +957,11 @@ class InventoryController extends Controller
         // Si el Xuxemon tiene el efecto secundario Overdose, se bloquea el uso de la carne especial
         if ($hasOverdose) {
             return [
-                'error'              => true,
-                'message'            => 'Your Xuxemon is affected by Overdose, cannot eat Special Meat, and its size has been reduced.',
+                'error' => true,
+                'message' => 'Your Xuxemon is affected by Overdose, cannot eat Special Meat, and its size has been reduced.',
                 'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
-                'overdose_blocked'   => true,
-                'overdose_info'      => 'This Xuxemon is affected by Overdose and cannot eat Special Meat until cured. Its size has been reduced.',
+                'overdose_blocked' => true,
+                'overdose_info' => 'This Xuxemon is affected by Overdose and cannot eat Special Meat until cured. Its size has been reduced.',
             ];
         }
 
@@ -956,7 +972,7 @@ class InventoryController extends Controller
                 'message' => 'Your Xuxemon is affected by Gluttony and cannot eat Special Meat.',
                 'remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0,
                 'gluttony_blocked' => true,
-                'gluttony_info' => 'This Xuxemon is affected by Gluttony and cannot eat Special Meat until cured.'
+                'gluttony_info' => 'This Xuxemon is affected by Gluttony and cannot eat Special Meat until cured.',
             ];
         }
 
@@ -1073,6 +1089,7 @@ class InventoryController extends Controller
         if ($hasStarving) {
             $response['starving_info'] = 'Your Xuxemon is Starving and needs 2 Special Meat per progress. '.$meatUsed.' were consumed for '.$progressGained.' progress.';
         }
+
         return $response;
     }
 
@@ -1082,7 +1099,7 @@ class InventoryController extends Controller
         try {
             // Se obtienen todos los items
             $items = Item::with('statusEffect')
-                ->select('id', 'name', 'description', 'effect_type', 'effect_value', 'is_stackable', 'max_quantity', 'status_effect_id', 'icon_path')
+                ->select('id', 'name', 'description', 'effect_type', 'effect_value', 'is_stackable', 'max_quantity', 'status_effect_id', 'icon_path', 'updated_at')
                 ->orderBy('name')
                 ->get();
 

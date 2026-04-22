@@ -42,7 +42,7 @@ export class AdminEditItem implements OnInit {
   readonly successMessage = signal<string | null>(null);
   readonly imagePreview = signal<string | null>(null);
   readonly selectedImage = signal<File | null>(null);
-  readonly iconPathPreview = signal('items/new_item.png');
+  readonly iconPathPreview = signal('items/new_item.webp');
   readonly isLoadingItem = signal(true);
   readonly itemId = signal<number | null>(null);
 
@@ -113,8 +113,13 @@ export class AdminEditItem implements OnInit {
     }
     this.updateMaxQuantityControl(this.form.controls.is_stackable.value);
     this.updateStatusEffectValidators();
-    this.iconPathPreview.set(item.icon_path ?? 'items/new_item.png');
-    const url = item.icon_path ? this.auth.getAssetUrl(item.icon_path.startsWith('/') ? item.icon_path : `/${item.icon_path}`) : null;
+    this.iconPathPreview.set(item.icon_path ?? 'items/new_item.webp');
+    const url = item.icon_path
+      ? this.auth.getAssetUrl(
+          item.icon_path.startsWith('/') ? item.icon_path : `/${item.icon_path}`,
+          item.updated_at
+        )
+      : null;
     this.imagePreview.set(url);
   }
 
@@ -161,8 +166,8 @@ export class AdminEditItem implements OnInit {
       this.errorMessage.set('Please select a valid image file.');
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      this.errorMessage.set('Image must be less than 10MB.');
+    if (file.size > 20 * 1024 * 1024) {
+      this.errorMessage.set('Image must be less than 20MB.');
       return;
     }
 
@@ -344,7 +349,7 @@ export class AdminEditItem implements OnInit {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_+|_+$/g, '') || 'new_item';
-    const ext = (originalName?.split('.').pop()?.toLowerCase() ?? 'png').replace(/[^a-z0-9]/g, '') || 'png';
+    const ext = (originalName?.split('.').pop()?.toLowerCase() ?? 'webp').replace(/[^a-z0-9]/g, '') || 'webp';
     return `${safeBase}.${ext}`;
   }
 

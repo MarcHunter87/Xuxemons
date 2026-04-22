@@ -10,4 +10,5 @@ export interface Item {
   status_effect_id?: number | null;
   status_effect?: { name: string } | null;
   icon_path: string;
+  updated_at?: string;
 }

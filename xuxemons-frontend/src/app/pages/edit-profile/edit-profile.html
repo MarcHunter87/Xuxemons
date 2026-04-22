@@ -6,7 +6,7 @@
 		<input type="file" #bannerInput accept="image/*" class="file-input" (change)="onBannerSelected($event)" aria-hidden="true">
 		<div
 			class="banner-dropzone"
-			[class.has-image]="bannerPreview() !== '/images/default_banner.png'"
+			[class.has-image]="bannerPreview() !== '/images/default_banner.webp'"
 			[style.background-image]="'url(' + bannerPreview() + ')'"
 			role="button"
 			tabindex="0"

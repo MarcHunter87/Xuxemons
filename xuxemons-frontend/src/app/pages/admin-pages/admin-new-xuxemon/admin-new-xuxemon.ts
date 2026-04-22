@@ -28,7 +28,7 @@ export class AdminNewXuxemon implements OnInit {
   readonly successMessage = signal<string | null>(null);
   readonly imagePreview = signal<string | null>(null);
   readonly selectedImage = signal<File | null>(null);
-  readonly iconPathPreview = signal('xuxemons/new_xuxemon.png');
+  readonly iconPathPreview = signal('xuxemons/new_xuxemon.webp');
   readonly attack1Label = signal('Select type first');
   readonly typeDropdownOpen = signal(false);
   readonly attack2DropdownOpen = signal(false);
@@ -82,8 +82,8 @@ export class AdminNewXuxemon implements OnInit {
       this.errorMessage.set('Please select a valid image file.');
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      this.errorMessage.set('Image must be less than 10MB.');
+    if (file.size > 20 * 1024 * 1024) {
+      this.errorMessage.set('Image must be less than 20MB.');
       return;
     }
 
@@ -298,7 +298,7 @@ export class AdminNewXuxemon implements OnInit {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_+|_+$/g, '') || 'new_xuxemon';
-    const ext = (originalName?.split('.').pop()?.toLowerCase() ?? 'png').replace(/[^a-z0-9]/g, '') || 'png';
+    const ext = (originalName?.split('.').pop()?.toLowerCase() ?? 'webp').replace(/[^a-z0-9]/g, '') || 'webp';
     return `${safeBase}.${ext}`;
   }
 

@@ -16,7 +16,7 @@
 						<h3 id="daily-gacha-title" class="reward-section-title">Gacha Ticket</h3>
 						<div class="reward-row" [ngClass]="getSlotClass(notification.gacha_ticket.effect_type)">
 							<div class="reward-icon-slot" [ngClass]="getSlotClass(notification.gacha_ticket.effect_type)">
-								<img class="reward-icon" [src]="auth.getAssetUrl(notification.gacha_ticket.icon_path ?? '/items/default_item.png')"
+								<img class="reward-icon" [src]="auth.getAssetUrl(notification.gacha_ticket.icon_path ?? '/items/default_item.webp')"
 									[alt]="notification.gacha_ticket.name" />
 							</div>
 							<div class="reward-meta">
@@ -35,7 +35,7 @@
 								@for (item of notification.items; track item.item_id) {
 									<li class="reward-row" [ngClass]="getSlotClass(item.effect_type)">
 										<div class="reward-icon-slot" [ngClass]="getSlotClass(item.effect_type)">
-											<img class="reward-icon" [src]="auth.getAssetUrl(item.icon_path ?? '/items/default_item.png')" [alt]="item.name" />
+											<img class="reward-icon" [src]="auth.getAssetUrl(item.icon_path ?? '/items/default_item.webp')" [alt]="item.name" />
 										</div>
 										<div class="reward-meta">
 											<p class="reward-name">{{ item.name }}</p>

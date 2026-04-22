@@ -176,10 +176,20 @@ export class AuthService {
   // Sirve para obtener la URL del asset
   getAssetUrl(path: string, cacheBust?: string): string {
     const base = this.apiUrl.replace(/\/api\/?$/, '') || this.apiUrl;
-    const p = path.startsWith('/') ? path : `/${path}`;
+    const normalizedPath = this.preferWebpPath(path);
+    const p = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
     const encoded = p.split('/').map(segment => encodeURIComponent(segment)).join('/');
     const url = `${base}${encoded}`;
     return cacheBust ? `${url}?v=${encodeURIComponent(cacheBust)}` : url;
+  }
+
+  // Sirve para priorizar la extensión webp en assets
+  private preferWebpPath(path: string): string {
+    if (/^\/?users\//i.test(path)) {
+      return path;
+    }
+
+    return path.replace(/\.png$/i, '.webp');
   }
 
   // Sirve para obtener el usuario

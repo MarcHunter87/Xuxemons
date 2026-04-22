@@ -30,7 +30,7 @@ export class AdminEditXuxemon implements OnInit {
   readonly successMessage = signal<string | null>(null);
   readonly imagePreview = signal<string | null>(null);
   readonly selectedImage = signal<File | null>(null);
-  readonly iconPathPreview = signal('xuxemons/new_xuxemon.png');
+  readonly iconPathPreview = signal('xuxemons/new_xuxemon.webp');
   readonly attack1Label = signal('Select type first');
   readonly typeDropdownOpen = signal(false);
   readonly attack2DropdownOpen = signal(false);
@@ -109,6 +109,7 @@ export class AdminEditXuxemon implements OnInit {
     attack: number;
     defense: number;
     icon_path: string;
+    updated_at?: string;
     attack1?: { name: string } | null;
   }): void {
     this.form.patchValue({
@@ -123,8 +124,13 @@ export class AdminEditXuxemon implements OnInit {
       icon_path: x.icon_path ?? this.iconPathPreview(),
     }, { emitEvent: false });
     this.attack1Label.set(x.attack1?.name ?? 'Select type first');
-    this.iconPathPreview.set(x.icon_path ?? 'xuxemons/new_xuxemon.png');
-    const url = x.icon_path ? this.auth.getAssetUrl(x.icon_path.startsWith('/') ? x.icon_path : `/${x.icon_path}`) : null;
+    this.iconPathPreview.set(x.icon_path ?? 'xuxemons/new_xuxemon.webp');
+    const url = x.icon_path
+      ? this.auth.getAssetUrl(
+          x.icon_path.startsWith('/') ? x.icon_path : `/${x.icon_path}`,
+          x.updated_at
+        )
+      : null;
     this.imagePreview.set(url);
   }
 
@@ -136,8 +142,8 @@ export class AdminEditXuxemon implements OnInit {
       this.errorMessage.set('Please select a valid image file.');
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      this.errorMessage.set('Image must be less than 10MB.');
+    if (file.size > 20 * 1024 * 1024) {
+      this.errorMessage.set('Image must be less than 20MB.');
       return;
     }
 
@@ -353,7 +359,7 @@ export class AdminEditXuxemon implements OnInit {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_+|_+$/g, '') || 'new_xuxemon';
-    const ext = (originalName?.split('.').pop()?.toLowerCase() ?? 'png').replace(/[^a-z0-9]/g, '') || 'png';
+    const ext = (originalName?.split('.').pop()?.toLowerCase() ?? 'webp').replace(/[^a-z0-9]/g, '') || 'webp';
     return `${safeBase}.${ext}`;
   }
 

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Throwable;
+use WebPConvert\WebPConvert;
 
 class UserController extends Controller
 {
@@ -146,13 +147,13 @@ class UserController extends Controller
     // Sirve para subir el banner del usuario
     public function uploadBanner(Request $request)
     {
-        return $this->uploadProfileImage($request, 'banner', 'banner_path', 'banners', 15360, 'Banner', 'Couldn\'t upload banner');
+        return $this->uploadProfileImage($request, 'banner', 'banner_path', 'banners', 20480, 'Banner', 'Couldn\'t upload banner');
     }
 
     // Sirve para subir el icono del usuario
     public function uploadIcon(Request $request)
     {
-        return $this->uploadProfileImage($request, 'icon', 'icon_path', 'icons', 10240, 'Icon', 'Couldn\'t upload icon');
+        return $this->uploadProfileImage($request, 'icon', 'icon_path', 'icons', 20480, 'Icon', 'Couldn\'t upload icon');
     }
 
     // Sirve para subir la imagen de perfil del usuario
@@ -165,18 +166,16 @@ class UserController extends Controller
 
             // Se valida la imagen de perfil
             $request->validate([
-                $field => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:'.$maxKb,
+                $field => 'required|image|max:'.$maxKb,
             ], [
                 "{$field}.required" => "{$label} image is required.",
                 "{$field}.image" => 'File must be an image.',
-                "{$field}.mimes" => "{$label} must be jpeg, png, jpg, gif, or webp.",
                 "{$field}.max" => "{$label} must be less than ".round($maxKb / 1024).'MB.',
             ]);
 
             // Se obtiene el archivo
             $file = $request->file($field);
-            $ext = $file->getClientOriginalExtension();
-            $filename = $user->id.'.'.$ext;
+            $filename = $user->id.'.webp';
             // Se obtiene la ruta pública
             $publicPath = public_path("users/{$dir}");
             // Si la ruta pública no existe, se crea
@@ -191,9 +190,10 @@ class UserController extends Controller
                 unlink($oldPath);
             }
 
-            // Se mueve el archivo a la ruta pública
-            $file->move($publicPath, $filename);
+            // Se convierte la imagen subida a webp
+            $this->saveImageAsWebp($file->getRealPath(), "{$publicPath}/{$filename}");
             $user->{$pathKey} = "/users/{$dir}/{$filename}";
+            $user->updated_at = now();
             $user->save();
 
             // Se devuelve la respuesta
@@ -206,5 +206,23 @@ class UserController extends Controller
         } catch (Throwable $e) {
             return response()->json(['message' => $errorMessage, 'errors' => ['server' => [$e->getMessage()]]], 500);
         }
+    }
+
+    // Sirve para convertir una imagen a webp y guardarla con ImageMagick
+    private function saveImageAsWebp(string $sourcePath, string $targetPath): void
+    {
+        $detectedMime = mime_content_type($sourcePath) ?: 'unknown';
+
+        if ($detectedMime === 'image/webp') {
+            if (! @copy($sourcePath, $targetPath)) {
+                throw new \RuntimeException('Could not persist uploaded webp file.');
+            }
+            return;
+        }
+
+        WebPConvert::convert($sourcePath, $targetPath, [
+            'quality' => 90,
+            'fail' => 'throw',
+        ]);
     }
 }

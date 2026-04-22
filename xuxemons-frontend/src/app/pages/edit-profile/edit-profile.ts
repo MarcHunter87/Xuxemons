@@ -16,7 +16,7 @@ export class EditProfile {
   @ViewChild('primaryDeactivateButton') primaryDeactivateButton?: ElementRef<HTMLButtonElement>;
 
   user: User | null = null;
-  bannerPreview = signal<string>('/images/default_banner.png');
+  bannerPreview = signal<string>('/images/default_banner.webp');
   iconPreview = signal<string | null>(null);
   isUploadingBanner = signal(false);
   isUploadingIcon = signal(false);
@@ -409,7 +409,7 @@ export class EditProfile {
   onBannerSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file?.type.startsWith('image/')) {
-      this.uploadImage(file, 'banner', 15 * 1024 * 1024, 'Banner image must be less than 15MB.');
+      this.uploadImage(file, 'banner', 20 * 1024 * 1024, 'Banner image must be less than 20MB.');
     } else if (file) {
       this.uploadError.set('Please select a valid image file.');
     }
@@ -419,7 +419,7 @@ export class EditProfile {
   onIconSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file?.type.startsWith('image/')) {
-      this.uploadImage(file, 'icon', 10 * 1024 * 1024, 'Icon image must be less than 10MB.');
+      this.uploadImage(file, 'icon', 20 * 1024 * 1024, 'Profile image must be less than 20MB.');
     } else if (file) {
       this.uploadError.set('Please select a valid image file.');
     }
@@ -451,7 +451,8 @@ export class EditProfile {
         this.user = this.authService.getUser();
         const path = type === 'banner' ? this.user?.banner_path : this.user?.icon_path;
         if (path && this.user?.updated_at) {
-          preview.set(this.authService.getAssetUrl(path, this.user.updated_at));
+          const resolvedUrl = this.authService.getAssetUrl(path, this.user.updated_at);
+          preview.set(resolvedUrl);
         }
         setUploading(false);
         this.cdr.detectChanges();

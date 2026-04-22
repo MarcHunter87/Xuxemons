@@ -50,9 +50,9 @@ export class AdminItems implements OnInit {
   }
 
   // Sirve para obtener la URL del icono
-  getIconUrl(iconPath: string): string {
+  getIconUrl(iconPath: string, updatedAt?: string): string {
     const path = iconPath.startsWith('/') ? iconPath : `/${iconPath}`;
-    return this.auth.getAssetUrl(path);
+    return this.auth.getAssetUrl(path, updatedAt);
   }
 
   // Sirve para eliminar un item

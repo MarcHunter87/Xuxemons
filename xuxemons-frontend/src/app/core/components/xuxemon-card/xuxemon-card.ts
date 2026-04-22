@@ -23,7 +23,7 @@ export class XuxemonCard implements AfterViewChecked {
   // Sirve para obtener la URL del badge del tipo de Xuxemon
   getTypeBadge(): string {
     const type = this.xuxemon?.type?.name || 'Power';
-    const filename = `${type}.svg`;
+    const filename = `${type}.webp`;
     return this.auth.getAssetUrl(`/badges/${encodeURIComponent(filename)}`);
   }
 

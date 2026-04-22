@@ -123,13 +123,13 @@
               }
               @if (inventoryContext.selectedItem()?.effect_type === 'DMG Up') {
               <span class="stat-atk">
-                <img src="/icons/attack_logo.png" alt="DMG Up" class="stat-icon" onerror="this.style.display='none'" /> {{ xu.attack }}
+                <img src="/icons/attack_logo.webp" alt="DMG Up" class="stat-icon" onerror="this.style.display='none'" /> {{ xu.attack }}
                 <span class="stat-preview stat-preview-atk">→ {{ inventoryContext.getStatBuffPreview(xu, 'attack').boosted }}</span>
               </span>
               }
               @if (inventoryContext.selectedItem()?.effect_type === 'Defense Up') {
               <span class="stat-def">
-                <img src="/icons/defense_logo.png" alt="Defense Up" class="stat-icon" onerror="this.style.display='none'" /> {{ xu.defense }}
+                <img src="/icons/defense_logo.webp" alt="Defense Up" class="stat-icon" onerror="this.style.display='none'" /> {{ xu.defense }}
                 <span class="stat-preview stat-preview-def">→ {{ inventoryContext.getStatBuffPreview(xu, 'defense').boosted }}</span>
               </span>
               }

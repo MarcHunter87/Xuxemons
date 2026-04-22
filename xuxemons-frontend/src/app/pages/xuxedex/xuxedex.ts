@@ -23,7 +23,7 @@ export class Xuxedex implements OnInit, OnDestroy {
 
   readonly displayXuxemons = signal<Xuxemon[]>([]);
   readonly myXuxemons = signal<Xuxemon[]>([]);
-  typeChartUrl = this.authService.getAssetUrl('/badges/Tabla De Tipos.png');
+  typeChartUrl = this.authService.getAssetUrl('/badges/Tabla De Tipos.webp');
 
   myXuxemonsSortedByName = computed(() =>
     [...this.myXuxemons()].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))

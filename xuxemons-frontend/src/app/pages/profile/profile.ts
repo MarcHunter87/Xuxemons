@@ -46,7 +46,7 @@ export class Profile implements OnInit, OnDestroy {
   // Sirve para obtener la URL del banner
   getBannerUrl(): string {
     if (this.bannerLoadError || !this.user?.banner_path) {
-      return '/images/default_banner.png';
+      return '/images/default_banner.webp';
     }
     return this.authService.getAssetUrl(this.user.banner_path, this.user.updated_at);
   }

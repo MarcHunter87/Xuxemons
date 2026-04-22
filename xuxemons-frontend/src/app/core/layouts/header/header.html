@@ -1,7 +1,7 @@
 <header class="navbar" [class.navbar-dropdown-open]="menuOpen" role="banner">
   <div class="navbar-inner">
     <a class="brand" routerLink="/" aria-label="Xuxemons Home" (click)="closeMenu()">
-      <img src="/icons/logo%20v2.svg" alt="Xuxemons logo">
+      <img src="/icons/logo v2.webp" alt="Xuxemons logo">
       <span class="brand-name">XUXEMONS</span>
     </a>
 
@@ -39,7 +39,7 @@
         class="gacha-ticket-badge"
         [attr.aria-label]="'Gacha (' + auth.gachaTicketCount() + ')'">
         <span class="gacha-ticket-badge-inner">
-          <img [src]="auth.getAssetUrl('items/gacha_ticket.png')" alt="" width="22" height="22" class="gacha-ticket-icon" />
+          <img [src]="auth.getAssetUrl('items/gacha_ticket.webp')" alt="" width="22" height="22" class="gacha-ticket-icon" />
           <span class="gacha-ticket-count">{{ auth.gachaTicketCount() }}</span>
         </span>
       </a>
@@ -130,7 +130,7 @@
             [attr.aria-label]="'Gacha (' + auth.gachaTicketCount() + ')'"
             (click)="closeMenu()">
             <span class="gacha-ticket-badge-inner">
-              <img [src]="auth.getAssetUrl('items/gacha_ticket.png')" alt="" width="22" height="22" class="gacha-ticket-icon" />
+              <img [src]="auth.getAssetUrl('items/gacha_ticket.webp')" alt="" width="22" height="22" class="gacha-ticket-icon" />
               <span class="gacha-ticket-count">{{ auth.gachaTicketCount() }}</span>
             </span>
           </a>

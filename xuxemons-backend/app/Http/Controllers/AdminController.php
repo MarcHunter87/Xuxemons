@@ -16,13 +16,13 @@ use App\Models\User;
 use App\Models\Xuxemon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Throwable;
-use Illuminate\Support\Facades\Artisan;
+use WebPConvert\WebPConvert;
 
 class AdminController extends Controller
 {
@@ -650,7 +650,7 @@ class AdminController extends Controller
             $attacks = Attack::query()
                 ->with('statusEffect:id,name,icon_path')
                 ->get()
-                ->sortBy(fn (Attack $a) => ($a->statusEffect?->name ?? "\u{FFFF}") . ' ' . $a->name)
+                ->sortBy(fn (Attack $a) => ($a->statusEffect?->name ?? "\u{FFFF}").' '.$a->name)
                 ->values()
                 ->map(fn (Attack $a) => [
                     'id' => $a->id,
@@ -701,7 +701,7 @@ class AdminController extends Controller
                 'is_stackable' => 'required|boolean',
                 'max_quantity' => 'required|integer|min:1|max:99',
                 'status_effect_id' => 'nullable|exists:status_effects,id',
-                'icon' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+                'icon' => 'required|image|max:20480',
             ]);
 
             // Se obtiene el nombre
@@ -712,16 +712,14 @@ class AdminController extends Controller
 
             // Se obtiene el archivo de la imagen
             $iconFile = $request->file('icon');
-            $ext = $iconFile->getClientOriginalExtension();
-            $filename = Str::slug($name, '_').'.'.$ext;
+            $filename = Str::slug($name, '_').'.webp';
             // Se obtiene la ruta pública
             $publicPath = public_path('items');
             // Si la ruta pública no existe, se crea
             if (! file_exists($publicPath)) {
                 mkdir($publicPath, 0755, true);
             }
-            // Se mueve el archivo a la ruta pública
-            $iconFile->move($publicPath, $filename);
+            $this->saveImageAsWebp($iconFile->getRealPath(), "{$publicPath}/{$filename}");
 
             // Se crea el item
             $item = Item::create([
@@ -781,22 +779,20 @@ class AdminController extends Controller
                 'hp' => 'required|integer|min:1',
                 'attack' => 'required|integer|min:1',
                 'defense' => 'required|integer|min:1',
-                'icon' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+                'icon' => 'required|image|max:20480',
             ]);
 
             // Se obtiene el nombre
             $name = trim((string) $validated['name']);
             $iconFile = $request->file('icon');
-            $ext = $iconFile->getClientOriginalExtension();
-            $filename = Str::slug($name, '_').'.'.$ext;
+            $filename = Str::slug($name, '_').'.webp';
             // Se obtiene la ruta pública
             $publicPath = public_path('xuxemons');
             // Si la ruta pública no existe, se crea
             if (! file_exists($publicPath)) {
                 mkdir($publicPath, 0755, true);
             }
-            // Se mueve el archivo a la ruta pública
-            $iconFile->move($publicPath, $filename);
+            $this->saveImageAsWebp($iconFile->getRealPath(), "{$publicPath}/{$filename}");
 
             // Se crea el xuxemon
             $xuxemon = Xuxemon::create([
@@ -922,11 +918,11 @@ class AdminController extends Controller
                 'is_stackable' => 'required|boolean',
                 'max_quantity' => 'required|integer|min:1|max:99',
                 'status_effect_id' => 'nullable|exists:status_effects,id',
-                'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+                'icon' => 'nullable|image|max:20480',
             ];
             // Se valida la petición
             $validated = $request->validate($rules);
-           
+
             // Se obtiene el nombre
             $name = trim((string) $validated['name']);
             // Se obtiene el tipo de stackable
@@ -949,19 +945,29 @@ class AdminController extends Controller
             $iconFile = $request->file('icon');
             // Si el archivo de la imagen existe, se procesa
             if ($iconFile) {
-                // Se obtiene la extensión del archivo
-                $ext = $iconFile->getClientOriginalExtension();
-                // Se obtiene el nombre del archivo
-                $filename = Str::slug($name, '_').'_'.Str::lower(Str::random(8)).'.'.$ext;
                 // Se obtiene la ruta pública
                 $publicPath = public_path('items');
                 // Si la ruta pública no existe, se crea
                 if (! file_exists($publicPath)) {
                     mkdir($publicPath, 0755, true);
                 }
-                // Se mueve el archivo a la ruta pública
-                $iconFile->move($publicPath, $filename);
-                $update['icon_path'] = 'items/'.$filename;
+
+                $currentPath = (string) ($item->icon_path ?? '');
+                $targetPath = $currentPath !== ''
+                    ? preg_replace('/\.[a-z0-9]+$/i', '.webp', $currentPath)
+                    : 'items/'.Str::slug($name, '_').'.webp';
+                $targetPath = (string) $targetPath;
+
+                if ($currentPath !== '' && $currentPath !== $targetPath) {
+                    $oldAbsolutePath = public_path($currentPath);
+                    if (file_exists($oldAbsolutePath)) {
+                        unlink($oldAbsolutePath);
+                    }
+                }
+
+                $this->saveImageAsWebp($iconFile->getRealPath(), public_path($targetPath));
+                $update['icon_path'] = $targetPath;
+                $update['updated_at'] = now();
             }
 
             // Se actualiza el item
@@ -1017,7 +1023,7 @@ class AdminController extends Controller
                 'hp' => 'required|integer|min:1',
                 'attack' => 'required|integer|min:1',
                 'defense' => 'required|integer|min:1',
-                'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+                'icon' => 'nullable|image|max:20480',
             ];
             // Se valida la petición
             $validated = $request->validate($rules);
@@ -1040,19 +1046,29 @@ class AdminController extends Controller
             $iconFile = $request->file('icon');
             // Si el archivo de la imagen existe, se procesa
             if ($iconFile) {
-                // Se obtiene la extensión del archivo
-                $ext = $iconFile->getClientOriginalExtension();
-                // Se obtiene el nombre del archivo
-                $filename = Str::slug($name, '_').'_'.Str::lower(Str::random(8)).'.'.$ext;
                 // Se obtiene la ruta pública
                 $publicPath = public_path('xuxemons');
                 // Si la ruta pública no existe, se crea
                 if (! file_exists($publicPath)) {
                     mkdir($publicPath, 0755, true);
                 }
-                // Se mueve el archivo a la ruta pública
-                $iconFile->move($publicPath, $filename);
-                $update['icon_path'] = 'xuxemons/'.$filename;
+
+                $currentPath = (string) ($xuxemon->icon_path ?? '');
+                $targetPath = $currentPath !== ''
+                    ? preg_replace('/\.[a-z0-9]+$/i', '.webp', $currentPath)
+                    : 'xuxemons/'.Str::slug($name, '_').'.webp';
+                $targetPath = (string) $targetPath;
+
+                if ($currentPath !== '' && $currentPath !== $targetPath) {
+                    $oldAbsolutePath = public_path($currentPath);
+                    if (file_exists($oldAbsolutePath)) {
+                        unlink($oldAbsolutePath);
+                    }
+                }
+
+                $this->saveImageAsWebp($iconFile->getRealPath(), public_path($targetPath));
+                $update['icon_path'] = $targetPath;
+                $update['updated_at'] = now();
             }
 
             // Se actualiza el xuxemon
@@ -1102,6 +1118,24 @@ class AdminController extends Controller
         }
 
         return $usedSlots;
+    }
+
+    // Sirve para convertir una imagen a webp y guardarla
+    private function saveImageAsWebp(string $sourcePath, string $targetPath): void
+    {
+        $detectedMime = mime_content_type($sourcePath) ?: 'unknown';
+
+        if ($detectedMime === 'image/webp') {
+            if (! @copy($sourcePath, $targetPath)) {
+                throw new \RuntimeException('Could not persist uploaded webp file.');
+            }
+            return;
+        }
+
+        WebPConvert::convert($sourcePath, $targetPath, [
+            'quality' => 90,
+            'fail' => 'throw',
+        ]);
     }
 
     // Sirve para eliminar un item

@@ -49,7 +49,7 @@
                 <td><span class="cell-id">{{ item.id }}</span></td>
                 <td>
                   @if (item.icon_path) {
-                    <img [src]="getIconUrl(item.icon_path)" [alt]="item.name" class="item-icon" />
+                    <img [src]="getIconUrl(item.icon_path, item.updated_at)" [alt]="item.name" class="item-icon" />
                   } @else {
                     <span class="no-icon">—</span>
                   }
