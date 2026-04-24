@@ -225,6 +225,46 @@ class XuxemonController extends Controller
         }
     }
 
+    public function updateCurrentHp(Request $request)
+    {
+        try {
+            $userId = Auth::guard('api')->id();
+            if (! $userId) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+
+            $adquiredId = (int) $request->input('adquired_id');
+            $currentHp = max(0, (int) $request->input('current_hp'));
+
+            if (! $adquiredId) {
+                return response()->json(['message' => 'adquired_id is required'], 422);
+            }
+
+            $adquired = AdquiredXuxemon::where('id', $adquiredId)
+                ->where('user_id', $userId)
+                ->with('xuxemon')
+                ->first();
+
+            if (! $adquired) {
+                return response()->json(['message' => 'Xuxemon not found'], 404);
+            }
+
+            $adquired->current_hp = min($currentHp, $adquired->hp);
+            $adquired->save();
+
+            return response()->json([
+                'message' => 'HP updated successfully',
+                'data' => [
+                    'adquired_id' => $adquired->id,
+                    'current_hp' => (int) $adquired->current_hp,
+                    'max_hp' => $adquired->hp,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Server error: '.$e->getMessage()], 500);
+        }
+    }
+
     // Sirve para actualizar un Xuxemon
     public function update(Request $request, $id)
     {
