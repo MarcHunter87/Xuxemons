@@ -19,6 +19,15 @@
   box-sizing: border-box;
 }
 
+.app-content.battle-fullscreen {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  height: calc(100dvh - 68px);
+  overflow: hidden;
+}
+
 .app-content app-breadcrumb {
   display: block;
   margin-bottom: 1rem;
@@ -45,4 +54,43 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.battle-invite-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0, 0, 0, 0.48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.battle-invite-card {
+  width: min(420px, 100%);
+  background: var(--neutral-white);
+  border: 1px solid var(--color-gray-light);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px var(--color-black-soft);
+  padding: 1.2rem;
+}
+
+.battle-invite-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--neutral-black);
+}
+
+.battle-invite-text {
+  margin: 0;
+  color: var(--neutral-black);
+}
+
+.battle-invite-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
 }

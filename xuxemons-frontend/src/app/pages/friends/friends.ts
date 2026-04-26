@@ -7,9 +7,11 @@ import {
   signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth';
+import { BattleService } from '../../core/services/battle.service';
 import { FriendsService } from '../../core/services/friends.service';
 import { ConfirmRemoveFriendModal } from '../../core/components/modals/confirm-remove-friend-modal/confirm-remove-friend-modal';
 import { FriendCard } from '../../core/components/friend-card/friend-card';
@@ -24,10 +26,14 @@ import type { FriendUser, FriendRequestItem, SearchUser } from '../../core/inter
 })
 export class Friends implements OnInit, OnDestroy {
   private readonly cardAnimationMs = 260;
+  private readonly battlePollMs = 2500;
   private auth = inject(AuthService);
   private friendsService = inject(FriendsService);
+  private battleService = inject(BattleService);
+  private router = inject(Router);
   private subs = new Subscription();
   private timeoutIds: ReturnType<typeof setTimeout>[] = [];
+  private battlePollingInterval: ReturnType<typeof setInterval> | null = null;
   private friendsInitialized = false;
   private pendingRequestsInitialized = false;
 
@@ -48,6 +54,10 @@ export class Friends implements OnInit, OnDestroy {
   exitingRequestIds = signal<number[]>([]);
   busyRequestIds = signal<number[]>([]);
   busyFriendIds = signal<string[]>([]);
+  challengeBusyFriendId = signal<string | null>(null);
+  outgoingBattleId = signal<number | null>(null);
+  outgoingBattleFriendId = signal<string | null>(null);
+  isNavigatingToBattle = signal(false);
 
   private previousFocusedElement: HTMLElement | null = null;
 
@@ -132,12 +142,81 @@ export class Friends implements OnInit, OnDestroy {
     );
 
     this.friendsService.loadAll();
+    this.startBattlePolling();
   }
 
   // Sirve para destruir el componente
   ngOnDestroy(): void {
     this.subs.unsubscribe();
     this.timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
+    this.stopBattlePolling();
+  }
+
+  // Sirve para iniciar polling de invitaciones y estado de batalla saliente
+  private startBattlePolling(): void {
+    this.pollBattleState();
+    this.battlePollingInterval = setInterval(() => this.pollBattleState(), this.battlePollMs);
+  }
+
+  // Sirve para detener polling de batalla
+  private stopBattlePolling(): void {
+    if (this.battlePollingInterval) {
+      clearInterval(this.battlePollingInterval);
+      this.battlePollingInterval = null;
+    }
+  }
+
+  // Sirve para comprobar invitaciones entrantes y reto saliente
+  private pollBattleState(): void {
+    this.pollOutgoingBattleStatus();
+  }
+
+  // Sirve para comprobar si el reto enviado ya fue aceptado/rechazado
+  private pollOutgoingBattleStatus(): void {
+    const battleId = this.outgoingBattleId();
+    if (!battleId || this.isNavigatingToBattle()) {
+      return;
+    }
+
+    this.subs.add(this.battleService.getBattle(battleId).subscribe({
+      next: (battle: any) => {
+        const status = String(battle?.status ?? '').toLowerCase();
+
+        if (status === 'accepted') {
+          this.navigateToBattle(battleId);
+          return;
+        }
+
+        if (status === 'rejected' || status === 'completed' || status === 'finished') {
+          this.outgoingBattleId.set(null);
+          this.outgoingBattleFriendId.set(null);
+          this.successMessage.set(status === 'rejected'
+            ? 'Your challenge was rejected.'
+            : 'The challenge is no longer active.');
+          return;
+        }
+
+        if (status !== 'pending') {
+          this.outgoingBattleId.set(null);
+          this.outgoingBattleFriendId.set(null);
+        }
+      },
+      error: () => {
+        this.outgoingBattleId.set(null);
+        this.outgoingBattleFriendId.set(null);
+      },
+    }));
+  }
+
+  // Sirve para navegar al combate evitando dobles navegaciones
+  private navigateToBattle(battleId: number): void {
+    if (this.isNavigatingToBattle()) {
+      return;
+    }
+
+    this.isNavigatingToBattle.set(true);
+    this.stopBattlePolling();
+    this.router.navigate(['/battle', battleId]);
   }
 
   // Sirve para programar un timeout
@@ -322,6 +401,70 @@ export class Friends implements OnInit, OnDestroy {
         this.reloadAll();
       },
     });
+  }
+
+  // Sirve para lanzar un challenge a un amigo
+  challengeFriend(friend: FriendUser): void {
+    if (this.challengeBusyFriendId() || this.isNavigatingToBattle()) {
+      return;
+    }
+
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+    this.challengeBusyFriendId.set(friend.id);
+
+    this.subs.add(this.battleService.requestBattle(friend.id).subscribe({
+      next: (battle: any) => {
+        const battleId = Number(battle?.id);
+        if (Number.isFinite(battleId) && battleId > 0) {
+          this.outgoingBattleId.set(battleId);
+          this.outgoingBattleFriendId.set(friend.id);
+          this.successMessage.set(`Challenge sent to ${friend.name}. Waiting for acceptance...`);
+        } else {
+          this.successMessage.set(`Challenge sent to ${friend.name}.`);
+        }
+        this.challengeBusyFriendId.set(null);
+      },
+      error: (error) => {
+        const existingBattleId = Number(error?.error?.battle_id);
+        const existingBattleStatus = String(error?.error?.status ?? '').toLowerCase();
+        if (Number.isFinite(existingBattleId) && existingBattleId > 0) {
+          this.challengeBusyFriendId.set(null);
+          if (existingBattleStatus === 'accepted') {
+            this.successMessage.set('You already have an active battle with this friend. Rejoining...');
+            this.navigateToBattle(existingBattleId);
+            return;
+          }
+
+          if (existingBattleStatus === 'pending') {
+            this.outgoingBattleId.set(existingBattleId);
+            this.outgoingBattleFriendId.set(friend.id);
+            this.successMessage.set(`You already have a pending challenge with ${friend.name}. Waiting for acceptance...`);
+            return;
+          }
+
+          this.successMessage.set('You already have a battle with this friend.');
+          return;
+        }
+
+        const backendMessage = String(error?.error?.message ?? '').trim();
+        this.errorMessage.set(backendMessage || `Could not send challenge to ${friend.name}.`);
+        this.challengeBusyFriendId.set(null);
+      },
+    }));
+  }
+
+  // Sirve para saber si el challenge está ocupado para un amigo
+  isChallengeBusy(friendId: string): boolean {
+    if (this.challengeBusyFriendId() === friendId) {
+      return true;
+    }
+
+    if (this.outgoingBattleId() && this.outgoingBattleFriendId() === friendId) {
+      return true;
+    }
+
+    return false;
   }
 
   // Sirve para cancelar una solicitud de amistad enviada

@@ -1,5 +1,8 @@
 <div class="battle-container">
   <audio #battleMusic [src]="getAssetUrl('/Xuxemon_evolving.mp3')" preload="auto" loop></audio>
+  <audio #diceSfx [src]="getAssetUrl('/Xuxemon Modal.mp3')" preload="auto"></audio>
+  <audio #attackSfx [src]="getAssetUrl('/Xuxemon_evolving.mp3')" preload="auto"></audio>
+  <audio #impactSfx [src]="getAssetUrl('/Xuxemon Modal.mp3')" preload="auto"></audio>
   <div class="battle-wrapper">
     <!-- Main Battle Arena -->
     <div class="battle-arena">
@@ -7,10 +10,18 @@
       <div class="turn-indicator" [class.player-turn]="currentTurn() === 'player'" [class.opponent-turn]="currentTurn() === 'opponent'">
         {{ currentTurn() === 'player' ? 'YOUR TURN' : 'OPPONENT TURN' }}
       </div>
+      @if (battleCallout()) {
+        <div class="battle-callout" [class.battle-callout--buff]="battleCallout()!.tone === 'buff'" [class.battle-callout--nerf]="battleCallout()!.tone === 'nerf'" [class.battle-callout--neutral]="battleCallout()!.tone === 'neutral'">
+          {{ battleCallout()!.text }}
+        </div>
+      }
 
-      <div class="battle-screen" [style.background-image]="'url(' + getAssetUrl('/fondo batalla.jfif') + ')'">
+      <div class="battle-screen" [style.background-image]="'url(' + getAssetUrl('/fondo-batalla.webp') + ')'">
       @if (attackImpactSide()) {
         <div class="impact-burst" [class.impact-burst--player]="attackImpactSide() === 'player'" [class.impact-burst--opponent]="attackImpactSide() === 'opponent'"></div>
+      }
+      @if (attackTrailSide()) {
+        <div class="attack-trail" [class.attack-trail--player]="attackTrailSide() === 'player'" [class.attack-trail--opponent]="attackTrailSide() === 'opponent'"></div>
       }
       @if (selectedXuxemon() && opponentXuxemon()) {
         <div class="battle-grid">
@@ -29,7 +40,14 @@
               </div>
               <hr class="status-divider">
               <div class="name-row">
-                <span class="name">{{ opponentXuxemon()?.name }}</span>
+                <span class="name-with-status">
+                  <span class="name">{{ opponentXuxemon()?.name }}</span>
+                  @if (opponentXuxemon()?.statusEffect?.name) {
+                    <span class="status-banner-badge" [title]="opponentXuxemon()?.statusEffect?.name">
+                      {{ opponentXuxemon()?.statusEffect?.name }}
+                    </span>
+                  }
+                </span>
                 <span class="level">Lv.{{ opponentXuxemon()?.level || 50 }}</span>
               </div>
               <div class="hp-bar-container">
@@ -77,7 +95,14 @@
               </div>
               <hr class="status-divider">
               <div class="name-row">
-                <span class="name">{{ selectedXuxemon()?.name }}</span>
+                <span class="name-with-status">
+                  <span class="name">{{ selectedXuxemon()?.name }}</span>
+                  @if (selectedXuxemon()?.statusEffect?.name) {
+                    <span class="status-banner-badge" [title]="selectedXuxemon()?.statusEffect?.name">
+                      {{ selectedXuxemon()?.statusEffect?.name }}
+                    </span>
+                  }
+                </span>
                 <span class="level">Lv.{{ selectedXuxemon()?.level || 50 }}</span>
               </div>
               <div class="hp-bar-container">
@@ -137,14 +162,26 @@
             <button class="menu-btn run" (click)="runAway()">RUN</button>
           </div>
         } @else if (currentSubMenu() === 'attacks') {
-          <div class="attack-grid">
+          <div class="attack-grid attack-grid--attacks">
             @for (atk of selectedXuxemon()?.attacks; track atk.id) {
-              <button class="atk-btn" (click)="attack(atk)">{{ atk.name }}</button>
+              <button class="atk-btn attack-option-btn" (click)="attack(atk)">
+                <span class="attack-option-btn__name">{{ atk.name }}</span>
+                <span class="attack-option-btn__meta">DMG {{ atk.dmg ?? 10 }}</span>
+                @if ((atk.status_chance ?? 0) > 0) {
+                  <span class="attack-option-btn__status">{{ atk.status_chance }}% {{ atk.statusEffect?.name ?? 'status' }}</span>
+                }
+              </button>
             } @empty {
-              <button class="atk-btn" (click)="attack({name: 'Tackle', dmg: 10})">Tackle</button>
-              <button class="atk-btn" (click)="attack({name: 'Quick Attack', dmg: 15})">Quick Attack</button>
+              <button class="atk-btn attack-option-btn" (click)="attack({name: 'Tackle', dmg: 10})">
+                <span class="attack-option-btn__name">Tackle</span>
+                <span class="attack-option-btn__meta">DMG 10</span>
+              </button>
+              <button class="atk-btn attack-option-btn" (click)="attack({name: 'Quick Attack', dmg: 15})">
+                <span class="attack-option-btn__name">Quick Attack</span>
+                <span class="attack-option-btn__meta">DMG 15</span>
+              </button>
             }
-            <button class="back-btn" (click)="showSubMenu(null)">BACK</button>
+            <button class="back-btn submenu-back-btn" (click)="showSubMenu(null)">BACK</button>
           </div>
         } @else if (currentSubMenu() === 'bag') {
           <div class="bag-panel">
@@ -168,10 +205,10 @@
                 <button class="back-btn bag-pagination-btn" (click)="nextBagPage()" [disabled]="!canGoToNextBagPage()">NEXT</button>
               </div>
             }
-            <button class="back-btn" (click)="showSubMenu(null)">BACK</button>
+            <button class="back-btn submenu-back-btn" (click)="showSubMenu(null)">BACK</button>
           </div>
         } @else if (currentSubMenu() === 'bag-target') {
-          <div class="attack-grid">
+          <div class="attack-grid attack-grid--targets">
             @for (xuxemon of getEligibleItemTargets(); track xuxemon.adquired_id || xuxemon.id) {
               <button class="atk-btn" (click)="useItemOnTarget(xuxemon)">
                 {{ xuxemon.name }}
@@ -181,22 +218,23 @@
             } @empty {
               <p class="no-items">No valid targets for {{ selectedBattleItem()?.name }}</p>
             }
-            <button class="back-btn" (click)="cancelBagTargeting()">BACK</button>
+            <button class="back-btn submenu-back-btn" (click)="cancelBagTargeting()">BACK</button>
           </div>
         } @else if (currentSubMenu() === 'switch') {
-          <div class="attack-grid">
-            @for (xuxemon of myXuxemons(); track xuxemon.adquired_id || xuxemon.id) {
+          <div class="attack-grid attack-grid--switch">
+            @for (xuxemon of getSwitchMenuXuxemons(); track xuxemon.adquired_id || xuxemon.id) {
               <button class="atk-btn switch-option" [class.switch-option--active]="isPlayerActiveXuxemon(xuxemon)" [class.switch-option--fainted]="(xuxemon.current_hp ?? xuxemon.hp ?? 0) <= 0" [disabled]="!canSwitchToXuxemon(xuxemon)" (click)="switchXuxemon(xuxemon)">
-                {{ xuxemon.name }}
-                <br>
-                HP {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}
-                <span class="switch-option-badge">{{ isPlayerActiveXuxemon(xuxemon) ? 'ACTIVE' : ((xuxemon.current_hp ?? xuxemon.hp ?? 0) <= 0 ? 'KO' : 'READY') }}</span>
+                <span class="switch-option__header">
+                  <span class="switch-option__name">{{ xuxemon.name }}</span>
+                  <span class="switch-option-badge">{{ isPlayerActiveXuxemon(xuxemon) ? 'ACTIVE' : ((xuxemon.current_hp ?? xuxemon.hp ?? 0) <= 0 ? 'KO' : 'READY') }}</span>
+                </span>
+                <span class="switch-option__hp">HP {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}</span>
               </button>
             } @empty {
               <p class="no-items">No other available Xuxemons</p>
             }
             @if (!forcedSwitch()) {
-              <button class="back-btn" (click)="showSubMenu(null)">BACK</button>
+              <button class="back-btn submenu-back-btn" (click)="showSubMenu(null)">BACK</button>
             }
           </div>
         } @else {
@@ -243,7 +281,7 @@
   @if (showDice()) {
     <div class="dice-overlay">
       <div class="dice-container">
-        <div class="dice" [class.rolling]="diceRolling()">
+        <div class="dice" [class.rolling]="diceRolling()" [class.landed]="diceLanded()" [attr.data-value]="diceValue()">
           {{ diceValue() || '?' }}
         </div>
         <p class="dice-label">{{ diceLabel() }}</p>

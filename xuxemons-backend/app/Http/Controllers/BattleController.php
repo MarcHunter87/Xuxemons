@@ -7,6 +7,7 @@ use App\Models\Attack;
 use App\Models\Bag;
 use App\Models\BagItem;
 use App\Models\Battle;
+use App\Models\Friend;
 use App\Models\Size;
 use App\Models\StatusEffect;
 use App\Models\Team;
@@ -22,15 +23,59 @@ class BattleController extends Controller
     {
         $userId = Auth::id();
 
-        // Verificar que no haya ya una batalla pendiente entre ellos
+        if (! $userId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        if ((string) $friendId === (string) $userId) {
+            return response()->json(['message' => 'You cannot challenge yourself'], 422);
+        }
+
+        $areFriends = Friend::where('user_id', $userId)
+            ->where('friend_user_id', $friendId)
+            ->exists();
+
+        if (! $areFriends) {
+            return response()->json(['message' => 'You can only challenge users in your friends list'], 403);
+        }
+
+        // Resolver batallas previas entre ambos jugadores.
         $existing = Battle::where(function ($q) use ($userId, $friendId) {
             $q->where('user_id', $userId)->where('opponent_user_id', $friendId);
         })->orWhere(function ($q) use ($userId, $friendId) {
             $q->where('user_id', $friendId)->where('opponent_user_id', $userId);
-        })->whereIn('status', ['pending', 'accepted'])->first();
+        })->whereIn('status', ['pending', 'accepted'])->latest('updated_at')->first();
 
         if ($existing) {
-            return response()->json(['message' => 'Already have a pending/active battle with this friend'], 400);
+            $staleCutoff = now()->subMinutes(5);
+            $isStale = ! $existing->updated_at || $existing->updated_at->lt($staleCutoff);
+
+            if (! $isStale) {
+                $isPending = $existing->status === 'pending';
+
+                return response()->json([
+                    'message' => $isPending
+                        ? 'Already have a pending challenge with this friend'
+                        : 'Already have an active battle with this friend',
+                    'battle_id' => $existing->id,
+                    'status' => $existing->status,
+                ], 409);
+            }
+
+            if ($existing->status === 'pending') {
+                $existing->status = 'rejected';
+                $existing->completion_reason = $existing->completion_reason ?: 'request_expired';
+                $existing->save();
+            } else {
+                $existing->status = 'completed';
+                $existing->completion_reason = 'abandoned';
+                $existing->runner_id = $userId;
+                $existing->winner_id = $userId === $existing->user_id
+                    ? $existing->opponent_user_id
+                    : $existing->user_id;
+                $this->appendBattleLog($existing, 'Battle auto-closed due to inactivity.');
+                $existing->save();
+            }
         }
 
         $battle = Battle::create([
@@ -851,17 +896,19 @@ class BattleController extends Controller
         if (($attackerType === 'aigua' && $defenderType === 'terra')
             || ($attackerType === 'terra' && $defenderType === 'aire')
             || ($attackerType === 'aire' && $defenderType === 'aigua')) {
-            $modifiers += 2;
+            $modifiers += 1;
         }
 
         if (($attackerType === 'terra' && $defenderType === 'aigua')
             || ($attackerType === 'aire' && $defenderType === 'terra')
             || ($attackerType === 'aigua' && $defenderType === 'aire')) {
-            $modifiers -= 2;
+            $modifiers -= 1;
         }
 
-        if ($attacker->size === 'Large') {
+        if ($attacker->size === 'Medium') {
             $modifiers += 1;
+        } elseif ($attacker->size === 'Large') {
+            $modifiers += 2;
         }
 
         return $modifiers;

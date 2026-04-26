@@ -424,11 +424,44 @@ class InventoryController extends Controller
                 return response()->json(['message' => 'Item not found in inventory'], 404);
             }
 
+            $item = $bagItem->item;
+
             // Si la cantidad es 0, se elimina el item
             if ($quantity === 0) {
                 $bagItem->delete();
 
                 return response()->json(['message' => 'Item removed from inventory', 'remaining' => 0], 200);
+            }
+
+            if ($item && ! $item->excludedFromPlayerInventory()) {
+                $bagItems = BagItem::where('bag_id', $bag->id)
+                    ->with('item')
+                    ->get();
+
+                $usedSlots = $this->calculateUsedSlots($bagItems);
+                $currentQty = (int) $bagItem->quantity;
+                $maxQty = max(1, (int) ($item->max_quantity ?? 1));
+
+                if ($item->is_stackable) {
+                    $oldSlots = (int) ceil($currentQty / $maxQty);
+                    $newSlots = (int) ceil($quantity / $maxQty);
+                } else {
+                    $oldSlots = $currentQty;
+                    $newSlots = $quantity;
+                }
+
+                $newUsedSlots = $usedSlots - $oldSlots + $newSlots;
+                if ($newUsedSlots > (int) $bag->max_slots) {
+                    return response()->json([
+                        'message' => 'Not enough free slots in bag for this quantity',
+                        'data' => [
+                            'max_slots' => (int) $bag->max_slots,
+                            'used_slots' => (int) $usedSlots,
+                            'requested_slots' => (int) $newSlots,
+                            'current_item_slots' => (int) $oldSlots,
+                        ],
+                    ], 422);
+                }
             }
 
             // Se actualiza la cantidad del item

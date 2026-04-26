@@ -50,10 +50,12 @@
     <button
       type="button"
       class="btn-primary friend-action-btn"
+      [disabled]="challengePending"
       [attr.aria-label]="'Challenge ' + friend.name"
+      (click)="onChallenge()"
     >
       <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
-      <span>Challenge</span>
+      <span>{{ challengePending ? 'Challenging...' : 'Challenge' }}</span>
     </button>
     <button
       type="button"

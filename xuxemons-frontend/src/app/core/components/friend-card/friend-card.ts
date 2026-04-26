@@ -11,7 +11,9 @@ import type { FriendUser } from '../../interfaces';
 })
 export class FriendCard {
   @Input() friend!: FriendUser;
+  @Input() challengePending = false;
   @Output() remove = new EventEmitter<void>();
+  @Output() challenge = new EventEmitter<FriendUser>();
 
   private auth = inject(AuthService);
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
@@ -45,6 +47,15 @@ export class FriendCard {
   onRemove(): void {
     this.menuOpen = false;
     this.remove.emit();
+  }
+
+  // Sirve para lanzar un challenge de batalla
+  onChallenge(): void {
+    if (this.challengePending) {
+      return;
+    }
+
+    this.challenge.emit(this.friend);
   }
 
   // Sirve para manejar el clic en el documento

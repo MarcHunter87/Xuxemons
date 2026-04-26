@@ -21,6 +21,11 @@ type BattleMenu = 'attacks' | 'bag' | 'bag-target' | 'switch' | null;
 })
 export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private readonly bagPageSize = 4;
+  private readonly diceTickMs = 80;
+  private readonly diceTicks = 12;
+  private readonly diceSettleMs = 560;
+  private readonly attackWindupMs = 180;
+  private readonly attackImpactMs = 380;
   private readonly supportedBattleEffectTypes = new Set<InventoryItem['effect_type']>([
     'Heal',
     'DMG Up',
@@ -43,6 +48,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
   private battleEventSource: EventSource | null = null;
   private streamBootstrapTimeout: ReturnType<typeof setTimeout> | null = null;
+  private attackTrailTimeout: ReturnType<typeof setTimeout> | null = null;
+  private battleCalloutTimeout: ReturnType<typeof setTimeout> | null = null;
   private teamIds: number[] = [];
   private lastBattleAnimationKey = '';
   private readonly handleVisibilityChange = () => {
@@ -54,6 +61,9 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   };
 
   @ViewChild('battleMusic') battleMusic?: ElementRef<HTMLAudioElement>;
+  @ViewChild('diceSfx') diceSfx?: ElementRef<HTMLAudioElement>;
+  @ViewChild('attackSfx') attackSfx?: ElementRef<HTMLAudioElement>;
+  @ViewChild('impactSfx') impactSfx?: ElementRef<HTMLAudioElement>;
 
   battleId = signal<number | null>(null);
   isPractice = signal(false);
@@ -79,6 +89,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   diceValue = signal<number | null>(null);
   showDice = signal(false);
   diceRolling = signal(false);
+  diceLanded = signal(false);
   diceLabel = signal('Rolling for attack power!');
   showConfetti = signal(false);
   showVictoryModal = signal(false);
@@ -87,6 +98,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   showRunawayResultModal = signal(false);
   realtimeStatus = signal<'live' | 'syncing'>('syncing');
   attackImpactSide = signal<'player' | 'opponent' | null>(null);
+  attackTrailSide = signal<'player' | 'opponent' | null>(null);
+  battleCallout = signal<{ text: string; tone: 'buff' | 'nerf' | 'neutral' } | null>(null);
   isSubmittingBattleResult = signal(false);
   isSubmittingRun = signal(false);
   runawayResultMessage = signal('');
@@ -143,6 +156,16 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     if (this.isBrowser) {
       document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    }
+
+    if (this.attackTrailTimeout) {
+      clearTimeout(this.attackTrailTimeout);
+      this.attackTrailTimeout = null;
+    }
+
+    if (this.battleCalloutTimeout) {
+      clearTimeout(this.battleCalloutTimeout);
+      this.battleCalloutTimeout = null;
     }
 
     this.stopBattleSync();
@@ -429,23 +452,28 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     this.showDice.set(true);
     this.diceRolling.set(true);
+    this.diceLanded.set(false);
     this.diceLabel.set(label ?? 'Rolling for attack power!');
     this.diceValue.set(null);
+    this.playSfx(this.diceSfx, { volume: 0.3, fromMs: 80 });
 
     let counter = 0;
     const interval = setInterval(() => {
       this.diceValue.set(Math.floor(Math.random() * 6) + 1);
       counter++;
-      if (counter > 12) {
+      if (counter > this.diceTicks) {
         clearInterval(interval);
         this.diceValue.set(resolvedRoll);
         this.diceRolling.set(false);
+        this.diceLanded.set(true);
+        this.playSfx(this.diceSfx, { volume: 0.42, fromMs: 440 });
         setTimeout(() => {
           this.showDice.set(false);
+          this.diceLanded.set(false);
           callback();
-        }, 600);
+        }, this.diceSettleMs);
       }
-    }, 80);
+    }, this.diceTickMs);
   }
 
   executePlayerAttack(attackObj: any): void {
@@ -463,6 +491,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     setTimeout(() => {
+      this.triggerAttackTrail('player');
       this.playerAttacking.set(true);
 
       const attackerStat = attacker.attack || 10;
@@ -492,8 +521,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
           this.endTurn();
         }, 400);
-      }, 400);
-    }, 200);
+      }, this.attackImpactMs);
+    }, this.attackWindupMs);
   }
 
   opponentTurn(): void {
@@ -518,24 +547,49 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    const availableAttacks = opponent.attacks && opponent.attacks.length > 0
+      ? opponent.attacks
+      : [{ name: 'Tackle', dmg: 10, status_chance: null, statusEffect: undefined }];
+    const randomAttack = availableAttacks[Math.floor(Math.random() * availableAttacks.length)];
+
+    this.rollDice(
+      () => this.executeOpponentAttack(randomAttack),
+      undefined,
+      `${opponent.name} rolls the battle dice`,
+    );
+  }
+
+  private executeOpponentAttack(attackObj: any): void {
+    const opponent = this.opponentXuxemon();
+    const player = this.selectedXuxemon();
+    if (!opponent || !player) {
+      this.currentTurn.set('player');
+      this.battleStatus.set('ready');
+      return;
+    }
+
     setTimeout(() => {
+      this.triggerAttackTrail('opponent');
       this.opponentAttacking.set(true);
 
       const opponentAttack = opponent.attack || 10;
       const playerDefense = player.defense || 5;
-      const availableAttacks = opponent.attacks && opponent.attacks.length > 0
-        ? opponent.attacks
-        : [{ name: 'Tackle', dmg: 10, status_chance: null, statusEffect: undefined }];
-      const randomAttack = availableAttacks[Math.floor(Math.random() * availableAttacks.length)];
-      const roll = Math.floor(Math.random() * 6) + 1;
+      const roll = this.diceValue() || 0;
       const playerMaxHp = player.hp || 100;
       const playerCurrentHp = this.getCurrentHpValue(player);
-      const damageAmount = this.calculateDamageAmount(opponentAttack, playerDefense, randomAttack.dmg, roll, this.calculateModifiers(opponent, player), playerMaxHp);
+      const damageAmount = this.calculateDamageAmount(
+        opponentAttack,
+        playerDefense,
+        attackObj.dmg,
+        roll,
+        this.calculateModifiers(opponent, player),
+        playerMaxHp,
+      );
       const newHpValue = Math.max(0, playerCurrentHp - damageAmount);
       const newHpPercent = playerMaxHp > 0 ? (newHpValue / playerMaxHp) * 100 : 0;
-      const updatedPlayer = this.applyAttackStatusEffectToTarget({ ...player, current_hp: newHpValue }, randomAttack);
+      const updatedPlayer = this.applyAttackStatusEffectToTarget({ ...player, current_hp: newHpValue }, attackObj);
 
-      this.addLog(`${opponent.name} used ${randomAttack.name}! (Roll: ${roll}, -${damageAmount} HP)`);
+      this.addLog(`${opponent.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`);
 
       setTimeout(() => {
         this.opponentAttacking.set(false);
@@ -556,31 +610,44 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
           this.currentTurn.set('player');
           this.battleStatus.set('ready');
         }, 400);
-      }, 400);
-    }, 400);
+      }, this.attackImpactMs);
+    }, this.attackWindupMs);
   }
 
   calculateModifiers(attacker: Xuxemon, defender: Xuxemon): number {
     let modifiers = 0;
     const attackerType = attacker.type?.name?.toLowerCase() || '';
     const defenderType = defender.type?.name?.toLowerCase() || '';
+    let effectiveness: 'buff' | 'nerf' | null = null;
 
     if ((attackerType === 'aigua' && defenderType === 'terra')
       || (attackerType === 'terra' && defenderType === 'aire')
       || (attackerType === 'aire' && defenderType === 'aigua')) {
-      modifiers += 2;
-      this.addLog(`It's super effective! +2`);
+      modifiers += 1;
+      this.addLog(`It's super effective! +1`);
+      effectiveness = 'buff';
+      this.showBattleCallout('SUPER EFFECTIVE!', 'buff');
     }
 
     if ((attackerType === 'terra' && defenderType === 'aigua')
       || (attackerType === 'aire' && defenderType === 'terra')
       || (attackerType === 'aigua' && defenderType === 'aire')) {
-      modifiers -= 2;
-      this.addLog(`It's not very effective... -2`);
+      modifiers -= 1;
+      this.addLog(`It's not very effective... -1`);
+      effectiveness = 'nerf';
+      this.showBattleCallout('NOT VERY EFFECTIVE', 'nerf');
     }
 
-    if (attacker.size === 'Large') {
+    if (attacker.size === 'Medium') {
       modifiers += 1;
+      if (!effectiveness) {
+        this.showBattleCallout('SIZE BONUS +1', 'neutral');
+      }
+    } else if (attacker.size === 'Large') {
+      modifiers += 2;
+      if (!effectiveness) {
+        this.showBattleCallout('SIZE BONUS +2', 'neutral');
+      }
     }
 
     return modifiers;
@@ -736,6 +803,23 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   getSwitchCandidates(): Xuxemon[] {
     const currentId = this.selectedXuxemon()?.adquired_id;
     return this.myXuxemons().filter((xuxemon) => this.getCurrentHpValue(xuxemon) > 0 && xuxemon.adquired_id !== currentId);
+  }
+
+  getSwitchMenuXuxemons(): Xuxemon[] {
+    const seen = new Set<string>();
+
+    return this.myXuxemons().filter((xuxemon) => {
+      const key = xuxemon.adquired_id !== undefined
+        ? `adquired:${xuxemon.adquired_id}`
+        : `base:${xuxemon.id}`;
+
+      if (seen.has(key)) {
+        return false;
+      }
+
+      seen.add(key);
+      return true;
+    });
   }
 
   canSwitchToXuxemon(xuxemon: Xuxemon): boolean {
@@ -940,8 +1024,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.forcedSwitch.set(requiresForcedSwitch);
     if (requiresForcedSwitch) {
       this.currentSubMenu.set('switch');
-    } else if (this.currentSubMenu() === 'switch' && !this.isPractice()) {
-      this.currentSubMenu.set(null);
     }
 
     if (!normalizedData.winner_id) {
@@ -1030,23 +1112,26 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   private playSpriteAnimation(side: 'player' | 'opponent'): void {
     if (side === 'player') {
+      this.triggerAttackTrail('player');
       this.playerAttacking.set(true);
       setTimeout(() => {
         this.playerAttacking.set(false);
         this.showAttackImpact('opponent');
-      }, 320);
+      }, this.attackImpactMs);
       return;
     }
 
+    this.triggerAttackTrail('opponent');
     this.opponentAttacking.set(true);
     setTimeout(() => {
       this.opponentAttacking.set(false);
       this.showAttackImpact('player');
-    }, 320);
+    }, this.attackImpactMs);
   }
 
   private showAttackImpact(targetSide: 'player' | 'opponent'): void {
     this.attackImpactSide.set(targetSide);
+    this.playSfx(this.impactSfx, { volume: 0.44, fromMs: 120 });
 
     if (targetSide === 'player') {
       this.playerHit.set(true);
@@ -1062,6 +1147,56 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.opponentHit.set(false);
       this.attackImpactSide.set(null);
     }, 360);
+  }
+
+  private triggerAttackTrail(side: 'player' | 'opponent'): void {
+    this.attackTrailSide.set(side);
+    this.playSfx(this.attackSfx, { volume: 0.35, fromMs: side === 'player' ? 0 : 220 });
+
+    if (this.attackTrailTimeout) {
+      clearTimeout(this.attackTrailTimeout);
+    }
+
+    this.attackTrailTimeout = setTimeout(() => {
+      this.attackTrailSide.set(null);
+      this.attackTrailTimeout = null;
+    }, 380);
+  }
+
+  private showBattleCallout(text: string, tone: 'buff' | 'nerf' | 'neutral'): void {
+    this.battleCallout.set({ text, tone });
+
+    if (this.battleCalloutTimeout) {
+      clearTimeout(this.battleCalloutTimeout);
+    }
+
+    this.battleCalloutTimeout = setTimeout(() => {
+      this.battleCallout.set(null);
+      this.battleCalloutTimeout = null;
+    }, 1300);
+  }
+
+  private playSfx(
+    audioRef: ElementRef<HTMLAudioElement> | undefined,
+    options?: { volume?: number; fromMs?: number },
+  ): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
+    const audio = audioRef?.nativeElement;
+    if (!audio) {
+      return;
+    }
+
+    try {
+      audio.pause();
+      audio.currentTime = Math.max(0, (options?.fromMs ?? 0) / 1000);
+      audio.volume = options?.volume ?? 0.4;
+      void audio.play().catch(() => undefined);
+    } catch {
+      // Ignore transient playback failures from browser autoplay policies.
+    }
   }
 
   private startBattleMusic(): void {
@@ -1499,6 +1634,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.submitLinkedBattleAction({
         action_type: 'use_item',
         bag_item_id: item.bag_item_id,
+        target_adquired_xuxemon_id: target.adquired_id,
       });
       return;
     }

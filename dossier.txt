@@ -1,0 +1,387 @@
+Informàtica CFGS DESENVOLUPAMENT D'APLICACIONS WEB
+
+0612 ENT-CLI 0613 ENT-SERV 0614 DESPLEGAMENT APPS-WEB 0615 DISS.INT.WEB
+0000 MPO
+
+Durada: 154 Sessions x 1 h
+
+Organització: Grups 3 persones
+
+Repte XUXEMONS
+Breu descripció
+Es tracta de desenvolupar una aplicació web gamificada on els usuaris col·leccionen Xuxemons, els fan créixer amb xuxes, gestionen inventaris i poden interactuar amb altres jugadors mitjançant amics, intercanvis, batalles i xat. Inclou funcionalitats avançades com enfermetats, vacunes, recompenses diàries, desplegament amb Docker i seguretat amb
+JWT. 
+1
+
+El Repte
+El repte consisteix en crear una aplicació web gamificada amb arquitectura moderna, utilitzant Laravel per al backend, Angular per al frontend i Docker per al desplegament. L'objectiu és implementar un ecosistema on els usuaris puguin col·leccionar criatures anomenades Xuxemons, gestionar recursos i interactuar entre ells.
+Objectiu principal
+Crear una plataforma on:  Els jugadors es registren i inicien sessió.  Reben Xuxemons i xuxes (dolços) per fer-los créixer.  Gestionen una mochila (inventari) i una Xuxedex (col·lecció).  Poden interactuar amb altres jugadors: amics, intercanvis, batalles i xat.
+Usuaris
+  L'usuari Jugador serà a partir d'ara   L'usuari Administrador serà a partir d'ara   Tots els usuaris en general
+2
+
+Funcionalitat per nivells
+
+Nivell 1 ­ Autenticació i Perfil
+
+Funció Registre
+ID
+Login
+Pàgina Principal Pàgina Info
+Usuari
+
+Usuari
+
+
+  
+
+Descripció
+  - El primer registrat pasarà automáticament a ser .  - Cada vegada que es registri un es generarà un ID
+aleatori per a aquest jugador. - Camps del formulari: Nom, Cognoms, Email, Contrasenya i Repetir Contrasenya
+- Es genera automàticament en registrar-se. - L'ID té la següent forma: #NomXXXX. - On Nom és el que s'hagi posat en el formulari sense espais. - I XXXX és un número aleatori de 4 xifres del 0000 al 9999
+- Camps del formulari: ID i Contrasenya. - El mateix formulari per a tots dos tipus d'usuari, la distinció es fa la pàgina principal. - Redirecció a pàgina principal.
+- Posar un botó on poder anar a l'apartat Pàgina Info Usuari.
+- Des d'aquesta pàgina es podrà veure i canviar la informació personal de l'usuari: Nom, Cognoms, Email i Contrasenya. - Addicionalment ha d'haver-hi l'opció per a donar-se de baixa i que per tant, no pugui tornar a entrar amb aquest usuari. Ha d'haver-hi un diàleg de confirmació.
+
+ Angular: Components per formularis i validació.  Laravel: Rutes API per registre/login, controladors per gestió d'usuaris.  JWT: Autenticació sense estat, token guardat en localStorage i enviat en cada
+petició via HttpInterceptor.
+
+3
+
+Nivell 2 ­ Inventari i Col·lecció
+
+Funció Pàgina Principal Pàgina Motxilla (inventari)
+Xuxemon
+Pàgina Xuxedex
+
+Usuaris
+ 
+   
+
+Descripció
+- Posar un botó on podrem anar a l'apartat Motxilla. - Posar un botó on podrem anar a l'apartat Xuxedex.
+- En aquesta pàgina han d'haver-hi un total de 20 espais en total per a objectes. - Cal distingir entre dos tipus d'objectes: Apilables i No apilables. - Els objectes Apilables (xuxes) s'agrupen com a màxim en 5 unitats per espai:
+Si per exemple tinguéssim 6 objectes Apilables d'un mateix tipus, ocuparia 1 espai de 5 objectes i 1 espai d'1 objecte en la nostra motxilla. - Els objectes No apilables (vacunes) ocupen 1 espai cadascun. - Per a aquest nivell cal crear 3 tipus d'objecte Apilable que siguin Xuxes.
+ - Ha de poder veure una llista amb tots els i afegir-los  una quantitat de Xuxes específica.
+- En cas de tenir la motxilla plena el jugador objectiu, el no podrà afegir més Xuxes i si sobren es descarten.
+- Definir els tipus (Aigua, Terra i Aire). - Definir les grandàries (Petit, Mitjà i Gran). - Transició entre grandàries, de Petit a Mitjà i de Mitjà a Gran.
+- En aquesta pàgina es mostraran tots els Xuxemons que tingui en la seva col·lecció. - No hi ha límit de Xuxemons. - Es poden repetir els Xuxemons.
+ - Ha de poder veure una llista amb tots els i afegir-los un
+Xuxemon aleatori.
+
+ Angular: Components per mostrar la Mochila i la Xuxedex amb disseny responsive.  Laravel: Models per Xuxemons i objectes, endpoints per CRUD.
+
+4
+
+Nivell 3 ­ Mecàniques avançades
+
+Funció Pujar Nivell Xuxemons
+Enfermetats
+Vacunes Sistema d'Infecció
+Xuxes diaries
+Xuxemon diari
+
+Usuaris
+
+ 
+      
+
+Descripció
+- Un Xuxemon comença en grandària Petita. - Funcionalitat que permet als Xuxemons pujar de nivell:
+ 3 Xuxes de petit a mitjà  5 Xuxes de mitjà a gran
+- Pot canviar la quantitat de Xuxes necessàries per a fer créixer als Xuxemons.
+- Veure taula més a baix. - Un Xuxemon pot estar malalt de diverses malalties. - Un Xuxemon malalt ha de mostrar el seu estat en la Xuxedex.
+- Veure taula més a baix.
+- Per cada Xuxe amb la qual s'alimenti a un Xuxemon, existeix un % d'infecció aleatori per a contraure una de les malalties de l'apartat anterior. Veure taula.
+ - Es pot modificar el % d'infecció.
+- Ha de poder veure una llista amb tots els i afegir-los la vacuna que ell vulgui.
+ - A les 08.00 AM de cada dia els reben 10 Xuxes
+aleatòries.
+- Pot canviar l'hora en què es reben les Xuxes i la quantitat.
+ - A les 08.00 AM de cada dia els rep 1 Xuxemon
+aleatori de grandària petita.
+- Pot canviar l'hora en què es rep el Xuxemon.
+
+Taula de Malalties:
+
+Malaltia "Bajón de azúcar"
+"Atracón"
+
+Descripció
+Requereix +2 xuxes per nivell per a créixer
+El xuxemon no pot alimentar-se, per tant l'usuari no pot donar-li menjar.
+
+5
+
+Taula de Vacunes:
+
+Vacunes
+
+Descripció
+
+Xocolatina
+
+Objecte No Apilable que s'emmagatzema en la motxilla i en usar-ho en un Xuxemon treu "Bajón de azúcar"
+
+Xal de fruites
+
+Objecte No Apilable que s'emmagatzema en la motxilla i en usar-ho en un Xuxemon treu "Atracón"
+
+Inxulina
+
+Objecte No Apilable que s'emmagatzema en la motxilla i en usar-ho en un Xuxemon cura totes les malalties d'aquest Xuxemon.
+
+Sistema d'Infecció:
+
+"Bajón de azúcar" Sobredosis de sucre
+"Atracón"
+
+5% 10% 15%
+
+Nivell 4 ­ Social i Desplegament
+
+Funció
+Pàgina Amics
+
+Usuaris
+
+
+Descripció
+- Haureu d'afegir un nou apartat on aparegui la llista d'amics. - Barra de cerca d'usuaris a partir de l'ID. - Del resultat de la barra de cerca, s'ha de poder enviar una sol·licitud d'amistat a qualsevol d'ells. - La sol·licitud es podrà confirmar o rebutjar per l'usuari destinatari. - Si es rebutja, s'elimina la sol·licitud. - Si s'accepta, apareixerà l'usuari remitent en la seva llista d'amics i viceversa. - S'han de poder eliminar els amics, això implica que s'esborrarà de la llista d'amics de l'altre usuari també.
+
+Desplegament
+
+
+
+- Crear contenidors amb PHP, MySQL i Node per Angular
+
+amb Docker
+
+- Configuració per accedir des del client.
+
+6
+
+Nivell 5 ­ Seguretat i SEO
+ Autenticació amb JWT:  Sessió d'usuari: Tokens amb expiració (2h), això implica que si en algun moment dins d'aquestes 2h tanca i obre la pàgina, ha de poder entrar automàticament.  Si l'usuari tanca sessió, s'ha d'eliminar la sessió i per tant en tancar i tornar a obrir la pàgina ha de demanar una altra vegada les credencials de Login o Registre.  S'ha d'implementar JWT per a la comunicació entre el client i el servidor.
+ SEO:  Bones pràctiques en HTML per indexació.
+
+Nivell 6 ­ Interacció avançada (NOTA DEL 9 AL 10)
+
+Funció Xat
+Batalla
+Pàgina Batalla
+
+Usuaris
+ 
+
+
+Descripció
+- Ha d'haver-hi un xat per a poder parlar amb qualsevol dels vostres amics i s'han de guardar l'historial dels missatges en la BBDD. - El xat ha de ser instantani.
+- Els usuaris poden fer batalles contra amics. - Per a fer una batalla, des de la Pàgina d'Amics ha d'haver-hi un botó al costat de l'amic (en la llista d'amics) per a sol·licitar una batalla. - És necessari que l'amic-rival accepti la batalla. - Una vegada acceptada la batalla passarem a la pàgina de Batalla.
+ - Es mostra a cada la seva llista de Xuxemons (sans) en
+un lateral per a poder seleccionar el que desitgi. - Tirada de dau (1D6) + modificadors per tipus i mida. Veure taula. - El guanyador roba un Xuxemon al perdedor.
+
+Taula de Combat:
+Modificadors +1 +1 +2
+
+Descripció Si el tipus del Xuxemon té avantatge Per tamany Mitjà Per tamany Gran
+
+7
+
+-1
+
+Si el tipus del Xuxemon té desavantatge
+
+Diagrama d'avantatges:
+
+Tecnologies clau
+ Laravel (PHP): gestió del servidor, API REST, autenticació amb JWT, persistència en base de dades.
+ Angular: interfície dinàmica, components per a pàgines (login, inventari, Xuxedex, amics, batalles).
+ Docker: desplegament amb Docker Compose per garantir entorns consistents i fàcil instal·lació.
+Objectiu final
+Crear una aplicació completa que combini backend robust amb Laravel, frontend dinàmic amb Angular i desplegament professional amb Docker, aplicant bones pràctiques de seguretat i escalabilitat.
+
+8
+
+Resultats d'Aprenentatge
+
+TÈCNICS: 0612 ENT-CLI
+
+RA5: Desenvolupa aplicacions web interactives integrant mecanismes de maneig d'esdeveniments.
+
+RA6: Desenvolupa aplicacions web analitzant i aplicant les característiques del model d'objectes del document.
+
+RA7: Desenvolupa aplicacions web dinàmiques, reconeixent i aplicant mecanismes de comunicació asíncrona entre client i servidor.
+
+0613 ENT-SERV
+
+RA6: Desenvolupa aplicacions web d'accés a magatzems de dades, aplicant mesures per mantenir la seguretat i la integritat de la informació.
+
+RA7: Desenvolupa serveis web reutilitzables i accessibles mitjançant protocols web, verificant-ne el funcionament.
+
+RA9: Desenvolupa aplicacions web híbrides seleccionant i utilitzant tecnologies, frameworks servidor i repositoris heterogenis d'informació.
+
+0614 DESPLEGAMENT
+APPS-WEB
+
+RA1: Implanta arquitectures web analitzant i aplicant criteris de funcionalitat.
+RA2: Implanta aplicacions web en servidors web, avaluant i aplicant criteris de configuració per al funcionament segur.
+
+RA3: Implanta aplicacions web en servidors d'aplicacions, avaluant i aplicant criteris de configuració per al funcionament segur.
+
+RA5: Verifica l'execució d'aplicacions web comprovant els paràmetres de configuració de serveis de xarxa.
+
+RA6: Elabora la documentació de l'aplicació web avaluant i seleccionant eines de generació de documentació, control de versions i d'integració contínua.
+
+0615 DISS.INT.WEB RA3: Prepara arxius multimèdia per al web, analitzant-ne les característiques i manejant eines específiques.
+
+RA4: Integra contingut multimèdia en documents web valorant la seva aportació i seleccionant adequadament els elements interactius.
+
+RA5: Desenvolupa interfícies web accessibles, analitzant les pautes establertes i aplicant-hi tècniques de verificació.
+
+9
+
+0000 MPO
+
+RA6: Desenvolupa interfícies web amigables analitzant i aplicant les pautes d'usabilitat establertes.
+RA2: Desenvolupa interfícies web accessibles mitjançant bones pràctiques de disseny i implementació tècnica.
+
+TRANSVERSALS - Capacitat d'organització del treball - Capacitat de responsabilitat en el treball - Autonomia i capacitat d'iniciativa - Capacitat de relació interpersonal - Capacitat de treball en equip
+1. Tasques a realitzar
+
+0615.Dissseny d'interfícies web (per nivell)
+Nivell 0 - Especificacions de disseny i Prototips Figma:  Prototips Figma d'alta fidelitat de TOTES les pantalles amb navegació  Design system (colors, tipografies, components)  Document amb guia d'estil completa
+Nivell 1 - Autenticació i perfil:  Flexbox: Centrar formularis de login i registre.  Bootstrap: Form, inputs, botons, alerts.  Animacions: Transicions suaus en errors/èxits.
+Nivell 2 - Inventari i Col·lecció:  Grid CSS: Xuxedex responsive (6-4-2 cols).  Grid CSS: Inventari fix 4x5 (20 slots).  Bootstrap: Cards per Xuxemons i items.  Flexbox: Badges per tipus, mida, quantitat.  Animacions: Hover effects en targetes.
+Nivell 3 ­ Mecàniques avançades:  Bootstrap: Modals (popup) per alimentar i vacunar  Animacions CSS: Evolució (scale-up, particles (opcional))  Flexbox: Layout de preview d'evolució  Bootstrap: Forms per admin (config paràmetres)  Animacions: Notificacions de recompenses diàries
+Nivell 4 ­ Social i Desplegament:  Flexbox: Layout cerca + resultats + llista amics  Bootstrap: Input group per cerca, cards per amics
+10
+
+ Bootstrap: Badges per sol·licituds pendents  Animacions: Transicions en afegir/eliminar amics
+Nivell 5 ­ Seguretat i SEO:
+ Responsive: Testing final en tots els dispositius  SEO: Meta tags en index.html
+Nivell 6 ­ Interacció avançada:
+ Flexbox: Layout chat (missatges + input)  Grid CSS: Arena batalla (2 columnes: jo vs rival)  Animacions CSS: Daus rodant, shake, confeti  Bootstrap: Popup per resultats batalla  Flexbox: Missatges alineats (propis vs altres)
+0612.Desenvolupament web en entorn client (per nivell)
+Nivell 1 - Autenticació i perfil:
+ Funcionalitats:  Formulari login: ID + Password  Formulari registre: Nom, Cognoms, Email, Password, Confirm Password  Validadors: required, email, minLength(6), passwordMatch  Generació ID visual: #Nom0000 (preview client)  AuthService amb BehaviorSubject per usuari actual  Login/Registre guarda token JWT a localStorage  Rutes: /login, /register, /home, /profile  Editar perfil (Nom, Cognoms, Email, Password)  Eliminar compte amb diàleg de confirmació  AuthGuard per protegir rutes
+ Conceptes Angular:  Forms reactius amb validadors personalitzats  BehaviorSubject per estat d'usuari  Routing bàsic  @if per mostrar errors de validació  Property/Event binding
+Nivell 2 - Inventari i Col·lecció:
+ Funcionalitats:  Xuxedex: Llistar tots els Xuxemons  Filtres: per tipus (Aigua/Terra/Aire), mida (Petit/Mitjà/Gran)  Inventari: Grid 4x5 (20 slots visuals)  Apilament visual: mostrar x5, x3, etc.  Distinció visual: Apilables vs No apilables  XuxemonService amb BehaviorSubject  InventoryService amb BehaviorSubject  Rutes: /xuxedex, /inventory  Panel Admin: llista usuaris + formulari afegir items  AdminGuard per protegir /admin
+ Conceptes Angular:
+11
+
+ @for per llistar Xuxemons i slots  @if per slots buits/plens  [ngClass] per classes dinàmiques (tipus, mida)  .filter() per filtrar Xuxemons  @Input/@Output per components reutilitzables  Rutes amb guards
+Nivell 3 ­ Mecàniques avançades:
+ Funcionalitats:  Alimentar Xuxemon: Seleccionar Xuxe + quantitat  Càlcul evolució client-side  Comprovar malaltia "Atracón": no pot menjar  Preview abans de confirmar alimentació  Sistema d'infecció probabilístic  Aplicar vacunes  Indicadors visuals de malalties a Xuxedex  Animació d'evolució (CSS keyframes)  Admin: modificar paràmetres del joc (formulari)  Notificació visual de recompenses diàries  Simular recompenses diàries (client-side per testing)
+ Conceptes Angular:  Lògica complexa en services  Validacions abans d'enviar al backend  Forms per admin amb múltiples camps
+Nivell 4 ­ Social i Desplegament:
+ Funcionalitats:  Barra de cerca per ID amb debounce (300ms)  Filtrar usuaris: mínim 3 caràcters  Enviar sol·licitud d'amistat  Llista de sol·licituds rebudes  Acceptar sol·licitud (bidireccional)  Rebutjar sol·licitud (eliminar)  Llista d'amics  Eliminar amic (bidireccional)  Badge amb número de sol·licituds pendents  FriendsService amb BehaviorSubject  Ruta: /friends
+ Conceptes Angular:  FormControl amb valueChanges  debounceTime, distinctUntilChanged, filter (RxJS)  .filter() per cerca  Diàlegs de confirmació  Badge dinàmic amb comptador (notificacions).
+Nivell 5 ­ Seguretat i SEO:
+ JWT (ja implementat en Nivell 1, aquí refinament):  AuthInterceptor per afegir token automàticament
+12
+
+ Gestió expiració token (2h)  Auto-login si token vàlid  Logout elimina token i redirigeix  Captura error 401  logout automàtic  SEO:  Meta tags: title, description, keywords  Semàntica HTML correcta (header, main, nav, section)  Alt text en imatges  Títols jeràrquics (h1, h2, h3)  Conceptes Angular:  HttpInterceptor  Error handling centralitzat  Loading states globals  Meta tags dinàmics
+Nivell 6 ­ Interacció avançada:
+CHAT:
+ Components:  Chat - Interfície chat completa  Message - Missatge individual
+ Funcionalitats:  Enviar missatges a amics  Historial de missatges  Scroll automàtic a últim missatge  Timestamps relatius ("fa 5 min")  Indicador visual propis vs rebuts  Simulació de resposta automàtica (mock)  ChatService amb BehaviorSubject  Ruta: /chat/:friendId
+BATALLA:
+ Components:  Battle - Arena de batalla  BattleResult - Pantalla resultats
+ Funcionalitats:  Seleccionar Xuxemon (només sans)  Mostrar Xuxemons de l'amic  Llançar dau 1D6 per cada jugador  Calcular modificadors  Avantatges: Aigua > Terra > Aire > Aigua  Mostrar modificadors visuals  Determinar guanyador (dau + mods)  Transfer Xuxemon al guanyador  Ruta: /battle/:battleId
+ Conceptes Angular:  Rutes amb paràmetres (ActivatedRoute)  Lògica de càlcul de modificadors  Simulació de temps real (setTimeout)
+13
+
+ Actualització reactiva amb BehaviorSubject
+0613.Desenvolupament web en entorn servidor
+Nivell 1 - Autenticació i perfil:
+ Funcionalitats:  Backend per gestionar el login del usuari  Backend per gestionar el registre d'un usuari  Encriptació de la contrasenya  Validació de usuari existent  Login/Registre gestió del sessión id (token)  Rutes: /login, /register, /home, /profile  Backend editar perfil (Nom, Cognoms, Email, Password)  Delete usuari  Utilització de crides POST per protegir rutes  Implementació de rols (middleware)
+ Conceptes Laravel:  Model usuari  Controlador usuari  CRUD usuari  Rutes API  Middleware (usuari o admin)
+Nivell 2 - Inventari i Col·lecció:
+ Funcionalitats:  Xuxedex: Llistar tots els Xuxemons  Query: per tipus (Aigua/Terra/Aire), mida (Petit/Mitjà/Gran)  Inventari: crear, modificar, llistar, eliminar  Rutes: /xuxedex, /inventory
+ Conceptes Laravel:  CRUD xuxemons  CRUD inventari  Rutes API  Model xuxemons/inventari  Controlador xuxemons/inventari
+Nivell 3 ­ Mecàniques avançades:
+ Funcionalitats:  Alimentar Xuxemon: query per assignar xuxe  Control de malalties a xuxemon, retornar missatges "xuxemon no pot menjar"  Infecció xuxemon (per probabilitat)  Aplicar vacunes  Evolució, guardar imatges en base de dades  Admin: query modificació parámetres joc
+ Conceptes Laravel:  Validacions a nivell de backend  Validació funcions usuari administrador
+14
+
+Nivell 4 ­ Social i Desplegament:
+ Funcionalitats:  Filtrar usuaris: query per filtrar amb mínim 3 caràcters  Gestió de solicituds: crear i cambiar estat  Control de solicituds pendents  Gestió llistat amics: crear i eliminar amics
+ Conceptes Laravel:  CRUD solicituds  CRUD amics
+Nivell 5 ­ Seguretat i SEO:
+ JWT (ja implementat en Nivell 1, aquí refinament):  Gestió token  Aplicació middleware per control de rols d'usuari
+ Conceptes Laravel:  JSON amb token  API REST
+Nivell 6 ­ Interacció avançada:
+CHAT:
+ Funcionalitats:  Control accés usuaris, usuari amic  Historial de missatges, enmagatzemar a la base de dades i consultar missatges  Ruta: /chat/:friendId
+ Conceptes Laravel:  API Rest (JSON)  CRUD missatges
+BATALLA:
+ Funcionalitats:  Seleccionar Xuxemon (només sans)  Mostrar Xuxemons de l'amic  Llançar dau 1D6 per cada jugador  Calcular modificadors  Avantatges: Aigua > Terra > Aire > Aigua  Mostrar modificadors visuals  Determinar guanyador (dau + mods)  Transfer Xuxemon al guanyador, control a nivell de base de dades  Ruta: /battle/:battleId
+ Conceptes Laravel:  Rutes amb paràmetres  API Rest (JSON)
+15
+
+0614.Desplegament d'aplicacions web
+Tasca 1 ­ Documentació tècnica de l'aplicació
+Elaborar un document tècnic complet de l'aplicació web desenvolupada.
+La documentació ha d'incloure com a mínim:
+ Descripció general del projecte i objectius.  Arquitectura de l'aplicació (frontend, backend, base de dades).  Diagrama de contenidors (Docker).  Estructura de carpetes del projecte.  Tecnologies utilitzades i justificació.  Requisits per al desplegament.  Procés d'instal·lació i posada en marxa en local.  Variables d'entorn utilitzades i la seva funció.
+La documentació s'ha de redactar en format PDF i s'ha d'incloure dins del repositori del projecte.
+Tasca 2 ­ Manual d'usuari
+Crear un manual d'usuari orientat a persones no tècniques.
+El manual ha d'incloure:
+ Accés a l'aplicació i registre d'usuari.  Inici de sessió i tancament de sessió.  Descripció de totes les funcionalitats principals de l'aplicació.  Captures de pantalla de les pantalles més importants.  Flux d'ús recomanat de l'aplicació.  Resolució de problemes habituals (FAQ).
+El manual s'ha de lliurar en format PDF i també ha d'estar accessible des del repositori.
+Tasca 3 ­ Desplegament amb Docker Compose
+Crear un entorn complet de desplegament mitjançant Docker Compose.
+El fitxer docker-compose.yml ha d'incloure com a mínim:
+ Contenidor per al backend (Laravel).  Contenidor per al frontend (Angular).  Contenidor per a la base de dades (MySQL o equivalent).
+16
+
+ Xarxa interna entre serveis.  Volums per a persistència de dades.
+El desplegament ha de permetre:
+ Posar en marxa tota l'aplicació amb una sola comanda.  Accedir a l'aplicació des del navegador.  Mantenir les dades entre reinicis dels contenidors.
+Afegir a la documentació:
+ Explicació del docker-compose.yml.  Comandes bàsiques d'ús (start, stop, rebuild).  Captures o proves de funcionament del desplegament.
+Tasca 4 ­ Control de versions i lliurament
+Tot el projecte ha d'estar versionat amb Git.
+El repositori ha d'incloure:
+ Codi font complet.  Documentació tècnica.  Manual d'usuari.  Fitxers de Docker i Docker Compose.
+S'ha d'entregar l'enllaç al repositori Git com a lliurament final de l'assignatura.
+0000.L'accessibilitat i l'experiència d'usuari en el desenvolupament web (per nivell) Nivell 1 - Autenticació i perfil:
+ Aplicar principis bàsics d'accessibilitat en formularis.  Principis de disseny accessible  Contrast mínim WCAG AA (4.5:1)  No usar només color per errors  Tipografia mínima 16px  Jerarquia clara (h1 únic per pàgina)  HTML semàntic  header  main  section  form  footer  Formularis accessibles  Cada input amb el seu label for  id únics  Missatges d'error associats amb:
+17
+
+ aria-describedby  aria-live="polite" per errors dinàmics  Botó amb text clar ("Inicia sessió")  Navegació amb teclat  Tabulació correcta  Focus visible (no eliminar outline)  Enter envia formulari
+Nivell 2 - Inventari i Col·lecció:
+ Fer accessibles estructures complexes (grid + cards)  Estructura semàntica correcta  nav per menú principal  main únic  section per inventari  section per col·lecció  article per cada Xuxemon  Cards accessibles  Cada Xuxemon ha de:  Tenir h2  Imatge amb alt descriptiu  Estat textual (no només icona)  Botons amb text explícit (no només icona)  Grid inventari accessible  Opció A (recomanada):
+<ul class="inventory"> <li>Slot 1 - 3 Xuxes tipus maduixa</li>
+</ul>  Opció B (nivell alt):
+ role="grid"  role="gridcell"  Color i estat  Si un Xuxemon està:  Malalt  text + icona + color  Gran  no només canvi visual, també text  Focus visual  Hover  Focus
+Nivell 3 ­ Mecàniques avançades:
+ Fer accessibles interaccions dinàmiques.  Modals accessibles  role="dialog"  aria-modal="true"  Focus es mou dins el modal  ESC el tanca  En tancar, torna el focus al botó original  Sistema d'infecció (dinàmic)  Si apareix notificació:  aria-live="assertive" per missatges importants
+18
+
+ No només animació visual  Formularis admin accessibles
+ fieldset  legend  Inputs agrupats correctament  Animacions accessibles  No han de ser essencials per entendre acció  Respectar prefers-reduced-motion
+Nivell 4 ­ Social i Desplegament:
+ Accessibilitat en llistes dinàmiques i cerca.  Barra de cerca accessible  label visible  Placeholder no substitueix label  Resultats dins aria-live="polite"  Llista d'amics  ul / li
+   Botons amb text complet:  per exemple ( "+" / "Enviar sol·licitud d'amistat")  Badges
+ No només número visual: <span aria-label="3 sol·licituds pendents">
+Nivell 5 ­ Seguretat i SEO:
+ Consolidació WCAG 2.1 AA  HTML totalment semàntic  meta description  lang="ca"  title únic per pàgina  Estructura correcta de headings (no saltar h1  h4)  Imatges amb alt  Enllaç "Saltar al contingut" (skip link)
+Nivell 6 ­ Interacció avançada:
+CHAT:
+ Missatges dins:  role="log"  aria-live="polite"  Indicar qui envia el missatge (no només alineació visual)  Timestamp textual
+BATALLA:
+ Resultat anunciat amb:
+ aria-live="assertive"
+ Botons accessibles per seleccionar Xuxemon
+ No usar només animació del dau per indicar resultat
+19
+
+4. Temporalització
+20
+
+

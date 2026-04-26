@@ -8,7 +8,7 @@
 }
 <main class="app-main">
   @if (showLayout()) {
-    <div class="app-content" [class.profile-no-padding-bottom]="isProfilePage()">
+    <div class="app-content" [class.profile-no-padding-bottom]="isProfilePage()" [class.battle-fullscreen]="isBattlePage()">
       @if (showTopBreadcrumb()) {
         <app-breadcrumb></app-breadcrumb>
       }
@@ -18,7 +18,7 @@
     <router-outlet></router-outlet>
   }
 </main>
-@if (showLayout()) {
+@if (showLayout() && !isBattlePage()) {
   <app-footer></app-footer>
 }
 
@@ -35,3 +35,22 @@
   (acceptRequest)="onAcceptFriendRequest($event)"
   (rejectRequest)="onRejectFriendRequest($event)">
 </app-friend-request-noti-modal>
+
+@if (pendingBattleInvite(); as invite) {
+  <div class="battle-invite-modal" role="dialog" aria-modal="true" aria-labelledby="global-battle-invite-title">
+    <div class="battle-invite-card">
+      <h2 id="global-battle-invite-title" class="battle-invite-title">Battle Challenge</h2>
+      <p class="battle-invite-text">
+        <strong>{{ invite.user?.name || invite.user_id }}</strong> challenged you to a PvP battle.
+      </p>
+      <div class="battle-invite-actions">
+        <button type="button" class="btn-danger btn-sm" (click)="onRejectBattleInvite()" [disabled]="isBattleInviteBusy()">
+          Decline
+        </button>
+        <button type="button" class="btn-primary btn-sm" (click)="onAcceptBattleInvite()" [disabled]="isBattleInviteBusy()">
+          Accept
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -263,6 +263,12 @@
   box-sizing: border-box;
 }
 
+.friend-action-btn:disabled {
+  opacity: 0.85;
+  cursor: not-allowed;
+  transform: none;
+}
+
 @media (max-width: 500px) {
   .friend-card-actions {
     flex-direction: column;

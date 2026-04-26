@@ -142,6 +142,8 @@
             >
               <app-friend-card
                 [friend]="friend"
+                [challengePending]="isChallengeBusy(friend.id)"
+                (challenge)="challengeFriend(friend)"
                 (remove)="askConfirmRemove(friend)"
               ></app-friend-card>
             </li>

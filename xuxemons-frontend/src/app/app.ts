@@ -8,10 +8,24 @@ import { Breadcrumb } from './core/components/breadcrumb/breadcrumb';
 import { DailyNotiModal } from './core/components/modals/daily-noti-modal/daily-noti-modal';
 import { FriendRequestNotiModal } from './core/components/modals/friend-request-noti-modal/friend-request-noti-modal';
 import { AuthService } from './core/services/auth';
+import { BattleService } from './core/services/battle.service';
 import { FriendsService } from './core/services/friends.service';
 import type { DailyRewardNotification, FriendRequestItem } from './core/interfaces';
 import { LoadingService } from './core/services/loading.service';
 import { Meta, Title } from '@angular/platform-browser';
+
+type PendingBattleInvite = {
+  id: number;
+  user_id: string;
+  opponent_user_id: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'finished' | string;
+  user?: {
+    id: string;
+    name?: string;
+    level?: number;
+    icon_path?: string | null;
+  };
+};
 
 @Component({
   selector: 'app-root',
@@ -24,14 +38,19 @@ export class App implements OnInit, OnDestroy {
   protected readonly showLayout = signal(true);
   protected readonly showTopBreadcrumb = signal(true);
   protected readonly isProfilePage = signal(false);
+  protected readonly isBattlePage = signal(false);
   protected readonly showDailyRewardsModal = signal(false);
   protected readonly pendingDailyRewards = signal<DailyRewardNotification | null>(null);
   protected readonly showFriendRequestModal = signal(false);
   protected readonly pendingFriendRequests = signal<FriendRequestItem[]>([]);
+  protected readonly pendingBattleInvite = signal<PendingBattleInvite | null>(null);
+  protected readonly isBattleInviteBusy = signal(false);
   private dismissedFriendRequestIds: Record<string, boolean> = {};
+  private readonly battleInvitePollMs = 3000;
   private sub: { unsubscribe: () => void } | null = null;
   private friendSub: { unsubscribe: () => void } | null = null;
   private periodicSyncSub: Subscription | null = null;
+  private battleInviteSub: Subscription | null = null;
   private isCheckingPendingDailyRewards = false;
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   protected readonly loadingService = inject(LoadingService);
@@ -40,14 +59,21 @@ export class App implements OnInit, OnDestroy {
   private readonly activatedRoute = inject(ActivatedRoute);
 
   // Sirve para inyectar los servicios principales de la app
-  constructor(private router: Router, private authService: AuthService, private friendsService: FriendsService) { }
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private friendsService: FriendsService,
+    private battleService: BattleService,
+  ) { }
 
   // Sirve para actualizar la visibilidad de la layout y el breadcrumb
   private updateShowLayout(): void {
     const url = this.router.url.split('?')[0];
+    const isBattleRoute = url.startsWith('/battle/');
     this.showLayout.set(url !== '/login' && url !== '/register');
-    this.showTopBreadcrumb.set(url !== '/profile');
+    this.showTopBreadcrumb.set(url !== '/profile' && !isBattleRoute);
     this.isProfilePage.set(url === '/profile');
+    this.isBattlePage.set(isBattleRoute);
   }
 
   // Sirve para inicializar el componente
@@ -72,7 +98,13 @@ export class App implements OnInit, OnDestroy {
           this.checkPendingDailyRewards();
         }
       });
+
+      this.battleInviteSub = interval(this.battleInvitePollMs).subscribe(() => {
+        this.pollPendingBattleInvites();
+      });
     }
+
+    this.pollPendingBattleInvites();
 
     this.sub = this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
@@ -98,6 +130,66 @@ export class App implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
     this.friendSub?.unsubscribe();
     this.periodicSyncSub?.unsubscribe();
+    this.battleInviteSub?.unsubscribe();
+  }
+
+  // Sirve para obtener invitaciones pendientes de batalla desde cualquier pantalla
+  private pollPendingBattleInvites(): void {
+    if (!this.authService.getUser() || this.router.url.startsWith('/battle/')) {
+      this.pendingBattleInvite.set(null);
+      return;
+    }
+
+    this.battleService.getPendingBattles().subscribe({
+      next: (battles: PendingBattleInvite[] | unknown) => {
+        const pendingBattles = Array.isArray(battles) ? battles : [];
+        this.pendingBattleInvite.set(pendingBattles.length > 0 ? pendingBattles[0] : null);
+      },
+      error: () => {
+        this.pendingBattleInvite.set(null);
+      },
+    });
+  }
+
+  // Sirve para aceptar una invitación global de batalla
+  onAcceptBattleInvite(): void {
+    const invite = this.pendingBattleInvite();
+    if (!invite || this.isBattleInviteBusy()) {
+      return;
+    }
+
+    this.isBattleInviteBusy.set(true);
+
+    this.battleService.acceptBattle(invite.id).subscribe({
+      next: () => {
+        this.pendingBattleInvite.set(null);
+        this.isBattleInviteBusy.set(false);
+        this.router.navigate(['/battle', invite.id]);
+      },
+      error: () => {
+        this.isBattleInviteBusy.set(false);
+      },
+    });
+  }
+
+  // Sirve para rechazar una invitación global de batalla
+  onRejectBattleInvite(): void {
+    const invite = this.pendingBattleInvite();
+    if (!invite || this.isBattleInviteBusy()) {
+      return;
+    }
+
+    this.isBattleInviteBusy.set(true);
+
+    this.battleService.rejectBattle(invite.id).subscribe({
+      next: () => {
+        this.pendingBattleInvite.set(null);
+        this.isBattleInviteBusy.set(false);
+      },
+      error: () => {
+        this.isBattleInviteBusy.set(false);
+      },
+    });
   }
 
   // Sirve para cerrar el modal de recompensas diarias
