@@ -18,10 +18,15 @@
 
       <div class="battle-screen" [style.background-image]="'url(' + getAssetUrl('/fondo-batalla.webp') + ')'">
       @if (attackImpactSide()) {
-        <div class="impact-burst" [class.impact-burst--player]="attackImpactSide() === 'player'" [class.impact-burst--opponent]="attackImpactSide() === 'opponent'"></div>
+        <div class="impact-burst" [class.impact-burst--player]="attackImpactSide() === 'player'" [class.impact-burst--opponent]="attackImpactSide() === 'opponent'" [class.impact-burst--speed]="attackVisualType() === 'speed'" [class.impact-burst--technical]="attackVisualType() === 'technical'" [class.impact-burst--power]="attackVisualType() === 'power'"></div>
       }
       @if (attackTrailSide()) {
-        <div class="attack-trail" [class.attack-trail--player]="attackTrailSide() === 'player'" [class.attack-trail--opponent]="attackTrailSide() === 'opponent'"></div>
+        <div class="attack-trail" [class.attack-trail--player]="attackTrailSide() === 'player'" [class.attack-trail--opponent]="attackTrailSide() === 'opponent'" [class.attack-trail--speed]="attackVisualType() === 'speed'" [class.attack-trail--technical]="attackVisualType() === 'technical'" [class.attack-trail--power]="attackVisualType() === 'power'"></div>
+        <div class="attack-particles" [class.attack-particles--player]="attackTrailSide() === 'player'" [class.attack-particles--opponent]="attackTrailSide() === 'opponent'" [class.attack-particles--speed]="attackVisualType() === 'speed'" [class.attack-particles--technical]="attackVisualType() === 'technical'" [class.attack-particles--power]="attackVisualType() === 'power'">
+          @for (particleIndex of attackParticleIndexes; track particleIndex) {
+            <span class="attack-particle" [style.--i]="particleIndex"></span>
+          }
+        </div>
       }
       @if (selectedXuxemon() && opponentXuxemon()) {
         <div class="battle-grid">
@@ -75,7 +80,7 @@
             </div>
 
             <div class="sprite-container opponent-sprite" [class.hit]="opponentHit()">
-              <img [src]="opponentXuxemon()!.image_url" [class.attacking]="opponentAttacking()" alt="Opponent">
+              <img [src]="opponentXuxemon()!.image_url" [class.attacking]="opponentAttacking()" [class.attacking-speed]="opponentAttacking() && attackVisualType() === 'speed'" [class.attacking-technical]="opponentAttacking() && attackVisualType() === 'technical'" [class.attacking-power]="opponentAttacking() && attackVisualType() === 'power'" alt="Opponent">
               <div class="platform"></div>
             </div>
           </div>
@@ -130,7 +135,7 @@
             </div>
 
             <div class="sprite-container player-sprite" [class.hit]="playerHit()">
-              <img [src]="selectedXuxemon()!.image_url" [class.attacking]="playerAttacking()" alt="Player">
+              <img [src]="selectedXuxemon()!.image_url" [class.attacking]="playerAttacking()" [class.attacking-speed]="playerAttacking() && attackVisualType() === 'speed'" [class.attacking-technical]="playerAttacking() && attackVisualType() === 'technical'" [class.attacking-power]="playerAttacking() && attackVisualType() === 'power'" alt="Player">
               <div class="platform"></div>
             </div>
           </div>
@@ -280,7 +285,7 @@
   <!-- Dice Overlay -->
   @if (showDice()) {
     <div class="dice-overlay">
-      <div class="dice-container">
+      <div class="dice-container" [class.throwing]="diceThrowing()">
         <div class="dice" [class.rolling]="diceRolling()" [class.landed]="diceLanded()" [attr.data-value]="diceValue()">
           {{ diceValue() || '?' }}
         </div>
@@ -333,7 +338,7 @@
     <div class="victory-modal" (click)="cancelRunAway()">
       <div class="battle-dialog battle-dialog--warning" (click)="$event.stopPropagation()">
         <h2 class="battle-dialog-title">Run Away</h2>
-        <p class="battle-dialog-text">Seguro que quieres huir del combate?</p>
+        <p class="battle-dialog-text">Are you sure you want to run away from the battle?</p>
         <div class="battle-dialog-actions">
           <button type="button" class="battle-dialog-btn battle-dialog-btn--secondary" (click)="cancelRunAway()">Cancel</button>
           <button type="button" class="battle-dialog-btn battle-dialog-btn--danger" (click)="confirmRunAway()" [disabled]="isSubmittingRun()">

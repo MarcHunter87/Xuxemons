@@ -11,6 +11,7 @@ import { InventoryService } from '../../core/services/inventory.service';
 import type { InventoryItem, UseItemResponseData, Xuxemon } from '../../core/interfaces';
 
 type BattleMenu = 'attacks' | 'bag' | 'bag-target' | 'switch' | null;
+type AttackVisualType = 'speed' | 'technical' | 'power' | 'neutral';
 
 @Component({
   selector: 'app-battle',
@@ -90,6 +91,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   showDice = signal(false);
   diceRolling = signal(false);
   diceLanded = signal(false);
+  diceThrowing = signal(false);
   diceLabel = signal('Rolling for attack power!');
   showConfetti = signal(false);
   showVictoryModal = signal(false);
@@ -99,6 +101,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   realtimeStatus = signal<'live' | 'syncing'>('syncing');
   attackImpactSide = signal<'player' | 'opponent' | null>(null);
   attackTrailSide = signal<'player' | 'opponent' | null>(null);
+  attackVisualType = signal<AttackVisualType>('neutral');
   battleCallout = signal<{ text: string; tone: 'buff' | 'nerf' | 'neutral' } | null>(null);
   isSubmittingBattleResult = signal(false);
   isSubmittingRun = signal(false);
@@ -121,6 +124,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   opponentAttacking = signal(false);
   playerHit = signal(false);
   opponentHit = signal(false);
+  readonly attackParticleIndexes = Array.from({ length: 14 }, (_, index) => index);
 
   ngAfterViewInit(): void {
     this.startBattleMusic();
@@ -396,7 +400,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.battleStatus.set('animating');
-    this.addLog(`Come back ${this.selectedXuxemon()?.name ?? 'Xuxemon'}! Go ${xuxemon.name}!`);
+    this.addLog('Xuxemon changed!');
 
     setTimeout(() => {
       this.selectedXuxemon.set(xuxemon);
@@ -451,6 +455,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       : Math.floor(Math.random() * 6) + 1;
 
     this.showDice.set(true);
+    this.diceThrowing.set(true);
     this.diceRolling.set(true);
     this.diceLanded.set(false);
     this.diceLabel.set(label ?? 'Rolling for attack power!');
@@ -467,6 +472,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         this.diceRolling.set(false);
         this.diceLanded.set(true);
         this.playSfx(this.diceSfx, { volume: 0.42, fromMs: 440 });
+        this.diceThrowing.set(false);
         setTimeout(() => {
           this.showDice.set(false);
           this.diceLanded.set(false);
@@ -491,7 +497,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     setTimeout(() => {
-      this.triggerAttackTrail('player');
+      this.triggerAttackTrail('player', this.getAttackVisualType(attacker));
       this.playerAttacking.set(true);
 
       const attackerStat = attacker.attack || 10;
@@ -569,7 +575,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     setTimeout(() => {
-      this.triggerAttackTrail('opponent');
+      this.triggerAttackTrail('opponent', this.getAttackVisualType(opponent));
       this.opponentAttacking.set(true);
 
       const opponentAttack = opponent.attack || 10;
@@ -675,6 +681,28 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   addLog(message: string): void {
     this.battleLog.update((logs) => [message, ...logs].slice(0, 8));
+  }
+
+  private hydrateBattleLogNames(logs: unknown[], activePlayer: Xuxemon | null, activeOpponent: Xuxemon | null): string[] {
+    void activePlayer;
+    void activeOpponent;
+
+    return logs.map((entry) => {
+      const text = String(entry ?? '').trim();
+      if (/^come back\s+.+!\s+go\s+.+!$/i.test(text)) {
+        return 'Xuxemon changed!';
+      }
+
+      if (/^.+\s+sent\s+out\s+.+!$/i.test(text)) {
+        return 'A Xuxemon enters the battle!';
+      }
+
+      if (/^enters\s+the\s+battle!?$/i.test(text) || /^.+\s+enters\s+the\s+battle!?$/i.test(text)) {
+        return 'A Xuxemon enters the battle!';
+      }
+
+      return text;
+    });
   }
 
   confirmPrizeSelection(xuxemon: Xuxemon): void {
@@ -994,11 +1022,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.opponentTeam.set(opponentTeam);
     }
 
-    if (Array.isArray(normalizedData.battle_log)) {
-      this.battleLog.set(normalizedData.battle_log);
-      this.triggerBattleAnimationsFromSnapshot(normalizedData);
-    }
-
     const activePlayer = myTeam.find((xuxemon: Xuxemon) => xuxemon.adquired_id === normalizedData.my_active_xuxemon_id)
       ?? this.getFirstAlive(myTeam);
     if (activePlayer) {
@@ -1011,6 +1034,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     if (activeOpponent) {
       this.opponentXuxemon.set(activeOpponent);
       this.syncOpponentBars(activeOpponent);
+    }
+
+    if (Array.isArray(normalizedData.battle_log)) {
+      const hydratedLog = this.hydrateBattleLogNames(normalizedData.battle_log, activePlayer, activeOpponent);
+      this.battleLog.set(hydratedLog);
+      this.triggerBattleAnimationsFromSnapshot({ ...normalizedData, battle_log: hydratedLog });
     }
 
     const requiresForcedSwitch = Boolean(
@@ -1098,21 +1127,26 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private playBattleAnimationSequence(side: 'player' | 'opponent', attackerName: string, roll: number | null): void {
+    const attacker = side === 'player' ? this.selectedXuxemon() : this.opponentXuxemon();
+    const visualType = this.getAttackVisualType(attacker);
+
     if (typeof roll === 'number' && Number.isFinite(roll)) {
       this.rollDice(
-        () => this.playSpriteAnimation(side),
+        () => this.playSpriteAnimation(side, visualType),
         roll,
         `${attackerName} rolls the battle dice`,
       );
       return;
     }
 
-    this.playSpriteAnimation(side);
+    this.playSpriteAnimation(side, visualType);
   }
 
-  private playSpriteAnimation(side: 'player' | 'opponent'): void {
+  private playSpriteAnimation(side: 'player' | 'opponent', visualType: AttackVisualType): void {
+    this.attackVisualType.set(visualType);
+
     if (side === 'player') {
-      this.triggerAttackTrail('player');
+      this.triggerAttackTrail('player', visualType);
       this.playerAttacking.set(true);
       setTimeout(() => {
         this.playerAttacking.set(false);
@@ -1121,7 +1155,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.triggerAttackTrail('opponent');
+    this.triggerAttackTrail('opponent', visualType);
     this.opponentAttacking.set(true);
     setTimeout(() => {
       this.opponentAttacking.set(false);
@@ -1138,6 +1172,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       setTimeout(() => {
         this.playerHit.set(false);
         this.attackImpactSide.set(null);
+        this.attackVisualType.set('neutral');
       }, 360);
       return;
     }
@@ -1146,11 +1181,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       this.opponentHit.set(false);
       this.attackImpactSide.set(null);
+      this.attackVisualType.set('neutral');
     }, 360);
   }
 
-  private triggerAttackTrail(side: 'player' | 'opponent'): void {
+  private triggerAttackTrail(side: 'player' | 'opponent', visualType: AttackVisualType): void {
     this.attackTrailSide.set(side);
+    this.attackVisualType.set(visualType);
     this.playSfx(this.attackSfx, { volume: 0.35, fromMs: side === 'player' ? 0 : 220 });
 
     if (this.attackTrailTimeout) {
@@ -1161,6 +1198,24 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.attackTrailSide.set(null);
       this.attackTrailTimeout = null;
     }, 380);
+  }
+
+  private getAttackVisualType(xuxemon: Xuxemon | null): AttackVisualType {
+    const typeName = xuxemon?.type?.name?.toLowerCase() ?? '';
+
+    if (typeName === 'speed') {
+      return 'speed';
+    }
+
+    if (typeName === 'technical') {
+      return 'technical';
+    }
+
+    if (typeName === 'power') {
+      return 'power';
+    }
+
+    return 'neutral';
   }
 
   private showBattleCallout(text: string, tone: 'buff' | 'nerf' | 'neutral'): void {
@@ -1401,7 +1456,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       this.opponentXuxemon.set(nextOpponent);
       this.syncOpponentBars(nextOpponent);
-      this.addLog(`${this.opponentTrainerName()} sent out ${nextOpponent.name}!`);
+      this.addLog(`${this.opponentTrainerName()} sent out a Xuxemon!`);
       this.currentTurn.set('opponent');
       this.battleStatus.set('ready');
       setTimeout(() => this.opponentTurn(), 1200);
@@ -1437,9 +1492,9 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     if (data.completion_reason === 'runaway') {
       if (data.runner_id === userId) {
-        this.runawayResultMessage.set('Has huido del combate.');
+        this.runawayResultMessage.set('You ran away from the battle.');
       } else {
-        this.runawayResultMessage.set('Tu rival ha huido del combate.');
+        this.runawayResultMessage.set('Your rival ran away from the battle.');
       }
 
       this.showRunawayResultModal.set(true);
