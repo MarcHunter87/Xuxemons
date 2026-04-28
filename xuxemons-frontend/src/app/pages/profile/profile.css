@@ -237,18 +237,18 @@
 }
 
 .team-slot {
-  min-height: 182px;
+  min-height: 224px;
   border: 2px solid var(--color-gray-light);
-  border-radius: 14px;
+  border-radius: var(--radius-pill);
   background: var(--neutral-white);
   color: var(--neutral-black);
-  padding: 0.52rem 0.4rem;
+  padding: 0.72rem 0.58rem;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.24rem;
+  gap: 0.32rem;
   position: relative;
   transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
 }
@@ -261,7 +261,7 @@
   content: '';
   position: absolute;
   inset: 9px;
-  border-radius: 10px;
+  border-radius: calc(var(--radius-pill) - 4px);
   border: 1px dashed var(--color-gray-light);
   pointer-events: none;
 }
@@ -291,14 +291,15 @@
 }
 
 .team-slot__icon {
-  width: 56px;
-  height: 56px;
+  width: 76px;
+  height: 76px;
   object-fit: contain;
   filter: drop-shadow(0 4px 7px var(--color-blue-overlay-medium));
+  align-self: center;
 }
 
 .team-slot__name {
-  font-size: 0.74rem;
+  font-size: 0.9rem;
   font-weight: 800;
   text-align: center;
   color: var(--neutral-black);
@@ -322,7 +323,7 @@
   content: '+';
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px dashed var(--color-gray-light);
   display: inline-flex;
   align-items: center;
@@ -333,15 +334,15 @@
 }
 
 .team-slots .team-slot .team-roster__meta {
-  font-size: 0.67rem;
+  font-size: 0.74rem;
 }
 
 .team-slots .team-slot .team-roster__stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.18rem;
+  gap: 0.26rem;
   width: 100%;
-  margin-top: 0.04rem;
+  margin-top: 0.2rem;
 }
 
 .team-slots .team-slot .team-roster__stat {
@@ -350,17 +351,20 @@
   justify-content: center;
   white-space: nowrap;
   line-height: 1;
-  min-height: 18px;
+  min-height: 22px;
   min-width: 0;
   width: 100%;
-  font-size: 0.57rem;
-  padding: 0.12rem 0.22rem;
+  font-size: 0.66rem;
+  padding: 0.16rem 0.3rem;
   font-variant-numeric: tabular-nums;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  border: 1px solid transparent;
 }
 
 .team-slots .team-slot .team-roster__states {
-  gap: 0.18rem;
-  margin-top: 0.02rem;
+  gap: 0.26rem;
+  margin-top: 0.08rem;
 }
 
 .team-slots .team-slot .team-roster__state {
@@ -369,10 +373,29 @@
   justify-content: center;
   white-space: nowrap;
   line-height: 1;
-  min-height: 17px;
-  min-width: 48px;
-  font-size: 0.55rem;
-  padding: 0.11rem 0.3rem;
+  min-height: 20px;
+  min-width: 64px;
+  font-size: 0.62rem;
+  padding: 0.12rem 0.34rem;
+  border-radius: var(--radius-pill);
+}
+
+.team-slots .team-slot .team-roster__stat--hp {
+  background: var(--color-green-overlay-soft);
+  border-color: var(--color-green-bright);
+  color: var(--color-green-base);
+}
+
+.team-slots .team-slot .team-roster__stat--atk {
+  background: var(--color-red-overlay-medium);
+  border-color: var(--color-red-bright);
+  color: var(--color-red-deep);
+}
+
+.team-slots .team-slot .team-roster__stat--def {
+  background: var(--color-amber-overlay);
+  border-color: var(--color-amber-base);
+  color: var(--color-amber-deep);
 }
 
 .team-slots .team-slot .team-roster__state:nth-child(n + 3) {
@@ -391,21 +414,21 @@
   margin: 0;
   font-size: 0.86rem;
   font-weight: 700;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.35rem 0.7rem;
   border: 1px solid transparent;
 }
 
 .team-builder__feedback--error {
-  color: #9b1c1c;
-  background: #fde8e8;
-  border-color: #f8b4b4;
+  color: var(--color-red-deep);
+  background: var(--color-red-overlay-soft);
+  border-color: var(--color-red-bright);
 }
 
 .team-builder__feedback--success {
-  color: #065f46;
-  background: #d1fae5;
-  border-color: #86efac;
+  color: var(--color-green-base);
+  background: var(--color-green-overlay-soft);
+  border-color: var(--color-green-bright);
 }
 
 .team-roster {
@@ -415,13 +438,13 @@
 }
 
 .team-roster__card {
-  border: 1px solid var(--color-gray-light);
-  border-radius: 13px;
+  border: 2px solid var(--color-gray-light);
+  border-radius: var(--radius-pill);
   background: var(--neutral-white);
   padding: 0.72rem 0.58rem;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   gap: 0.32rem;
   cursor: pointer;
   transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
@@ -470,6 +493,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.26rem;
   margin-top: 0.2rem;
+  width: 100%;
 }
 
 .team-roster__stat {
@@ -478,7 +502,7 @@
   color: var(--accent-on-light);
   background: var(--color-blue-overlay);
   border: 1px solid var(--color-blue-overlay-medium);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.16rem 0.3rem;
   display: flex;
   align-items: center;
@@ -490,6 +514,24 @@
   width: 100%;
   font-variant-numeric: tabular-nums;
   text-align: center;
+}
+
+.team-roster__stat--hp {
+  background: var(--color-green-overlay-soft);
+  border-color: var(--color-green-bright);
+  color: var(--color-green-base);
+}
+
+.team-roster__stat--atk {
+  background: var(--color-red-overlay-medium);
+  border-color: var(--color-red-bright);
+  color: var(--color-red-deep);
+}
+
+.team-roster__stat--def {
+  background: var(--color-amber-overlay);
+  border-color: var(--color-amber-base);
+  color: var(--color-amber-deep);
 }
 
 .team-roster__states {
@@ -505,7 +547,7 @@
   font-weight: 700;
   color: var(--neutral-white);
   background: var(--accent-color);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.12rem 0.34rem;
   display: inline-flex;
   align-items: center;
@@ -532,7 +574,7 @@
   font-weight: 800;
   background: var(--accent-color);
   color: var(--neutral-white);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.15rem 0.35rem;
 }
 
@@ -556,22 +598,22 @@
   }
 
   .team-slot {
-    min-height: 158px;
-    padding: 0.5rem 0.38rem;
-    gap: 0.24rem;
+    min-height: 190px;
+    padding: 0.62rem 0.48rem;
+    gap: 0.28rem;
   }
 
   .team-slot__icon {
-    width: 52px;
-    height: 52px;
+    width: 60px;
+    height: 60px;
   }
 
   .team-slot__name {
-    font-size: 0.72rem;
+    font-size: 0.8rem;
   }
 
   .team-slots .team-slot .team-roster__meta {
-    font-size: 0.66rem;
+    font-size: 0.68rem;
   }
 
   .team-slots .team-slot .team-roster__stats {
@@ -583,6 +625,7 @@
   .team-slots .team-slot .team-roster__stat {
     font-size: 0.62rem;
     padding: 0.12rem 0.26rem;
+    border-radius: var(--radius-pill);
   }
 
   .team-slots .team-slot .team-roster__stat:nth-child(n + 2) {

@@ -32,6 +32,7 @@ export class Profile implements OnInit, OnDestroy {
   myXuxemons = signal<Xuxemon[]>([]);
   isTeamBusy = signal(false);
   teamFeedback = signal<string | null>(null);
+  rosterVisible = signal(false);
   private readonly subs = new Subscription();
 
   // Sirve para inyectar servicios de perfil
@@ -102,7 +103,12 @@ export class Profile implements OnInit, OnDestroy {
       return;
     }
 
-    this.selectedTeamSlot.set(index);
+    if (this.selectedTeamSlot() === index && this.rosterVisible()) {
+      this.rosterVisible.set(false);
+    } else {
+      this.selectedTeamSlot.set(index);
+      this.rosterVisible.set(true);
+    }
   }
 
   getSlotXuxemon(index: number): Xuxemon | null {

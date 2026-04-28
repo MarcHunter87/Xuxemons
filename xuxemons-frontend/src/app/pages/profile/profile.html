@@ -73,9 +73,9 @@
                 Lv.{{ slotXuxemon.level ?? 1 }} · {{ slotXuxemon.size }}
               </span>
               <div class="team-roster__stats" aria-label="slot xuxemon stats">
-                <span class="team-roster__stat">HP {{ getXuxemonStat(slotXuxemon, 'hp') }}</span>
-                <span class="team-roster__stat">ATK {{ getXuxemonStat(slotXuxemon, 'attack') }}</span>
-                <span class="team-roster__stat">DEF {{ getXuxemonStat(slotXuxemon, 'defense') }}</span>
+                <span class="team-roster__stat team-roster__stat--hp">HP {{ getXuxemonStat(slotXuxemon, 'hp') }}</span>
+                <span class="team-roster__stat team-roster__stat--atk">ATK {{ getXuxemonStat(slotXuxemon, 'attack') }}</span>
+                <span class="team-roster__stat team-roster__stat--def">DEF {{ getXuxemonStat(slotXuxemon, 'defense') }}</span>
               </div>
               <div class="team-roster__states" aria-label="slot xuxemon states">
                 @for (state of getXuxemonStates(slotXuxemon); track state) {
@@ -95,16 +95,9 @@
         <button type="button" class="btn-primary btn-sm" (click)="clearSelectedSlot()" [disabled]="isTeamBusy() || !getSlotXuxemon(selectedTeamSlot())">
           Clear Selected Slot
         </button>
-        @if (teamFeedback()) {
-          <p
-            class="team-builder__feedback"
-            [class.team-builder__feedback--error]="isTeamFeedbackError()"
-            [class.team-builder__feedback--success]="!isTeamFeedbackError()">
-            {{ teamFeedback() }}
-          </p>
-        }
       </div>
 
+      @if (rosterVisible()) {
       <div class="team-roster" role="list" aria-label="Your xuxemons">
         @for (xuxemon of myXuxemons(); track trackByXuxemon($index, xuxemon)) {
           <button
@@ -119,9 +112,9 @@
               Lv.{{ xuxemon.level ?? 1 }} · {{ xuxemon.size }}
             </span>
             <div class="team-roster__stats" aria-label="xuxemon stats">
-              <span class="team-roster__stat">HP {{ getXuxemonStat(xuxemon, 'hp') }}</span>
-              <span class="team-roster__stat">ATK {{ getXuxemonStat(xuxemon, 'attack') }}</span>
-              <span class="team-roster__stat">DEF {{ getXuxemonStat(xuxemon, 'defense') }}</span>
+              <span class="team-roster__stat team-roster__stat--hp">HP {{ getXuxemonStat(xuxemon, 'hp') }}</span>
+              <span class="team-roster__stat team-roster__stat--atk">ATK {{ getXuxemonStat(xuxemon, 'attack') }}</span>
+              <span class="team-roster__stat team-roster__stat--def">DEF {{ getXuxemonStat(xuxemon, 'defense') }}</span>
             </div>
             <div class="team-roster__states" aria-label="xuxemon states">
               @for (state of getXuxemonStates(xuxemon); track state) {
@@ -138,6 +131,7 @@
           <p class="team-builder__empty">You do not have any Xuxemon yet.</p>
         }
       </div>
+      }
     </section>
 
     <button type="button" class="btn-danger" [disabled]="isLoggingOut()" (click)="logout()" [attr.aria-busy]="isLoggingOut()">
