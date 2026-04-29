@@ -2,15 +2,18 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BattleController;
 use App\Http\Controllers\DailyRewardNotificationController;
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\XuxemonController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/battles/{battleId}/stream', [BattleController::class, 'streamBattle']);
 
 Route::get('/xuxemons', [XuxemonController::class, 'index']);
 Route::get('/items', [InventoryController::class, 'getAllItems']);
@@ -62,6 +65,7 @@ Route::middleware(['auth:api', 'update.last.seen'])->group(function () {
     Route::get('/xuxemons/collection-stats', [XuxemonController::class, 'collectionStats']);
     Route::get('/xuxemons/me', [XuxemonController::class, 'myXuxemons']);
     Route::post('/xuxemons/award-random', [XuxemonController::class, 'awardRandomXuxemon']);
+    Route::post('/xuxemons/update-hp', [XuxemonController::class, 'updateCurrentHp']);
     Route::put('/xuxemons/{id}', [XuxemonController::class, 'update']);
     Route::delete('/xuxemons/{id}', [XuxemonController::class, 'delete']);
 
@@ -87,4 +91,19 @@ Route::middleware(['auth:api', 'update.last.seen'])->group(function () {
     Route::delete('/friends/requests/{id}', [FriendController::class, 'rejectRequest']);
     Route::get('/friends', [FriendController::class, 'getFriends']);
     Route::delete('/friends/{friendUserId}', [FriendController::class, 'removeFriend']);
+
+    // Batallas
+    Route::post('/battles/request/{friendId}', [BattleController::class, 'requestBattle']);
+    Route::post('/battles/practice/use-item', [BattleController::class, 'usePracticeItem']);
+    Route::post('/battles/{battleId}/accept', [BattleController::class, 'acceptBattle']);
+    Route::post('/battles/{battleId}/reject', [BattleController::class, 'rejectBattle']);
+    Route::get('/battles/pending', [BattleController::class, 'getPendingBattles']);
+    Route::get('/battles/{battleId}', [BattleController::class, 'getBattle']);
+    Route::post('/battles/{battleId}/action', [BattleController::class, 'submitAction']);
+    Route::post('/battles/{battleId}/use-item', [BattleController::class, 'useBattleItem']);
+    Route::post('/battles/{battleId}/finish', [BattleController::class, 'finishBattle']);
+
+    // Equipos
+    Route::get('/team', [TeamController::class, 'getTeam']);
+    Route::post('/team/slot/{slotNumber}', [TeamController::class, 'updateSlot']);
 });

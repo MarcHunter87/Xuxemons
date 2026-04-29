@@ -59,6 +59,13 @@ export class XuxemonService {
         return this.xuxemonsList$.getValue();
     }
 
+    updateCurrentHp(adquiredId: number, currentHp: number): Observable<any> {
+        return this.http.post(`${this.apiUrl}/xuxemons/update-hp`, {
+            adquired_id: adquiredId,
+            current_hp: Math.round(currentHp)
+        });
+    }
+
     // Sirve para obtener la lista de Xuxemons de mi inventario
     getMyXuxemonsList(): Xuxemon[] {
         return this.myXuxemonsList$.getValue();
