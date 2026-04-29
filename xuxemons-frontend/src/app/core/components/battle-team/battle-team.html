@@ -1,0 +1,102 @@
+<section class="team-builder" aria-labelledby="team-builder-title">
+  <div class="team-builder__header">
+    <h2 id="team-builder-title" class="team-builder__title">Battle Team</h2>
+    <p class="team-builder__subtitle">Choose your 6-slot team before entering PvP battles.</p>
+  </div>
+
+  <div class="team-builder__content">
+    <div class="team-slots" role="list" aria-label="Battle team slots">
+      @for (slotId of [0,1,2,3,4,5]; track slotId) {
+        <button
+          type="button"
+          class="team-slot"
+          [class.team-slot--selected]="isSelectedSlot(slotId)"
+          [class.team-slot--filled]="!!getSlotXuxemon(slotId)"
+          [class.team-slot--empty]="!getSlotXuxemon(slotId)"
+          (click)="selectTeamSlot(slotId)"
+          [disabled]="isTeamBusy()"
+          [attr.aria-label]="getSlotLabel(slotId)">
+          @if (getSlotXuxemon(slotId); as slotXuxemon) {
+            <img class="team-slot__icon" [src]="slotXuxemon.image_url" [alt]="slotXuxemon.name">
+            <span class="team-slot__name">{{ slotXuxemon.name }}</span>
+            <span class="team-roster__meta">
+              Lv.{{ slotXuxemon.level ?? 1 }} · {{ slotXuxemon.size }}
+            </span>
+            <div class="team-roster__stats" aria-label="slot xuxemon stats">
+              <span class="team-roster__stat team-roster__stat--hp">HP {{ getXuxemonStat(slotXuxemon, 'hp') }}</span>
+              <span class="team-roster__stat team-roster__stat--atk">ATK {{ getXuxemonStat(slotXuxemon, 'attack') }}</span>
+              <span class="team-roster__stat team-roster__stat--def">DEF {{ getXuxemonStat(slotXuxemon, 'defense') }}</span>
+            </div>
+            <div class="team-roster__states" aria-label="slot xuxemon states">
+              @for (state of getXuxemonStates(slotXuxemon); track state.name) {
+                <span class="team-roster__state">
+                  @if (state.iconUrl) {
+                    <img class="team-roster__state-icon" [src]="state.iconUrl" [alt]="state.name" />
+                  }
+                  <span class="team-roster__state-text">{{ state.name }}</span>
+                </span>
+              }
+            </div>
+          } @else {
+            <span class="team-slot__empty">Empty slot</span>
+          }
+        </button>
+      }
+    </div>
+
+    @if (hasSelectedFilledSlot() || (teamFeedback() && isTeamFeedbackError())) {
+    <div class="team-builder__actions">
+      @if (hasSelectedFilledSlot()) {
+      <button type="button" class="btn-primary btn-sm" (click)="clearSelectedSlot()" [disabled]="isTeamBusy()">
+        Clear Selected Slot
+      </button>
+      }
+      @if (teamFeedback(); as feedback) {
+        @if (isTeamFeedbackError()) {
+        <p
+          class="team-builder__feedback"
+          [class.team-builder__feedback--error]="true">
+          {{ feedback }}
+        </p>
+        }
+      }
+    </div>
+    }
+
+    @if (rosterVisible()) {
+      <h3 class="team-roster__title">Your Xuxemons</h3>
+      <div class="team-roster" role="list" aria-label="Your xuxemons">
+        @for (xuxemon of availableRosterXuxemons(); track trackByXuxemon($index, xuxemon)) {
+          <button
+            type="button"
+            class="team-roster__card"
+            [disabled]="isTeamBusy()"
+            (click)="assignXuxemonToSelectedSlot(xuxemon)">
+            <img class="team-roster__sprite" [src]="xuxemon.image_url" [alt]="xuxemon.name">
+            <span class="team-roster__name">{{ xuxemon.name }}</span>
+            <span class="team-roster__meta">
+              Lv.{{ xuxemon.level ?? 1 }} · {{ xuxemon.size }}
+            </span>
+            <div class="team-roster__stats" aria-label="xuxemon stats">
+              <span class="team-roster__stat team-roster__stat--hp">HP {{ getXuxemonStat(xuxemon, 'hp') }}</span>
+              <span class="team-roster__stat team-roster__stat--atk">ATK {{ getXuxemonStat(xuxemon, 'attack') }}</span>
+              <span class="team-roster__stat team-roster__stat--def">DEF {{ getXuxemonStat(xuxemon, 'defense') }}</span>
+            </div>
+            <div class="team-roster__states" aria-label="xuxemon states">
+              @for (state of getXuxemonStates(xuxemon); track state.name) {
+                <span class="team-roster__state">
+                  @if (state.iconUrl) {
+                    <img class="team-roster__state-icon" [src]="state.iconUrl" [alt]="state.name" />
+                  }
+                  <span class="team-roster__state-text">{{ state.name }}</span>
+                </span>
+              }
+            </div>
+          </button>
+        } @empty {
+          <p class="team-builder__empty">No available Xuxemon to assign.</p>
+        }
+      </div>
+    }
+  </div>
+</section>
