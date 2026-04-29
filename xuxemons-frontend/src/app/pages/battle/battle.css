@@ -231,20 +231,30 @@
 }
 
 .status-banner-badge {
-  max-width: 92px;
+  max-width: 132px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  border-radius: 999px;
-  border: 1px solid var(--accent-color);
-  background: var(--color-blue-overlay-medium);
-  color: var(--accent-on-light);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--accent-on-light);
+  background: var(--color-blue-overlay);
+  color: var(--neutral-black);
   font-size: 0.56rem;
   font-weight: 900;
   line-height: 1;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 0.16rem 0.34rem;
+  flex-shrink: 0;
+}
+
+.status-banner-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
   flex-shrink: 0;
 }
 
@@ -462,7 +472,7 @@
 
 .menu-btn {
   border: 4px solid var(--neutral-black);
-  border-radius: 15px;
+  border-radius: var(--radius-pill);
   font-weight: 900;
   font-size: 1.3rem;
   cursor: pointer;
@@ -478,6 +488,10 @@
 
 .menu-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 rgba(0,0,0,0.3); }
 .menu-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+.menu-btn:focus-visible {
+  outline: 3px solid var(--neutral-white);
+  outline-offset: 2px;
+}
 
 /* Attack Submenu */
 .attack-grid {
@@ -529,8 +543,10 @@
 .bag-items-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
   gap: 8px;
   width: 100%;
+  height: 100%;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -551,15 +567,22 @@
 
 .bag-pagination-status {
   color: var(--neutral-white);
+  background: var(--neutral-black);
+  border: 2px solid var(--neutral-white);
   font-size: 0.9rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  padding: 0.2rem 0.7rem;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: center;
 }
 
 .atk-btn {
   padding: 15px;
-  border-radius: 12px;
+  border-radius: var(--radius-pill);
   border: 4px solid var(--neutral-black);
   background: var(--primary-color);
   font-weight: 800;
@@ -597,8 +620,8 @@
   font-weight: 800;
   color: var(--accent-on-light);
   background: var(--color-blue-overlay-medium);
-  border: 1px solid var(--accent-color);
-  border-radius: 999px;
+  border: 2px solid var(--accent-color);
+  border-radius: var(--radius-pill);
   padding: 0.08rem 0.42rem;
 }
 
@@ -607,14 +630,15 @@
   font-weight: 800;
   color: var(--color-purple-deep);
   background: var(--color-purple-overlay);
-  border: 1px solid var(--color-purple-base);
-  border-radius: 999px;
+  border: 2px solid var(--color-purple-base);
+  border-radius: var(--radius-pill);
   padding: 0.08rem 0.42rem;
 }
 
 .bag-item-btn {
   align-items: center;
   display: flex;
+  justify-content: flex-start;
   gap: 8px;
   min-height: 56px;
   padding: 8px 10px;
@@ -632,6 +656,7 @@
 .bag-item-copy {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 2px;
   min-width: 0;
 }
@@ -652,13 +677,52 @@
 
 .back-btn {
   grid-column: span 2;
-  background: var(--color-gray-medium);
+  background: var(--color-red-base);
   color: var(--neutral-white);
-  border: 4px solid var(--neutral-black);
-  border-radius: 10px;
+  border: 2px solid var(--color-red-base);
+  border-radius: var(--radius-pill);
   padding: 10px;
   font-weight: 800;
   cursor: pointer;
+  box-shadow: 0 2px 0 var(--color-red-overlay-strong);
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.back-btn:hover:not(:disabled) {
+  background: var(--color-red-deep);
+  border-color: var(--neutral-white);
+  transform: translateY(-1px);
+}
+
+.back-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 0 var(--color-red-overlay-strong);
+}
+
+.back-btn:focus-visible:not(:disabled) {
+  outline: 3px solid var(--color-red-deep);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.back-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.bag-pagination-btn {
+  min-width: 88px;
+  background: var(--accent-color);
+  color: var(--neutral-white);
+  border-color: var(--neutral-black);
+  box-shadow: 0 2px 0 var(--accent-on-light);
+}
+
+.bag-pagination-btn:hover:not(:disabled) {
+  background: var(--accent-on-light);
+  border-color: var(--neutral-black);
+  transform: translateY(-1px);
 }
 
 .switch-option {
@@ -671,18 +735,36 @@
   gap: 0.35rem;
   padding: 0.65rem 0.75rem;
   border-width: 3px;
-  border-radius: 14px;
+  border-radius: var(--radius-pill);
+  border-color: var(--neutral-black);
+  background: var(--neutral-white);
+  color: var(--neutral-black);
   line-height: 1.2;
 }
 
+.switch-option:hover:not(:disabled) {
+  background: var(--secondary-color);
+  border-color: var(--accent-color);
+}
+
 .switch-option--active {
-  background: var(--color-amber-overlay);
-  border-color: var(--color-amber-base);
+  background: var(--accent-on-light);
+  border-color: var(--neutral-black);
+  color: var(--neutral-white);
+}
+
+.switch-option--active .switch-option__name,
+.switch-option--active .switch-option__hp {
+  color: var(--neutral-white);
 }
 
 .switch-option--fainted {
   background: var(--color-gray-light);
-  border-color: var(--color-gray-medium);
+  border-color: var(--neutral-black);
+}
+
+.switch-option:disabled {
+  opacity: 1;
 }
 
 .switch-option__header {
@@ -706,7 +788,6 @@
   font-size: 0.82rem;
   font-weight: 800;
   color: var(--neutral-black);
-  opacity: 0.9;
 }
 
 .switch-option-badge {
@@ -714,9 +795,17 @@
   font-weight: 900;
   letter-spacing: 0.6px;
   padding: 0.16rem 0.5rem;
-  border-radius: 999px;
-  background: var(--color-black-soft);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--neutral-black);
+  background: var(--neutral-white);
+  color: var(--neutral-black);
   flex-shrink: 0;
+}
+
+.switch-option--active .switch-option-badge {
+  background: var(--neutral-black);
+  color: var(--neutral-white);
+  border-color: var(--neutral-white);
 }
 
 @media (max-width: 1100px) {
@@ -1368,7 +1457,7 @@
 .victory-content {
   background: linear-gradient(135deg, var(--neutral-white) 0%, var(--primary-color) 100%);
   padding: 35px;
-  border-radius: 24px;
+  border-radius: var(--radius-pill);
   text-align: center;
   border: 10px solid var(--color-amber-base);
   box-shadow: 0 20px 60px rgba(0,0,0,0.4);
@@ -1407,17 +1496,14 @@
 .battle-dialog {
   width: min(100%, 420px);
   background: linear-gradient(180deg, var(--neutral-white) 0%, var(--primary-color) 100%);
-  border-radius: 24px;
+  border-radius: var(--radius-pill);
   padding: 30px;
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.36);
+  box-shadow: 0 22px 60px var(--color-black-soft);
   text-align: center;
-  border: 6px solid var(--color-gray-light);
+  border: 6px solid var(--accent-color);
 }
 
-.battle-dialog--warning {
-  border-color: var(--color-amber-base);
-}
-
+.battle-dialog--warning,
 .battle-dialog--info {
   border-color: var(--accent-color);
 }
@@ -1448,39 +1534,69 @@
 
 .battle-dialog-btn {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
-  border-radius: 14px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: 900;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
   min-height: 52px;
-  padding: 0.9rem 1rem;
-  transition: transform 0.15s ease, filter 0.15s ease;
+  padding: 0.75rem 1.5rem;
+  transition: filter 0.2s, transform 0.1s;
 }
 
 .battle-dialog-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  filter: brightness(1.03);
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+.battle-dialog-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.85);
+}
+
+.battle-dialog-btn:focus-visible:not(:disabled) {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+  filter: none;
+  transform: none;
 }
 
 .battle-dialog-btn:disabled {
-  cursor: default;
-  opacity: 0.7;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .battle-dialog-btn--primary {
-  background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+  background-color: var(--accent-color);
   color: var(--neutral-white);
+}
+
+.battle-dialog-btn--primary:focus-visible:not(:disabled) {
+  background-color: var(--accent-color);
 }
 
 .battle-dialog-btn--secondary {
-  background: var(--color-gray-light);
-  color: var(--neutral-black);
+  background-color: var(--color-gray-medium);
+  color: var(--neutral-white);
+}
+
+.battle-dialog-btn--secondary:focus-visible:not(:disabled) {
+  background-color: var(--color-gray-medium);
+  outline-color: var(--color-gray-medium);
 }
 
 .battle-dialog-btn--danger {
-  background: linear-gradient(135deg, var(--color-red-bright), var(--color-red-base));
+  background-color: var(--color-red-base);
   color: var(--neutral-white);
+}
+
+.battle-dialog-btn--danger:focus-visible:not(:disabled) {
+  background-color: var(--color-red-base);
+  outline-color: var(--color-red-deep);
 }
 
 .empty-arena {

@@ -49,6 +49,9 @@
                   <span class="name">{{ opponentXuxemon()?.name }}</span>
                   @if (opponentXuxemon()?.statusEffect?.name) {
                     <span class="status-banner-badge" [title]="opponentXuxemon()?.statusEffect?.name">
+                      @if (opponentXuxemon()?.statusEffect?.icon_url) {
+                        <img class="status-banner-icon" [src]="opponentXuxemon()?.statusEffect?.icon_url" alt="">
+                      }
                       {{ opponentXuxemon()?.statusEffect?.name }}
                     </span>
                   }
@@ -64,9 +67,6 @@
 
               <!-- Status Effects Display -->
               <div class="status-effects">
-                @if (opponentXuxemon()?.statusEffect?.icon_url) {
-                  <img [src]="opponentXuxemon()?.statusEffect?.icon_url" [title]="opponentXuxemon()?.statusEffect?.name" class="status-icon">
-                }
                 @if (opponentXuxemon()?.side_effect_1?.icon_url) {
                   <img [src]="opponentXuxemon()?.side_effect_1?.icon_url" [title]="opponentXuxemon()?.side_effect_1?.name" class="status-icon">
                 }
@@ -104,6 +104,9 @@
                   <span class="name">{{ selectedXuxemon()?.name }}</span>
                   @if (selectedXuxemon()?.statusEffect?.name) {
                     <span class="status-banner-badge" [title]="selectedXuxemon()?.statusEffect?.name">
+                      @if (selectedXuxemon()?.statusEffect?.icon_url) {
+                        <img class="status-banner-icon" [src]="selectedXuxemon()?.statusEffect?.icon_url" alt="">
+                      }
                       {{ selectedXuxemon()?.statusEffect?.name }}
                     </span>
                   }
@@ -119,9 +122,6 @@
 
               <!-- Status Effects Display -->
               <div class="status-effects">
-                @if (selectedXuxemon()?.statusEffect?.icon_url) {
-                  <img [src]="selectedXuxemon()?.statusEffect?.icon_url" [title]="selectedXuxemon()?.statusEffect?.name" class="status-icon">
-                }
                 @if (selectedXuxemon()?.side_effect_1?.icon_url) {
                   <img [src]="selectedXuxemon()?.side_effect_1?.icon_url" [title]="selectedXuxemon()?.side_effect_1?.name" class="status-icon">
                 }
