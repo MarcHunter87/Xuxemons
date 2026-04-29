@@ -1322,7 +1322,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     audio.loop = true;
-    audio.volume = 0.4;
+    audio.volume = 0.6;
 
     if (!audio.paused) {
       return;
