@@ -472,7 +472,7 @@
   border-color: var(--color-green-glow-strong);
   background: var(--color-green-bright);
   box-shadow: 0 6px 16px var(--color-black-soft);
-  color: var(--color-green-base);
+  color: var(--neutral-black);
 }
 
 .use-item-status-block .use-item-status-chip.is-target .icon-success {
@@ -480,7 +480,7 @@
 }
 
 .use-item-status-block .use-item-status-chip.is-target .use-item-status-name {
-  color: var(--color-green-base);
+  color: var(--neutral-black);
   font-weight: 700;
 }
 
