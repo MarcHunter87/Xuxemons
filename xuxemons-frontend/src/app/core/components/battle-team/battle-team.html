@@ -28,7 +28,7 @@
               <span class="team-roster__stat team-roster__stat--def">DEF {{ getXuxemonStat(slotXuxemon, 'defense') }}</span>
             </div>
             <div class="team-roster__states" aria-label="slot xuxemon states">
-              @for (state of getXuxemonStates(slotXuxemon); track state.name) {
+              @for (state of getXuxemonStates(slotXuxemon); track $index) {
                 <span class="team-roster__state">
                   @if (state.iconUrl) {
                     <img class="team-roster__state-icon" [src]="state.iconUrl" [alt]="state.name" />
@@ -83,7 +83,7 @@
               <span class="team-roster__stat team-roster__stat--def">DEF {{ getXuxemonStat(xuxemon, 'defense') }}</span>
             </div>
             <div class="team-roster__states" aria-label="xuxemon states">
-              @for (state of getXuxemonStates(xuxemon); track state.name) {
+              @for (state of getXuxemonStates(xuxemon); track $index) {
                 <span class="team-roster__state">
                   @if (state.iconUrl) {
                     <img class="team-roster__state-icon" [src]="state.iconUrl" [alt]="state.name" />

@@ -157,20 +157,12 @@ export class BattleTeam implements OnInit {
 
   // Sirve para obtener estados/side effects únicos junto con su icono
   getXuxemonStates(xuxemon: Xuxemon): Array<{ name: string; iconUrl: string | null }> {
-    const entries = [
+    return [
       { name: xuxemon.statusEffect?.name, iconUrl: xuxemon.statusEffect?.icon_url ?? null },
       { name: xuxemon.side_effect_1?.name, iconUrl: xuxemon.side_effect_1?.icon_url ?? null },
       { name: xuxemon.side_effect_2?.name, iconUrl: xuxemon.side_effect_2?.icon_url ?? null },
       { name: xuxemon.side_effect_3?.name, iconUrl: xuxemon.side_effect_3?.icon_url ?? null },
     ].filter((state): state is { name: string; iconUrl: string | null } => !!state.name?.trim());
-
-    const uniqueByName = new Map<string, { name: string; iconUrl: string | null }>();
-    for (const state of entries) {
-      if (!uniqueByName.has(state.name)) {
-        uniqueByName.set(state.name, state);
-      }
-    }
-    return Array.from(uniqueByName.values());
   }
 
   // Sirve para resolver si el feedback actual es de error

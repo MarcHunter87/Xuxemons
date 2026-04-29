@@ -828,6 +828,39 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return this.auth.getAssetUrl(path);
   }
 
+  getXuxemonSideEffects(xuxemon: Xuxemon | null): Array<{ name: string; icon_url: string | null }> {
+    if (!xuxemon) {
+      return [];
+    }
+
+    return [
+      xuxemon.side_effect_1,
+      xuxemon.side_effect_2,
+      xuxemon.side_effect_3,
+    ]
+      .filter((effect): effect is NonNullable<Xuxemon['side_effect_1']> => Boolean(effect?.name?.trim()))
+      .map((effect) => ({
+        name: effect.name,
+        icon_url: effect.icon_url ?? null,
+      }));
+  }
+
+  getXuxemonAllStates(xuxemon: Xuxemon | null): Array<{ name: string; icon_url: string | null }> {
+    if (!xuxemon) {
+      return [];
+    }
+
+    return [
+      xuxemon.statusEffect
+        ? {
+          name: xuxemon.statusEffect.name,
+          icon_url: xuxemon.statusEffect.icon_url ?? null,
+        }
+        : null,
+      ...this.getXuxemonSideEffects(xuxemon),
+    ].filter((state): state is { name: string; icon_url: string | null } => Boolean(state?.name?.trim()));
+  }
+
   getSwitchCandidates(): Xuxemon[] {
     const currentId = this.selectedXuxemon()?.adquired_id;
     return this.myXuxemons().filter((xuxemon) => this.getCurrentHpValue(xuxemon) > 0 && xuxemon.adquired_id !== currentId);
@@ -1075,6 +1108,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       image_url: hasAbsoluteImage
         ? rawImage
         : (rawImage ? this.auth.getAssetUrl(rawImage.startsWith('/') ? rawImage : `/${rawImage}`) : assetPath),
+      statusEffect: this.normalizeEffect(raw?.statusEffect ?? raw?.status_effect),
+      side_effect_1: this.normalizeEffect(raw?.side_effect_1),
+      side_effect_2: this.normalizeEffect(raw?.side_effect_2),
+      side_effect_3: this.normalizeEffect(raw?.side_effect_3),
       attacks: rawAttacks.map((attack: any) => ({
         id: attack.id,
         name: attack.name,
@@ -1090,6 +1127,30 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
           : undefined,
       })),
     } as Xuxemon;
+  }
+
+  private normalizeEffect(
+    effect: { name?: string; icon_url?: string; icon_path?: string } | null | undefined,
+  ): { name: string; icon_url: string } | undefined {
+    const name = effect?.name?.trim();
+    if (!name) {
+      return undefined;
+    }
+
+    const rawIcon = effect?.icon_url?.trim();
+    const iconFromUrl = rawIcon
+      ? (rawIcon.startsWith('http://') || rawIcon.startsWith('https://')
+        ? rawIcon
+        : this.auth.getAssetUrl(rawIcon.startsWith('/') ? rawIcon : `/${rawIcon}`))
+      : '';
+    const iconFromPath = effect?.icon_path
+      ? this.auth.getAssetUrl(effect.icon_path.startsWith('/') ? effect.icon_path : `/${effect.icon_path}`)
+      : '';
+
+    return {
+      name,
+      icon_url: iconFromUrl || iconFromPath || '',
+    };
   }
 
   private triggerBattleAnimationsFromSnapshot(data: any): void {

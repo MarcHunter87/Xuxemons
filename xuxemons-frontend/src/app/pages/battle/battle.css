@@ -183,20 +183,10 @@
 
 .status-effects {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   margin-top: 10px;
-  min-height: 24px;
-}
-
-.status-icon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-  background: var(--neutral-white);
-  border-radius: 4px;
-  padding: 2px;
-  border: 1px solid var(--color-gray-light);
-  box-shadow: 0 2px 4px var(--color-black-soft);
+  min-height: 30px;
 }
 
 .name-row {
@@ -231,7 +221,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  border-radius: var(--radius-pill);
+  border-radius: 5px;
   border: 2px solid var(--accent-on-light);
   background: var(--color-blue-overlay);
   color: var(--neutral-black);
@@ -245,10 +235,16 @@
 }
 
 .status-banner-icon {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   object-fit: contain;
   flex-shrink: 0;
+}
+
+.status-banner-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hp-bar-container {
