@@ -20,7 +20,7 @@
   min-height: 100%;
   height: 100%;
   max-width: none;
-    36%  { transform: rotateX(306deg) rotateY(144deg) rotateZ(210deg) scale(1.11); }
+}
 
 /* Modal-like Selection Overlay */
 .selection-overlay {
@@ -32,7 +32,7 @@
   align-items: center;
   justify-content: center;
   z-index: 500;
-    55%  { transform: translate3d(80px, -60px, 0) scale(1.14) rotate(-12deg); }
+  backdrop-filter: blur(5px);
 }
 
 .selection-card {
@@ -41,7 +41,7 @@
   background: var(--neutral-white);
   border-radius: 20px;
   padding: 24px;
-    55%  { transform: translate3d(-80px, 60px, 0) scale(1.14) rotate(12deg); }
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
   display: flex;
   flex-direction: column;
 }
@@ -50,7 +50,7 @@
   font-size: 1.5rem;
   margin-bottom: 5px;
   color: var(--neutral-black);
-    60%  { transform: translate3d(64px, -30px, 0) scale(1.1) rotate(-6deg); }
+  text-align: center;
 }
 
 .sidebar-info {
@@ -59,7 +59,7 @@
   margin-bottom: 15px;
   text-align: center;
 }
-    60%  { transform: translate3d(-64px, 30px, 0) scale(1.1) rotate(6deg); }
+
 .xuxemon-list {
   display: flex;
   flex-direction: column;
@@ -68,7 +68,7 @@
   padding-right: 5px;
 }
 
-    48%  { transform: translate3d(56px, -22px, 0) scale(1.16) rotate(-5deg); }
+/* Battle Arena Layout */
 .battle-arena {
   width: 100%;
   flex: 1;
@@ -78,7 +78,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-    48%  { transform: translate3d(-56px, 22px, 0) scale(1.16) rotate(5deg); }
+  box-shadow: none;
   border: none;
   overflow: hidden;
 }
@@ -482,7 +482,7 @@
 }
 
 .menu-btn.fight { background: var(--color-red-base); color: var(--neutral-white); }
-.menu-btn.bag { background: var(--color-amber-base); color: var(--neutral-white); }
+.menu-btn.bag { background: var(--color-amber-base); color: var(--neutral-black); }
 .menu-btn.pokemon { background: var(--color-green-base); color: var(--neutral-white); }
 .menu-btn.run { background: var(--accent-color); color: var(--neutral-white); }
 
@@ -742,18 +742,15 @@
   line-height: 1.2;
 }
 
+.switch-option:hover:not(:disabled) {
+  background: var(--secondary-color);
+  border-color: var(--accent-color);
+}
+
 .switch-option--active {
   background: var(--accent-on-light);
   border-color: var(--neutral-black);
   color: var(--neutral-white);
-  cursor: default;
-}
-
-.switch-option--active:hover {
-  background: var(--accent-on-light);
-  border-color: var(--neutral-black);
-  filter: none;
-  transform: none;
 }
 
 .switch-option--active .switch-option__name,
@@ -1311,24 +1308,11 @@
 }
 
 .dice.landed {
-  animation: diceLand 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: diceLand 0.42s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.dice.landed[data-value='1'] { color: var(--color-gray-medium); box-shadow: 0 0 18px rgba(119,119,119,0.3), inset 0 0 8px rgba(119,119,119,0.15); }
-.dice.landed[data-value='2'] { color: var(--accent-color); box-shadow: 0 0 24px var(--color-blue-overlay-medium), inset 0 0 10px var(--color-blue-overlay); }
-.dice.landed[data-value='3'] { color: var(--color-green-base); box-shadow: 0 0 24px var(--color-green-overlay-soft), inset 0 0 10px var(--color-green-overlay); }
-.dice.landed[data-value='4'] { color: var(--color-amber-base); box-shadow: 0 0 28px var(--color-amber-overlay), inset 0 0 12px var(--color-amber-overlay); }
-.dice.landed[data-value='5'] { color: var(--color-red-bright); box-shadow: 0 0 28px var(--color-red-overlay-medium), inset 0 0 12px var(--color-red-overlay-soft); }
 .dice.landed[data-value='6'] {
-  color: var(--color-amber-deep);
-  box-shadow: 0 0 40px var(--color-amber-overlay), inset 0 0 18px var(--color-amber-overlay);
-  animation: diceLand 0.62s cubic-bezier(0.16, 1, 0.3, 1), diceGlow6 0.7s 0.45s ease-in-out forwards;
-}
-
-@keyframes diceGlow6 {
-  0%   { box-shadow: 0 0 40px var(--color-amber-overlay), inset 0 0 18px var(--color-amber-overlay); }
-  50%  { box-shadow: 0 0 80px var(--color-amber-base), inset 0 0 32px var(--color-amber-overlay), 0 0 120px rgba(245,158,11,0.45); }
-  100% { box-shadow: 0 0 40px var(--color-amber-overlay), inset 0 0 18px var(--color-amber-overlay); }
+  box-shadow: 0 0 40px var(--color-amber-overlay), inset 0 0 14px var(--color-amber-overlay);
 }
 
 .dice-label {
@@ -1340,26 +1324,18 @@
 }
 
 @keyframes diceRoll3D {
-  0%   { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); }
-  10%  { transform: rotateX(144deg) rotateY(90deg) rotateZ(38deg) scale(1.14); }
-  22%  { transform: rotateX(72deg) rotateY(252deg) rotateZ(115deg) scale(0.92); }
-  36%  { transform: rotateX(306deg) rotateY(144deg) rotateZ(210deg) scale(1.11); }
-  50%  { transform: rotateX(180deg) rotateY(330deg) rotateZ(165deg) scale(0.95); }
-  64%  { transform: rotateX(324deg) rotateY(216deg) rotateZ(285deg) scale(1.09); }
-  78%  { transform: rotateX(108deg) rotateY(288deg) rotateZ(325deg) scale(0.98); }
-  90%  { transform: rotateX(252deg) rotateY(180deg) rotateZ(272deg) scale(1.04); }
+  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); }
+  20% { transform: rotateX(120deg) rotateY(100deg) rotateZ(52deg) scale(1.08); }
+  45% { transform: rotateX(210deg) rotateY(228deg) rotateZ(130deg) scale(1.02); }
+  70% { transform: rotateX(300deg) rotateY(330deg) rotateZ(242deg) scale(1.08); }
   100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg) scale(1); }
 }
 
 @keyframes diceLand {
-  0%   { transform: translateY(-24px) scale(1.12) rotateZ(-10deg); }
-  20%  { transform: translateY(6px) scale(0.94) rotateZ(4deg); }
-  38%  { transform: translateY(-11px) scale(1.05) rotateZ(-2deg); }
-  54%  { transform: translateY(3px) scale(0.98) rotateZ(1deg); }
-  68%  { transform: translateY(-5px) scale(1.02) rotateZ(0deg); }
-  80%  { transform: translateY(1px) scale(0.995) rotateZ(0deg); }
-  90%  { transform: translateY(-2px) scale(1.003) rotateZ(0deg); }
-  100% { transform: translateY(0) scale(1) rotateZ(0deg); }
+  0% { transform: translateY(-10px) scale(1.05); }
+  45% { transform: translateY(0) scale(1); }
+  70% { transform: translateY(-4px) scale(1.01); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -1430,30 +1406,6 @@
   }
 }
 
-@keyframes impactBurstSpeed {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.12); filter: brightness(3); }
-  15%  { opacity: 1; transform: translate(-50%, -50%) scale(0.62); filter: brightness(2.2); }
-  42%  { opacity: 0.88; transform: translate(-50%, -50%) scale(1.08); filter: brightness(1.3); }
-  68%  { opacity: 0.45; transform: translate(-50%, -50%) scale(1.42); filter: brightness(1); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.85); filter: brightness(1); }
-}
-
-@keyframes impactBurstTechnical {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.08) rotate(0deg); }
-  18%  { opacity: 0.88; transform: translate(-50%, -50%) scale(0.65) rotate(55deg); }
-  48%  { opacity: 0.78; transform: translate(-50%, -50%) scale(1.05) rotate(110deg); }
-  72%  { opacity: 0.42; transform: translate(-50%, -50%) scale(1.28) rotate(148deg); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6) rotate(190deg); }
-}
-
-@keyframes impactBurstPower {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.22); filter: blur(0px); }
-  14%  { opacity: 1; transform: translate(-50%, -50%) scale(0.82); filter: blur(1.5px); }
-  36%  { opacity: 0.94; transform: translate(-50%, -50%) scale(1.08); filter: blur(0px); }
-  60%  { opacity: 0.55; transform: translate(-50%, -50%) scale(1.45); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.1); }
-}
-
 @keyframes slashFromPlayer {
   0% {
     opacity: 0;
@@ -1489,77 +1441,6 @@
 @keyframes hitFlash {
   0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
   50% { filter: brightness(2) drop-shadow(0 0 10px #fff); }
-}
-
-/* ── Type-specific screen effects (requires :has() support) ── */
-.battle-screen:has(.impact-burst--speed) {
-  animation: speedScreenFlash 0.3s ease-out;
-}
-
-.battle-screen:has(.impact-burst--technical) {
-  animation: technicalScreenPulse 0.44s ease-out;
-}
-
-.battle-screen:has(.impact-burst--power) {
-  animation: powerScreenShake 0.46s ease-out;
-}
-
-@keyframes speedScreenFlash {
-  0%   { filter: brightness(1); }
-  16%  { filter: brightness(1.5) saturate(0.7); }
-  40%  { filter: brightness(1.15); }
-  100% { filter: brightness(1); }
-}
-
-@keyframes technicalScreenPulse {
-  0%   { filter: brightness(1) hue-rotate(0deg); }
-  22%  { filter: brightness(1.12) hue-rotate(25deg); }
-  55%  { filter: brightness(1.05) hue-rotate(12deg); }
-  100% { filter: brightness(1) hue-rotate(0deg); }
-}
-
-@keyframes powerScreenShake {
-  0%   { transform: translate(0, 0); }
-  10%  { transform: translate(-7px, 4px); }
-  22%  { transform: translate(9px, -7px); }
-  34%  { transform: translate(-6px, 6px); }
-  46%  { transform: translate(7px, -4px); }
-  58%  { transform: translate(-4px, 3px); }
-  70%  { transform: translate(3px, -2px); }
-  84%  { transform: translate(-2px, 1px); }
-  100% { transform: translate(0, 0); }
-}
-
-/* ── Type-specific hit flash using :has() ── */
-.battle-screen:has(.impact-burst--speed) .sprite-container.hit img {
-  animation: shakeHit 0.1s linear 3, hitFlashSpeed 0.34s ease;
-}
-
-.battle-screen:has(.impact-burst--technical) .sprite-container.hit img {
-  animation: shakeHit 0.1s linear 3, hitFlashTechnical 0.34s ease;
-}
-
-.battle-screen:has(.impact-burst--power) .sprite-container.hit img {
-  animation: shakeHit 0.12s linear 4, hitFlashPower 0.44s ease;
-}
-
-@keyframes hitFlashSpeed {
-  0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
-  22%  { filter: brightness(3) drop-shadow(0 0 14px rgba(56,189,248,0.95)) saturate(0.5); }
-  50%  { filter: brightness(1.8) drop-shadow(0 0 8px rgba(14,165,233,0.7)); }
-}
-
-@keyframes hitFlashTechnical {
-  0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
-  28%  { filter: brightness(2.2) drop-shadow(0 0 16px rgba(139,92,246,0.9)) hue-rotate(35deg); }
-  58%  { filter: brightness(1.5) drop-shadow(0 0 9px rgba(109,40,217,0.65)); }
-}
-
-@keyframes hitFlashPower {
-  0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
-  18%  { filter: brightness(3.5) drop-shadow(0 0 20px rgba(251,191,36,0.98)) saturate(1.6); }
-  42%  { filter: brightness(2.2) drop-shadow(0 0 12px rgba(217,119,6,0.85)); }
-  68%  { filter: brightness(1.4) drop-shadow(0 0 6px rgba(245,158,11,0.6)); }
 }
 
 /* Modal Victory */
@@ -1744,24 +1625,19 @@
 }
 
 .dice-container.throwing {
-  animation: diceThrowArc 0.64s cubic-bezier(0.18, 0.88, 0.28, 1) both;
+  animation: diceThrowArc 0.52s cubic-bezier(0.2, 0.9, 0.28, 1) both;
 }
 
 .impact-burst--speed {
-  background: radial-gradient(circle, rgba(255,255,255,0.98) 0%, rgba(56,189,248,0.88) 18%, rgba(14,165,233,0.42) 55%, rgba(224,242,254,0) 100%);
-  animation: impactBurstSpeed 0.36s ease-out forwards;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.92) 0%, rgba(56, 189, 248, 0.72) 30%, rgba(14, 165, 233, 0.24) 64%, rgba(255, 255, 255, 0) 100%);
 }
 
 .impact-burst--technical {
-  background: radial-gradient(circle, rgba(255,255,255,0.92) 0%, rgba(167,139,250,0.72) 30%, rgba(109,40,217,0.24) 64%, rgba(255,255,255,0) 100%);
-  animation: impactBurstTechnical 0.52s ease-out forwards;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.92) 0%, rgba(167, 139, 250, 0.72) 30%, rgba(109, 40, 217, 0.24) 64%, rgba(255, 255, 255, 0) 100%);
 }
 
 .impact-burst--power {
-  background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(251,191,36,0.82) 22%, rgba(217,119,6,0.38) 58%, rgba(255,255,255,0) 100%);
-  width: 240px;
-  height: 240px;
-  animation: impactBurstPower 0.46s ease-out forwards;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(251, 191, 36, 0.74) 30%, rgba(217, 119, 6, 0.28) 64%, rgba(255, 255, 255, 0) 100%);
 }
 
 .attack-trail--player.attack-trail--speed {
@@ -1883,12 +1759,9 @@
 .opponent-sprite img.attacking.attacking-power { animation: opponentPowerAttack 0.58s cubic-bezier(0.12, 0.9, 0.24, 1); }
 
 @keyframes diceThrowArc {
-  0%   { transform: translate3d(-240px, 70px, 0) rotate(-52deg) scale(0.55); opacity: 0; }
-  12%  { opacity: 1; transform: translate3d(-175px, 10px, 0) rotate(-30deg) scale(0.78); }
-  35%  { transform: translate3d(-70px, -52px, 0) rotate(-10deg) scale(1.06); }
-  58%  { transform: translate3d(10px, -22px, 0) rotate(6deg) scale(1.04); }
-  76%  { transform: translate3d(4px, 6px, 0) rotate(-3deg) scale(0.97); }
-  90%  { transform: translate3d(-2px, -2px, 0) rotate(1deg) scale(1.01); }
+  0% { transform: translate3d(-180px, 40px, 0) rotate(-26deg) scale(0.84); opacity: 0; }
+  22% { opacity: 1; }
+  58% { transform: translate3d(0, -24px, 0) rotate(8deg) scale(1.03); }
   100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); opacity: 1; }
 }
 
@@ -1921,72 +1794,60 @@
 }
 
 @keyframes powerFromPlayer {
-  0% { opacity: 0; transform: translate3d(-18px, -50%, 0) scaleX(0.24) scaleY(1.08); }
+  0% { opacity: 0; transform: translate3d(-18px, -50%, 0) scaleX(0.24) scaleY(1.08); filter: blur(0.2px); }
   32% { opacity: 0.96; transform: translate3d(68px, -50%, 0) scaleX(0.94) scaleY(1.02); }
   56% { opacity: 0.86; transform: translate3d(138px, -50%, 0) scaleX(1.08) scaleY(1.1) translateY(2px); }
-  100% { opacity: 0; transform: translate3d(208px, -50%, 0) scaleX(1.24) scaleY(1.04) translateY(-1px); }
+  100% { opacity: 0; transform: translate3d(208px, -50%, 0) scaleX(1.24) scaleY(1.04) translateY(-1px); filter: blur(0.4px); }
 }
 
 @keyframes powerFromOpponent {
-  0% { opacity: 0; transform: translate3d(18px, -50%, 0) scaleX(0.24) scaleY(1.08); }
+  0% { opacity: 0; transform: translate3d(18px, -50%, 0) scaleX(0.24) scaleY(1.08); filter: blur(0.2px); }
   32% { opacity: 0.96; transform: translate3d(-68px, -50%, 0) scaleX(0.94) scaleY(1.02); }
   56% { opacity: 0.86; transform: translate3d(-138px, -50%, 0) scaleX(1.08) scaleY(1.1) translateY(2px); }
-  100% { opacity: 0; transform: translate3d(-208px, -50%, 0) scaleX(1.24) scaleY(1.04) translateY(-1px); }
+  100% { opacity: 0; transform: translate3d(-208px, -50%, 0) scaleX(1.24) scaleY(1.04) translateY(-1px); filter: blur(0.4px); }
 }
 
 @keyframes playerSpeedAttack {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  12%  { transform: translate3d(14px, -6px, 0) scale(0.96); }
-  35%  { transform: translate3d(68px, -54px, 0) scale(1.12) rotate(-10deg); }
-  55%  { transform: translate3d(80px, -60px, 0) scale(1.14) rotate(-12deg); }
-  72%  { transform: translate3d(26px, -20px, 0) scale(1.06) rotate(-4deg); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  35% { transform: translate3d(58px, -56px, 0) scale(1.1) rotate(-8deg); }
+  70% { transform: translate3d(24px, -20px, 0) scale(1.05) rotate(-3deg); }
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes opponentSpeedAttack {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  12%  { transform: translate3d(-14px, 6px, 0) scale(0.96); }
-  35%  { transform: translate3d(-68px, 54px, 0) scale(1.12) rotate(10deg); }
-  55%  { transform: translate3d(-80px, 60px, 0) scale(1.14) rotate(12deg); }
-  72%  { transform: translate3d(-26px, 20px, 0) scale(1.06) rotate(4deg); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  35% { transform: translate3d(-58px, 56px, 0) scale(1.1) rotate(8deg); }
+  70% { transform: translate3d(-24px, 20px, 0) scale(1.05) rotate(3deg); }
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes playerTechnicalAttack {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  15%  { transform: translate3d(10px, -8px, 0) scale(1.03); }
-  38%  { transform: translate3d(40px, -22px, 0) scale(1.07) rotate(-3deg); }
-  60%  { transform: translate3d(64px, -30px, 0) scale(1.1) rotate(-6deg); }
-  78%  { transform: translate3d(22px, -10px, 0) scale(1.04) rotate(-2deg); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  28% { transform: translate3d(34px, -16px, 0) scale(1.06) rotate(-2deg); }
+  56% { transform: translate3d(62px, -28px, 0) scale(1.09) rotate(-5deg); }
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes opponentTechnicalAttack {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  15%  { transform: translate3d(-10px, 8px, 0) scale(1.03); }
-  38%  { transform: translate3d(-40px, 22px, 0) scale(1.07) rotate(3deg); }
-  60%  { transform: translate3d(-64px, 30px, 0) scale(1.1) rotate(6deg); }
-  78%  { transform: translate3d(-22px, 10px, 0) scale(1.04) rotate(2deg); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  28% { transform: translate3d(-34px, 16px, 0) scale(1.06) rotate(2deg); }
+  56% { transform: translate3d(-62px, 28px, 0) scale(1.09) rotate(5deg); }
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes playerPowerAttack {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  10%  { transform: translate3d(-16px, 6px, 0) scale(0.9) rotate(4deg); }
-  28%  { transform: translate3d(-8px, 3px, 0) scale(0.95) rotate(2deg); }
-  48%  { transform: translate3d(56px, -22px, 0) scale(1.16) rotate(-5deg); }
-  65%  { transform: translate3d(72px, -28px, 0) scale(1.18) rotate(-7deg); }
-  80%  { transform: translate3d(32px, -12px, 0) scale(1.08) rotate(-2deg); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  24% { transform: translate3d(16px, -8px, 0) scale(1.04) rotate(-1deg); }
+  52% { transform: translate3d(56px, -22px, 0) scale(1.11) rotate(-4deg); }
+  74% { transform: translate3d(28px, -10px, 0) scale(1.06) rotate(-2deg); }
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes opponentPowerAttack {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  10%  { transform: translate3d(16px, -6px, 0) scale(0.9) rotate(-4deg); }
-  28%  { transform: translate3d(8px, -3px, 0) scale(0.95) rotate(-2deg); }
-  48%  { transform: translate3d(-56px, 22px, 0) scale(1.16) rotate(5deg); }
-  65%  { transform: translate3d(-72px, 28px, 0) scale(1.18) rotate(7deg); }
-  80%  { transform: translate3d(-32px, 12px, 0) scale(1.08) rotate(2deg); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  24% { transform: translate3d(-16px, 8px, 0) scale(1.04) rotate(1deg); }
+  52% { transform: translate3d(-56px, 22px, 0) scale(1.11) rotate(4deg); }
+  74% { transform: translate3d(-28px, 10px, 0) scale(1.06) rotate(2deg); }
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 

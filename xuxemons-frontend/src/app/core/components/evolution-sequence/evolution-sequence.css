@@ -240,29 +240,49 @@
   opacity: 0;
 }
 
-.particle:nth-child(n) {
-  --r: 0deg;
-  --d: 0s;
-  animation: gachaParticleFly 2s ease-out infinite;
-  animation-delay: var(--d);
-}
+.particle:nth-child(n) { animation: gachaParticleFly 2s ease-out infinite; }
 .particle:nth-child(even) { background: #ffd700; box-shadow: 0 0 15px #ffd700; width: 4px; height: 30px; }
 
-.particle:nth-child(2n) { --r: 36deg; --d: 0.1s; }
-.particle:nth-child(3n) { --r: 72deg; --d: 1.5s; }
-.particle:nth-child(4n) { --r: 108deg; --d: 0.4s; }
-.particle:nth-child(5n) { --r: 144deg; --d: 1.8s; }
-.particle:nth-child(6n) { --r: 180deg; --d: 0.7s; }
-.particle:nth-child(7n) { --r: 216deg; --d: 0.2s; }
-.particle:nth-child(8n) { --r: 252deg; --d: 1.1s; }
-.particle:nth-child(9n) { --r: 288deg; --d: 0.8s; }
-.particle:nth-child(10n) { --r: 324deg; --d: 1.4s; }
-
-/* Extra offset layer for pseudo-random spread without 40 explicit selectors */
-.particle:nth-child(4n + 1) { --r: calc(var(--r) + 15deg); --d: 0.5s; }
-.particle:nth-child(4n + 2) { --r: calc(var(--r) + 25deg); --d: 0.9s; }
-.particle:nth-child(4n + 3) { --r: calc(var(--r) + 10deg); --d: 1.3s; }
-.particle:nth-child(4n) { --r: calc(var(--r) + 5deg); --d: 0.6s; }
+.particle:nth-child(1) { --r: 0deg; --d: 1.2s; }
+.particle:nth-child(2) { --r: 36deg; --d: 0.1s; }
+.particle:nth-child(3) { --r: 72deg; --d: 1.5s; }
+.particle:nth-child(4) { --r: 108deg; --d: 0.4s; }
+.particle:nth-child(5) { --r: 144deg; --d: 1.8s; }
+.particle:nth-child(6) { --r: 180deg; --d: 0.7s; }
+.particle:nth-child(7) { --r: 216deg; --d: 0.2s; }
+.particle:nth-child(8) { --r: 252deg; --d: 1.1s; }
+.particle:nth-child(9) { --r: 288deg; --d: 0.8s; }
+.particle:nth-child(10) { --r: 324deg; --d: 1.4s; }
+.particle:nth-child(11) { --r: 15deg; --d: 0.5s; }
+.particle:nth-child(12) { --r: 50deg; --d: 1.9s; }
+.particle:nth-child(13) { --r: 85deg; --d: 0.3s; }
+.particle:nth-child(14) { --r: 120deg; --d: 1.6s; }
+.particle:nth-child(15) { --r: 155deg; --d: 0.9s; }
+.particle:nth-child(16) { --r: 190deg; --d: 1.3s; }
+.particle:nth-child(17) { --r: 225deg; --d: 0.6s; }
+.particle:nth-child(18) { --r: 260deg; --d: 1.7s; }
+.particle:nth-child(19) { --r: 295deg; --d: 1.0s; }
+.particle:nth-child(20) { --r: 330deg; --d: 0.4s; }
+.particle:nth-child(21) { --r: 25deg; --d: 0.3s; }
+.particle:nth-child(22) { --r: 65deg; --d: 1.2s; }
+.particle:nth-child(23) { --r: 95deg; --d: 0.8s; }
+.particle:nth-child(24) { --r: 135deg; --d: 0.5s; }
+.particle:nth-child(25) { --r: 165deg; --d: 1.4s; }
+.particle:nth-child(26) { --r: 205deg; --d: 0.9s; }
+.particle:nth-child(27) { --r: 235deg; --d: 0.2s; }
+.particle:nth-child(28) { --r: 275deg; --d: 1.6s; }
+.particle:nth-child(29) { --r: 305deg; --d: 0.7s; }
+.particle:nth-child(30) { --r: 345deg; --d: 1.1s; }
+.particle:nth-child(31) { --r: 10deg; --d: 1.5s; }
+.particle:nth-child(32) { --r: 45deg; --d: 0.4s; }
+.particle:nth-child(33) { --r: 80deg; --d: 1.8s; }
+.particle:nth-child(34) { --r: 115deg; --d: 0.6s; }
+.particle:nth-child(35) { --r: 150deg; --d: 1.0s; }
+.particle:nth-child(36) { --r: 185deg; --d: 1.3s; }
+.particle:nth-child(37) { --r: 220deg; --d: 0.5s; }
+.particle:nth-child(38) { --r: 255deg; --d: 1.7s; }
+.particle:nth-child(39) { --r: 290deg; --d: 0.9s; }
+.particle:nth-child(40) { --r: 325deg; --d: 0.2s; }
 
 @keyframes gachaMorph {
   0% { transform: scale(var(--from-scale)); opacity: 0; filter: brightness(1); }
@@ -381,7 +401,8 @@
   0%, 35% { opacity: 0; }
   50% { opacity: 0.4; }
   70% { opacity: 0.8; }
-
+  75% { opacity: 0; }
+  100% { opacity: 0; }
 }
 
 @keyframes gachaFinalFlash {
@@ -389,7 +410,8 @@
   76.5% { opacity: 1; background: #000; }
   77% { opacity: 1; background: #fff; }
   78% { opacity: 1; }
-
+  85% { opacity: 0; }
+  100% { opacity: 0; }
 }
 
 @keyframes gachaParticleFly {
