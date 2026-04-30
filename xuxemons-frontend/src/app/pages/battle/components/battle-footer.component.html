@@ -1,0 +1,102 @@
+<div class="battle-footer">
+  <div class="battle-logs">
+    @for (log of vm.battleLog(); track $index) {
+      <p [class.new-log]="$index === 0">{{ log }}</p>
+    } @empty {
+      <p>The battle begins!</p>
+    }
+  </div>
+
+  <div class="battle-actions">
+    @if (vm.battleStatus() === 'ready' && vm.currentTurn() === 'player' && !vm.currentSubMenu()) {
+      <div class="menu-grid">
+        <button class="menu-btn fight" (click)="vm.showSubMenu('attacks')">FIGHT</button>
+        <button class="menu-btn bag" (click)="vm.showSubMenu('bag')">BAG</button>
+        <button class="menu-btn pokemon" (click)="vm.showSubMenu('switch')">XUXEMONS</button>
+        <button class="menu-btn run" (click)="vm.runAway()">RUN</button>
+      </div>
+    } @else if (vm.currentSubMenu() === 'attacks') {
+      <div class="attack-grid attack-grid--attacks">
+        @for (atk of vm.selectedXuxemon()?.attacks; track atk.id) {
+          <button class="atk-btn attack-option-btn" (click)="vm.attack(atk)">
+            <span class="attack-option-btn__name">{{ atk.name }}</span>
+            <span class="attack-option-btn__meta">DMG {{ atk.dmg ?? 10 }}</span>
+            @if ((atk.status_chance ?? 0) > 0) {
+              <span class="attack-option-btn__status">{{ atk.status_chance }}% {{ atk.statusEffect?.name ?? 'status' }}</span>
+            }
+          </button>
+        } @empty {
+          <button class="atk-btn attack-option-btn" (click)="vm.attack({name: 'Tackle', dmg: 10})">
+            <span class="attack-option-btn__name">Tackle</span>
+            <span class="attack-option-btn__meta">DMG 10</span>
+          </button>
+          <button class="atk-btn attack-option-btn" (click)="vm.attack({name: 'Quick Attack', dmg: 15})">
+            <span class="attack-option-btn__name">Quick Attack</span>
+            <span class="attack-option-btn__meta">DMG 15</span>
+          </button>
+        }
+        <button class="back-btn submenu-back-btn" (click)="vm.showSubMenu(null)">BACK</button>
+      </div>
+    } @else if (vm.currentSubMenu() === 'bag') {
+      <div class="bag-panel">
+        <div class="bag-items-grid">
+        @for (item of vm.paginatedBagItems(); track item.id) {
+          <button class="atk-btn bag-item-btn" (click)="vm.chooseBagItem(item)">
+            <img class="bag-item-icon" [src]="item.iconPath" [alt]="item.name">
+            <span class="bag-item-copy">
+              <span class="bag-item-name">{{ item.name }}</span>
+              <span class="bag-item-qty">x{{ item.quantity }}</span>
+            </span>
+          </button>
+        } @empty {
+          <p class="no-items">No items available</p>
+        }
+        </div>
+        @if (vm.bagPageCount() > 1) {
+          <div class="bag-pagination">
+            <button class="back-btn bag-pagination-btn" (click)="vm.previousBagPage()" [disabled]="!vm.canGoToPreviousBagPage()">PREV</button>
+            <span class="bag-pagination-status">Page {{ vm.bagPage() + 1 }} / {{ vm.bagPageCount() }}</span>
+            <button class="back-btn bag-pagination-btn" (click)="vm.nextBagPage()" [disabled]="!vm.canGoToNextBagPage()">NEXT</button>
+          </div>
+        }
+        <button class="back-btn submenu-back-btn" (click)="vm.showSubMenu(null)">BACK</button>
+      </div>
+    } @else if (vm.currentSubMenu() === 'bag-target') {
+      <div class="attack-grid attack-grid--targets">
+        @for (xuxemon of vm.getEligibleItemTargets(); track xuxemon.adquired_id || xuxemon.id) {
+          <button class="atk-btn" (click)="vm.useItemOnTarget(xuxemon)">
+            {{ xuxemon.name }}
+            <br>
+            HP {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}
+          </button>
+        } @empty {
+          <p class="no-items">No valid targets for {{ vm.selectedBattleItem()?.name }}</p>
+        }
+        <button class="back-btn submenu-back-btn" (click)="vm.cancelBagTargeting()">BACK</button>
+      </div>
+    } @else if (vm.currentSubMenu() === 'switch') {
+      <div class="attack-grid attack-grid--switch">
+        @for (xuxemon of vm.getSwitchMenuXuxemons(); track xuxemon.adquired_id || xuxemon.id) {
+          <button class="atk-btn switch-option" [class.switch-option--active]="vm.isPlayerActiveXuxemon(xuxemon)" [class.switch-option--fainted]="(xuxemon.current_hp ?? xuxemon.hp ?? 0) <= 0" [disabled]="!vm.canSwitchToXuxemon(xuxemon)" (click)="vm.switchXuxemon(xuxemon)">
+            <span class="switch-option__header">
+              <span class="switch-option__name">{{ xuxemon.name }}</span>
+              <span class="switch-option-badge">{{ vm.isPlayerActiveXuxemon(xuxemon) ? 'ACTIVE' : ((xuxemon.current_hp ?? xuxemon.hp ?? 0) <= 0 ? 'KO' : 'READY') }}</span>
+            </span>
+            <span class="switch-option__hp">HP {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}</span>
+          </button>
+        } @empty {
+          <p class="no-items">No other available Xuxemons</p>
+        }
+        @if (!vm.forcedSwitch()) {
+          <button class="back-btn submenu-back-btn" (click)="vm.showSubMenu(null)">BACK</button>
+        }
+      </div>
+    } @else {
+      <div class="waiting-msg">
+        <span class="pulse">
+          {{ vm.forcedSwitch() ? 'Choose your next Xuxemon...' : (vm.battleStatus() === 'animating' ? 'Executing action...' : 'Waiting for opponent...') }}
+        </span>
+      </div>
+    }
+  </div>
+</div>

@@ -1,32 +1,39 @@
 import { take } from 'rxjs/operators';
-import { Component, OnDestroy, OnInit, AfterViewInit, ViewChild, ElementRef, inject, signal, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit, ViewChild, ElementRef, inject, signal, PLATFORM_ID, ChangeDetectorRef, NgZone, ViewEncapsulation } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { BattleService } from '../../core/services/battle.service';
 import { XuxemonService } from '../../core/services/xuxemon.service';
 import { TeamService } from '../../core/services/team.service';
 import { AuthService } from '../../core/services/auth';
 import { InventoryService } from '../../core/services/inventory.service';
+import { BattleTurnHeaderComponent } from './components/battle-turn-header.component';
+import { BattleFooterComponent } from './components/battle-footer.component';
+import { BattleSelectionOverlayComponent } from './components/battle-selection-overlay.component';
+import { BattleModalsComponent } from './components/battle-modals.component';
 import type { InventoryItem, UseItemResponseData, Xuxemon } from '../../core/interfaces';
 
 type BattleMenu = 'attacks' | 'bag' | 'bag-target' | 'switch' | null;
-type AttackVisualType = 'speed' | 'technical' | 'power' | 'neutral';
 
 @Component({
   selector: 'app-battle',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    BattleTurnHeaderComponent,
+    BattleFooterComponent,
+    BattleSelectionOverlayComponent,
+    BattleModalsComponent,
+  ],
   templateUrl: './battle.html',
   styleUrl: './battle.css',
+  encapsulation: ViewEncapsulation.None,
 })
 export class Battle implements OnInit, OnDestroy, AfterViewInit {
+  readonly vm = this;
+
   private readonly bagPageSize = 4;
-  private readonly diceTickMs = 80;
-  private readonly diceTicks = 12;
-  private readonly diceSettleMs = 560;
-  private readonly attackWindupMs = 180;
-  private readonly attackImpactMs = 380;
   private readonly supportedBattleEffectTypes = new Set<InventoryItem['effect_type']>([
     'Heal',
     'DMG Up',
@@ -43,6 +50,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private auth = inject(AuthService);
   private inventoryService = inject(InventoryService);
   private cdr = inject(ChangeDetectorRef);
+  private zone = inject(NgZone);
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   private subs = new Subscription();
@@ -50,7 +58,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
   private battleEventSource: EventSource | null = null;
   private streamBootstrapTimeout: ReturnType<typeof setTimeout> | null = null;
-  private attackTrailTimeout: ReturnType<typeof setTimeout> | null = null;
   private battleCalloutTimeout: ReturnType<typeof setTimeout> | null = null;
   private teamIds: number[] = [];
   private lastBattleAnimationKey = '';
@@ -63,9 +70,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   };
 
   @ViewChild('battleMusic') battleMusic?: ElementRef<HTMLAudioElement>;
-  @ViewChild('diceSfx') diceSfx?: ElementRef<HTMLAudioElement>;
-  @ViewChild('attackSfx') attackSfx?: ElementRef<HTMLAudioElement>;
-  @ViewChild('impactSfx') impactSfx?: ElementRef<HTMLAudioElement>;
 
   battleId = signal<number | null>(null);
   isPractice = signal(false);
@@ -89,20 +93,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   opponentMaxHP = signal(100);
 
   diceValue = signal<number | null>(null);
-  showDice = signal(false);
-  diceRolling = signal(false);
-  diceLanded = signal(false);
-  diceThrowing = signal(false);
-  diceLabel = signal('Rolling for attack power!');
   showConfetti = signal(false);
   showVictoryModal = signal(false);
   showStealModal = signal(false);
   showRunConfirmModal = signal(false);
   showRunawayResultModal = signal(false);
   realtimeStatus = signal<'live' | 'syncing'>('syncing');
-  attackImpactSide = signal<'player' | 'opponent' | null>(null);
-  attackTrailSide = signal<'player' | 'opponent' | null>(null);
-  attackVisualType = signal<AttackVisualType>('neutral');
   battleCallout = signal<{ text: string; tone: 'buff' | 'nerf' | 'neutral' } | null>(null);
   isSubmittingBattleResult = signal(false);
   isSubmittingRun = signal(false);
@@ -120,12 +116,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   opponentTrainerName = signal('');
   opponentTrainerLevel = signal(1);
   opponentTrainerIcon = signal('');
-
-  playerAttacking = signal(false);
-  opponentAttacking = signal(false);
-  playerHit = signal(false);
-  opponentHit = signal(false);
-  readonly attackParticleIndexes = Array.from({ length: 14 }, (_, index) => index);
 
   ngAfterViewInit(): void {
     this.startBattleMusic();
@@ -161,11 +151,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     if (this.isBrowser) {
       document.removeEventListener('visibilitychange', this.handleVisibilityChange);
-    }
-
-    if (this.attackTrailTimeout) {
-      clearTimeout(this.attackTrailTimeout);
-      this.attackTrailTimeout = null;
     }
 
     if (this.battleCalloutTimeout) {
@@ -445,42 +430,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.rollDice(() => {
-      this.executePlayerAttack(attackObj);
-    }, undefined, `${this.selectedXuxemon()?.name ?? 'Your Xuxemon'} rolls the battle dice`);
+    this.diceValue.set(this.resolveRoll());
+    this.executePlayerAttack(attackObj);
   }
 
-  rollDice(callback: () => void, finalValue?: number, label?: string): void {
-    const resolvedRoll = typeof finalValue === 'number'
+  private resolveRoll(finalValue?: number): number {
+    return typeof finalValue === 'number'
       ? Math.max(1, Math.min(6, Math.round(finalValue)))
       : Math.floor(Math.random() * 6) + 1;
-
-    this.showDice.set(true);
-    this.diceThrowing.set(true);
-    this.diceRolling.set(true);
-    this.diceLanded.set(false);
-    this.diceLabel.set(label ?? 'Rolling for attack power!');
-    this.diceValue.set(null);
-    this.playSfx(this.diceSfx, { volume: 0.3, fromMs: 80 });
-
-    let counter = 0;
-    const interval = setInterval(() => {
-      this.diceValue.set(Math.floor(Math.random() * 6) + 1);
-      counter++;
-      if (counter > this.diceTicks) {
-        clearInterval(interval);
-        this.diceValue.set(resolvedRoll);
-        this.diceRolling.set(false);
-        this.diceLanded.set(true);
-        this.playSfx(this.diceSfx, { volume: 0.42, fromMs: 440 });
-        this.diceThrowing.set(false);
-        setTimeout(() => {
-          this.showDice.set(false);
-          this.diceLanded.set(false);
-          callback();
-        }, this.diceSettleMs);
-      }
-    }, this.diceTickMs);
   }
 
   executePlayerAttack(attackObj: any): void {
@@ -497,39 +454,27 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    setTimeout(() => {
-      this.triggerAttackTrail('player', this.getAttackVisualType(attacker));
-      this.playerAttacking.set(true);
+    const attackerStat = attacker.attack || 10;
+    const defenderStat = defender.defense || 5;
+    const modifiers = this.calculateModifiers(attacker, defender);
+    const roll = this.diceValue() || 0;
+    const defenderMaxHp = defender.hp || 100;
+    const defenderCurrentHp = this.getCurrentHpValue(defender);
+    const damageAmount = this.calculateDamageAmount(attackerStat, defenderStat, attackObj.dmg, roll, modifiers, defenderMaxHp);
+    const newHpValue = Math.max(0, defenderCurrentHp - damageAmount);
+    const newHpPercent = defenderMaxHp > 0 ? (newHpValue / defenderMaxHp) * 100 : 0;
+    const updatedDefender = this.applyAttackStatusEffectToTarget({ ...defender, current_hp: newHpValue }, attackObj);
 
-      const attackerStat = attacker.attack || 10;
-      const defenderStat = defender.defense || 5;
-      const modifiers = this.calculateModifiers(attacker, defender);
-      const roll = this.diceValue() || 0;
-      const defenderMaxHp = defender.hp || 100;
-      const defenderCurrentHp = this.getCurrentHpValue(defender);
-      const damageAmount = this.calculateDamageAmount(attackerStat, defenderStat, attackObj.dmg, roll, modifiers, defenderMaxHp);
-      const newHpValue = Math.max(0, defenderCurrentHp - damageAmount);
-      const newHpPercent = defenderMaxHp > 0 ? (newHpValue / defenderMaxHp) * 100 : 0;
-      const updatedDefender = this.applyAttackStatusEffectToTarget({ ...defender, current_hp: newHpValue }, attackObj);
+    this.addLog(`${attacker.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`);
+    this.opponentHP.set(newHpPercent);
+    this.updateOpponentStateAfterItem(updatedDefender);
 
-      this.addLog(`${attacker.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`);
+    if (newHpValue <= 0) {
+      this.handleOpponentFaint();
+      return;
+    }
 
-      setTimeout(() => {
-        this.playerAttacking.set(false);
-        this.showAttackImpact('opponent');
-        this.opponentHP.set(newHpPercent);
-        this.updateOpponentStateAfterItem(updatedDefender);
-
-        setTimeout(() => {
-          if (newHpValue <= 0) {
-            this.handleOpponentFaint();
-            return;
-          }
-
-          this.endTurn();
-        }, 400);
-      }, this.attackImpactMs);
-    }, this.attackWindupMs);
+    this.endTurn();
   }
 
   opponentTurn(): void {
@@ -559,11 +504,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       : [{ name: 'Tackle', dmg: 10, status_chance: null, statusEffect: undefined }];
     const randomAttack = availableAttacks[Math.floor(Math.random() * availableAttacks.length)];
 
-    this.rollDice(
-      () => this.executeOpponentAttack(randomAttack),
-      undefined,
-      `${opponent.name} rolls the battle dice`,
-    );
+    this.diceValue.set(this.resolveRoll());
+    this.executeOpponentAttack(randomAttack);
   }
 
   private executeOpponentAttack(attackObj: any): void {
@@ -575,50 +517,38 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    setTimeout(() => {
-      this.triggerAttackTrail('opponent', this.getAttackVisualType(opponent));
-      this.opponentAttacking.set(true);
+    const opponentAttack = opponent.attack || 10;
+    const playerDefense = player.defense || 5;
+    const roll = this.diceValue() || 0;
+    const playerMaxHp = player.hp || 100;
+    const playerCurrentHp = this.getCurrentHpValue(player);
+    const damageAmount = this.calculateDamageAmount(
+      opponentAttack,
+      playerDefense,
+      attackObj.dmg,
+      roll,
+      this.calculateModifiers(opponent, player),
+      playerMaxHp,
+    );
+    const newHpValue = Math.max(0, playerCurrentHp - damageAmount);
+    const newHpPercent = playerMaxHp > 0 ? (newHpValue / playerMaxHp) * 100 : 0;
+    const updatedPlayer = this.applyAttackStatusEffectToTarget({ ...player, current_hp: newHpValue }, attackObj);
 
-      const opponentAttack = opponent.attack || 10;
-      const playerDefense = player.defense || 5;
-      const roll = this.diceValue() || 0;
-      const playerMaxHp = player.hp || 100;
-      const playerCurrentHp = this.getCurrentHpValue(player);
-      const damageAmount = this.calculateDamageAmount(
-        opponentAttack,
-        playerDefense,
-        attackObj.dmg,
-        roll,
-        this.calculateModifiers(opponent, player),
-        playerMaxHp,
-      );
-      const newHpValue = Math.max(0, playerCurrentHp - damageAmount);
-      const newHpPercent = playerMaxHp > 0 ? (newHpValue / playerMaxHp) * 100 : 0;
-      const updatedPlayer = this.applyAttackStatusEffectToTarget({ ...player, current_hp: newHpValue }, attackObj);
+    this.addLog(`${opponent.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`);
+    this.playerHP.set(newHpPercent);
+    this.updateMyTeamHp(updatedPlayer, newHpValue);
 
-      this.addLog(`${opponent.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`);
+    if (updatedPlayer.adquired_id) {
+      this.subs.add(this.xuxemonService.updateCurrentHp(updatedPlayer.adquired_id, newHpValue).subscribe());
+    }
 
-      setTimeout(() => {
-        this.opponentAttacking.set(false);
-        this.showAttackImpact('player');
-        this.playerHP.set(newHpPercent);
-        this.updateMyTeamHp(updatedPlayer, newHpValue);
+    if (newHpValue <= 0) {
+      this.handlePlayerFaint();
+      return;
+    }
 
-        if (updatedPlayer.adquired_id) {
-          this.subs.add(this.xuxemonService.updateCurrentHp(updatedPlayer.adquired_id, newHpValue).subscribe());
-        }
-
-        setTimeout(() => {
-          if (newHpValue <= 0) {
-            this.handlePlayerFaint();
-            return;
-          }
-
-          this.currentTurn.set('player');
-          this.battleStatus.set('ready');
-        }, 400);
-      }, this.attackImpactMs);
-    }, this.attackWindupMs);
+    this.currentTurn.set('player');
+    this.battleStatus.set('ready');
   }
 
   calculateModifiers(attacker: Xuxemon, defender: Xuxemon): number {
@@ -1050,6 +980,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private applyBattleSnapshot(data: any): void {
+    const previousActivePlayer = this.selectedXuxemon();
+    const previousActiveOpponent = this.opponentXuxemon();
     const normalizedMyTeam = Array.isArray(data.my_team)
       ? data.my_team.map((xuxemon: any) => this.normalizeBattleXuxemon(xuxemon))
       : [];
@@ -1115,7 +1047,15 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     if (Array.isArray(normalizedData.battle_log)) {
       const hydratedLog = this.hydrateBattleLogNames(normalizedData.battle_log, activePlayer, activeOpponent);
       this.battleLog.set(hydratedLog);
-      this.triggerBattleAnimationsFromSnapshot({ ...normalizedData, battle_log: hydratedLog });
+      this.triggerBattleAnimationsFromSnapshot(
+        { ...normalizedData, battle_log: hydratedLog },
+        {
+          currentPlayer: activePlayer ?? null,
+          currentOpponent: activeOpponent ?? null,
+          previousPlayer: previousActivePlayer,
+          previousOpponent: previousActiveOpponent,
+        },
+      );
     }
 
     const requiresForcedSwitch = Boolean(
@@ -1196,134 +1136,96 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
-  private triggerBattleAnimationsFromSnapshot(data: any): void {
-    const attackLog = Array.isArray(data?.battle_log)
-      ? data.battle_log.find((entry: string) => /^.+? used .+!/.test(entry)) ?? ''
-      : '';
-    const animationKey = `${data?.turn ?? ''}|${attackLog}`;
+  private triggerBattleAnimationsFromSnapshot(
+    data: any,
+    combatants?: {
+      currentPlayer: Xuxemon | null;
+      currentOpponent: Xuxemon | null;
+      previousPlayer: Xuxemon | null;
+      previousOpponent: Xuxemon | null;
+    },
+  ): void {
+    const playerCandidates = [combatants?.currentPlayer, combatants?.previousPlayer]
+      .filter((xuxemon): xuxemon is Xuxemon => Boolean(xuxemon));
+    const opponentCandidates = [combatants?.currentOpponent, combatants?.previousOpponent]
+      .filter((xuxemon): xuxemon is Xuxemon => Boolean(xuxemon));
+    const knownCombatants = new Map<string, { side: 'player' | 'opponent'; xuxemon: Xuxemon }>();
 
-    if (!attackLog || attackLog === 'Battle started!' || this.lastBattleAnimationKey === animationKey) {
+    for (const xuxemon of playerCandidates) {
+      knownCombatants.set(xuxemon.name.trim(), { side: 'player', xuxemon });
+    }
+
+    for (const xuxemon of opponentCandidates) {
+      knownCombatants.set(xuxemon.name.trim(), { side: 'opponent', xuxemon });
+    }
+
+    const attackLog = Array.isArray(data?.battle_log)
+      ? data.battle_log.find((entry: string) => {
+        const text = String(entry ?? '').trim();
+        const match = /^(.+?) used (.+?)!\s*\(Roll:\s*\d+/i.exec(text);
+        if (!match) {
+          return false;
+        }
+
+        const attackerName = match[1]?.trim();
+        return knownCombatants.size === 0 || knownCombatants.has(attackerName);
+      }) ?? ''
+      : '';
+
+    if (!attackLog || attackLog === 'Battle started!') {
       return;
     }
 
-    this.lastBattleAnimationKey = animationKey;
-
-    const attackMatch = /^(.+?) used .+!/.exec(attackLog);
+    const attackMatch = /^(.+?) used (.+?)!/.exec(attackLog);
     if (!attackMatch) {
       return;
     }
 
     const attackerName = attackMatch[1]?.trim();
+    const extractedAttackName = attackMatch[2]?.trim();
     const rollMatch = /Roll:\s*(\d+)/.exec(attackLog);
     const resolvedRoll = rollMatch ? Number(rollMatch[1]) : null;
     if (!attackerName) {
       return;
     }
 
-    if (this.selectedXuxemon()?.name === attackerName) {
-      this.playBattleAnimationSequence('player', attackerName, resolvedRoll);
+    const attackerContext = knownCombatants.get(attackerName);
+    if (!attackerContext) {
       return;
     }
 
-    if (this.opponentXuxemon()?.name === attackerName) {
-      this.playBattleAnimationSequence('opponent', attackerName, resolvedRoll);
-    }
-  }
-
-  private playBattleAnimationSequence(side: 'player' | 'opponent', attackerName: string, roll: number | null): void {
-    const attacker = side === 'player' ? this.selectedXuxemon() : this.opponentXuxemon();
-    const visualType = this.getAttackVisualType(attacker);
-
-    if (typeof roll === 'number' && Number.isFinite(roll)) {
-      this.rollDice(
-        () => this.playSpriteAnimation(side, visualType),
-        roll,
-        `${attackerName} rolls the battle dice`,
-      );
+    const animationKey = `${data?.turn ?? ''}|${attackLog}`;
+    if (this.lastBattleAnimationKey === animationKey) {
       return;
     }
 
-    this.playSpriteAnimation(side, visualType);
+    this.lastBattleAnimationKey = animationKey;
+    this.playBattleAnimationSequence(
+      attackerContext.side,
+      attackerName,
+      resolvedRoll,
+      extractedAttackName,
+      attackerContext.xuxemon,
+    );
   }
 
-  private playSpriteAnimation(side: 'player' | 'opponent', visualType: AttackVisualType): void {
-    this.attackVisualType.set(visualType);
-
-    if (side === 'player') {
-      this.triggerAttackTrail('player', visualType);
-      this.playerAttacking.set(true);
-      setTimeout(() => {
-        this.playerAttacking.set(false);
-        this.showAttackImpact('opponent');
-      }, this.attackImpactMs);
-      return;
-    }
-
-    this.triggerAttackTrail('opponent', visualType);
-    this.opponentAttacking.set(true);
-    setTimeout(() => {
-      this.opponentAttacking.set(false);
-      this.showAttackImpact('player');
-    }, this.attackImpactMs);
-  }
-
-  private showAttackImpact(targetSide: 'player' | 'opponent'): void {
-    this.attackImpactSide.set(targetSide);
-    this.playSfx(this.impactSfx, { volume: 0.44, fromMs: 120 });
-
-    if (targetSide === 'player') {
-      this.playerHit.set(true);
-      setTimeout(() => {
-        this.playerHit.set(false);
-        this.attackImpactSide.set(null);
-        this.attackVisualType.set('neutral');
-      }, 360);
-      return;
-    }
-
-    this.opponentHit.set(true);
-    setTimeout(() => {
-      this.opponentHit.set(false);
-      this.attackImpactSide.set(null);
-      this.attackVisualType.set('neutral');
-    }, 360);
-  }
-
-  private triggerAttackTrail(side: 'player' | 'opponent', visualType: AttackVisualType): void {
-    this.attackTrailSide.set(side);
-    this.attackVisualType.set(visualType);
-    this.playSfx(this.attackSfx, { volume: 0.35, fromMs: side === 'player' ? 0 : 220 });
-
-    if (this.attackTrailTimeout) {
-      clearTimeout(this.attackTrailTimeout);
-    }
-
-    this.attackTrailTimeout = setTimeout(() => {
-      this.attackTrailSide.set(null);
-      this.attackTrailTimeout = null;
-    }, 380);
-  }
-
-  private getAttackVisualType(xuxemon: Xuxemon | null): AttackVisualType {
-    const typeName = xuxemon?.type?.name?.toLowerCase() ?? '';
-
-    if (typeName === 'speed') {
-      return 'speed';
-    }
-
-    if (typeName === 'technical') {
-      return 'technical';
-    }
-
-    if (typeName === 'power') {
-      return 'power';
-    }
-
-    return 'neutral';
+  private playBattleAnimationSequence(
+    side: 'player' | 'opponent',
+    attackerName: string,
+    roll: number | null,
+    attackName?: string,
+    attackerOverride?: Xuxemon | null,
+  ): void {
+    void side;
+    void attackerName;
+    void roll;
+    void attackName;
+    void attackerOverride;
   }
 
   private showBattleCallout(text: string, tone: 'buff' | 'nerf' | 'neutral'): void {
     this.battleCallout.set({ text, tone });
+    this.flushBattleView();
 
     if (this.battleCalloutTimeout) {
       clearTimeout(this.battleCalloutTimeout);
@@ -1332,30 +1234,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.battleCalloutTimeout = setTimeout(() => {
       this.battleCallout.set(null);
       this.battleCalloutTimeout = null;
+      this.flushBattleView();
     }, 1300);
   }
 
-  private playSfx(
-    audioRef: ElementRef<HTMLAudioElement> | undefined,
-    options?: { volume?: number; fromMs?: number },
-  ): void {
-    if (!this.isBrowser) {
-      return;
-    }
-
-    const audio = audioRef?.nativeElement;
-    if (!audio) {
-      return;
-    }
-
-    try {
-      audio.pause();
-      audio.currentTime = Math.max(0, (options?.fromMs ?? 0) / 1000);
-      audio.volume = options?.volume ?? 0.4;
-      void audio.play().catch(() => undefined);
-    } catch {
-      // Ignore transient playback failures from browser autoplay policies.
-    }
+  private flushBattleView(): void {
+    this.cdr.detectChanges();
   }
 
   private startBattleMusic(): void {
@@ -1405,16 +1289,20 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     stream.addEventListener('battle', (event: Event) => {
       const message = event as MessageEvent<string>;
-      receivedSnapshot = true;
-      this.clearStreamBootstrapTimeout();
-      this.stopPolling();
-      this.realtimeStatus.set('live');
-      this.handleRealtimeBattlePayload(message.data);
+      this.zone.run(() => {
+        receivedSnapshot = true;
+        this.clearStreamBootstrapTimeout();
+        this.stopPolling();
+        this.realtimeStatus.set('live');
+        this.handleRealtimeBattlePayload(message.data);
+      });
     });
 
     stream.onerror = () => {
-      this.closeBattleStream();
-      this.startPolling();
+      this.zone.run(() => {
+        this.closeBattleStream();
+        this.startPolling();
+      });
     };
 
     this.battleEventSource = stream;
@@ -1917,7 +1805,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   private applySelfDamageFromStatus(xuxemon: Xuxemon, side: 'player' | 'opponent', newHpValue: number): void {
     if (side === 'player') {
-      this.playerHit.set(true);
       this.updateMyTeamHp(xuxemon, newHpValue);
       if (xuxemon.adquired_id) {
         this.subs.add(this.xuxemonService.updateCurrentHp(xuxemon.adquired_id, newHpValue).subscribe());
@@ -1925,7 +1812,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.syncPlayerBars({ ...xuxemon, current_hp: newHpValue });
 
       setTimeout(() => {
-        this.playerHit.set(false);
         if (newHpValue <= 0) {
           this.handlePlayerFaint();
           return;
@@ -1936,12 +1822,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.opponentHit.set(true);
     this.updateOpponentTeamHp(xuxemon, newHpValue);
     this.syncOpponentBars({ ...xuxemon, current_hp: newHpValue });
 
     setTimeout(() => {
-      this.opponentHit.set(false);
       if (newHpValue <= 0) {
         this.handleOpponentFaint();
         return;

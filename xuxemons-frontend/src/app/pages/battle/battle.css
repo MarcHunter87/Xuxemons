@@ -526,18 +526,18 @@
   width: 100%;
   height: 100%;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .bag-items-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-auto-rows: auto;
+  grid-auto-rows: minmax(86px, 86px);
   gap: 8px;
   width: 100%;
-  flex-shrink: 0;
-  overflow: visible;
-  align-content: start;
+  flex: 1 1 auto;
+  overflow: hidden;
+  align-content: stretch;
   padding-right: 0;
 }
 
@@ -627,10 +627,13 @@
   display: flex;
   justify-content: flex-start;
   gap: 8px;
-  min-height: 56px;
-  padding: 8px 10px;
+  width: 100%;
+  height: 100%;
+  min-height: 86px;
+  padding: 10px 12px;
   border-width: 3px;
   text-align: left;
+  overflow: hidden;
 }
 
 .bag-item-icon {
@@ -652,6 +655,10 @@
   color: var(--neutral-black);
   font-size: 1rem;
   line-height: 1.05;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -861,15 +868,20 @@
 .impact-burst {
   position: absolute;
   top: 50%;
-  width: 180px;
-  height: 180px;
+  width: 220px;
+  height: 220px;
   border-radius: 50%;
   pointer-events: none;
   z-index: 8;
+  display: none;
+  background: radial-gradient(circle, var(--neutral-white) 0%, var(--secondary-color) 18%, var(--color-amber-bright) 48%, var(--color-red-bright) 72%, transparent 100%);
+}
+
+.impact-burst.active {
+  display: block;
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.2);
-  background: radial-gradient(circle, var(--neutral-white) 0%, var(--color-amber-bright) 28%, var(--color-red-bright) 62%, transparent 100%);
-  animation: impactBurst 0.36s ease-out forwards;
+  animation: impactBurst 0.44s ease-out forwards;
 }
 
 .impact-burst--player {
@@ -883,39 +895,46 @@
 .attack-trail {
   position: absolute;
   top: 50%;
-  width: min(52vw, 560px);
-  height: 30px;
+  width: min(58vw, 620px);
+  height: 34px;
   border-radius: 999px;
   z-index: 7;
   pointer-events: none;
   opacity: 0;
   transform: translateY(-50%);
-  box-shadow: 0 0 30px var(--color-white-overlay-strong);
+  box-shadow: 0 0 36px var(--color-white-overlay-strong);
 }
 
 .attack-trail--player {
-  left: 24%;
-  background: linear-gradient(90deg, var(--color-blue-overlay) 0%, var(--secondary-color) 30%, var(--neutral-white) 56%, var(--color-amber-bright) 78%, var(--color-red-bright) 100%);
-  animation: slashFromPlayer 0.38s cubic-bezier(0.12, 0.9, 0.32, 1) forwards;
+  left: 22%;
+  background: linear-gradient(90deg, transparent 0%, var(--secondary-color) 14%, var(--neutral-white) 48%, var(--color-amber-bright) 72%, var(--color-red-bright) 100%);
+  animation: slashFromPlayer 0.48s cubic-bezier(0.16, 0.92, 0.28, 1) forwards;
 }
 
 .attack-trail--opponent {
-  right: 24%;
-  background: linear-gradient(270deg, var(--color-red-overlay) 0%, var(--color-red-bright) 30%, var(--neutral-white) 56%, var(--secondary-color) 78%, var(--accent-color) 100%);
-  animation: slashFromOpponent 0.38s cubic-bezier(0.12, 0.9, 0.32, 1) forwards;
+  right: 22%;
+  display: none;
 }
 
 .hit { animation: shake 0.1s linear 3; filter: brightness(2) contrast(2); }
-
-/* Este keyframe se encarga de aplicar sacudida por impacto. */
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  75% { transform: translateX(10px); }
-  100% { transform: translateX(0); }
+.attack-trail.active {
+  display: block;
+  opacity: 0;
+  transform: translateY(-50%);
 }
 
-/* Modal Victory */
+.attack-trail.active.attack-trail--player {
+  left: 22%;
+  background: linear-gradient(90deg, transparent 0%, var(--secondary-color) 14%, var(--neutral-white) 48%, var(--color-amber-bright) 72%, var(--color-red-bright) 100%);
+  animation: slashFromPlayer 0.48s cubic-bezier(0.16, 0.92, 0.28, 1) forwards;
+}
+
+.attack-trail.active.attack-trail--opponent {
+  right: 22%;
+  background: linear-gradient(270deg, transparent 0%, var(--secondary-color) 14%, var(--neutral-white) 48%, var(--color-amber-bright) 72%, var(--color-red-bright) 100%);
+  animation: slashFromOpponent 0.48s cubic-bezier(0.16, 0.92, 0.28, 1) forwards;
+}
+
 .victory-modal {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -1215,96 +1234,91 @@
 /* Dice Overlay */
 .dice-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: var(--color-black-soft);
-  display: flex;
+  inset: 0;
+  background: rgba(43, 42, 43, 0.52);
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(6px);
+}
+
+.dice-overlay.visible {
+  display: flex;
 }
 
 .dice-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 18px;
+  padding: 24px 28px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+}
+
+.dice-container.throwing {
+  animation: diceIntro 0.22s ease-out both;
 }
 
 .dice {
-  width: 100px;
-  height: 100px;
-  background: linear-gradient(145deg, var(--neutral-white) 0%, var(--primary-color) 62%, var(--secondary-color) 100%);
+  width: 116px;
+  height: 116px;
+  background: linear-gradient(145deg, var(--neutral-white) 0%, var(--primary-color) 70%, var(--secondary-color) 100%);
   color: var(--neutral-black);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3.5rem;
+  font-size: 3.7rem;
   font-weight: 900;
-  border-radius: 16px;
-  border: 3px solid var(--neutral-white);
-  box-shadow: 0 0 30px var(--color-white-overlay-strong), inset 0 0 20px var(--color-black-soft);
-  transform-style: preserve-3d;
+  border-radius: 24px;
+  border: 4px solid var(--neutral-white);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.22), inset 0 -8px 16px rgba(0, 0, 0, 0.08);
 }
 
 .dice.rolling {
-  animation: diceRoll3D 0.18s linear infinite;
+  animation: diceRoll 0.16s linear infinite;
 }
 
 .dice.landed {
-  animation: diceLand 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: diceSettle 0.42s cubic-bezier(0.18, 0.9, 0.32, 1) both;
 }
 
-.dice.landed[data-value='1'] { color: var(--color-gray-medium); box-shadow: 0 0 18px var(--color-gray-light), inset 0 0 8px var(--color-gray-light); }
-.dice.landed[data-value='2'] { color: var(--accent-color); box-shadow: 0 0 24px var(--color-blue-overlay-medium), inset 0 0 10px var(--color-blue-overlay); }
-.dice.landed[data-value='3'] { color: var(--color-green-base); box-shadow: 0 0 24px var(--color-green-overlay-soft), inset 0 0 10px var(--color-green-overlay); }
-.dice.landed[data-value='4'] { color: var(--color-amber-base); box-shadow: 0 0 28px var(--color-amber-overlay), inset 0 0 12px var(--color-amber-overlay); }
-.dice.landed[data-value='5'] { color: var(--color-red-bright); box-shadow: 0 0 28px var(--color-red-overlay-medium), inset 0 0 12px var(--color-red-overlay-soft); }
-.dice.landed[data-value='6'] {
-  color: var(--color-amber-deep);
-  box-shadow: 0 0 40px var(--color-amber-overlay), inset 0 0 18px var(--color-amber-overlay);
-  animation: diceLand 0.62s cubic-bezier(0.16, 1, 0.3, 1), diceGlow6 0.7s 0.45s ease-in-out forwards;
-}
-
-/* Este keyframe se encarga del brillo especial para el 6 del dado. */
-@keyframes diceGlow6 {
-  0%   { box-shadow: 0 0 40px var(--color-amber-overlay), inset 0 0 18px var(--color-amber-overlay); }
-  50%  { box-shadow: 0 0 80px var(--color-amber-base), inset 0 0 32px var(--color-amber-overlay), 0 0 120px var(--color-amber-bright); }
-  100% { box-shadow: 0 0 40px var(--color-amber-overlay), inset 0 0 18px var(--color-amber-overlay); }
-}
+.dice.landed[data-value='1'] { color: var(--color-gray-medium); }
+.dice.landed[data-value='2'] { color: var(--accent-color); }
+.dice.landed[data-value='3'] { color: var(--color-green-base); }
+.dice.landed[data-value='4'] { color: var(--color-amber-base); }
+.dice.landed[data-value='5'] { color: var(--color-red-bright); }
+.dice.landed[data-value='6'] { color: var(--color-amber-deep); }
 
 .dice-label {
   color: var(--neutral-white);
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
+  text-align: center;
 }
 
-/* Este keyframe se encarga del giro 3D del dado al rodar. */
-@keyframes diceRoll3D {
-  0%   { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); }
-  10%  { transform: rotateX(144deg) rotateY(90deg) rotateZ(38deg) scale(1.14); }
-  22%  { transform: rotateX(72deg) rotateY(252deg) rotateZ(115deg) scale(0.92); }
-  36%  { transform: rotateX(306deg) rotateY(144deg) rotateZ(210deg) scale(1.11); }
-  50%  { transform: rotateX(180deg) rotateY(330deg) rotateZ(165deg) scale(0.95); }
-  64%  { transform: rotateX(324deg) rotateY(216deg) rotateZ(285deg) scale(1.09); }
-  78%  { transform: rotateX(108deg) rotateY(288deg) rotateZ(325deg) scale(0.98); }
-  90%  { transform: rotateX(252deg) rotateY(180deg) rotateZ(272deg) scale(1.04); }
-  100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg) scale(1); }
+@keyframes diceIntro {
+  from { opacity: 0; transform: translateY(18px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Este keyframe se encarga del aterrizaje con rebote del dado. */
-@keyframes diceLand {
-  0%   { transform: translateY(-24px) scale(1.12) rotateZ(-10deg); }
-  20%  { transform: translateY(6px) scale(0.94) rotateZ(4deg); }
-  38%  { transform: translateY(-11px) scale(1.05) rotateZ(-2deg); }
-  54%  { transform: translateY(3px) scale(0.98) rotateZ(1deg); }
-  68%  { transform: translateY(-5px) scale(1.02) rotateZ(0deg); }
-  80%  { transform: translateY(1px) scale(0.995) rotateZ(0deg); }
-  90%  { transform: translateY(-2px) scale(1.003) rotateZ(0deg); }
-  100% { transform: translateY(0) scale(1) rotateZ(0deg); }
+@keyframes diceRoll {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) scale(1.06); }
+  50% { transform: rotate(180deg) scale(0.96); }
+  75% { transform: rotate(270deg) scale(1.04); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes diceSettle {
+  0% { transform: translateY(-12px) scale(1.08); }
+  35% { transform: translateY(6px) scale(0.94); }
+  65% { transform: translateY(-2px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 /* Este keyframe se encarga del giro continuo de elementos circulares. */
@@ -1767,79 +1781,6 @@
   animation: powerFromOpponent 0.52s cubic-bezier(0.1, 0.9, 0.28, 1) forwards;
 }
 
-.attack-particles {
-  position: absolute;
-  top: 50%;
-  width: min(54vw, 590px);
-  height: 140px;
-  pointer-events: none;
-  z-index: 8;
-  transform: translateY(-50%);
-}
-
-.attack-particles--player {
-  left: 24%;
-}
-
-.attack-particles--opponent {
-  right: 24%;
-}
-
-.attack-particle {
-  --x-shift: calc(var(--i) * 10px);
-  --y-shift: calc((var(--i) % 5 - 2) * 10px);
-  position: absolute;
-  top: 50%;
-  left: calc(8% + (var(--i) * 5.8%));
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  opacity: 0;
-  background: var(--neutral-white);
-  box-shadow: 0 0 8px var(--color-white-overlay-strong);
-}
-
-.attack-particles--player .attack-particle {
-  animation: attackParticlePlayer 0.52s cubic-bezier(0.18, 0.88, 0.26, 1) forwards;
-  animation-delay: calc(var(--i) * 0.016s);
-}
-
-.attack-particles--opponent .attack-particle {
-  animation: attackParticleOpponent 0.52s cubic-bezier(0.18, 0.88, 0.26, 1) forwards;
-  animation-delay: calc(var(--i) * 0.016s);
-}
-
-.attack-particles--speed .attack-particle {
-  background: linear-gradient(135deg, var(--neutral-white), var(--secondary-color));
-  box-shadow: 0 0 10px var(--secondary-color);
-}
-
-.attack-particles--technical .attack-particle {
-  background: linear-gradient(135deg, var(--neutral-white), var(--color-purple-base));
-  box-shadow: 0 0 10px var(--color-purple-base);
-}
-
-.attack-particles--power .attack-particle {
-  background: linear-gradient(135deg, var(--neutral-white), var(--color-amber-bright));
-  box-shadow: 0 0 10px var(--color-amber-base);
-}
-
-.attack-particles--speed .attack-particle:nth-child(odd) {
-  width: 6px;
-  height: 6px;
-}
-
-.attack-particles--technical .attack-particle:nth-child(3n) {
-  width: 10px;
-  height: 5px;
-  border-radius: 999px;
-}
-
-.attack-particles--power .attack-particle:nth-child(4n) {
-  width: 11px;
-  height: 11px;
-}
-
 .player-sprite img.attacking.attacking-speed { animation: playerSpeedAttack 0.48s cubic-bezier(0.16, 0.92, 0.26, 1); }
 .opponent-sprite img.attacking.attacking-speed { animation: opponentSpeedAttack 0.48s cubic-bezier(0.16, 0.92, 0.26, 1); }
 
@@ -1970,35 +1911,346 @@
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
-/* Este keyframe se encarga de la trayectoria de partículas del jugador. */
-@keyframes attackParticlePlayer {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0) scale(0.35);
-  }
-  30% {
-    opacity: 1;
-    transform: translate3d(calc(var(--x-shift) * 0.5), calc(var(--y-shift) * 0.45), 0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(var(--x-shift), calc(var(--y-shift) * 0.85), 0) scale(0.5);
-  }
+/* ═══════════════════════════════════════════════════════════════
+   SPECIAL ATTACK VARIANTS  (status_chance > 0 = special move)
+   speed-special   →  lightning bolt / electric blitz
+   technical-special → green energy wave / spiral
+   power-special   →  red explosive shockwave
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Screen effects for special variants ── */
+.battle-screen:has(.impact-burst--speed-special) {
+  animation: speedSpecialScreenFlash 0.38s ease-out;
 }
 
-/* Este keyframe se encarga de la trayectoria de partículas del oponente. */
-@keyframes attackParticleOpponent {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0) scale(0.35);
-  }
-  30% {
-    opacity: 1;
-    transform: translate3d(calc(var(--x-shift) * -0.5), calc(var(--y-shift) * 0.45), 0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(calc(var(--x-shift) * -1), calc(var(--y-shift) * 0.85), 0) scale(0.5);
-  }
+.battle-screen:has(.impact-burst--technical-special) {
+  animation: technicalSpecialScreenPulse 0.5s ease-out;
+}
+
+.battle-screen:has(.impact-burst--power-special) {
+  animation: powerSpecialScreenShake 0.52s ease-out;
+}
+
+@keyframes speedSpecialScreenFlash {
+  0%   { filter: brightness(1); }
+  10%  { filter: brightness(2.2) saturate(0.4); }
+  24%  { filter: brightness(1.1) saturate(1.2); }
+  38%  { filter: brightness(1.7) saturate(0.5); }
+  55%  { filter: brightness(1.1); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes technicalSpecialScreenPulse {
+  0%   { filter: brightness(1) hue-rotate(0deg); }
+  18%  { filter: brightness(1.2) hue-rotate(-55deg) saturate(1.4); }
+  42%  { filter: brightness(1.08) hue-rotate(-28deg) saturate(1.2); }
+  70%  { filter: brightness(1.04) hue-rotate(-12deg); }
+  100% { filter: brightness(1) hue-rotate(0deg); }
+}
+
+@keyframes powerSpecialScreenShake {
+  0%   { transform: translate(0, 0); filter: brightness(1); }
+  8%   { transform: translate(-10px, 6px); filter: brightness(1.6) saturate(1.3); }
+  18%  { transform: translate(12px, -9px); filter: brightness(1.4); }
+  28%  { transform: translate(-8px, 8px); filter: brightness(1.2); }
+  38%  { transform: translate(9px, -5px); }
+  48%  { transform: translate(-6px, 4px); }
+  60%  { transform: translate(5px, -3px); }
+  74%  { transform: translate(-3px, 2px); }
+  88%  { transform: translate(2px, -1px); }
+  100% { transform: translate(0, 0); filter: brightness(1); }
+}
+
+/* ── Hit flash for special variants ── */
+.battle-screen:has(.impact-burst--speed-special) .sprite-container.hit img {
+  animation: shakeHit 0.08s linear 4, hitFlashSpeedSpecial 0.38s ease;
+}
+
+.battle-screen:has(.impact-burst--technical-special) .sprite-container.hit img {
+  animation: shakeHit 0.1s linear 3, hitFlashTechnicalSpecial 0.4s ease;
+}
+
+.battle-screen:has(.impact-burst--power-special) .sprite-container.hit img {
+  animation: shakeHit 0.12s linear 5, hitFlashPowerSpecial 0.52s ease;
+}
+
+@keyframes hitFlashSpeedSpecial {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+  15%  { filter: brightness(4) drop-shadow(0 0 18px var(--neutral-white)) saturate(0.2); }
+  32%  { filter: brightness(2.4) drop-shadow(0 0 12px var(--secondary-color)) saturate(0.6); }
+  55%  { filter: brightness(1.6) drop-shadow(0 0 7px var(--accent-color)); }
+}
+
+@keyframes hitFlashTechnicalSpecial {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+  22%  { filter: brightness(2.8) drop-shadow(0 0 18px var(--color-green-bright)) hue-rotate(-40deg) saturate(1.6); }
+  50%  { filter: brightness(1.9) drop-shadow(0 0 11px var(--color-green-base)) hue-rotate(-20deg); }
+}
+
+@keyframes hitFlashPowerSpecial {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+  12%  { filter: brightness(4.5) drop-shadow(0 0 24px var(--color-red-bright)) saturate(1.8); }
+  30%  { filter: brightness(3) drop-shadow(0 0 16px var(--color-red-base)) saturate(1.5); }
+  52%  { filter: brightness(2) drop-shadow(0 0 10px var(--color-red-deep)) saturate(1.2); }
+  76%  { filter: brightness(1.4) drop-shadow(0 0 5px var(--color-red-deep)); }
+}
+
+/* ── Impact burst colors for special variants ── */
+.impact-burst--speed-special {
+  background: radial-gradient(circle, var(--neutral-white) 0%, var(--secondary-color) 14%, var(--accent-on-light) 40%, var(--secondary-color) 62%, transparent 100%);
+  animation: impactBurstSpeedSpecial 0.42s ease-out forwards;
+}
+
+.impact-burst--technical-special {
+  background: radial-gradient(circle, var(--neutral-white) 0%, var(--color-green-bright) 22%, var(--color-green-base) 52%, transparent 100%);
+  animation: impactBurstTechnicalSpecial 0.6s ease-out forwards;
+}
+
+.impact-burst--power-special {
+  background: radial-gradient(circle, var(--neutral-white) 0%, var(--color-red-bright) 18%, var(--color-red-base) 46%, var(--color-red-deep) 72%, transparent 100%);
+  width: 260px;
+  height: 260px;
+  animation: impactBurstPowerSpecial 0.54s ease-out forwards;
+}
+
+@keyframes impactBurstSpeedSpecial {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  18%  { opacity: 1; transform: translate(-50%, -50%) scale(0.7) rotate(-12deg); }
+  40%  { opacity: 0.8; transform: translate(-50%, -50%) scale(1.15) rotate(6deg); }
+  65%  { opacity: 0.6; transform: translate(-50%, -50%) scale(1.3) rotate(-4deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6) rotate(0deg); }
+}
+
+@keyframes impactBurstTechnicalSpecial {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0) rotate(-30deg); }
+  20%  { opacity: 1; transform: translate(-50%, -50%) scale(0.6) rotate(-15deg); }
+  48%  { opacity: 0.85; transform: translate(-50%, -50%) scale(1.1) rotate(5deg); }
+  72%  { opacity: 0.5; transform: translate(-50%, -50%) scale(1.35) rotate(12deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.7) rotate(20deg); }
+}
+
+@keyframes impactBurstPowerSpecial {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  14%  { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+  36%  { opacity: 0.9; transform: translate(-50%, -50%) scale(1.05); }
+  60%  { opacity: 0.7; transform: translate(-50%, -50%) scale(1.25); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.7); }
+}
+
+/* ── Attack trail for speed-special (lightning / double-dash) ── */
+.attack-trail--player.attack-trail--speed-special {
+  height: 16px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--neutral-white) 0px,
+    var(--secondary-color) 8px,
+    transparent 8px,
+    transparent 16px,
+    var(--accent-on-light) 16px,
+    var(--secondary-color) 24px,
+    transparent 24px,
+    transparent 32px
+  );
+  box-shadow: 0 0 14px var(--secondary-color), 0 0 28px var(--accent-color);
+  animation: speedSpecialFromPlayer 0.36s cubic-bezier(0.1, 0.9, 0.22, 1) forwards;
+}
+
+.attack-trail--opponent.attack-trail--speed-special {
+  height: 16px;
+  background: repeating-linear-gradient(
+    270deg,
+    var(--neutral-white) 0px,
+    var(--secondary-color) 8px,
+    transparent 8px,
+    transparent 16px,
+    var(--accent-on-light) 16px,
+    var(--secondary-color) 24px,
+    transparent 24px,
+    transparent 32px
+  );
+  box-shadow: 0 0 14px var(--secondary-color), 0 0 28px var(--accent-color);
+  animation: speedSpecialFromOpponent 0.36s cubic-bezier(0.1, 0.9, 0.22, 1) forwards;
+}
+
+/* ── Attack trail for technical-special (green energy spiral wave) ── */
+.attack-trail--player.attack-trail--technical-special {
+  height: 28px;
+  background: linear-gradient(
+    90deg,
+    var(--color-green-glow-strong) 0%,
+    var(--color-green-bright) 30%,
+    var(--neutral-white) 50%,
+    var(--color-green-bright) 70%,
+    var(--color-green-base) 100%
+  );
+  box-shadow: 0 0 18px var(--color-green-bright), 0 0 36px var(--color-green-glow-strong);
+  border-radius: 50% 0 0 50%;
+  animation: technicalSpecialFromPlayer 0.46s cubic-bezier(0.12, 0.88, 0.22, 1) forwards;
+}
+
+.attack-trail--opponent.attack-trail--technical-special {
+  height: 28px;
+  background: linear-gradient(
+    270deg,
+    var(--color-green-glow-strong) 0%,
+    var(--color-green-bright) 30%,
+    var(--neutral-white) 50%,
+    var(--color-green-bright) 70%,
+    var(--color-green-base) 100%
+  );
+  box-shadow: 0 0 18px var(--color-green-bright), 0 0 36px var(--color-green-glow-strong);
+  border-radius: 0 50% 50% 0;
+  animation: technicalSpecialFromOpponent 0.46s cubic-bezier(0.12, 0.88, 0.22, 1) forwards;
+}
+
+/* ── Attack trail for power-special (red explosive charge) ── */
+.attack-trail--player.attack-trail--power-special {
+  height: 48px;
+  background: radial-gradient(
+    ellipse at left center,
+    var(--color-red-bright) 0%,
+    var(--color-red-base) 28%,
+    var(--color-red-deep) 60%,
+    transparent 100%
+  );
+  box-shadow: 0 0 24px var(--color-red-bright), 0 0 48px var(--color-red-base);
+  animation: powerSpecialFromPlayer 0.4s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+.attack-trail--opponent.attack-trail--power-special {
+  height: 48px;
+  background: radial-gradient(
+    ellipse at right center,
+    var(--color-red-bright) 0%,
+    var(--color-red-base) 28%,
+    var(--color-red-deep) 60%,
+    transparent 100%
+  );
+  box-shadow: 0 0 24px var(--color-red-bright), 0 0 48px var(--color-red-base);
+  animation: powerSpecialFromOpponent 0.4s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+/* ── Trail keyframes ── */
+@keyframes speedSpecialFromPlayer {
+  0%   { opacity: 0; transform: translate3d(-28px, -50%, 0) scaleX(0.1) scaleY(0.6); }
+  20%  { opacity: 1; transform: translate3d(40px, -50%, 0) scaleX(0.55) scaleY(0.9); }
+  48%  { opacity: 0.9; transform: translate3d(110px, -50%, 0) scaleX(1) scaleY(1); }
+  72%  { opacity: 0.7; transform: translate3d(170px, -50%, 0) scaleX(1.15) scaleY(0.8); }
+  100% { opacity: 0; transform: translate3d(240px, -50%, 0) scaleX(1.3) scaleY(0.5); }
+}
+
+@keyframes speedSpecialFromOpponent {
+  0%   { opacity: 0; transform: translate3d(28px, -50%, 0) scaleX(0.1) scaleY(0.6); }
+  20%  { opacity: 1; transform: translate3d(-40px, -50%, 0) scaleX(0.55) scaleY(0.9); }
+  48%  { opacity: 0.9; transform: translate3d(-110px, -50%, 0) scaleX(1) scaleY(1); }
+  72%  { opacity: 0.7; transform: translate3d(-170px, -50%, 0) scaleX(1.15) scaleY(0.8); }
+  100% { opacity: 0; transform: translate3d(-240px, -50%, 0) scaleX(1.3) scaleY(0.5); }
+}
+
+@keyframes technicalSpecialFromPlayer {
+  0%   { opacity: 0; transform: translate3d(-18px, -50%, 0) scaleX(0.12) scaleY(0.5) rotate(-8deg); }
+  22%  { opacity: 0.9; transform: translate3d(50px, -50%, 0) scaleX(0.5) scaleY(1.1) rotate(4deg); }
+  50%  { opacity: 1; transform: translate3d(120px, -50%, 0) scaleX(0.88) scaleY(1.05) rotate(-3deg); }
+  76%  { opacity: 0.7; transform: translate3d(175px, -50%, 0) scaleX(1.1) scaleY(0.9) rotate(2deg); }
+  100% { opacity: 0; transform: translate3d(220px, -50%, 0) scaleX(1.24) scaleY(0.7) rotate(0deg); }
+}
+
+@keyframes technicalSpecialFromOpponent {
+  0%   { opacity: 0; transform: translate3d(18px, -50%, 0) scaleX(0.12) scaleY(0.5) rotate(8deg); }
+  22%  { opacity: 0.9; transform: translate3d(-50px, -50%, 0) scaleX(0.5) scaleY(1.1) rotate(-4deg); }
+  50%  { opacity: 1; transform: translate3d(-120px, -50%, 0) scaleX(0.88) scaleY(1.05) rotate(3deg); }
+  76%  { opacity: 0.7; transform: translate3d(-175px, -50%, 0) scaleX(1.1) scaleY(0.9) rotate(-2deg); }
+  100% { opacity: 0; transform: translate3d(-220px, -50%, 0) scaleX(1.24) scaleY(0.7) rotate(0deg); }
+}
+
+@keyframes powerSpecialFromPlayer {
+  0%   { opacity: 0; transform: translate3d(-20px, -50%, 0) scaleX(0.18) scaleY(0.9); }
+  18%  { opacity: 1; transform: translate3d(38px, -50%, 0) scaleX(0.55) scaleY(1.12); }
+  44%  { opacity: 0.92; transform: translate3d(108px, -50%, 0) scaleX(0.9) scaleY(1.08); }
+  68%  { opacity: 0.8; transform: translate3d(168px, -50%, 0) scaleX(1.12) scaleY(1.02); }
+  100% { opacity: 0; transform: translate3d(220px, -50%, 0) scaleX(1.32) scaleY(0.9); }
+}
+
+@keyframes powerSpecialFromOpponent {
+  0%   { opacity: 0; transform: translate3d(20px, -50%, 0) scaleX(0.18) scaleY(0.9); }
+  18%  { opacity: 1; transform: translate3d(-38px, -50%, 0) scaleX(0.55) scaleY(1.12); }
+  44%  { opacity: 0.92; transform: translate3d(-108px, -50%, 0) scaleX(0.9) scaleY(1.08); }
+  68%  { opacity: 0.8; transform: translate3d(-168px, -50%, 0) scaleX(1.12) scaleY(1.02); }
+  100% { opacity: 0; transform: translate3d(-220px, -50%, 0) scaleX(1.32) scaleY(0.9); }
+}
+
+/* ── Sprite attack animations for special variants ── */
+.player-sprite img.attacking.attacking-speed-special  { animation: playerSpeedSpecialAttack 0.46s cubic-bezier(0.1, 0.95, 0.2, 1); }
+.opponent-sprite img.attacking.attacking-speed-special { animation: opponentSpeedSpecialAttack 0.46s cubic-bezier(0.1, 0.95, 0.2, 1); }
+
+.player-sprite img.attacking.attacking-technical-special  { animation: playerTechnicalSpecialAttack 0.56s cubic-bezier(0.12, 0.9, 0.22, 1); }
+.opponent-sprite img.attacking.attacking-technical-special { animation: opponentTechnicalSpecialAttack 0.56s cubic-bezier(0.12, 0.9, 0.22, 1); }
+
+.player-sprite img.attacking.attacking-power-special  { animation: playerPowerSpecialAttack 0.62s cubic-bezier(0.1, 0.92, 0.2, 1); }
+.opponent-sprite img.attacking.attacking-power-special { animation: opponentPowerSpecialAttack 0.62s cubic-bezier(0.1, 0.92, 0.2, 1); }
+
+/* speed-special: double-dash — two rapid lunges forward */
+@keyframes playerSpeedSpecialAttack {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  10%  { transform: translate3d(36px, -28px, 0) scale(1.08) rotate(-8deg); }
+  22%  { transform: translate3d(8px, -6px, 0) scale(0.96) rotate(-2deg); }
+  36%  { transform: translate3d(70px, -52px, 0) scale(1.14) rotate(-12deg); }
+  52%  { transform: translate3d(82px, -58px, 0) scale(1.16) rotate(-14deg); }
+  68%  { transform: translate3d(28px, -18px, 0) scale(1.06) rotate(-4deg); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes opponentSpeedSpecialAttack {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  10%  { transform: translate3d(-36px, 28px, 0) scale(1.08) rotate(8deg); }
+  22%  { transform: translate3d(-8px, 6px, 0) scale(0.96) rotate(2deg); }
+  36%  { transform: translate3d(-70px, 52px, 0) scale(1.14) rotate(12deg); }
+  52%  { transform: translate3d(-82px, 58px, 0) scale(1.16) rotate(14deg); }
+  68%  { transform: translate3d(-28px, 18px, 0) scale(1.06) rotate(4deg); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* technical-special: charge-up spin then precise lunge */
+@keyframes playerTechnicalSpecialAttack {
+  0%   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  14%  { transform: translate3d(6px, -4px, 0) scale(1.05) rotate(-6deg); }
+  30%  { transform: translate3d(14px, -10px, 0) scale(1.1) rotate(-14deg); }
+  46%  { transform: translate3d(52px, -28px, 0) scale(1.12) rotate(-8deg); }
+  62%  { transform: translate3d(68px, -34px, 0) scale(1.14) rotate(-4deg); }
+  80%  { transform: translate3d(24px, -12px, 0) scale(1.06) rotate(-2deg); }
+  100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+}
+
+@keyframes opponentTechnicalSpecialAttack {
+  0%   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  14%  { transform: translate3d(-6px, 4px, 0) scale(1.05) rotate(6deg); }
+  30%  { transform: translate3d(-14px, 10px, 0) scale(1.1) rotate(14deg); }
+  46%  { transform: translate3d(-52px, 28px, 0) scale(1.12) rotate(8deg); }
+  62%  { transform: translate3d(-68px, 34px, 0) scale(1.14) rotate(4deg); }
+  80%  { transform: translate3d(-24px, 12px, 0) scale(1.06) rotate(2deg); }
+  100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+}
+
+/* power-special: massive wind-up, explosive forward charge, stumble back */
+@keyframes playerPowerSpecialAttack {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  8%   { transform: translate3d(-22px, 8px, 0) scale(0.86) rotate(6deg); }
+  20%  { transform: translate3d(-12px, 4px, 0) scale(0.92) rotate(3deg); }
+  38%  { transform: translate3d(68px, -28px, 0) scale(1.22) rotate(-8deg); }
+  52%  { transform: translate3d(84px, -34px, 0) scale(1.26) rotate(-10deg); }
+  66%  { transform: translate3d(-10px, 4px, 0) scale(0.94) rotate(3deg); }
+  80%  { transform: translate3d(6px, -2px, 0) scale(1.02) rotate(-1deg); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes opponentPowerSpecialAttack {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  8%   { transform: translate3d(22px, -8px, 0) scale(0.86) rotate(-6deg); }
+  20%  { transform: translate3d(12px, -4px, 0) scale(0.92) rotate(-3deg); }
+  38%  { transform: translate3d(-68px, 28px, 0) scale(1.22) rotate(8deg); }
+  52%  { transform: translate3d(-84px, 34px, 0) scale(1.26) rotate(10deg); }
+  66%  { transform: translate3d(10px, -4px, 0) scale(0.94) rotate(-3deg); }
+  80%  { transform: translate3d(-6px, 2px, 0) scale(1.02) rotate(1deg); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
