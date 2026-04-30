@@ -703,7 +703,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     modifiers: number,
     defenderMaxHp: number,
   ): number {
-    const baseAttackDamage = Math.max(0, attackerStat) + Math.max(0, attackDamage ?? 0);
+    // Base damage must come from the active myXuxemon attack stat.
+    const baseAttackDamage = Math.max(0, attackerStat);
     const normalizedAttackPower = Math.max(6, Math.round(baseAttackDamage / 10));
     const rawDamage = normalizedAttackPower
       + (attackerStat * 0.35)

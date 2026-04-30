@@ -40,6 +40,12 @@ class BattleController extends Controller
             return response()->json(['message' => 'You can only challenge users in your friends list'], 403);
         }
 
+        if (count($this->getOrderedTeamIds((string) $userId)) === 0) {
+            return response()->json([
+                'message' => 'You do not have any Xuxemons equipped. Equip at least one to challenge other players.',
+            ], 422);
+        }
+
         // Resolver batallas previas entre ambos jugadores.
         $existing = Battle::where(function ($q) use ($userId, $friendId) {
             $q->where('user_id', $userId)->where('opponent_user_id', $friendId);
@@ -1026,7 +1032,8 @@ class BattleController extends Controller
         int $modifiers,
         int $defenderMaxHp,
     ): int {
-        $baseAttackDamage = max(0, $attackerStat) + max(0, (int) ($attackDamage ?? 0));
+        // Base damage must come from the active myXuxemon attack stat.
+        $baseAttackDamage = max(0, $attackerStat);
         $normalizedAttackPower = max(6, (int) round($baseAttackDamage / 10));
         $rawDamage = $normalizedAttackPower
             + ($attackerStat * 0.35)
