@@ -444,21 +444,11 @@
   height: var(--sp-size, 5px);
   background: var(--neutral-white);
   border-radius: 50%;
-  opacity: 0;
+  opacity: var(--sp-opacity, 0.75);
   box-shadow:
     0 0 6px 2px var(--type-color, var(--accent-color)),
     0 0 14px 4px var(--type-glow, color-mix(in srgb, var(--accent-color) 30%, transparent));
-  animation: sparkle-twinkle var(--sp-duration, 2s) var(--sp-delay, 1.5s) ease-in-out infinite;
   z-index: 3;
-}
-
-/* Este keyframe se encarga de animar el parpadeo y ascenso de las chispas. */
-@keyframes sparkle-twinkle {
-  0% { opacity: 0; transform: scale(0) translateY(0); }
-  25% { opacity: 1; transform: scale(1.2) translateY(-12px); }
-  50% { opacity: 0.55; transform: scale(0.7) translateY(-30px); }
-  75% { opacity: 0.85; transform: scale(1) translateY(-50px); }
-  100% { opacity: 0; transform: scale(0) translateY(-65px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

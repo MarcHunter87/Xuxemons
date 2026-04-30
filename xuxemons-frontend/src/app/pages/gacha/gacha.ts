@@ -40,7 +40,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     private shouldFocusAwardCloseButton = false;
 
     readonly revealRayAngles = Array.from({ length: 14 }, (_, i) => Math.round((i * 360) / 14));
-    revealSparkles: Array<{ x: number; y: number; size: number; delay: number; duration: number }> = [];
+    revealSparkles: Array<{ x: number; y: number; size: number; opacity: number }> = [];
 
     // Sirve para inicializar el componente
     ngOnInit() {
@@ -157,9 +157,9 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         }, 50);
 
         setTimeout(() => {
+            this.awardedXuxemon.set(winner);
             this.generateSparkles();
             this.isSpinning.set(false);
-            this.awardedXuxemon.set(winner);
             this.showAward.set(true);
             this.shouldFocusAwardCloseButton = true;
             this.playModalRevealAudio();
@@ -180,20 +180,20 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     // Sirve para obtener el color del tipo de Xuxemon
     getTypeColor(typeName: string): string {
         switch (typeName) {
-            case 'Power': return '#D0181B';
-            case 'Speed': return '#0D6EFD';
-            case 'Technical': return '#28A745';
-            default: return '#777';
+            case 'Power': return 'var(--color-red-base)';
+            case 'Speed': return 'var(--accent-color)';
+            case 'Technical': return 'var(--color-green-base)';
+            default: return 'var(--color-gray-medium)';
         }
     }
 
     // Sirve para obtener el color del tipo de Xuxemon con glow
     getTypeColorGlow(typeName: string): string {
         switch (typeName) {
-            case 'Power': return 'rgba(208, 24, 27, 0.5)';
-            case 'Speed': return 'rgba(13, 110, 253, 0.5)';
-            case 'Technical': return 'rgba(40, 167, 69, 0.5)';
-            default: return 'rgba(119, 119, 119, 0.5)';
+            case 'Power': return 'var(--color-red-overlay-strong)';
+            case 'Speed': return 'var(--color-blue-overlay-strong)';
+            case 'Technical': return 'var(--color-green-glow-strong)';
+            default: return 'var(--color-white-overlay-strong)';
         }
     }
 
@@ -219,9 +219,13 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
             const x = -8 + Math.random() * 116;
             const y = -8 + Math.random() * 116;
             const size = 2 + Math.random() * 8;
-            const delay = Math.random() * 2.4;
-            const duration = 1.2 + Math.random() * 2.6;
-            return { x, y, size, delay, duration };
+            const opacity = 0.55 + Math.random() * 0.35;
+            return {
+                x,
+                y,
+                size,
+                opacity,
+            };
         });
     }
 

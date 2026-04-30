@@ -1,22 +1,22 @@
 @if (vm.showVictoryModal()) {
   <div class="victory-modal">
-    <div class="victory-content">
-      <h2 class="victory-title">VICTORY!</h2>
+    <div class="battle-dialog battle-dialog--info victory-content">
+      <h2 class="battle-dialog-title victory-title">VICTORY!</h2>
       <img [src]="vm.selectedXuxemon()?.image_url" class="winner-sprite" alt="">
-      <p>{{ vm.selectedXuxemon()?.name }} won!</p>
+      <p class="battle-dialog-text">{{ vm.selectedXuxemon()?.name }} won!</p>
       @if (vm.stolenXuxemon()) {
-        <p>You stole {{ vm.stolenXuxemon()?.name }} from your rival.</p>
+        <p class="battle-dialog-text">You stole {{ vm.stolenXuxemon()?.name }} from your rival.</p>
       }
-      <button class="btn-continue" (click)="vm.closeVictoryModal()">CONTINUE</button>
+      <button type="button" class="battle-dialog-btn battle-dialog-btn--primary btn-continue" (click)="vm.closeVictoryModal()">CONTINUE</button>
     </div>
   </div>
 }
 
 @if (vm.showStealModal()) {
   <div class="victory-modal">
-    <div class="victory-content">
-      <h2 class="victory-title">PRIZE</h2>
-      <p>Choose one Xuxemon from your rival.</p>
+    <div class="battle-dialog battle-dialog--info victory-content victory-content--prize">
+      <h2 class="battle-dialog-title victory-title">PRIZE</h2>
+      <p class="battle-dialog-text">Choose one Xuxemon from your rival.</p>
       <div class="xuxemon-list">
         @for (xuxemon of vm.stealOptions(); track xuxemon.adquired_id || xuxemon.id) {
           <div class="xuxemon-item-card" (click)="vm.confirmPrizeSelection(xuxemon)">
@@ -32,7 +32,7 @@
           </div>
         }
       </div>
-      <button class="btn-continue" (click)="vm.skipPrizeSelection()" [disabled]="vm.isSubmittingBattleResult()">SKIP</button>
+      <button type="button" class="battle-dialog-btn battle-dialog-btn--primary btn-continue" (click)="vm.skipPrizeSelection()" [disabled]="vm.isSubmittingBattleResult()">SKIP</button>
     </div>
   </div>
 }

@@ -12,6 +12,7 @@ export interface User {
   level?: number;
   xp?: number;
   win_streak?: number;
+  total_wins?: number;
   total_battles?: number;
   theme?: 'light' | 'dark';
 }

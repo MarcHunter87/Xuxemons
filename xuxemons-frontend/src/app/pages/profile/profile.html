@@ -39,7 +39,7 @@
                 <span class="stat-card__spinner" aria-hidden="true"></span>
                 <span class="visually-hidden">Loading</span>
               } @else if (user$ | async; as u) {
-                {{ u.win_streak ?? 0 }}
+                {{ u.total_wins ?? 0 }}
               }
             </p>
           </div>

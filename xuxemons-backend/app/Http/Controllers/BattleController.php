@@ -11,6 +11,7 @@ use App\Models\Friend;
 use App\Models\Size;
 use App\Models\StatusEffect;
 use App\Models\Team;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -153,24 +154,13 @@ class BattleController extends Controller
 
     public function streamBattle(Request $request, $battleId)
     {
-        $token = (string) $request->query('token', '');
+        $viewerId = $this->resolveViewerIdFromToken($request);
 
-        if ($token === '') {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        try {
-            $viewer = JWTAuth::setToken($token)->authenticate();
-        } catch (\Throwable) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        if (! $viewer) {
+        if (! $viewerId) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         $battle = Battle::with(['user', 'opponentUser', 'winner'])->findOrFail($battleId);
-        $viewerId = (string) $viewer->id;
 
         if ($viewerId !== $battle->user_id && $viewerId !== $battle->opponent_user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -225,6 +215,33 @@ class BattleController extends Controller
             'Connection' => 'keep-alive',
             'X-Accel-Buffering' => 'no',
         ]);
+    }
+
+    public function disconnectBattle(Request $request, $battleId)
+    {
+        $viewerId = $this->resolveViewerIdFromToken($request);
+
+        if (! $viewerId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $battle = Battle::with(['user', 'opponentUser', 'winner'])->findOrFail($battleId);
+
+        if ($viewerId !== $battle->user_id && $viewerId !== $battle->opponent_user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($battle->status !== 'accepted' || $battle->winner_id) {
+            return response()->json($this->buildBattlePayload($battle, $viewerId));
+        }
+
+        $context = $this->resolveParticipantFields($battle, $viewerId);
+
+        DB::transaction(function () use ($battle, $context) {
+            $this->completeBattleAsRunaway($battle, $context);
+        });
+
+        return response()->json($this->buildBattlePayload($battle->fresh(['user', 'opponentUser', 'winner']), $viewerId));
     }
 
     public function submitAction(Request $request, $battleId)
@@ -450,9 +467,15 @@ class BattleController extends Controller
         $loserXuxemonId = $request->filled('loser_xuxemon_id') ? (int) $request->input('loser_xuxemon_id') : null;
 
         $stolenXuxemon = DB::transaction(function () use ($battle, $winnerId, $loserId, $loserXuxemonId) {
+            $shouldApplyRewards = ! $battle->winner_id;
+
             $battle->winner_id = $winnerId;
             $battle->status = 'completed';
             $battle->save();
+
+            if ($shouldApplyRewards) {
+                $this->applyBattleRewards($winnerId, $loserId);
+            }
 
             $xuxemon = null;
             if ($loserXuxemonId) {
@@ -690,6 +713,7 @@ class BattleController extends Controller
                 $battle->turn = (int) $battle->turn + 1;
             } else {
                 $battle->winner_id = $context['player_id'];
+                $this->applyBattleRewards($context['player_id'], $context['opponent_id']);
                 $this->appendBattleLog($battle, sprintf('%s wins the battle!', $attacker->name));
             }
         } else {
@@ -801,22 +825,37 @@ class BattleController extends Controller
         $context = $this->resolveParticipantFields($battle, $viewerId);
 
         DB::transaction(function () use ($battle, $context) {
-            $runnerName = $context['player_id'] === $battle->user_id
-                ? ($battle->user->name ?? 'A player')
-                : ($battle->opponentUser->name ?? 'A player');
-
-            $battle->winner_id = $context['opponent_id'];
-            $battle->status = 'completed';
-            $battle->completion_reason = 'runaway';
-            $battle->runner_id = $context['player_id'];
-            $this->appendBattleLog($battle, sprintf('%s fled the battle!', $runnerName));
-            $battle->save();
+            $this->completeBattleAsRunaway($battle, $context);
         });
 
         return response()->json($this->buildBattlePayload($battle->fresh(['user', 'opponentUser', 'winner']), $viewerId));
     }
 
     private function performRunAction(Battle $battle, array $context): ?JsonResponse
+    {
+        $this->completeBattleAsRunaway($battle, $context);
+
+        return null;
+    }
+
+    private function resolveViewerIdFromToken(Request $request): ?string
+    {
+        $token = (string) ($request->query('token') ?: $request->input('token', ''));
+
+        if ($token === '') {
+            return null;
+        }
+
+        try {
+            $viewer = JWTAuth::setToken($token)->authenticate();
+        } catch (\Throwable) {
+            return null;
+        }
+
+        return $viewer ? (string) $viewer->id : null;
+    }
+
+    private function completeBattleAsRunaway(Battle $battle, array $context): void
     {
         $runnerName = $context['player_id'] === $battle->user_id
             ? ($battle->user->name ?? 'A player')
@@ -829,7 +868,41 @@ class BattleController extends Controller
         $this->appendBattleLog($battle, sprintf('%s fled the battle!', $runnerName));
         $battle->save();
 
-        return null;
+        $this->applyBattleRewards($context['opponent_id'], $context['player_id']);
+    }
+
+    private function applyBattleRewards(string $winnerId, string $loserId): void
+    {
+        $winner = User::query()->lockForUpdate()->find($winnerId);
+        $loser = User::query()->lockForUpdate()->find($loserId);
+
+        if (! $winner) {
+            return;
+        }
+
+        $winner->win_streak = (int) $winner->win_streak + 1;
+        $winner->total_battles = (int) $winner->total_battles + 1;
+        $this->applyTrainerXpReward($winner, 100);
+        $winner->save();
+
+        if ($loser) {
+            $loser->total_battles = (int) $loser->total_battles + 1;
+            $loser->save();
+        }
+    }
+
+    private function applyTrainerXpReward(User $user, int $xpReward): void
+    {
+        $pendingXp = max(0, (int) $user->xp + max(0, $xpReward));
+        $currentLevel = max(1, (int) $user->level);
+
+        while ($pendingXp >= ($currentLevel * 100)) {
+            $pendingXp -= $currentLevel * 100;
+            $currentLevel++;
+        }
+
+        $user->level = $currentLevel;
+        $user->xp = $pendingXp;
     }
 
     private function performAllyItemAction(Battle $battle, array $context, int $bagItemId, int $targetId): ?JsonResponse
@@ -953,7 +1026,8 @@ class BattleController extends Controller
         int $modifiers,
         int $defenderMaxHp,
     ): int {
-        $normalizedAttackPower = max(6, (int) round(($attackDamage ?? 36) / 10));
+        $baseAttackDamage = max(0, $attackerStat) + max(0, (int) ($attackDamage ?? 0));
+        $normalizedAttackPower = max(6, (int) round($baseAttackDamage / 10));
         $rawDamage = $normalizedAttackPower
             + ($attackerStat * 0.35)
             + $roll
@@ -1033,6 +1107,7 @@ class BattleController extends Controller
                 }
 
                 $battle->winner_id = $playerId === $battle->user_id ? $battle->opponent_user_id : $battle->user_id;
+                $this->applyBattleRewards((string) $battle->winner_id, $playerId);
                 $battle->save();
 
                 return false;

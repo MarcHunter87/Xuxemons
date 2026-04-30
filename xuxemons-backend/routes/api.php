@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/battles/{battleId}/stream', [BattleController::class, 'streamBattle']);
+Route::post('/battles/{battleId}/disconnect', [BattleController::class, 'disconnectBattle']);
 
 Route::get('/xuxemons', [XuxemonController::class, 'index']);
 Route::get('/items', [InventoryController::class, 'getAllItems']);

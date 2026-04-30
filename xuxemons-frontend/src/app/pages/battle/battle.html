@@ -48,8 +48,9 @@
               </div>
             </div>
 
-            <div class="sprite-container opponent-sprite">
-              <img [src]="opponentXuxemon()!.image_url" alt="Opponent">
+            <div #opponentSprite class="sprite-container opponent-sprite" [class.attacking]="vm.isOpponentAttacking()" [class.fainting]="vm.isOpponentFainting()" [class.hit]="vm.isOpponentHit()">
+              <img [src]="opponentXuxemon()!.image_url" alt="Opponent" [class.attacking]="vm.isOpponentAttacking()" [class.fainting]="vm.isOpponentFainting()">
+              <span class="faint-particles" aria-hidden="true"></span>
               <div class="platform"></div>
             </div>
           </div>
@@ -94,11 +95,34 @@
               </div>
             </div>
 
-            <div class="sprite-container player-sprite">
-              <img [src]="selectedXuxemon()!.image_url" alt="Player">
+            <div #playerSprite class="sprite-container player-sprite" [class.attacking]="vm.isPlayerAttacking()" [class.fainting]="vm.isPlayerFainting()" [class.hit]="vm.isPlayerHit()">
+              <img [src]="selectedXuxemon()!.image_url" alt="Player" [class.attacking]="vm.isPlayerAttacking()" [class.fainting]="vm.isPlayerFainting()">
+              <span class="faint-particles" aria-hidden="true"></span>
               <div class="platform"></div>
             </div>
           </div>
+        </div>
+
+        <div
+          class="attack-trail"
+          [class.active]="vm.activeAttackTrail() !== null"
+          [class.attack-trail--player]="vm.activeAttackTrail() === 'player'"
+          [class.attack-trail--opponent]="vm.activeAttackTrail() === 'opponent'"
+          aria-hidden="true">
+        </div>
+
+        <div
+          class="impact-burst"
+          [class.active]="vm.activeImpactBurst() !== null"
+          [class.impact-burst--player]="vm.activeImpactBurst() === 'player'"
+          [class.impact-burst--opponent]="vm.activeImpactBurst() === 'opponent'"
+          aria-hidden="true">
+        </div>
+
+        <div
+          class="battle-hit-flash"
+          [class.active]="vm.activeImpactBurst() !== null"
+          aria-hidden="true">
         </div>
       } @else {
         <div class="empty-arena">
@@ -114,4 +138,13 @@
   <app-battle-selection-overlay [vm]="vm"></app-battle-selection-overlay>
 
   <app-battle-modals [vm]="vm"></app-battle-modals>
+
+  <div class="dice-overlay" [class.visible]="vm.isDiceOverlayVisible()" aria-live="polite" aria-atomic="true">
+    <div class="dice-container" [class.throwing]="vm.isDiceRolling()">
+      <div class="dice" [class.rolling]="vm.isDiceRolling()" [class.landed]="!vm.isDiceRolling()" [attr.data-value]="vm.diceValue() || 1">
+        {{ vm.isDiceRolling() ? '?' : vm.diceValue() }}
+      </div>
+      <span class="dice-label">{{ vm.isDiceRolling() ? 'Rolling...' : ('Roll: ' + vm.diceValue()) }}</span>
+    </div>
+  </div>
 </div>

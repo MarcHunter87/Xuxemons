@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -14,6 +15,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property string $id
  * @property string $name
  * @property int $level
+ * @property int $total_wins
  * @property string|null $icon_path
  * @property \Illuminate\Support\Carbon|null $last_seen_at
  */
@@ -63,6 +65,15 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'total_wins',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -87,6 +98,16 @@ class User extends Authenticatable implements JWTSubject
     public function bag(): HasOne
     {
         return $this->hasOne(Bag::class, 'user_id', 'id');
+    }
+
+    public function wonBattles(): HasMany
+    {
+        return $this->hasMany(Battle::class, 'winner_id', 'id');
+    }
+
+    public function getTotalWinsAttribute(): int
+    {
+        return $this->wonBattles()->count();
     }
 
     public function getJWTIdentifier()

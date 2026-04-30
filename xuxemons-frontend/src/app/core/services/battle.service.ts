@@ -47,6 +47,32 @@ export class BattleService {
     return this.http.post(`${this.apiUrl}/${battleId}/forfeit`, {});
   }
 
+  autoForfeitOnDisconnect(battleId: number, token: string): void {
+    if (!this.isBrowser || !token) {
+      return;
+    }
+
+    const url = `${this.apiUrl}/${battleId}/disconnect?token=${encodeURIComponent(token)}`;
+
+    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+      const beaconSent = navigator.sendBeacon(url, new Blob([], { type: 'text/plain' }));
+      if (beaconSent) {
+        return;
+      }
+    }
+
+    if (typeof fetch === 'function') {
+      void fetch(url, {
+        method: 'POST',
+        body: '',
+        keepalive: true,
+        headers: {
+          'Content-Type': 'text/plain;charset=UTF-8',
+        },
+      }).catch(() => undefined);
+    }
+  }
+
   useBattleItem(battleId: number, bagItemId: number, targetAdquiredXuxemonId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/${battleId}/use-item`, {
       bag_item_id: bagItemId,

@@ -83,6 +83,7 @@
   background-position: center;
   overflow: hidden;
   min-height: clamp(380px, 54vh, 740px);
+  isolation: isolate;
 }
 
 .battle-screen::after {
@@ -113,6 +114,7 @@
   left: clamp(16px, 8vw, 110px);
   display: flex;
   flex-direction: column;
+  padding: 24px;
   align-items: center;
 }
 
@@ -279,14 +281,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  will-change: transform, filter, opacity;
 }
 
 .sprite-container img {
+  display: block;
   width: clamp(200px, 27vw, 330px);
   height: clamp(200px, 27vw, 330px);
   object-fit: contain;
   filter: drop-shadow(0 10px 15px var(--color-black-soft));
   z-index: 5;
+  position: relative;
+  will-change: transform, filter, opacity;
 }
 
 .platform {
@@ -438,6 +444,19 @@
   margin-bottom: 8px;
   font-size: 1rem;
   line-height: 1.4;
+}
+
+.battle-logs .log-player {
+  color: var(--secondary-color);
+}
+
+.battle-logs .log-opponent {
+  color: var(--color-red-bright);
+}
+
+.battle-logs .log-system {
+  color: var(--primary-color);
+  opacity: 0.75;
 }
 
 .battle-actions {
@@ -872,9 +891,49 @@
   height: 220px;
   border-radius: 50%;
   pointer-events: none;
-  z-index: 8;
+  z-index: 14;
   display: none;
   background: radial-gradient(circle, var(--neutral-white) 0%, var(--secondary-color) 18%, var(--color-amber-bright) 48%, var(--color-red-bright) 72%, transparent 100%);
+}
+
+.battle-hit-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 12;
+  background:
+    radial-gradient(circle at center, var(--color-white-overlay-strong) 0%, var(--color-amber-overlay) 18%, transparent 42%),
+    linear-gradient(180deg, var(--color-white-overlay) 0%, transparent 60%);
+}
+
+.battle-hit-flash.active {
+  animation: battleHitFlash 0.34s ease-out forwards;
+}
+
+.impact-burst::before,
+.impact-burst::after {
+  content: '';
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.impact-burst::before {
+  background:
+    radial-gradient(circle at 50% 50%, var(--neutral-white) 0 12%, transparent 13%),
+    radial-gradient(circle at 22% 28%, var(--color-amber-bright) 0 8%, transparent 9%),
+    radial-gradient(circle at 74% 34%, var(--secondary-color) 0 8%, transparent 9%),
+    radial-gradient(circle at 34% 78%, var(--color-red-bright) 0 7%, transparent 8%),
+    radial-gradient(circle at 76% 76%, var(--color-blue-overlay-medium) 0 7%, transparent 8%);
+}
+
+.impact-burst::after {
+  inset: 6%;
+  border: 4px solid var(--color-white-overlay-strong);
+  box-shadow: 0 0 18px var(--color-white-overlay-strong);
 }
 
 .impact-burst.active {
@@ -882,6 +941,14 @@
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.2);
   animation: impactBurst 0.44s ease-out forwards;
+}
+
+.impact-burst.active::before {
+  animation: impactSpark 0.44s ease-out forwards;
+}
+
+.impact-burst.active::after {
+  animation: impactRing 0.44s ease-out forwards;
 }
 
 .impact-burst--player {
@@ -898,11 +965,35 @@
   width: min(58vw, 620px);
   height: 34px;
   border-radius: 999px;
-  z-index: 7;
+  z-index: 13;
   pointer-events: none;
   opacity: 0;
   transform: translateY(-50%);
   box-shadow: 0 0 36px var(--color-white-overlay-strong);
+}
+
+.attack-trail::before,
+.attack-trail::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  transform: translateY(-50%);
+  opacity: 0;
+}
+
+.attack-trail::before {
+  background: linear-gradient(90deg, transparent 0%, var(--neutral-white) 36%, transparent 100%);
+  filter: blur(8px);
+}
+
+.attack-trail::after {
+  height: 12px;
+  background: linear-gradient(90deg, transparent 0%, var(--color-white-overlay-strong) 50%, transparent 100%);
+  filter: blur(14px);
 }
 
 .attack-trail--player {
@@ -933,6 +1024,12 @@
   right: 22%;
   background: linear-gradient(270deg, transparent 0%, var(--secondary-color) 14%, var(--neutral-white) 48%, var(--color-amber-bright) 72%, var(--color-red-bright) 100%);
   animation: slashFromOpponent 0.48s cubic-bezier(0.16, 0.92, 0.28, 1) forwards;
+}
+
+.attack-trail.active::before,
+.attack-trail.active::after {
+  opacity: 1;
+  animation: attackTrailGlow 0.42s ease-out forwards;
 }
 
 .victory-modal {
@@ -1235,16 +1332,20 @@
 .dice-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(43, 42, 43, 0.52);
-  display: none;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(6px);
+  z-index: 9999;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-out;
 }
 
 .dice-overlay.visible {
-  display: flex;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .dice-container {
@@ -1299,6 +1400,236 @@
   text-transform: uppercase;
   letter-spacing: 2px;
   text-align: center;
+}
+
+.sprite-container {
+  overflow: visible;
+}
+
+/* Attack animations */
+.player-sprite.attacking {
+  animation: playerLunge 0.7s ease-in-out forwards !important;
+  transform-origin: 50% 65%;
+}
+
+.opponent-sprite.attacking {
+  animation: opponentLunge 0.7s ease-in-out forwards !important;
+  transform-origin: 50% 65%;
+}
+
+.player-sprite.attacking img,
+.opponent-sprite.attacking img {
+  filter: brightness(1.12) saturate(1.08) drop-shadow(0 18px 24px var(--color-black-soft));
+}
+
+.sprite-container.hit img {
+  animation: targetImpactShake 0.34s ease-out;
+  filter: brightness(1.25) saturate(1.2) drop-shadow(0 0 18px var(--neutral-white));
+}
+
+/* Faint animations */
+.sprite-container img.fainting {
+  animation: xuxemonFaintErase 0.72s ease-in forwards;
+}
+
+.sprite-container.fainting .platform {
+  animation: xuxemonPlatformFade 0.72s ease-in forwards;
+}
+
+.faint-particles,
+.faint-particles::before,
+.faint-particles::after {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 999px;
+}
+
+.faint-particles {
+  left: 50%;
+  top: 48%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  margin-top: -7px;
+  background: var(--neutral-white);
+  box-shadow:
+    0 0 0 12px var(--color-white-overlay),
+    -26px -12px 0 0 var(--secondary-color),
+    22px -18px 0 0 var(--color-blue-overlay-medium),
+    -24px 16px 0 0 var(--color-amber-overlay),
+    28px 14px 0 0 var(--color-red-overlay-soft);
+}
+
+.faint-particles::before,
+.faint-particles::after {
+  content: '';
+  left: 0;
+  top: 0;
+  width: 10px;
+  height: 10px;
+}
+
+.faint-particles::before {
+  background: var(--secondary-color);
+  box-shadow:
+    -18px 24px 0 0 var(--color-green-overlay-soft),
+    20px -22px 0 0 var(--color-amber-overlay),
+    30px 8px 0 0 var(--color-blue-overlay-medium);
+}
+
+.faint-particles::after {
+  background: var(--color-red-overlay-medium);
+  box-shadow:
+    -30px -6px 0 0 var(--color-blue-overlay),
+    10px 30px 0 0 var(--color-green-overlay),
+    -8px -26px 0 0 var(--color-white-overlay-strong);
+}
+
+.sprite-container.fainting .faint-particles,
+.sprite-container.fainting .faint-particles::before,
+.sprite-container.fainting .faint-particles::after {
+  animation: xuxemonFaintParticles 0.72s ease-out forwards;
+}
+
+@keyframes xuxemonFaintErase {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: brightness(1) drop-shadow(0 10px 15px var(--color-black-soft));
+  }
+  45% {
+    opacity: 0.8;
+    transform: translate3d(0, -10px, 0) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -24px, 0) scale(0.72);
+    filter: brightness(1.25) drop-shadow(0 0 0 transparent);
+  }
+}
+
+@keyframes xuxemonPlatformFade {
+  0% {
+    opacity: 1;
+    transform: rotateX(60deg) scale(1);
+  }
+  100% {
+    opacity: 0.28;
+    transform: rotateX(60deg) scale(0.82);
+  }
+}
+
+@keyframes xuxemonFaintParticles {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.2);
+  }
+  25% {
+    opacity: 0.95;
+    transform: translate3d(0, -8px, 0) scale(0.88);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -44px, 0) scale(1.36);
+  }
+}
+
+@keyframes attackTrailGlow {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scaleX(0.7);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-50%) scaleX(1.08);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) scaleX(1.2);
+  }
+}
+
+@keyframes impactRing {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+@keyframes impactSpark {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0deg);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1) rotate(8deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2) rotate(18deg);
+  }
+}
+
+@keyframes targetImpactShake {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(-10px, 4px, 0);
+  }
+  50% {
+    transform: translate3d(12px, -4px, 0);
+  }
+  75% {
+    transform: translate3d(-6px, 3px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes battleHitFlash {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Player attack lunge forward and back */
+@keyframes playerLunge {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  35% {
+    transform: translate3d(72px, -16px, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Opponent attack lunge forward and back */
+@keyframes opponentLunge {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  35% {
+    transform: translate3d(-72px, 16px, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
 }
 
 @keyframes diceIntro {
@@ -1369,8 +1700,9 @@
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
-.player-sprite img.attacking { animation: playerAttack 0.5s ease-in-out; }
-.opponent-sprite img.attacking { animation: opponentAttack 0.5s ease-in-out; }
+/* Replaced by new playerLunge/opponentLunge animations */
+/* .player-sprite img.attacking { animation: playerAttack 0.5s ease-in-out; }
+.opponent-sprite img.attacking { animation: opponentAttack 0.5s ease-in-out; } */
 
 /* Este keyframe se encarga del shake corto al recibir daño. */
 @keyframes shakeHit {
@@ -1568,7 +1900,7 @@
   to { transform: scale(1); opacity: 1; }
 }
 
-.victory-title { font-size: 3rem; color: var(--color-amber-base); text-shadow: 3px 3px 0 var(--neutral-black); margin-bottom: 10px; }
+.victory-title { font-size: 3rem; color: var(--color-amber-base); text-shadow: none; margin-bottom: 10px; }
 .winner-sprite { width: 130px; height: 130px; margin: 15px 0; object-fit: contain; animation: bounce 0.6s infinite; }
 
 /* Este keyframe se encarga del rebote suave de elementos UI. */
@@ -1578,18 +1910,18 @@
 }
 
 .btn-continue {
-  background: linear-gradient(135deg, var(--color-green-base) 0%, var(--color-green-bright) 100%);
-  color: var(--neutral-white); border: none; padding: 14px 35px;
-  border-radius: 12px; font-weight: 900; cursor: pointer; width: 100%;
-  font-size: 1.1rem;
-  box-shadow: 0 4px 15px var(--color-green-glow-strong);
-  transition: all 0.2s;
+  width: 100%;
   margin-top: 15px;
 }
 
-.btn-continue:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--color-green-glow-strong);
+.victory-content .battle-dialog-text + .battle-dialog-text {
+  margin-top: 15px;
+}
+
+.victory-content .xuxemon-list {
+  margin-top: 20px;
+  max-height: 320px;
+  padding-right: 8px;
 }
 
 .battle-dialog {
@@ -1600,6 +1932,7 @@
   box-shadow: 0 22px 60px var(--color-black-soft);
   text-align: center;
   border: 6px solid var(--accent-color);
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .battle-dialog--warning,
@@ -1612,6 +1945,7 @@
   color: var(--neutral-black);
   font-size: 2rem;
   font-weight: 900;
+  font-family: inherit;
 }
 
 .battle-dialog-text {
@@ -1619,6 +1953,12 @@
   color: var(--color-gray-medium);
   font-size: 1.05rem;
   line-height: 1.5;
+  font-family: inherit;
+}
+
+.victory-title {
+  font-family: inherit;
+  font-weight: 900;
 }
 
 .battle-dialog-actions {

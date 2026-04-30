@@ -15,6 +15,8 @@ import { BattleModalsComponent } from './components/battle-modals.component';
 import type { InventoryItem, UseItemResponseData, Xuxemon } from '../../core/interfaces';
 
 type BattleMenu = 'attacks' | 'bag' | 'bag-target' | 'switch' | null;
+type BattleLogSource = 'player' | 'opponent' | 'system';
+interface BattleLogEntry { text: string; source: BattleLogSource; }
 
 @Component({
   selector: 'app-battle',
@@ -59,7 +61,22 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private battleEventSource: EventSource | null = null;
   private streamBootstrapTimeout: ReturnType<typeof setTimeout> | null = null;
   private battleCalloutTimeout: ReturnType<typeof setTimeout> | null = null;
+  private diceLandingTimeout: ReturnType<typeof setTimeout> | null = null;
+  private diceOverlayTimeout: ReturnType<typeof setTimeout> | null = null;
+  private playerAttackTimeout: ReturnType<typeof setTimeout> | null = null;
+  private opponentAttackTimeout: ReturnType<typeof setTimeout> | null = null;
+  private attackTrailTimeout: ReturnType<typeof setTimeout> | null = null;
+  private impactBurstTimeout: ReturnType<typeof setTimeout> | null = null;
+  private playerHitTimeout: ReturnType<typeof setTimeout> | null = null;
+  private opponentHitTimeout: ReturnType<typeof setTimeout> | null = null;
+  @ViewChild('playerSprite') playerSprite?: ElementRef<HTMLDivElement>;
+  @ViewChild('opponentSprite') opponentSprite?: ElementRef<HTMLDivElement>;
+  private playerFaintTimeout: ReturnType<typeof setTimeout> | null = null;
+  private opponentFaintTimeout: ReturnType<typeof setTimeout> | null = null;
+  private playerSpriteAnimation: Animation | null = null;
+  private opponentSpriteAnimation: Animation | null = null;
   private teamIds: number[] = [];
+  private disconnectForfeitSent = false;
   private lastBattleAnimationKey = '';
   private readonly handleVisibilityChange = () => {
     if (this.battleEventSource || !this.isBrowser) {
@@ -67,6 +84,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.restartPolling();
+  };
+  private readonly handlePageExit = (event: PageTransitionEvent | BeforeUnloadEvent) => {
+    if ('persisted' in event && event.persisted) {
+      return;
+    }
+
+    this.autoForfeitOnExit();
   };
 
   @ViewChild('battleMusic') battleMusic?: ElementRef<HTMLAudioElement>;
@@ -93,6 +117,16 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   opponentMaxHP = signal(100);
 
   diceValue = signal<number | null>(null);
+  isDiceOverlayVisible = signal(false);
+  isDiceRolling = signal(false);
+  isPlayerAttacking = signal(false);
+  isOpponentAttacking = signal(false);
+  activeAttackTrail = signal<'player' | 'opponent' | null>(null);
+  activeImpactBurst = signal<'player' | 'opponent' | null>(null);
+  isPlayerHit = signal(false);
+  isOpponentHit = signal(false);
+  isPlayerFainting = signal(false);
+  isOpponentFainting = signal(false);
   showConfetti = signal(false);
   showVictoryModal = signal(false);
   showStealModal = signal(false);
@@ -104,7 +138,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   isSubmittingRun = signal(false);
   runawayResultMessage = signal('');
 
-  battleLog = signal<string[]>([]);
+  battleLog = signal<BattleLogEntry[]>([]);
   myItems = signal<InventoryItem[]>([]);
   bagPage = signal(0);
   stealOptions = signal<Xuxemon[]>([]);
@@ -116,6 +150,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   opponentTrainerName = signal('');
   opponentTrainerLevel = signal(1);
   opponentTrainerIcon = signal('');
+
+  private refreshAuthenticatedUserStats(): void {
+    this.subs.add(this.auth.refreshUserFromApi().pipe(take(1)).subscribe());
+  }
 
   ngAfterViewInit(): void {
     this.startBattleMusic();
@@ -141,6 +179,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     if (this.isBrowser) {
       document.addEventListener('visibilitychange', this.handleVisibilityChange);
+      window.addEventListener('pagehide', this.handlePageExit);
+      window.addEventListener('beforeunload', this.handlePageExit);
     }
 
     this.loadTeamAndXuxemons();
@@ -151,12 +191,59 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     if (this.isBrowser) {
       document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+      window.removeEventListener('pagehide', this.handlePageExit);
+      window.removeEventListener('beforeunload', this.handlePageExit);
     }
 
     if (this.battleCalloutTimeout) {
       clearTimeout(this.battleCalloutTimeout);
       this.battleCalloutTimeout = null;
     }
+
+    if (this.diceLandingTimeout) {
+      clearTimeout(this.diceLandingTimeout);
+      this.diceLandingTimeout = null;
+    }
+    if (this.diceOverlayTimeout) {
+      clearTimeout(this.diceOverlayTimeout);
+      this.diceOverlayTimeout = null;
+    }
+    if (this.playerAttackTimeout) {
+      clearTimeout(this.playerAttackTimeout);
+      this.playerAttackTimeout = null;
+    }
+    if (this.opponentAttackTimeout) {
+      clearTimeout(this.opponentAttackTimeout);
+      this.opponentAttackTimeout = null;
+    }
+    if (this.attackTrailTimeout) {
+      clearTimeout(this.attackTrailTimeout);
+      this.attackTrailTimeout = null;
+    }
+    if (this.impactBurstTimeout) {
+      clearTimeout(this.impactBurstTimeout);
+      this.impactBurstTimeout = null;
+    }
+    if (this.playerHitTimeout) {
+      clearTimeout(this.playerHitTimeout);
+      this.playerHitTimeout = null;
+    }
+    if (this.opponentHitTimeout) {
+      clearTimeout(this.opponentHitTimeout);
+      this.opponentHitTimeout = null;
+    }
+    if (this.playerFaintTimeout) {
+      clearTimeout(this.playerFaintTimeout);
+      this.playerFaintTimeout = null;
+    }
+    if (this.opponentFaintTimeout) {
+      clearTimeout(this.opponentFaintTimeout);
+      this.opponentFaintTimeout = null;
+    }
+    this.playerSpriteAnimation?.cancel();
+    this.playerSpriteAnimation = null;
+    this.opponentSpriteAnimation?.cancel();
+    this.opponentSpriteAnimation = null;
 
     this.stopBattleSync();
     this.stopBattleMusic();
@@ -285,13 +372,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   chooseBagItem(item: InventoryItem): void {
     if (!this.isBattleUsableItem(item)) {
-      this.addLog(`${item.name} cannot be used during battle.`);
+      this.addLog(`${item.name} cannot be used during battle.`, 'system');
       return;
     }
 
     const eligibleTargets = this.getEligibleItemTargetsForItem(item);
     if (eligibleTargets.length === 0) {
-      this.addLog(`No valid targets for ${item.name}.`);
+      this.addLog(`No valid targets for ${item.name}.`, 'system');
       return;
     }
 
@@ -331,12 +418,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       target.adquired_id!,
       (data?: UseItemResponseData) => {
         if (data?.error) {
-          this.addLog(data.message || `You cannot use ${item.name} right now.`);
+          this.addLog(data.message || `You cannot use ${item.name} right now.`, 'system');
           this.battleStatus.set('ready');
           return;
         }
 
-        this.addLog(`You used ${item.name} on ${target.name}!`);
+        this.addLog(`You used ${item.name} on ${target.name}!`, 'player');
 
         const updatedTarget = this.applyItemResponseToXuxemon(target, data, item);
         if (updatedTarget) {
@@ -356,7 +443,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         }, 800);
       },
       (message) => {
-        this.addLog(`Error: ${message}`);
+        this.addLog(`Error: ${message}`, 'system');
         this.battleStatus.set('ready');
       },
     );
@@ -386,7 +473,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.battleStatus.set('animating');
-    this.addLog('Xuxemon changed!');
+    this.addLog('Xuxemon changed!', 'player');
 
     setTimeout(() => {
       this.selectedXuxemon.set(xuxemon);
@@ -456,25 +543,34 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     const attackerStat = attacker.attack || 10;
     const defenderStat = defender.defense || 5;
-    const modifiers = this.calculateModifiers(attacker, defender);
+    const modifiers = this.calculateModifiers(attacker, defender, 'player');
     const roll = this.diceValue() || 0;
+    this.playDiceRollAnimation(roll);
+    this.playAttackLunge('player');
+
     const defenderMaxHp = defender.hp || 100;
     const defenderCurrentHp = this.getCurrentHpValue(defender);
     const damageAmount = this.calculateDamageAmount(attackerStat, defenderStat, attackObj.dmg, roll, modifiers, defenderMaxHp);
     const newHpValue = Math.max(0, defenderCurrentHp - damageAmount);
     const newHpPercent = defenderMaxHp > 0 ? (newHpValue / defenderMaxHp) * 100 : 0;
-    const updatedDefender = this.applyAttackStatusEffectToTarget({ ...defender, current_hp: newHpValue }, attackObj);
+    const updatedDefender = this.applyAttackStatusEffectToTarget({ ...defender, current_hp: newHpValue }, attackObj, 'player');
 
-    this.addLog(`${attacker.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`);
-    this.opponentHP.set(newHpPercent);
-    this.updateOpponentStateAfterItem(updatedDefender);
+    this.addLog(`${attacker.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`, 'player');
 
-    if (newHpValue <= 0) {
-      this.handleOpponentFaint();
-      return;
-    }
+    // Wait for attack animation to finish before applying damage (700ms animation)
+    setTimeout(() => {
+      this.zone.run(() => {
+        this.opponentHP.set(newHpPercent);
+        this.updateOpponentStateAfterItem(updatedDefender);
 
-    this.endTurn();
+        if (newHpValue <= 0) {
+          this.handleOpponentFaint();
+          return;
+        }
+
+        this.endTurn();
+      });
+    }, 750);
   }
 
   opponentTurn(): void {
@@ -520,6 +616,9 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const opponentAttack = opponent.attack || 10;
     const playerDefense = player.defense || 5;
     const roll = this.diceValue() || 0;
+    this.playDiceRollAnimation(roll);
+    this.playAttackLunge('opponent');
+
     const playerMaxHp = player.hp || 100;
     const playerCurrentHp = this.getCurrentHpValue(player);
     const damageAmount = this.calculateDamageAmount(
@@ -527,31 +626,37 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       playerDefense,
       attackObj.dmg,
       roll,
-      this.calculateModifiers(opponent, player),
+      this.calculateModifiers(opponent, player, 'opponent'),
       playerMaxHp,
     );
     const newHpValue = Math.max(0, playerCurrentHp - damageAmount);
     const newHpPercent = playerMaxHp > 0 ? (newHpValue / playerMaxHp) * 100 : 0;
-    const updatedPlayer = this.applyAttackStatusEffectToTarget({ ...player, current_hp: newHpValue }, attackObj);
+    const updatedPlayer = this.applyAttackStatusEffectToTarget({ ...player, current_hp: newHpValue }, attackObj, 'opponent');
 
-    this.addLog(`${opponent.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`);
-    this.playerHP.set(newHpPercent);
-    this.updateMyTeamHp(updatedPlayer, newHpValue);
+    this.addLog(`${opponent.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`, 'opponent');
 
-    if (updatedPlayer.adquired_id) {
-      this.subs.add(this.xuxemonService.updateCurrentHp(updatedPlayer.adquired_id, newHpValue).subscribe());
-    }
+    // Wait for attack animation to finish before applying damage (700ms animation)
+    setTimeout(() => {
+      this.zone.run(() => {
+        this.playerHP.set(newHpPercent);
+        this.updateMyTeamHp(updatedPlayer, newHpValue);
 
-    if (newHpValue <= 0) {
-      this.handlePlayerFaint();
-      return;
-    }
+        if (updatedPlayer.adquired_id) {
+          this.subs.add(this.xuxemonService.updateCurrentHp(updatedPlayer.adquired_id, newHpValue).subscribe());
+        }
 
-    this.currentTurn.set('player');
-    this.battleStatus.set('ready');
+        if (newHpValue <= 0) {
+          this.handlePlayerFaint();
+          return;
+        }
+
+        this.currentTurn.set('player');
+        this.battleStatus.set('ready');
+      });
+    }, 750);
   }
 
-  calculateModifiers(attacker: Xuxemon, defender: Xuxemon): number {
+  calculateModifiers(attacker: Xuxemon, defender: Xuxemon, side: BattleLogSource = 'system'): number {
     let modifiers = 0;
     const attackerType = attacker.type?.name?.toLowerCase() || '';
     const defenderType = defender.type?.name?.toLowerCase() || '';
@@ -561,7 +666,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       || (attackerType === 'terra' && defenderType === 'aire')
       || (attackerType === 'aire' && defenderType === 'aigua')) {
       modifiers += 1;
-      this.addLog(`It's super effective! +1`);
+      this.addLog(`It's super effective! +1`, side);
       effectiveness = 'buff';
       this.showBattleCallout('SUPER EFFECTIVE!', 'buff');
     }
@@ -570,7 +675,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       || (attackerType === 'aire' && defenderType === 'terra')
       || (attackerType === 'aigua' && defenderType === 'aire')) {
       modifiers -= 1;
-      this.addLog(`It's not very effective... -1`);
+      this.addLog(`It's not very effective... -1`, side);
       effectiveness = 'nerf';
       this.showBattleCallout('NOT VERY EFFECTIVE', 'nerf');
     }
@@ -598,7 +703,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     modifiers: number,
     defenderMaxHp: number,
   ): number {
-    const normalizedAttackPower = Math.max(6, Math.round((attackDamage ?? 36) / 10));
+    const baseAttackDamage = Math.max(0, attackerStat) + Math.max(0, attackDamage ?? 0);
+    const normalizedAttackPower = Math.max(6, Math.round(baseAttackDamage / 10));
     const rawDamage = normalizedAttackPower
       + (attackerStat * 0.35)
       + roll
@@ -610,29 +716,35 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return Math.min(damageAmount, damageCap);
   }
 
-  addLog(message: string): void {
-    this.battleLog.update((logs) => [message, ...logs].slice(0, 8));
+  addLog(message: string, source: BattleLogSource = 'system'): void {
+    this.battleLog.update((logs) => [{ text: message, source }, ...logs].slice(0, 8));
   }
 
-  private hydrateBattleLogNames(logs: unknown[], activePlayer: Xuxemon | null, activeOpponent: Xuxemon | null): string[] {
-    void activePlayer;
-    void activeOpponent;
+  private hydrateBattleLogNames(logs: unknown[], activePlayer: Xuxemon | null, activeOpponent: Xuxemon | null): BattleLogEntry[] {
+    const playerName = activePlayer?.name?.toLowerCase() ?? '';
+    const opponentName = activeOpponent?.name?.toLowerCase() ?? '';
 
     return logs.map((entry) => {
       const text = String(entry ?? '').trim();
+      let normalizedText = text;
+
       if (/^come back\s+.+!\s+go\s+.+!$/i.test(text)) {
-        return 'Xuxemon changed!';
+        normalizedText = 'Xuxemon changed!';
+      } else if (/^.+\s+sent\s+out\s+.+!$/i.test(text)) {
+        normalizedText = 'A Xuxemon enters the battle!';
+      } else if (/^enters\s+the\s+battle!?$/i.test(text) || /^.+\s+enters\s+the\s+battle!?$/i.test(text)) {
+        normalizedText = 'A Xuxemon enters the battle!';
       }
 
-      if (/^.+\s+sent\s+out\s+.+!$/i.test(text)) {
-        return 'A Xuxemon enters the battle!';
+      const lowerText = normalizedText.toLowerCase();
+      let source: BattleLogSource = 'system';
+      if (playerName && lowerText.startsWith(playerName + ' used')) {
+        source = 'player';
+      } else if (opponentName && lowerText.startsWith(opponentName + ' used')) {
+        source = 'opponent';
       }
 
-      if (/^enters\s+the\s+battle!?$/i.test(text) || /^.+\s+enters\s+the\s+battle!?$/i.test(text)) {
-        return 'A Xuxemon enters the battle!';
-      }
-
-      return text;
+      return { text: normalizedText, source };
     });
   }
 
@@ -652,12 +764,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
           this.showConfetti.set(true);
           this.showVictoryModal.set(true);
           this.stolenXuxemon.set(response?.stolen_xuxemon ?? xuxemon);
-          this.addLog(`${xuxemon.name} has joined your team.`);
+          this.refreshAuthenticatedUserStats();
+          this.addLog(`${xuxemon.name} has joined your team.`, 'player');
           void this.xuxemonService.loadMyXuxemons();
         },
         error: () => {
           this.isSubmittingBattleResult.set(false);
-          this.addLog('Could not complete the prize transfer.');
+          this.addLog('Could not complete the prize transfer.', 'system');
         },
       }),
     );
@@ -678,10 +791,11 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
           this.showStealModal.set(false);
           this.showConfetti.set(true);
           this.showVictoryModal.set(true);
+          this.refreshAuthenticatedUserStats();
         },
         error: () => {
           this.isSubmittingBattleResult.set(false);
-          this.addLog('Could not finish the battle.');
+          this.addLog('Could not finish the battle.', 'system');
         },
       }),
     );
@@ -695,12 +809,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.stopBattleSync();
 
     if (playerWon) {
-      this.addLog('VICTORY! You won the battle.');
+      this.addLog('VICTORY! You won the battle.', 'player');
       this.presentVictoryFlow();
       return;
     }
 
-    this.addLog('DEFEAT...');
+    this.addLog('DEFEAT...', 'opponent');
 
     if (!this.isPractice()) {
       const winnerId = this.getOpponentUserId();
@@ -1189,7 +1303,31 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const attackerContext = knownCombatants.get(attackerName);
+    let attackerContext = knownCombatants.get(attackerName) ?? null;
+
+    if (!attackerContext) {
+      const previousPlayerHp = combatants?.previousPlayer ? this.getCurrentHpValue(combatants.previousPlayer) : null;
+      const currentPlayerHp = combatants?.currentPlayer ? this.getCurrentHpValue(combatants.currentPlayer) : null;
+      const previousOpponentHp = combatants?.previousOpponent ? this.getCurrentHpValue(combatants.previousOpponent) : null;
+      const currentOpponentHp = combatants?.currentOpponent ? this.getCurrentHpValue(combatants.currentOpponent) : null;
+
+      if (
+        previousOpponentHp !== null
+        && currentOpponentHp !== null
+        && currentOpponentHp < previousOpponentHp
+        && combatants?.currentPlayer
+      ) {
+        attackerContext = { side: 'player', xuxemon: combatants.currentPlayer };
+      } else if (
+        previousPlayerHp !== null
+        && currentPlayerHp !== null
+        && currentPlayerHp < previousPlayerHp
+        && combatants?.currentOpponent
+      ) {
+        attackerContext = { side: 'opponent', xuxemon: combatants.currentOpponent };
+      }
+    }
+
     if (!attackerContext) {
       return;
     }
@@ -1216,11 +1354,276 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     attackName?: string,
     attackerOverride?: Xuxemon | null,
   ): void {
-    void side;
     void attackerName;
-    void roll;
     void attackName;
     void attackerOverride;
+
+    if (roll !== null) {
+      this.playDiceRollAnimation(roll);
+    }
+
+    this.playAttackLunge(side);
+
+    if (side === 'player' && this.opponentHP() <= 0) {
+      this.playFaintAnimation('opponent');
+    }
+
+    if (side === 'opponent' && this.playerHP() <= 0) {
+      this.playFaintAnimation('player');
+    }
+  }
+
+  private playDiceRollAnimation(finalRoll: number): void {
+    if (this.diceLandingTimeout) {
+      clearTimeout(this.diceLandingTimeout);
+    }
+    if (this.diceOverlayTimeout) {
+      clearTimeout(this.diceOverlayTimeout);
+    }
+
+    this.zone.run(() => {
+      this.isDiceOverlayVisible.set(true);
+      this.isDiceRolling.set(true);
+
+      this.diceLandingTimeout = setTimeout(() => {
+        this.zone.run(() => {
+          this.isDiceRolling.set(false);
+          this.diceValue.set(finalRoll);
+        });
+        this.diceLandingTimeout = null;
+      }, 600);
+
+      this.diceOverlayTimeout = setTimeout(() => {
+        this.zone.run(() => {
+          this.isDiceOverlayVisible.set(false);
+        });
+        this.diceOverlayTimeout = null;
+      }, 1200);
+    });
+  }
+
+  private playAttackLunge(side: 'player' | 'opponent'): void {
+    const startAnimation = () => {
+      this.playAttackEffects(side);
+      this.runSpriteAttackAnimation(side);
+
+      if (side === 'player') {
+        if (this.playerAttackTimeout) {
+          clearTimeout(this.playerAttackTimeout);
+        }
+        this.isPlayerAttacking.set(true);
+        this.playerAttackTimeout = setTimeout(() => {
+          this.zone.run(() => {
+            this.isPlayerAttacking.set(false);
+          });
+          this.playerAttackTimeout = null;
+        }, 700);
+        return;
+      }
+
+      if (this.opponentAttackTimeout) {
+        clearTimeout(this.opponentAttackTimeout);
+      }
+      this.isOpponentAttacking.set(true);
+      this.opponentAttackTimeout = setTimeout(() => {
+        this.zone.run(() => {
+          this.isOpponentAttacking.set(false);
+        });
+        this.opponentAttackTimeout = null;
+      }, 700);
+    };
+
+    this.zone.run(() => {
+      if (side === 'player') {
+        if (this.playerAttackTimeout) {
+          clearTimeout(this.playerAttackTimeout);
+        }
+        this.isPlayerAttacking.set(false);
+      } else {
+        if (this.opponentAttackTimeout) {
+          clearTimeout(this.opponentAttackTimeout);
+        }
+        this.isOpponentAttacking.set(false);
+      }
+
+      this.flushBattleView();
+
+      if (this.isBrowser) {
+        requestAnimationFrame(() => {
+          this.zone.run(startAnimation);
+        });
+        return;
+      }
+
+      startAnimation();
+    });
+  }
+
+  private runSpriteAttackAnimation(side: 'player' | 'opponent'): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
+    const element = side === 'player'
+      ? this.playerSprite?.nativeElement
+      : this.opponentSprite?.nativeElement;
+
+    if (!element || typeof element.animate !== 'function') {
+      return;
+    }
+
+    const currentAnimation = side === 'player' ? this.playerSpriteAnimation : this.opponentSpriteAnimation;
+    currentAnimation?.cancel();
+
+    const direction = side === 'player' ? 1 : -1;
+    const keyframes: Keyframe[] = [
+      {
+        transform: 'translate3d(0, 0, 0) scale(1)',
+        filter: 'brightness(1)',
+        offset: 0,
+      },
+      {
+        transform: `translate3d(${direction * 84}px, ${direction * -18}px, 0) scale(1.08)`,
+        filter: 'brightness(1.12)',
+        offset: 0.34,
+      },
+      {
+        transform: `translate3d(${direction * 28}px, ${direction * -6}px, 0) scale(1.03)`,
+        filter: 'brightness(1.05)',
+        offset: 0.62,
+      },
+      {
+        transform: 'translate3d(0, 0, 0) scale(1)',
+        filter: 'brightness(1)',
+        offset: 1,
+      },
+    ];
+
+    const animation = element.animate(keyframes, {
+      duration: 700,
+      easing: 'cubic-bezier(0.22, 0.9, 0.24, 1)',
+      fill: 'none',
+    });
+
+    animation.onfinish = () => {
+      if (side === 'player') {
+        this.playerSpriteAnimation = null;
+        return;
+      }
+
+      this.opponentSpriteAnimation = null;
+    };
+
+    if (side === 'player') {
+      this.playerSpriteAnimation = animation;
+      return;
+    }
+
+    this.opponentSpriteAnimation = animation;
+  }
+
+  private playAttackEffects(attackerSide: 'player' | 'opponent'): void {
+    const targetSide = attackerSide === 'player' ? 'opponent' : 'player';
+
+    if (this.attackTrailTimeout) {
+      clearTimeout(this.attackTrailTimeout);
+    }
+    if (this.impactBurstTimeout) {
+      clearTimeout(this.impactBurstTimeout);
+    }
+    if (this.playerHitTimeout) {
+      clearTimeout(this.playerHitTimeout);
+    }
+    if (this.opponentHitTimeout) {
+      clearTimeout(this.opponentHitTimeout);
+    }
+
+    this.activeAttackTrail.set(null);
+    this.activeImpactBurst.set(null);
+    this.isPlayerHit.set(false);
+    this.isOpponentHit.set(false);
+    this.flushBattleView();
+
+    const activateEffects = () => {
+      this.activeAttackTrail.set(attackerSide);
+      this.activeImpactBurst.set(targetSide);
+
+      if (targetSide === 'player') {
+        this.isPlayerHit.set(true);
+      } else {
+        this.isOpponentHit.set(true);
+      }
+
+      this.attackTrailTimeout = setTimeout(() => {
+        this.zone.run(() => {
+          this.activeAttackTrail.set(null);
+        });
+        this.attackTrailTimeout = null;
+      }, 340);
+
+      this.impactBurstTimeout = setTimeout(() => {
+        this.zone.run(() => {
+          this.activeImpactBurst.set(null);
+        });
+        this.impactBurstTimeout = null;
+      }, 420);
+
+      const clearHit = () => {
+        if (targetSide === 'player') {
+          this.isPlayerHit.set(false);
+          this.playerHitTimeout = null;
+          return;
+        }
+
+        this.isOpponentHit.set(false);
+        this.opponentHitTimeout = null;
+      };
+
+      if (targetSide === 'player') {
+        this.playerHitTimeout = setTimeout(() => {
+          this.zone.run(clearHit);
+        }, 360);
+        return;
+      }
+
+      this.opponentHitTimeout = setTimeout(() => {
+        this.zone.run(clearHit);
+      }, 360);
+    };
+
+    if (this.isBrowser) {
+      requestAnimationFrame(() => {
+        this.zone.run(activateEffects);
+      });
+      return;
+    }
+
+    activateEffects();
+  }
+
+  private playFaintAnimation(side: 'player' | 'opponent', onComplete?: () => void): void {
+    if (side === 'player') {
+      if (this.playerFaintTimeout) {
+        clearTimeout(this.playerFaintTimeout);
+      }
+      this.isPlayerFainting.set(true);
+      this.playerFaintTimeout = setTimeout(() => {
+        this.isPlayerFainting.set(false);
+        this.playerFaintTimeout = null;
+        onComplete?.();
+      }, 730);
+      return;
+    }
+
+    if (this.opponentFaintTimeout) {
+      clearTimeout(this.opponentFaintTimeout);
+    }
+    this.isOpponentFainting.set(true);
+    this.opponentFaintTimeout = setTimeout(() => {
+      this.isOpponentFainting.set(false);
+      this.opponentFaintTimeout = null;
+      onComplete?.();
+    }, 730);
   }
 
   private showBattleCallout(text: string, tone: 'buff' | 'nerf' | 'neutral'): void {
@@ -1420,7 +1823,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         if (firstOpponent) {
           this.opponentXuxemon.set(firstOpponent);
           this.syncOpponentBars(firstOpponent);
-          this.addLog(`Battle starts! vs ${firstOpponent.name}`);
+          this.addLog(`Battle starts! vs ${firstOpponent.name}`, 'system');
           if (this.selectedXuxemon()) {
             this.battleStatus.set('ready');
           }
@@ -1435,24 +1838,24 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.addLog(`${currentOpponent.name} fainted!`);
+    this.addLog(`${currentOpponent.name} fainted!`, 'opponent');
     const nextOpponent = this.getFirstAlive(
       this.opponentTeam().filter((xuxemon) => !this.isSameXuxemon(xuxemon, currentOpponent)),
     );
 
-    if (!nextOpponent) {
-      this.finishBattle(true);
-      return;
-    }
+    this.playFaintAnimation('opponent', () => {
+      if (!nextOpponent) {
+        this.finishBattle(true);
+        return;
+      }
 
-    setTimeout(() => {
       this.opponentXuxemon.set(nextOpponent);
       this.syncOpponentBars(nextOpponent);
-      this.addLog(`${this.opponentTrainerName()} sent out a Xuxemon!`);
+      this.addLog(`${this.opponentTrainerName()} sent out a Xuxemon!`, 'opponent');
       this.currentTurn.set('opponent');
       this.battleStatus.set('ready');
       setTimeout(() => this.opponentTurn(), 1200);
-    }, 800);
+    });
   }
 
   private handlePlayerFaint(): void {
@@ -1461,19 +1864,21 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.addLog(`${currentPlayer.name} fainted!`);
+    this.addLog(`${currentPlayer.name} fainted!`, 'player');
     const backups = this.getSwitchCandidates();
 
-    if (backups.length === 0) {
-      this.finishBattle(false);
-      return;
-    }
+    this.playFaintAnimation('player', () => {
+      if (backups.length === 0) {
+        this.finishBattle(false);
+        return;
+      }
 
-    this.forcedSwitch.set(true);
-    this.currentTurn.set('player');
-    this.currentSubMenu.set('switch');
-    this.battleStatus.set('ready');
-    this.addLog('Choose another Xuxemon to continue the battle.');
+      this.forcedSwitch.set(true);
+      this.currentTurn.set('player');
+      this.currentSubMenu.set('switch');
+      this.battleStatus.set('ready');
+      this.addLog('Choose another Xuxemon to continue the battle.', 'system');
+    });
   }
 
   private handleExternallyFinishedBattle(data: any): void {
@@ -1487,6 +1892,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         this.runawayResultMessage.set('You ran away from the battle.');
       } else {
         this.runawayResultMessage.set('Your rival ran away from the battle.');
+        this.refreshAuthenticatedUserStats();
       }
 
       this.showRunawayResultModal.set(true);
@@ -1494,12 +1900,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (playerWon) {
-      this.addLog('The battle ended in your favor.');
+      this.addLog('The battle ended in your favor.', 'system');
+      this.refreshAuthenticatedUserStats();
       this.presentVictoryFlow();
       return;
     }
 
-    this.addLog('The battle has already been completed.');
+    this.addLog('The battle has already been completed.', 'system');
     setTimeout(() => this.router.navigate(['/friends']), 1200);
   }
 
@@ -1572,6 +1979,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private applyAttackStatusEffectToTarget(
     xuxemon: Xuxemon,
     attackObj: { status_chance?: number | null; statusEffect?: { name: string; icon_url: string } },
+    side: BattleLogSource = 'system',
   ): Xuxemon {
     const statusChance = attackObj.status_chance ?? 0;
 
@@ -1583,7 +1991,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return xuxemon;
     }
 
-    this.addLog(`${xuxemon.name} is now affected by ${attackObj.statusEffect.name}!`);
+    this.addLog(`${xuxemon.name} is now affected by ${attackObj.statusEffect.name}!`, side);
 
     return {
       ...xuxemon,
@@ -1694,7 +2102,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
             this.updateOpponentStateAfterItem(updatedOpponent);
           }
 
-          this.addLog(`You used ${item.name} on ${target.name}!`);
+          this.addLog(`You used ${item.name} on ${target.name}!`, 'player');
           void this.xuxemonService.loadMyXuxemons();
 
           setTimeout(() => {
@@ -1705,7 +2113,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         },
         error: (error) => {
           const message = error?.error?.message ?? 'Failed to use battle item.';
-          this.addLog(`Error: ${message}`);
+          this.addLog(`Error: ${message}`, 'system');
           this.battleStatus.set('ready');
         },
       }),
@@ -1718,7 +2126,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         next: (response: { data?: UseItemResponseData }) => {
           const updatedOpponent = this.applyStatusEffectToXuxemon(target, response.data);
           this.updateOpponentStateAfterItem(updatedOpponent);
-          this.addLog(`You used ${item.name} on ${target.name}!`);
+          this.addLog(`You used ${item.name} on ${target.name}!`, 'player');
           this.inventoryService.loadInventory();
 
           setTimeout(() => {
@@ -1729,7 +2137,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         },
         error: (error) => {
           const message = error?.error?.message ?? 'Failed to use practice item.';
-          this.addLog(`Error: ${message}`);
+          this.addLog(`Error: ${message}`, 'system');
           this.battleStatus.set('ready');
         },
       }),
@@ -1763,14 +2171,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (statusName === 'Sleep') {
-      this.addLog(`${xuxemon.name} is asleep and cannot move!`);
+      this.addLog(`${xuxemon.name} is asleep and cannot move!`, side);
       this.clearStatusEffect(xuxemon, side);
       this.finishBlockedTurn(side);
       return { prevented: true };
     }
 
     if (statusName === 'Paralysis' && Math.random() < 0.35) {
-      this.addLog(`${xuxemon.name} is paralyzed and cannot move!`);
+      this.addLog(`${xuxemon.name} is paralyzed and cannot move!`, side);
       this.finishBlockedTurn(side);
       return { prevented: true };
     }
@@ -1781,7 +2189,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       const selfHitDamage = Math.max(1, Math.round(maxHp * 0.12));
       const newHpValue = Math.max(0, currentHp - selfHitDamage);
 
-      this.addLog(`${xuxemon.name} is confused and hurt itself!`);
+      this.addLog(`${xuxemon.name} is confused and hurt itself!`, side);
       this.applySelfDamageFromStatus(xuxemon, side, newHpValue);
       return { prevented: true };
     }
@@ -1879,6 +2287,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.subs.add(
       this.battleService.forfeit(battleId).subscribe({
         next: (data: any) => {
+          this.disconnectForfeitSent = Boolean(data?.winner_id);
           this.isSubmittingRun.set(false);
           this.applyBattleSnapshot(data);
           if (data.completion_reason === 'runaway') {
@@ -1893,6 +2302,34 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         },
       }),
     );
+  }
+
+  private autoForfeitOnExit(): void {
+    if (!this.shouldAutoForfeitOnExit()) {
+      return;
+    }
+
+    const battleId = this.battleId();
+    const token = this.auth.getToken();
+    if (!battleId || !token) {
+      return;
+    }
+
+    this.disconnectForfeitSent = true;
+    this.battleService.autoForfeitOnDisconnect(battleId, token);
+  }
+
+  private shouldAutoForfeitOnExit(): boolean {
+    const battleId = this.battleId();
+    const battleData = this.battleData();
+
+    return this.isBrowser
+      && !this.isPractice()
+      && !this.disconnectForfeitSent
+      && !!battleId
+      && this.battleStatus() !== 'finished'
+      && battleData?.status === 'accepted'
+      && !battleData?.winner_id;
   }
 
   private submitLinkedBattleAction(payload: Record<string, unknown>): void {
@@ -1922,7 +2359,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         error: (error) => {
           this.isSubmittingRun.set(false);
           const message = error?.error?.message ?? 'Battle action failed.';
-          this.addLog(`Error: ${message}`);
+          this.addLog(`Error: ${message}`, 'system');
           this.battleStatus.set('ready');
         },
       }),

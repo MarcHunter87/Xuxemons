@@ -1,7 +1,7 @@
 <div class="battle-footer">
   <div class="battle-logs">
     @for (log of vm.battleLog(); track $index) {
-      <p [class.new-log]="$index === 0">{{ log }}</p>
+      <p [class]="'log-entry log-' + log.source" [class.new-log]="$index === 0">{{ log.text }}</p>
     } @empty {
       <p>The battle begins!</p>
     }
