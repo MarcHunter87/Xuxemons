@@ -43,6 +43,10 @@ export class BattleService {
     return this.http.post(`${this.apiUrl}/${battleId}/action`, payload);
   }
 
+  forfeit(battleId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${battleId}/forfeit`, {});
+  }
+
   useBattleItem(battleId: number, bagItemId: number, targetAdquiredXuxemonId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/${battleId}/use-item`, {
       bag_item_id: bagItemId,

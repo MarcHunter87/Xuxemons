@@ -785,6 +785,37 @@ class BattleController extends Controller
         return null;
     }
 
+    public function forfeitBattle(Request $request, $battleId)
+    {
+        $battle = Battle::with(['user', 'opponentUser', 'winner'])->findOrFail($battleId);
+        $viewerId = Auth::id();
+
+        if ($viewerId !== $battle->user_id && $viewerId !== $battle->opponent_user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($battle->status !== 'accepted' || $battle->winner_id) {
+            return response()->json(['message' => 'Battle is not active'], 422);
+        }
+
+        $context = $this->resolveParticipantFields($battle, $viewerId);
+
+        DB::transaction(function () use ($battle, $context) {
+            $runnerName = $context['player_id'] === $battle->user_id
+                ? ($battle->user->name ?? 'A player')
+                : ($battle->opponentUser->name ?? 'A player');
+
+            $battle->winner_id = $context['opponent_id'];
+            $battle->status = 'completed';
+            $battle->completion_reason = 'runaway';
+            $battle->runner_id = $context['player_id'];
+            $this->appendBattleLog($battle, sprintf('%s fled the battle!', $runnerName));
+            $battle->save();
+        });
+
+        return response()->json($this->buildBattlePayload($battle->fresh(['user', 'opponentUser', 'winner']), $viewerId));
+    }
+
     private function performRunAction(Battle $battle, array $context): ?JsonResponse
     {
         $runnerName = $context['player_id'] === $battle->user_id

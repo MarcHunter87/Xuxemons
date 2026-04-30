@@ -2,7 +2,7 @@ import { take } from 'rxjs/operators';
 import { Component, OnDestroy, OnInit, AfterViewInit, ViewChild, ElementRef, inject, signal, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { BattleService } from '../../core/services/battle.service';
 import { XuxemonService } from '../../core/services/xuxemon.service';
 import { TeamService } from '../../core/services/team.service';
@@ -46,6 +46,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   private subs = new Subscription();
+  private navGuardSubject: Subject<boolean> | null = null;
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
   private battleEventSource: EventSource | null = null;
   private streamBootstrapTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -790,6 +791,15 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.router.navigate([this.isPractice() ? '/profile' : '/friends']);
   }
 
+  canDeactivate(): Observable<boolean> | boolean {
+    if (this.battleStatus() === 'finished') {
+      return true;
+    }
+    this.navGuardSubject = new Subject<boolean>();
+    this.showRunConfirmModal.set(true);
+    return this.navGuardSubject.asObservable();
+  }
+
   runAway(): void {
     if (this.forcedSwitch()) {
       return;
@@ -800,6 +810,11 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   cancelRunAway(): void {
     this.showRunConfirmModal.set(false);
+    if (this.navGuardSubject) {
+      this.navGuardSubject.next(false);
+      this.navGuardSubject.complete();
+      this.navGuardSubject = null;
+    }
   }
 
   confirmRunAway(): void {
@@ -809,13 +824,41 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     this.showRunConfirmModal.set(false);
 
+    const isPlayerTurn = this.currentTurn() === 'player' && this.battleStatus() === 'ready';
+
+    if (this.navGuardSubject) {
+      // Triggered by navbar navigation guard — block original nav, handle our own
+      const subject = this.navGuardSubject;
+      this.navGuardSubject = null;
+      subject.next(false);
+      subject.complete();
+
+      if (this.isPractice()) {
+        this.stopBattleMusic();
+        this.router.navigate(['/friends']);
+        return;
+      }
+
+      this.isSubmittingRun.set(true);
+      if (isPlayerTurn) {
+        this.submitLinkedBattleAction({ action_type: 'run' });
+      } else {
+        this.submitForfeit();
+      }
+      return;
+    }
+
     if (this.isPractice()) {
       this.router.navigate(['/friends']);
       return;
     }
 
     this.isSubmittingRun.set(true);
-    this.submitLinkedBattleAction({ action_type: 'run' });
+    if (isPlayerTurn) {
+      this.submitLinkedBattleAction({ action_type: 'run' });
+    } else {
+      this.submitForfeit();
+    }
   }
 
   closeRunawayResultModal(): void {
@@ -1938,6 +1981,34 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       bag_item_id: item.bag_item_id,
       target_adquired_xuxemon_id: target.adquired_id,
     });
+  }
+
+  private submitForfeit(): void {
+    const battleId = this.battleId();
+    if (!battleId) {
+      this.isSubmittingRun.set(false);
+      this.stopBattleMusic();
+      this.router.navigate(['/friends']);
+      return;
+    }
+
+    this.subs.add(
+      this.battleService.forfeit(battleId).subscribe({
+        next: (data: any) => {
+          this.isSubmittingRun.set(false);
+          this.applyBattleSnapshot(data);
+          if (data.completion_reason === 'runaway') {
+            this.runawayResultMessage.set('You ran away from the battle.');
+            this.showRunawayResultModal.set(true);
+          }
+        },
+        error: () => {
+          this.isSubmittingRun.set(false);
+          this.stopBattleMusic();
+          this.router.navigate(['/friends']);
+        },
+      }),
+    );
   }
 
   private submitLinkedBattleAction(payload: Record<string, unknown>): void {

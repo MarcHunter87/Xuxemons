@@ -49,7 +49,7 @@ Route::middleware(['auth:api', 'update.last.seen'])->group(function () {
         Route::post('/admin/process-daily-xuxemons', [AdminController::class, 'processDailyXuxemons']);
         Route::post('/admin/process-daily-all', [AdminController::class, 'processDailyAll']);
     });
-    
+
     // Rutas de Profile
     Route::get('/user', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -100,6 +100,7 @@ Route::middleware(['auth:api', 'update.last.seen'])->group(function () {
     Route::get('/battles/pending', [BattleController::class, 'getPendingBattles']);
     Route::get('/battles/{battleId}', [BattleController::class, 'getBattle']);
     Route::post('/battles/{battleId}/action', [BattleController::class, 'submitAction']);
+    Route::post('/battles/{battleId}/forfeit', [BattleController::class, 'forfeitBattle']);
     Route::post('/battles/{battleId}/use-item', [BattleController::class, 'useBattleItem']);
     Route::post('/battles/{battleId}/finish', [BattleController::class, 'finishBattle']);
 

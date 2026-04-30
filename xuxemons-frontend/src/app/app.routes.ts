@@ -24,6 +24,7 @@ import { AdminEditSideeffects } from './pages/admin-pages/admin-edit-sideeffects
 import { authGuard } from './guard/auth-guard';
 import { adminGuard } from './guard/admin-guard';
 import { adminGiveItemGuard } from './guard/admin-give-item.guard';
+import { battleDeactivateGuard } from './guard/battle-deactivate.guard';
 import { Register } from './pages/auth/register/register';
 import { Login } from './pages/auth/login/login';
 import { NotFound } from './pages/not-found/not-found';
@@ -49,6 +50,7 @@ export const routes: Routes = [
     path: 'battle/:id',
     component: Battle,
     canActivate: [authGuard],
+    canDeactivate: [battleDeactivateGuard],
     title: 'Battle',
   },
   {
