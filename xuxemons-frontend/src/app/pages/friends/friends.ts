@@ -60,15 +60,33 @@ export class Friends implements OnInit, OnDestroy {
   isNavigatingToBattle = signal(false);
 
   private previousFocusedElement: HTMLElement | null = null;
+  private readonly outgoingBattleStorageKey = 'xuxemons_outgoing_battle_id';
 
+  // Sirve para persistir el id del reto saliente y recuperarlo fuera de la vista de amigos.
+  private persistOutgoingBattleId(battleId: number | null): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
+    if (!battleId) {
+      localStorage.removeItem(this.outgoingBattleStorageKey);
+      return;
+    }
+
+    localStorage.setItem(this.outgoingBattleStorageKey, String(battleId));
+  }
+
+  // Sirve para exponer cuántas solicitudes pendientes hay en la cabecera de la vista.
   get pendingCount(): number {
     return this.pendingRequests().length;
   }
 
+  // Sirve para leer si las animaciones están habilitadas para el usuario actual.
   get animationsEnabled(): boolean {
     return this.auth.getUser()?.view_animations ?? true;
   }
 
+  // Sirve para mostrar resultados solo cuando la búsqueda tiene longitud mínima.
   get showSearchResults(): boolean {
     const q = this.searchControl.value ?? '';
     return q.length >= 3;
@@ -190,6 +208,7 @@ export class Friends implements OnInit, OnDestroy {
         if (status === 'rejected' || status === 'completed' || status === 'finished') {
           this.outgoingBattleId.set(null);
           this.outgoingBattleFriendId.set(null);
+          this.persistOutgoingBattleId(null);
           this.successMessage.set(status === 'rejected'
             ? 'Your challenge was rejected.'
             : 'The challenge is no longer active.');
@@ -199,11 +218,13 @@ export class Friends implements OnInit, OnDestroy {
         if (status !== 'pending') {
           this.outgoingBattleId.set(null);
           this.outgoingBattleFriendId.set(null);
+          this.persistOutgoingBattleId(null);
         }
       },
       error: () => {
         this.outgoingBattleId.set(null);
         this.outgoingBattleFriendId.set(null);
+        this.persistOutgoingBattleId(null);
       },
     }));
   }
@@ -419,6 +440,7 @@ export class Friends implements OnInit, OnDestroy {
         if (Number.isFinite(battleId) && battleId > 0) {
           this.outgoingBattleId.set(battleId);
           this.outgoingBattleFriendId.set(friend.id);
+          this.persistOutgoingBattleId(battleId);
           this.successMessage.set(`Challenge sent to ${friend.name}. Waiting for acceptance...`);
         } else {
           this.successMessage.set(`Challenge sent to ${friend.name}.`);
@@ -431,6 +453,7 @@ export class Friends implements OnInit, OnDestroy {
         if (Number.isFinite(existingBattleId) && existingBattleId > 0) {
           this.challengeBusyFriendId.set(null);
           if (existingBattleStatus === 'accepted') {
+            this.persistOutgoingBattleId(existingBattleId);
             this.successMessage.set('You already have an active battle with this friend. Rejoining...');
             this.navigateToBattle(existingBattleId);
             return;
@@ -439,6 +462,7 @@ export class Friends implements OnInit, OnDestroy {
           if (existingBattleStatus === 'pending') {
             this.outgoingBattleId.set(existingBattleId);
             this.outgoingBattleFriendId.set(friend.id);
+            this.persistOutgoingBattleId(existingBattleId);
             this.successMessage.set(`You already have a pending challenge with ${friend.name}. Waiting for acceptance...`);
             return;
           }

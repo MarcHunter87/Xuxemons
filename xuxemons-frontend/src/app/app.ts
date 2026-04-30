@@ -57,6 +57,7 @@ export class App implements OnInit, OnDestroy {
   private readonly meta = inject(Meta);
   private readonly title = inject(Title);
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly outgoingBattleStorageKey = 'xuxemons_outgoing_battle_id';
 
   // Sirve para inyectar los servicios principales de la app
   constructor(
@@ -101,10 +102,12 @@ export class App implements OnInit, OnDestroy {
 
       this.battleInviteSub = interval(this.battleInvitePollMs).subscribe(() => {
         this.pollPendingBattleInvites();
+        this.pollOutgoingBattleTracker();
       });
     }
 
     this.pollPendingBattleInvites();
+    this.pollOutgoingBattleTracker();
 
     this.sub = this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
@@ -143,10 +146,47 @@ export class App implements OnInit, OnDestroy {
     this.battleService.getPendingBattles().subscribe({
       next: (battles: PendingBattleInvite[] | unknown) => {
         const pendingBattles = Array.isArray(battles) ? battles : [];
-        this.pendingBattleInvite.set(pendingBattles.length > 0 ? pendingBattles[0] : null);
+        const nextInvite = pendingBattles.length > 0 ? pendingBattles[0] : null;
+        const previousInvite = this.pendingBattleInvite();
+        void previousInvite;
+        this.pendingBattleInvite.set(nextInvite);
       },
       error: () => {
         this.pendingBattleInvite.set(null);
+      },
+    });
+  }
+
+  // Sirve para reanudar la redirección a combate aunque el usuario salga de la página de amigos.
+  private pollOutgoingBattleTracker(): void {
+    if (!this.authService.getUser() || typeof localStorage === 'undefined') {
+      return;
+    }
+
+    const rawBattleId = localStorage.getItem(this.outgoingBattleStorageKey);
+    const battleId = Number(rawBattleId);
+    if (!Number.isFinite(battleId) || battleId <= 0) {
+      return;
+    }
+
+    this.battleService.getBattle(battleId).subscribe({
+      next: (battle: any) => {
+        const status = String(battle?.status ?? '').toLowerCase();
+
+        if (status === 'accepted') {
+          const expectedBattleRoute = `/battle/${battleId}`;
+          if (!this.router.url.startsWith(expectedBattleRoute)) {
+            this.router.navigate(['/battle', battleId]);
+          }
+          return;
+        }
+
+        if (status === 'rejected' || status === 'completed' || status === 'finished') {
+          localStorage.removeItem(this.outgoingBattleStorageKey);
+        }
+      },
+      error: () => {
+        localStorage.removeItem(this.outgoingBattleStorageKey);
       },
     });
   }

@@ -151,14 +151,17 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   opponentTrainerLevel = signal(1);
   opponentTrainerIcon = signal('');
 
+  // Sirve para refrescar estadísticas del usuario al terminar el combate.
   private refreshAuthenticatedUserStats(): void {
     this.subs.add(this.auth.refreshUserFromApi().pipe(take(1)).subscribe());
   }
 
+  // Sirve para iniciar la música cuando la vista ya está montada.
   ngAfterViewInit(): void {
     this.startBattleMusic();
   }
 
+  // Sirve para inicializar listeners, datos de combate e inventario.
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     const user = this.auth.getUser();
@@ -250,6 +253,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.subs.unsubscribe();
   }
 
+  // Sirve para mantener el estado del combate sincronizado en tiempo real o por polling.
   startBattleSync(): void {
     this.loadBattleData();
 
@@ -260,6 +264,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.startPolling();
   }
 
+  // Sirve para activar sincronización periódica cuando no hay stream disponible.
   startPolling(): void {
     if (this.pollingInterval) {
       return;
@@ -273,6 +278,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, this.getPollingIntervalMs());
   }
 
+  // Sirve para hidratar el estado local con el snapshot actual del backend.
   loadBattleData(): void {
     if (!this.battleId()) {
       return;
@@ -286,10 +292,11 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         if (data.winner_id && this.battleStatus() !== 'finished') {
           this.handleExternallyFinishedBattle(data);
         }
-      }),
+      }, () => {}),
     );
   }
 
+  // Sirve para mantener la bolsa de combate filtrada y paginada.
   loadMyItems(): void {
     this.subs.add(
       this.inventoryService.items.subscribe((items) => {
@@ -307,6 +314,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   loadTeamAndXuxemons(): void {
     this.subs.add(
       this.xuxemonService.myXuxemonsList.subscribe((list: Xuxemon[]) => {
+        // Sirve para limitar la lista al equipo elegido cuando existen slots configurados.
         const filtered = this.teamIds.length > 0
           ? list.filter((xuxemon) => xuxemon.adquired_id !== undefined && this.teamIds.includes(Number(xuxemon.adquired_id)))
           : list;
@@ -868,7 +876,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.showRunConfirmModal.set(false);
-
     const isPlayerTurn = this.currentTurn() === 'player' && this.battleStatus() === 'ready';
 
     if (this.navGuardSubject) {
@@ -1113,7 +1120,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       opponent_team: normalizedOpponentTeam,
       opponent_available_xuxemons: normalizedOpponentAvailable,
     };
-
     this.battleData.set(normalizedData);
 
     const user = this.auth.getUser();
@@ -1138,6 +1144,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const myTeam = normalizedMyTeam;
     const opponentTeam = normalizedOpponentTeam;
 
+    // Sirve para priorizar el activo indicado por backend y hacer fallback al primer Xuxemon vivo.
     if (myTeam.length > 0) {
       this.myXuxemons.set(myTeam);
     }
@@ -1789,6 +1796,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private refreshSelectedFromTeam(team: Xuxemon[]): void {
+    // Sirve para mantener seleccionado el mismo Xuxemon tras refrescos del equipo.
     const currentId = this.selectedXuxemon()?.adquired_id;
     if (!currentId) {
       return;

@@ -20,6 +20,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class BattleController extends Controller
 {
+    // Sirve para crear una solicitud de batalla entre dos amigos validando estado previo.
     public function requestBattle($friendId)
     {
         $userId = Auth::id();
@@ -46,42 +47,42 @@ class BattleController extends Controller
             ], 422);
         }
 
-        // Resolver batallas previas entre ambos jugadores.
-        $existing = Battle::where(function ($q) use ($userId, $friendId) {
+        // Resolver la batalla mas reciente entre ambos jugadores y decidir por estado.
+        $latestBattle = Battle::where(function ($q) use ($userId, $friendId) {
             $q->where('user_id', $userId)->where('opponent_user_id', $friendId);
         })->orWhere(function ($q) use ($userId, $friendId) {
             $q->where('user_id', $friendId)->where('opponent_user_id', $userId);
-        })->whereIn('status', ['pending', 'accepted'])->latest('updated_at')->first();
+        })->latest('updated_at')->first();
 
-        if ($existing) {
+        if ($latestBattle && in_array($latestBattle->status, ['pending', 'accepted'], true)) {
             $staleCutoff = now()->subMinutes(5);
-            $isStale = ! $existing->updated_at || $existing->updated_at->lt($staleCutoff);
+            $isStale = ! $latestBattle->updated_at || $latestBattle->updated_at->lt($staleCutoff);
 
             if (! $isStale) {
-                $isPending = $existing->status === 'pending';
+                $isPending = $latestBattle->status === 'pending';
 
                 return response()->json([
                     'message' => $isPending
                         ? 'Already have a pending challenge with this friend'
                         : 'Already have an active battle with this friend',
-                    'battle_id' => $existing->id,
-                    'status' => $existing->status,
+                    'battle_id' => $latestBattle->id,
+                    'status' => $latestBattle->status,
                 ], 409);
             }
 
-            if ($existing->status === 'pending') {
-                $existing->status = 'rejected';
-                $existing->completion_reason = $existing->completion_reason ?: 'request_expired';
-                $existing->save();
+            if ($latestBattle->status === 'pending') {
+                $latestBattle->status = 'rejected';
+                $latestBattle->completion_reason = $latestBattle->completion_reason ?: 'request_expired';
+                $latestBattle->save();
             } else {
-                $existing->status = 'completed';
-                $existing->completion_reason = 'abandoned';
-                $existing->runner_id = $userId;
-                $existing->winner_id = $userId === $existing->user_id
-                    ? $existing->opponent_user_id
-                    : $existing->user_id;
-                $this->appendBattleLog($existing, 'Battle auto-closed due to inactivity.');
-                $existing->save();
+                $latestBattle->status = 'completed';
+                $latestBattle->completion_reason = 'abandoned';
+                $latestBattle->runner_id = $userId;
+                $latestBattle->winner_id = $userId === $latestBattle->user_id
+                    ? $latestBattle->opponent_user_id
+                    : $latestBattle->user_id;
+                $this->appendBattleLog($latestBattle, 'Battle auto-closed due to inactivity.');
+                $latestBattle->save();
             }
         }
 
@@ -94,6 +95,7 @@ class BattleController extends Controller
         return response()->json($battle, 201);
     }
 
+    // Sirve para aceptar una solicitud pendiente e inicializar el estado del combate.
     public function acceptBattle($battleId)
     {
         $battle = Battle::findOrFail($battleId);
@@ -122,6 +124,7 @@ class BattleController extends Controller
         return response()->json($this->buildBattlePayload($battle, Auth::id()));
     }
 
+    // Sirve para rechazar una solicitud de batalla pendiente.
     public function rejectBattle($battleId)
     {
         $battle = Battle::findOrFail($battleId);
@@ -135,6 +138,7 @@ class BattleController extends Controller
         return response()->json($battle);
     }
 
+    // Sirve para listar las invitaciones de batalla pendientes para el usuario autenticado.
     public function getPendingBattles()
     {
         $userId = Auth::id();
@@ -146,6 +150,7 @@ class BattleController extends Controller
         return response()->json($battles);
     }
 
+    // Sirve para devolver el payload completo de una batalla a uno de sus participantes.
     public function getBattle($battleId)
     {
         $battle = Battle::with(['user', 'opponentUser', 'winner'])->findOrFail($battleId);
@@ -158,6 +163,7 @@ class BattleController extends Controller
         return response()->json($this->buildBattlePayload($battle, $viewerId));
     }
 
+    // Sirve para abrir un stream SSE con actualizaciones en tiempo real del combate.
     public function streamBattle(Request $request, $battleId)
     {
         $viewerId = $this->resolveViewerIdFromToken($request);
@@ -223,6 +229,7 @@ class BattleController extends Controller
         ]);
     }
 
+    // Sirve para registrar la desconexión del jugador del combate.
     public function disconnectBattle(Request $request, $battleId)
     {
         $viewerId = $this->resolveViewerIdFromToken($request);
@@ -250,6 +257,7 @@ class BattleController extends Controller
         return response()->json($this->buildBattlePayload($battle->fresh(['user', 'opponentUser', 'winner']), $viewerId));
     }
 
+    // Sirve para procesar acciones del turno (ataque, cambio o huida).
     public function submitAction(Request $request, $battleId)
     {
         $battle = Battle::with(['user', 'opponentUser', 'winner'])->findOrFail($battleId);
@@ -293,6 +301,7 @@ class BattleController extends Controller
         return response()->json($this->buildBattlePayload($battle->fresh(['user', 'opponentUser', 'winner']), $viewerId));
     }
 
+    // Sirve para aplicar un objeto de batalla sobre un objetivo válido del equipo.
     public function useBattleItem(Request $request, $battleId)
     {
         $battle = Battle::findOrFail($battleId);
@@ -393,6 +402,7 @@ class BattleController extends Controller
         ]);
     }
 
+    // Sirve para simular uso de objeto en modo práctica sin persistencia competitiva.
     public function usePracticeItem(Request $request)
     {
         $viewerId = Auth::id();
@@ -444,6 +454,7 @@ class BattleController extends Controller
         ]);
     }
 
+    // Sirve para cerrar el combate, asignar ganador y aplicar recompensas finales.
     public function finishBattle(Request $request, $battleId)
     {
         $battle = Battle::findOrFail($battleId);
@@ -526,6 +537,7 @@ class BattleController extends Controller
         ]);
     }
 
+    // Sirve para recuperar los Xuxemons del equipo con sus datos listos para combate.
     private function getTeamXuxemons(string $userId): array
     {
         $team = Team::firstOrCreate(['user_id' => $userId]);
@@ -563,6 +575,7 @@ class BattleController extends Controller
             ->all();
     }
 
+    // Sirve para devolver los IDs de slots en orden y sin valores nulos.
     private function getOrderedTeamIds(string $userId): array
     {
         $team = Team::firstOrCreate(['user_id' => $userId]);
@@ -577,6 +590,7 @@ class BattleController extends Controller
         ])->filter()->map(fn ($id) => (int) $id)->values()->all();
     }
 
+    // Sirve para resolver el primer Xuxemon vivo del equipo de un jugador.
     private function getFirstAliveTeamMemberId(string $userId): ?int
     {
         foreach ($this->getOrderedTeamIds($userId) as $teamMemberId) {
@@ -592,6 +606,7 @@ class BattleController extends Controller
         return null;
     }
 
+    // Sirve para listar todos los Xuxemons que posee un usuario.
     private function getOwnedXuxemons(string $userId): array
     {
         return AdquiredXuxemon::where('user_id', $userId)
@@ -611,6 +626,7 @@ class BattleController extends Controller
             ->all();
     }
 
+    // Sirve para construir el payload de batalla adaptado al jugador que consulta.
     private function buildBattlePayload(Battle $battle, string $viewerId): array
     {
         $context = $this->resolveParticipantFields($battle, $viewerId);
@@ -636,6 +652,7 @@ class BattleController extends Controller
         ];
     }
 
+    // Sirve para mapear campos user/opponent según la perspectiva del viewer.
     private function resolveParticipantFields(Battle $battle, string $viewerId): array
     {
         $isOwner = $viewerId === $battle->user_id;
@@ -648,6 +665,7 @@ class BattleController extends Controller
         ];
     }
 
+    // Sirve para calcular a quién pertenece el turno actual.
     private function getCurrentTurnOwnerId(Battle $battle): string
     {
         return ((int) $battle->turn % 2 === 0)
@@ -655,6 +673,7 @@ class BattleController extends Controller
             : (string) $battle->opponent_user_id;
     }
 
+    // Sirve para ejecutar un ataque y persistir su resultado en la batalla.
     private function performAttackAction(Battle $battle, array $context, int $attackId): ?JsonResponse
     {
         if (! $attackId) {
@@ -731,6 +750,7 @@ class BattleController extends Controller
         return null;
     }
 
+    // Sirve para cambiar el Xuxemon activo del jugador en su turno.
     private function performSwitchAction(Battle $battle, array $context, int $targetId): ?JsonResponse
     {
         if (! $targetId) {
@@ -758,6 +778,7 @@ class BattleController extends Controller
         return null;
     }
 
+    // Sirve para aplicar objetos de estado sobre el Xuxemon activo aliado.
     private function performStatusItemAction(Battle $battle, array $context, int $bagItemId): ?JsonResponse
     {
         if (! $bagItemId) {
@@ -815,6 +836,7 @@ class BattleController extends Controller
         return null;
     }
 
+    // Sirve para rendirse y finalizar la batalla declarando ganador al oponente.
     public function forfeitBattle(Request $request, $battleId)
     {
         $battle = Battle::with(['user', 'opponentUser', 'winner'])->findOrFail($battleId);
@@ -837,6 +859,7 @@ class BattleController extends Controller
         return response()->json($this->buildBattlePayload($battle->fresh(['user', 'opponentUser', 'winner']), $viewerId));
     }
 
+    // Sirve para procesar la acción de huida y su resolución final.
     private function performRunAction(Battle $battle, array $context): ?JsonResponse
     {
         $this->completeBattleAsRunaway($battle, $context);
@@ -844,6 +867,7 @@ class BattleController extends Controller
         return null;
     }
 
+    // Sirve para resolver el ID de usuario autenticado desde JWT en stream/peticiones.
     private function resolveViewerIdFromToken(Request $request): ?string
     {
         $token = (string) ($request->query('token') ?: $request->input('token', ''));
@@ -861,6 +885,7 @@ class BattleController extends Controller
         return $viewer ? (string) $viewer->id : null;
     }
 
+    // Sirve para cerrar la batalla cuando un jugador logra huir.
     private function completeBattleAsRunaway(Battle $battle, array $context): void
     {
         $runnerName = $context['player_id'] === $battle->user_id
@@ -877,6 +902,7 @@ class BattleController extends Controller
         $this->applyBattleRewards($context['opponent_id'], $context['player_id']);
     }
 
+    // Sirve para aplicar recompensas de victoria/derrota al cerrar combate.
     private function applyBattleRewards(string $winnerId, string $loserId): void
     {
         $winner = User::query()->lockForUpdate()->find($winnerId);
@@ -897,6 +923,7 @@ class BattleController extends Controller
         }
     }
 
+    // Sirve para calcular y persistir la experiencia y nivel del entrenador.
     private function applyTrainerXpReward(User $user, int $xpReward): void
     {
         $pendingXp = max(0, (int) $user->xp + max(0, $xpReward));
@@ -911,6 +938,7 @@ class BattleController extends Controller
         $user->xp = $pendingXp;
     }
 
+    // Sirve para usar un objeto aliado sobre un objetivo concreto del equipo.
     private function performAllyItemAction(Battle $battle, array $context, int $bagItemId, int $targetId): ?JsonResponse
     {
         if (! $bagItemId || ! $targetId) {
@@ -967,6 +995,7 @@ class BattleController extends Controller
         return null;
     }
 
+    // Sirve para cargar un Xuxemon del combate verificando propiedad del usuario.
     private function loadBattleXuxemon(int $adquiredId, string $userId): ?AdquiredXuxemon
     {
         if (! $adquiredId) {
@@ -987,6 +1016,7 @@ class BattleController extends Controller
             ->first();
     }
 
+    // Sirve para validar que el ataque pertenece al moveset del Xuxemon.
     private function findAttackForXuxemon(AdquiredXuxemon $adquired, int $attackId): ?Attack
     {
         $adquired->loadMissing(['xuxemon.attack1', 'xuxemon.attack2']);
@@ -997,6 +1027,7 @@ class BattleController extends Controller
         ])->first(fn ($attack) => $attack && (int) $attack->id === $attackId);
     }
 
+    // Sirve para calcular modificadores de daño por afinidades y estados.
     private function calculateBattleModifiers(AdquiredXuxemon $attacker, AdquiredXuxemon $defender): int
     {
         $modifiers = 0;
@@ -1024,6 +1055,7 @@ class BattleController extends Controller
         return $modifiers;
     }
 
+    // Sirve para estimar el daño final del ataque antes de aplicarlo.
     private function calculateBattleDamageAmount(
         int $attackerStat,
         int $defenderStat,
@@ -1047,6 +1079,7 @@ class BattleController extends Controller
         return min($damageAmount, $damageCap);
     }
 
+    // Sirve para aplicar efectos de estado del ataque cuando corresponde.
     private function applyAttackStatusEffectIfNeeded(Battle $battle, Attack $attack, AdquiredXuxemon $defender): void
     {
         if ((int) ($defender->current_hp ?? 0) <= 0 || $defender->status_effect_id) {
@@ -1071,6 +1104,7 @@ class BattleController extends Controller
         $this->appendBattleLog($battle, sprintf('%s is now affected by %s!', $defender->name, $statusEffect->name));
     }
 
+    // Sirve para resolver bloqueos o daños de estado antes de atacar.
     private function resolvePreAttackStatus(Battle $battle, AdquiredXuxemon $xuxemon, string $playerId): bool|JsonResponse
     {
         $statusName = $xuxemon->statusEffect?->name;
@@ -1129,6 +1163,7 @@ class BattleController extends Controller
         return true;
     }
 
+    // Sirve para verificar si aún quedan miembros vivos en el equipo.
     private function hasAliveTeamMembers(string $userId, ?int $excludeId = null): bool
     {
         foreach ($this->getOrderedTeamIds($userId) as $teamMemberId) {
@@ -1148,6 +1183,7 @@ class BattleController extends Controller
         return false;
     }
 
+    // Sirve para añadir una línea al log histórico del combate.
     private function appendBattleLog(Battle $battle, string $message): void
     {
         $logs = is_array($battle->battle_log) ? $battle->battle_log : [];
@@ -1155,6 +1191,7 @@ class BattleController extends Controller
         $battle->battle_log = array_slice($logs, 0, 8);
     }
 
+    // Sirve para aplicar curación de objetos durante combate.
     private function applyHealingDuringBattle(BagItem $bagItem, AdquiredXuxemon $adquired): array
     {
         $adquired->loadMissing('xuxemon');
@@ -1169,6 +1206,7 @@ class BattleController extends Controller
         return ['remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0];
     }
 
+    // Sirve para aplicar aumento de ataque mediante objeto.
     private function applyAttackUpDuringBattle(BagItem $bagItem, AdquiredXuxemon $adquired): array
     {
         $amount = max(0, (int) $bagItem->item->effect_value);
@@ -1179,6 +1217,7 @@ class BattleController extends Controller
         return ['remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0];
     }
 
+    // Sirve para aplicar aumento de defensa mediante objeto.
     private function applyDefenseUpDuringBattle(BagItem $bagItem, AdquiredXuxemon $adquired): array
     {
         $amount = max(0, (int) $bagItem->item->effect_value);
@@ -1189,6 +1228,7 @@ class BattleController extends Controller
         return ['remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0];
     }
 
+    // Sirve para limpiar estados alterados con objetos de soporte.
     private function applyRemoveStatusEffectsDuringBattle(BagItem $bagItem, AdquiredXuxemon $adquired): array
     {
         $name = $bagItem->item->name;
@@ -1228,6 +1268,7 @@ class BattleController extends Controller
         return ['remaining_quantity' => $bagItem->exists ? $bagItem->quantity : 0];
     }
 
+    // Sirve para serializar un Xuxemon adquirido para respuestas de API.
     private function serializeAdquiredXuxemon(AdquiredXuxemon $adquired): array
     {
         if (! $adquired->xuxemon) {
@@ -1269,6 +1310,7 @@ class BattleController extends Controller
         return $xuxemon;
     }
 
+    // Sirve para retirar del equipo un Xuxemon robado por victoria.
     private function removeXuxemonFromTeam(string $userId, int $adquiredXuxemonId): void
     {
         $team = Team::where('user_id', $userId)->first();
@@ -1286,6 +1328,7 @@ class BattleController extends Controller
         $team->save();
     }
 
+    // Sirve para resolver qué efecto de estado aplica cada ítem de batalla.
     private function resolveBattleItemStatusEffect(string $itemName, ?StatusEffect $configuredStatusEffect): ?StatusEffect
     {
         if ($configuredStatusEffect) {
@@ -1300,6 +1343,7 @@ class BattleController extends Controller
         };
     }
 
+    // Sirve para serializar efectos de estado para el frontend.
     private function serializeStatusEffect(StatusEffect $statusEffect): array
     {
         return [

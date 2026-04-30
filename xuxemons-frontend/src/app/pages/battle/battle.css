@@ -1103,7 +1103,7 @@
 
 .item-card-info { flex: 1; }
 .item-card-name { font-weight: 800; display: block; }
-.item-card-stats { display: flex; gap: 8px; font-size: 1rem; margin-top: 4px; color: var(--color-gray-medium); }
+.item-card-stats { display: flex; gap: 8px; font-size: 1rem; margin-top: 4px; color: var(--neutral-black); }
 .item-card-stats span { background: var(--color-gray-light); padding: 2px 6px; border-radius: 4px; }
 
 /* Empty & Waiting Messages */
@@ -1950,7 +1950,7 @@
 
 .battle-dialog-text {
   margin: 0;
-  color: var(--color-gray-medium);
+  color: var(--neutral-black);
   font-size: 1.05rem;
   line-height: 1.5;
   font-family: inherit;
