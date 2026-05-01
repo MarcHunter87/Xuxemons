@@ -17,6 +17,16 @@ import type { InventoryItem, UseItemResponseData, Xuxemon } from '../../core/int
 
 type BattleMenu = 'attacks' | 'bag' | 'bag-target' | 'switch' | null;
 type BattleLogSource = 'player' | 'opponent' | 'system';
+type AttackVisualType = 'speed' | 'technical' | 'power' | 'speed-special' | 'technical-special' | 'power-special' | 'neutral';
+type AttackAnimationDescriptor = {
+  name?: string;
+  dmg?: number;
+  status_chance?: number | null;
+  statusEffect?: {
+    name: string;
+    icon_url: string;
+  };
+};
 interface BattleLogEntry { text: string; source: BattleLogSource; }
 
 @Component({
@@ -36,6 +46,15 @@ interface BattleLogEntry { text: string; source: BattleLogSource; }
 })
 export class Battle implements OnInit, OnDestroy, AfterViewInit {
   readonly vm = this;
+
+  // Sirve para comparar IDs del backend/UI sin depender del tipo (number/string).
+  private sameId(left: unknown, right: unknown): boolean {
+    if (left === null || left === undefined || right === null || right === undefined) {
+      return false;
+    }
+
+    return String(left) === String(right);
+  }
 
   private readonly bagPageSize = 2;
   private readonly supportedBattleEffectTypes = new Set<InventoryItem['effect_type']>([
@@ -136,6 +155,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   isDiceOverlayVisible = signal(false);
   isDiceRolling = signal(false);
   diceOutcomeTone = signal<'low' | 'mid' | 'high' | null>(null);
+  attackVisualType = signal<AttackVisualType>('neutral');
   isPlayerAttacking = signal(false);
   isOpponentAttacking = signal(false);
   activeAttackTrail = signal<'player' | 'opponent' | null>(null);
@@ -728,7 +748,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const defenderStat = defender.defense || 5;
     const modifiers = this.calculateModifiers(attacker, defender, 'player');
     const roll = this.diceValue() || 0;
-    this.playDiceThenAttack('player', roll);
+    this.playDiceThenAttack('player', roll, attacker, attackObj);
 
     const defenderMaxHp = defender.hp || 100;
     const defenderCurrentHp = this.getCurrentHpValue(defender);
@@ -800,7 +820,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const opponentAttack = opponent.attack || 10;
     const playerDefense = player.defense || 5;
     const roll = this.diceValue() || 0;
-    this.playDiceThenAttack('opponent', roll);
+    this.playDiceThenAttack('opponent', roll, opponent, attackObj);
 
     const playerMaxHp = player.hp || 100;
     const playerCurrentHp = this.getCurrentHpValue(player);
@@ -911,7 +931,16 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const opponentName = activeOpponent?.name?.toLowerCase() ?? '';
 
     return logs.map((entry) => {
-      const text = String(entry ?? '').trim();
+      const text = (() => {
+        if (typeof entry === 'string') {
+          return entry.trim();
+        }
+        if (entry && typeof entry === 'object' && 'text' in entry) {
+          const raw = (entry as { text?: unknown }).text;
+          return typeof raw === 'string' ? raw.trim() : String(raw ?? '').trim();
+        }
+        return String(entry ?? '').trim();
+      })();
       let normalizedText = text;
 
       if (/^come back\s+.+!\s+go\s+.+!$/i.test(text)) {
@@ -1400,13 +1429,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (normalizedData.status === 'accepted' && !normalizedData.winner_id) {
-      const isMyTurn = (normalizedData.turn % 2 === 0 && normalizedData.user_id === user.id)
-        || (normalizedData.turn % 2 !== 0 && normalizedData.opponent_user_id === user.id);
+      const isMyTurn = (normalizedData.turn % 2 === 0 && this.sameId(normalizedData.user_id, user.id))
+        || (normalizedData.turn % 2 !== 0 && this.sameId(normalizedData.opponent_user_id, user.id));
       this.currentTurn.set(isMyTurn ? 'player' : 'opponent');
     }
 
     if (normalizedData.user && normalizedData.opponent_user) {
-      const isOwner = normalizedData.user_id === user.id;
+      const isOwner = this.sameId(normalizedData.user_id, user.id);
       const opponentTrainer = isOwner ? normalizedData.opponent_user : normalizedData.user;
       this.opponentTrainerName.set(opponentTrainer.name);
       this.opponentTrainerLevel.set(opponentTrainer.level || 1);
@@ -1585,11 +1614,11 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const knownCombatants = new Map<string, { side: 'player' | 'opponent'; xuxemon: Xuxemon }>();
 
     for (const xuxemon of playerCandidates) {
-      knownCombatants.set(xuxemon.name.trim(), { side: 'player', xuxemon });
+      knownCombatants.set(xuxemon.name.trim().toLowerCase(), { side: 'player', xuxemon });
     }
 
     for (const xuxemon of opponentCandidates) {
-      knownCombatants.set(xuxemon.name.trim(), { side: 'opponent', xuxemon });
+      knownCombatants.set(xuxemon.name.trim().toLowerCase(), { side: 'opponent', xuxemon });
     }
 
     const readBattleLogText = (entry: unknown): string => {
@@ -1605,18 +1634,28 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return String(entry ?? '').trim();
     };
 
-    const attackLog = Array.isArray(data?.battle_log)
-      ? readBattleLogText(data.battle_log.find((entry: unknown) => {
-        const text = readBattleLogText(entry);
-        const match = /^(.+?) used (.+?)!\s*\(Roll:\s*\d+/i.exec(text);
+    const attackLog = (() => {
+      if (!Array.isArray(data?.battle_log)) {
+        return '';
+      }
+
+      for (let index = 0; index < data.battle_log.length; index += 1) {
+        const text = readBattleLogText(data.battle_log[index]);
+        const match = /^(.+?) used (.+?)!/i.exec(text);
         if (!match) {
-          return false;
+          continue;
         }
 
-        const attackerName = match[1]?.trim();
-        return knownCombatants.size === 0 || knownCombatants.has(attackerName);
-      }))
-      : '';
+        const attackerName = match[1]?.trim().toLowerCase();
+        if (knownCombatants.size > 0 && attackerName && !knownCombatants.has(attackerName)) {
+          continue;
+        }
+
+        return text;
+      }
+
+      return '';
+    })();
 
     if (!attackLog || attackLog === 'Battle started!') {
       return;
@@ -1635,7 +1674,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    let attackerContext = knownCombatants.get(attackerName) ?? null;
+    let attackerContext = knownCombatants.get(attackerName.toLowerCase()) ?? null;
 
     if (!attackerContext) {
       const previousPlayerHp = combatants?.previousPlayer ? this.getCurrentHpValue(combatants.previousPlayer) : null;
@@ -1688,17 +1727,25 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     attackerOverride?: Xuxemon | null,
   ): void {
     void attackerName;
-    void attackName;
-    void attackerOverride;
-    void side;
+    const attacker = attackerOverride ?? (side === 'player' ? this.selectedXuxemon() : this.opponentXuxemon());
+    const attack = this.resolveAttackAnimationDescriptor(attacker, attackName);
+    const visualType = this.getAttackVisualType(attacker, attackName ?? attack);
 
     if (roll !== null) {
-      this.playDiceRollAnimation(roll);
+      this.playDiceRollAnimation(roll, () => this.queueAttackLunge(side, visualType));
+      return;
     }
+
+    if (attack) {
+      this.playAttackLunge(side, visualType);
+      return;
+    }
+
+    this.playAttackLunge(side, visualType);
   }
 
   // Sirve para mostrar el overlay del dado y fijar el valor final tras la animación de tirada.
-  private playDiceRollAnimation(finalRoll: number): void {
+  private playDiceRollAnimation(finalRoll: number, onLanded?: () => void): void {
     if (this.diceLandingTimeout) {
       clearTimeout(this.diceLandingTimeout);
     }
@@ -1726,6 +1773,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
           this.diceValue.set(finalRoll);
           this.diceOutcomeTone.set(this.getDiceOutcomeTone(finalRoll));
           this.runDiceLandingAnimation();
+          onLanded?.();
         });
         this.diceLandingTimeout = null;
       }, this.diceLandingDurationMs);
@@ -1810,31 +1858,77 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  // Sirve para mantener compatibilidad con llamadas existentes, dejando solo la animación del dado.
-  private playDiceThenAttack(side: 'player' | 'opponent', roll: number): void {
-    void side;
-    this.playDiceRollAnimation(roll);
+  // Sirve para encadenar la tirada y la animación del ataque según el atacante y el movimiento usado.
+  private playDiceThenAttack(
+    side: 'player' | 'opponent',
+    roll: number,
+    attacker: Xuxemon | null,
+    attack?: AttackAnimationDescriptor | null,
+  ): void {
+    const visualType = this.getAttackVisualType(attacker, attack ?? undefined);
+    this.playDiceRollAnimation(roll, () => this.queueAttackLunge(side, visualType));
   }
 
-  // Sirve para desactivar por completo las animaciones visuales del ataque.
-  private playAttackLunge(side: 'player' | 'opponent'): void {
-    void side;
-    this.isPlayerAttacking.set(false);
-    this.isOpponentAttacking.set(false);
+  // Sirve para programar el inicio del ataque justo después de que el dado aterrice.
+  private queueAttackLunge(side: 'player' | 'opponent', visualType: AttackVisualType): void {
+    if (this.queuedAttackLungeTimeout) {
+      clearTimeout(this.queuedAttackLungeTimeout);
+    }
+
+    this.queuedAttackLungeTimeout = setTimeout(() => {
+      this.zone.run(() => {
+        this.playAttackLunge(side, visualType);
+      });
+      this.queuedAttackLungeTimeout = null;
+    }, 80);
   }
 
-  // Sirve para desactivar por completo la animación del sprite atacante.
-  private runSpriteAttackAnimation(side: 'player' | 'opponent'): void {
+  // Sirve para lanzar la animación de acometida del atacante y coordinar trazo e impacto.
+  private playAttackLunge(side: 'player' | 'opponent', visualType: AttackVisualType): void {
+    this.clearAttackAnimationState(false);
+    this.attackVisualType.set(visualType);
+    this.playAttackEffects(side, visualType);
+    this.runSpriteAttackAnimation(side, visualType);
+
+    const durationMs = this.getAttackAnimationDurationMs(visualType);
+
+    if (side === 'player') {
+      this.isPlayerAttacking.set(true);
+      this.playerAttackTimeout = setTimeout(() => {
+        this.zone.run(() => {
+          this.isPlayerAttacking.set(false);
+          this.resetAttackVisualTypeIfIdle();
+        });
+        this.playerAttackTimeout = null;
+      }, durationMs);
+      return;
+    }
+
+    this.isOpponentAttacking.set(true);
+    this.opponentAttackTimeout = setTimeout(() => {
+      this.zone.run(() => {
+        this.isOpponentAttacking.set(false);
+        this.resetAttackVisualTypeIfIdle();
+      });
+      this.opponentAttackTimeout = null;
+    }, durationMs);
+  }
+
+  // Sirve para reiniciar cualquier animación programática anterior y forzar el repintado del nuevo ataque CSS.
+  private runSpriteAttackAnimation(side: 'player' | 'opponent', visualType: AttackVisualType): void {
     void side;
+    void visualType;
     this.playerSpriteAnimation?.cancel();
     this.playerSpriteAnimation = null;
     this.opponentSpriteAnimation?.cancel();
     this.opponentSpriteAnimation = null;
+    this.flushBattleView();
   }
 
-  // Sirve para desactivar por completo los efectos visuales de impacto.
-  private playAttackEffects(attackerSide: 'player' | 'opponent'): void {
-    void attackerSide;
+  // Sirve para activar el trazo de ataque y el burst de impacto con la variante visual correspondiente.
+  private playAttackEffects(attackerSide: 'player' | 'opponent', visualType: AttackVisualType): void {
+    const targetSide = attackerSide === 'player' ? 'opponent' : 'player';
+
     if (this.playerHitTimeout) {
       clearTimeout(this.playerHitTimeout);
       this.playerHitTimeout = null;
@@ -1851,10 +1945,244 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       clearTimeout(this.impactBurstTimeout);
       this.impactBurstTimeout = null;
     }
+
     this.activeAttackTrail.set(null);
     this.activeImpactBurst.set(null);
     this.isPlayerHit.set(false);
     this.isOpponentHit.set(false);
+    this.attackVisualType.set(visualType);
+    this.activeAttackTrail.set(attackerSide);
+    this.flushBattleView();
+
+    this.attackTrailTimeout = setTimeout(() => {
+      this.zone.run(() => {
+        this.activeAttackTrail.set(null);
+        this.resetAttackVisualTypeIfIdle();
+      });
+      this.attackTrailTimeout = null;
+    }, this.getAttackTrailDurationMs(visualType));
+
+    this.impactBurstTimeout = setTimeout(() => {
+      this.zone.run(() => {
+        this.activeImpactBurst.set(targetSide);
+
+        if (targetSide === 'player') {
+          this.isPlayerHit.set(true);
+          this.playerHitTimeout = setTimeout(() => {
+            this.zone.run(() => {
+              this.isPlayerHit.set(false);
+              this.activeImpactBurst.set(null);
+              this.resetAttackVisualTypeIfIdle();
+            });
+            this.playerHitTimeout = null;
+          }, this.getImpactDurationMs(visualType));
+        } else {
+          this.isOpponentHit.set(true);
+          this.opponentHitTimeout = setTimeout(() => {
+            this.zone.run(() => {
+              this.isOpponentHit.set(false);
+              this.activeImpactBurst.set(null);
+              this.resetAttackVisualTypeIfIdle();
+            });
+            this.opponentHitTimeout = null;
+          }, this.getImpactDurationMs(visualType));
+        }
+
+        this.flushBattleView();
+      });
+      this.impactBurstTimeout = null;
+    }, this.getImpactDelayMs(visualType));
+  }
+
+  // Sirve para limpiar la traza, el burst y los flags del último ataque antes de iniciar uno nuevo o al destruir.
+  private clearAttackAnimationState(resetVisualType = true): void {
+    if (this.queuedAttackLungeTimeout) {
+      clearTimeout(this.queuedAttackLungeTimeout);
+      this.queuedAttackLungeTimeout = null;
+    }
+    if (this.playerAttackTimeout) {
+      clearTimeout(this.playerAttackTimeout);
+      this.playerAttackTimeout = null;
+    }
+    if (this.opponentAttackTimeout) {
+      clearTimeout(this.opponentAttackTimeout);
+      this.opponentAttackTimeout = null;
+    }
+    if (this.attackTrailTimeout) {
+      clearTimeout(this.attackTrailTimeout);
+      this.attackTrailTimeout = null;
+    }
+    if (this.impactBurstTimeout) {
+      clearTimeout(this.impactBurstTimeout);
+      this.impactBurstTimeout = null;
+    }
+    if (this.playerHitTimeout) {
+      clearTimeout(this.playerHitTimeout);
+      this.playerHitTimeout = null;
+    }
+    if (this.opponentHitTimeout) {
+      clearTimeout(this.opponentHitTimeout);
+      this.opponentHitTimeout = null;
+    }
+
+    this.isPlayerAttacking.set(false);
+    this.isOpponentAttacking.set(false);
+    this.activeAttackTrail.set(null);
+    this.activeImpactBurst.set(null);
+    this.isPlayerHit.set(false);
+    this.isOpponentHit.set(false);
+
+    if (resetVisualType) {
+      this.attackVisualType.set('neutral');
+    }
+  }
+
+  // Sirve para volver a `neutral` cuando ya no queda ningún efecto visual activo del ataque.
+  private resetAttackVisualTypeIfIdle(): void {
+    if (
+      this.activeAttackTrail()
+      || this.activeImpactBurst()
+      || this.isPlayerAttacking()
+      || this.isOpponentAttacking()
+      || this.isPlayerHit()
+      || this.isOpponentHit()
+    ) {
+      return;
+    }
+
+    this.attackVisualType.set('neutral');
+  }
+
+  // Sirve para resolver el descriptor del ataque a partir del atacante y el nombre presente en el log del snapshot.
+  private resolveAttackAnimationDescriptor(
+    attacker: Xuxemon | null,
+    attackName?: string,
+  ): AttackAnimationDescriptor | undefined {
+    const normalizedAttackName = attackName?.trim().toLowerCase();
+    if (!attacker || !normalizedAttackName) {
+      return undefined;
+    }
+
+    return attacker.attacks?.find((attack) => attack.name?.trim().toLowerCase() === normalizedAttackName);
+  }
+
+  // Sirve para decidir qué familia visual usa el ataque actual y si debe activar la variante especial.
+  private getAttackVisualType(
+    attacker: Xuxemon | null,
+    attack?: AttackAnimationDescriptor | string,
+  ): AttackVisualType {
+    const baseType = this.getBaseAttackVisualType(attacker, attack);
+    const descriptor = typeof attack === 'string' ? this.resolveAttackAnimationDescriptor(attacker, attack) : attack;
+
+    if ((descriptor?.status_chance ?? 0) > 0) {
+      return `${baseType}-special` as AttackVisualType;
+    }
+
+    return baseType;
+  }
+
+  // Sirve para mapear el estilo del golpe a partir del tipo elemental o, en fallback, del perfil del ataque.
+  private getBaseAttackVisualType(
+    attacker: Xuxemon | null,
+    attack?: AttackAnimationDescriptor | string,
+  ): Exclude<AttackVisualType, 'speed-special' | 'technical-special' | 'power-special' | 'neutral'> {
+    const elementalType = attacker?.type?.name?.trim().toLowerCase() ?? '';
+    if (elementalType === 'aire') {
+      return 'speed';
+    }
+    if (elementalType === 'aigua') {
+      return 'technical';
+    }
+    if (elementalType === 'terra') {
+      return 'power';
+    }
+
+    const descriptor = typeof attack === 'string' ? this.resolveAttackAnimationDescriptor(attacker, attack) : attack;
+    const attackDamage = descriptor?.dmg ?? 0;
+    if ((descriptor?.status_chance ?? 0) > 0) {
+      return 'technical';
+    }
+    if (attackDamage >= 18) {
+      return 'power';
+    }
+    if (attackDamage > 0 && attackDamage <= 10) {
+      return 'speed';
+    }
+
+    return 'technical';
+  }
+
+  // Sirve para mantener la duración del trazo alineada con los keyframes CSS de cada variante.
+  private getAttackTrailDurationMs(visualType: AttackVisualType): number {
+    switch (visualType) {
+      case 'speed-special':
+        return 360;
+      case 'technical-special':
+        return 460;
+      case 'power-special':
+        return 400;
+      case 'speed':
+        return 420;
+      case 'technical':
+        return 480;
+      case 'power':
+        return 520;
+      default:
+        return 420;
+    }
+  }
+
+  // Sirve para retrasar el burst al instante en que el atacante ya ha avanzado visualmente.
+  private getImpactDelayMs(visualType: AttackVisualType): number {
+    switch (visualType) {
+      case 'speed-special':
+      case 'speed':
+        return 170;
+      case 'technical-special':
+      case 'technical':
+        return 220;
+      case 'power-special':
+      case 'power':
+        return 260;
+      default:
+        return 200;
+    }
+  }
+
+  // Sirve para mantener el burst y el flash el tiempo justo antes de limpiar la clase visual.
+  private getImpactDurationMs(visualType: AttackVisualType): number {
+    switch (visualType) {
+      case 'speed-special':
+      case 'technical-special':
+      case 'power-special':
+        return 420;
+      case 'speed':
+      case 'technical':
+      case 'power':
+        return 360;
+      default:
+        return 340;
+    }
+  }
+
+  // Sirve para desactivar el estado `attacking` cuando el keyframe principal del atacante ya ha terminado.
+  private getAttackAnimationDurationMs(visualType: AttackVisualType): number {
+    switch (visualType) {
+      case 'speed-special':
+        return 460;
+      case 'technical-special':
+        return 560;
+      case 'power-special':
+        return 620;
+      case 'speed':
+        return 480;
+      case 'technical':
+        return 540;
+      case 'power':
+        return 580;
+      default:
+        return 500;
+    }
   }
 
   // Sirve para reproducir la secuencia corta de debilitamiento de un bando y ejecutar un callback al terminar.
@@ -2159,12 +2487,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   // Sirve para reaccionar cuando el backend marca la batalla terminada (victoria, derrota o huida).
   private handleExternallyFinishedBattle(data: any): void {
     const userId = this.auth.getUser()?.id;
-    const playerWon = data.winner_id === userId;
+    const playerWon = this.sameId(data.winner_id, userId);
     this.battleStatus.set('finished');
     this.stopBattleSync();
 
     if (data.completion_reason === 'runaway') {
-      if (data.runner_id === userId) {
+      if (this.sameId(data.runner_id, userId)) {
         this.runawayResultMessage.set('You ran away from the battle.');
       } else {
         this.runawayResultMessage.set('Your rival ran away from the battle.');
@@ -2259,7 +2587,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     if (!data || !userId) {
       return null;
     }
-    return data.user_id === userId ? data.opponent_user_id : data.user_id;
+    return this.sameId(data.user_id, userId) ? String(data.opponent_user_id) : String(data.user_id);
   }
 
   // Sirve para intentar aplicar el estado alterado de un ataque según probabilidad y reglas de combate.

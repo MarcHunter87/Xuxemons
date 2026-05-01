@@ -813,12 +813,12 @@
 
 /* Attack animations */
 .player-sprite.attacking {
-  animation: none !important;
+  animation: playerLunge 0.52s ease-in-out;
   transform-origin: 50% 65%;
 }
 
 .opponent-sprite.attacking {
-  animation: none !important;
+  animation: opponentLunge 0.52s ease-in-out;
   transform-origin: 50% 65%;
 }
 

@@ -63,7 +63,7 @@
             </div>
 
             <div #opponentSprite class="sprite-container opponent-sprite" [class.attacking]="vm.isOpponentAttacking()" [class.fainting]="vm.isOpponentFainting()" [class.hit]="vm.isOpponentHit()">
-              <img [src]="opponentXuxemon()!.image_url" alt="Opponent" [class.attacking]="vm.isOpponentAttacking()" [class.fainting]="vm.isOpponentFainting()">
+              <img [src]="opponentXuxemon()!.image_url" alt="Opponent" [class.attacking]="vm.isOpponentAttacking()" [class.fainting]="vm.isOpponentFainting()" [class.attacking-speed]="vm.attackVisualType() === 'speed'" [class.attacking-technical]="vm.attackVisualType() === 'technical'" [class.attacking-power]="vm.attackVisualType() === 'power'" [class.attacking-speed-special]="vm.attackVisualType() === 'speed-special'" [class.attacking-technical-special]="vm.attackVisualType() === 'technical-special'" [class.attacking-power-special]="vm.attackVisualType() === 'power-special'">
               <span class="faint-particles" aria-hidden="true"></span>
               <div class="platform"></div>
             </div>
@@ -117,7 +117,7 @@
             </div>
 
             <div #playerSprite class="sprite-container player-sprite" [class.attacking]="vm.isPlayerAttacking()" [class.fainting]="vm.isPlayerFainting()" [class.hit]="vm.isPlayerHit()">
-              <img [src]="selectedXuxemon()!.image_url" alt="Player" [class.attacking]="vm.isPlayerAttacking()" [class.fainting]="vm.isPlayerFainting()">
+              <img [src]="selectedXuxemon()!.image_url" alt="Player" [class.attacking]="vm.isPlayerAttacking()" [class.fainting]="vm.isPlayerFainting()" [class.attacking-speed]="vm.attackVisualType() === 'speed'" [class.attacking-technical]="vm.attackVisualType() === 'technical'" [class.attacking-power]="vm.attackVisualType() === 'power'" [class.attacking-speed-special]="vm.attackVisualType() === 'speed-special'" [class.attacking-technical-special]="vm.attackVisualType() === 'technical-special'" [class.attacking-power-special]="vm.attackVisualType() === 'power-special'">
               <span class="faint-particles" aria-hidden="true"></span>
               <div class="platform"></div>
             </div>
@@ -129,6 +129,12 @@
           [class.active]="vm.activeAttackTrail() !== null"
           [class.attack-trail--player]="vm.activeAttackTrail() === 'player'"
           [class.attack-trail--opponent]="vm.activeAttackTrail() === 'opponent'"
+          [class.attack-trail--speed]="vm.attackVisualType() === 'speed'"
+          [class.attack-trail--technical]="vm.attackVisualType() === 'technical'"
+          [class.attack-trail--power]="vm.attackVisualType() === 'power'"
+          [class.attack-trail--speed-special]="vm.attackVisualType() === 'speed-special'"
+          [class.attack-trail--technical-special]="vm.attackVisualType() === 'technical-special'"
+          [class.attack-trail--power-special]="vm.attackVisualType() === 'power-special'"
           aria-hidden="true">
         </div>
 
@@ -137,6 +143,12 @@
           [class.active]="vm.activeImpactBurst() !== null"
           [class.impact-burst--player]="vm.activeImpactBurst() === 'player'"
           [class.impact-burst--opponent]="vm.activeImpactBurst() === 'opponent'"
+          [class.impact-burst--speed]="vm.attackVisualType() === 'speed'"
+          [class.impact-burst--technical]="vm.attackVisualType() === 'technical'"
+          [class.impact-burst--power]="vm.attackVisualType() === 'power'"
+          [class.impact-burst--speed-special]="vm.attackVisualType() === 'speed-special'"
+          [class.impact-burst--technical-special]="vm.attackVisualType() === 'technical-special'"
+          [class.impact-burst--power-special]="vm.attackVisualType() === 'power-special'"
           aria-hidden="true">
         </div>
 
