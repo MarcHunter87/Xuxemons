@@ -757,7 +757,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const newHpPercent = defenderMaxHp > 0 ? (newHpValue / defenderMaxHp) * 100 : 0;
     const updatedDefender = this.applyAttackStatusEffectToTarget({ ...defender, current_hp: newHpValue }, attackObj, 'player');
 
-    this.addLog(`${attacker.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`, 'player');
+    const attackerName = this.resolveDisplayXuxemonName(attacker, 'Your Xuxemon');
+    const defenderName = this.resolveDisplayXuxemonName(defender, 'Opponent Xuxemon');
+    const trainerName = this.auth.getUser()?.name?.trim() || 'You';
+    this.addLog(`${attackerName} (${trainerName}) used ${attackObj.name} on ${defenderName}! (Roll: ${roll}, -${damageAmount} HP)`, 'player');
 
     // Wait for attack animation to finish before applying damage (700ms animation)
     setTimeout(() => {
@@ -836,7 +839,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const newHpPercent = playerMaxHp > 0 ? (newHpValue / playerMaxHp) * 100 : 0;
     const updatedPlayer = this.applyAttackStatusEffectToTarget({ ...player, current_hp: newHpValue }, attackObj, 'opponent');
 
-    this.addLog(`${opponent.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`, 'opponent');
+    const attackerName = this.resolveDisplayXuxemonName(opponent, 'Opponent Xuxemon');
+    const defenderName = this.resolveDisplayXuxemonName(player, 'Your Xuxemon');
+    const trainerName = this.opponentTrainerName()?.trim() || 'Opponent';
+    this.addLog(`${attackerName} (${trainerName}) used ${attackObj.name} on ${defenderName}! (Roll: ${roll}, -${damageAmount} HP)`, 'opponent');
 
     // Wait for attack animation to finish before applying damage (700ms animation)
     setTimeout(() => {
@@ -920,15 +926,70 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return Math.min(damageAmount, Math.max(1, defenderMaxHp));
   }
 
+  // Sirve para resolver un nombre visible de Xuxemon con fallback seguro si el dato llega vacio.
+  private resolveDisplayXuxemonName(xuxemon: Xuxemon | null | undefined, fallback: string): string {
+    const name = xuxemon?.name?.trim();
+    return name ? name : fallback;
+  }
+
+  // Sirve para obtener una etiqueta de actor en consola segun el lado (Xuxemon + entrenador).
+  private getConsoleActorLabel(
+    source: BattleLogSource,
+    activePlayer: Xuxemon | null = this.selectedXuxemon(),
+    activeOpponent: Xuxemon | null = this.opponentXuxemon(),
+  ): string {
+    const myTrainer = this.auth.getUser()?.name?.trim() || 'You';
+    const opponentTrainer = this.opponentTrainerName()?.trim() || 'Opponent';
+
+    if (source === 'player') {
+      const xuxemonName = this.resolveDisplayXuxemonName(activePlayer, 'Your Xuxemon');
+      return `${xuxemonName} (${myTrainer})`;
+    }
+
+    if (source === 'opponent') {
+      const xuxemonName = this.resolveDisplayXuxemonName(activeOpponent, 'Opponent Xuxemon');
+      return `${xuxemonName} (${opponentTrainer})`;
+    }
+
+    return 'Unknown actor';
+  }
+
+  // Sirve para corregir logs heredados/incompletos y asegurar actor delante de la accion en consola.
+  private ensureConsoleActorInLog(
+    message: string,
+    source: BattleLogSource,
+    activePlayer: Xuxemon | null = this.selectedXuxemon(),
+    activeOpponent: Xuxemon | null = this.opponentXuxemon(),
+  ): string {
+    const text = message.trim();
+    if (!text) {
+      return text;
+    }
+
+    if (/^used\s+/i.test(text)) {
+      return `${this.getConsoleActorLabel(source, activePlayer, activeOpponent)} ${text}`;
+    }
+
+    if (/^you\s+used\s+/i.test(text)) {
+      const normalized = text.replace(/^you\s+used\s+/i, 'used ');
+      return `${this.getConsoleActorLabel('player', activePlayer, activeOpponent)} ${normalized}`;
+    }
+
+    return text;
+  }
+
   // Sirve para añadir una línea al registro de combate visible en la interfaz.
   addLog(message: string, source: BattleLogSource = 'system'): void {
-    this.battleLog.update((logs) => [{ text: message, source }, ...logs].slice(0, 8));
+    const normalizedMessage = this.ensureConsoleActorInLog(message, source);
+    this.battleLog.update((logs) => [{ text: normalizedMessage, source }, ...logs].slice(0, 8));
   }
 
   // Sirve para convertir entradas crudas del backend en líneas de log tipadas (jugador / rival / sistema).
   private hydrateBattleLogNames(logs: unknown[], activePlayer: Xuxemon | null, activeOpponent: Xuxemon | null): BattleLogEntry[] {
     const playerName = activePlayer?.name?.toLowerCase() ?? '';
     const opponentName = activeOpponent?.name?.toLowerCase() ?? '';
+    const playerTrainer = this.auth.getUser()?.name?.toLowerCase() ?? '';
+    const opponentTrainer = this.opponentTrainerName()?.toLowerCase() ?? '';
 
     return logs.map((entry) => {
       const text = (() => {
@@ -941,24 +1002,34 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         }
         return String(entry ?? '').trim();
       })();
-      let normalizedText = text;
-
-      if (/^come back\s+.+!\s+go\s+.+!$/i.test(text)) {
-        normalizedText = 'Xuxemon changed!';
-      } else if (/^.+\s+sent\s+out\s+.+!$/i.test(text)) {
-        normalizedText = 'A Xuxemon enters the battle!';
-      } else if (/^enters\s+the\s+battle!?$/i.test(text) || /^.+\s+enters\s+the\s+battle!?$/i.test(text)) {
-        normalizedText = 'A Xuxemon enters the battle!';
-      }
-
-      const lowerText = normalizedText.toLowerCase();
+      const lowerText = text.toLowerCase();
       let source: BattleLogSource = 'system';
       if (playerName && lowerText.startsWith(playerName + ' used')) {
         source = 'player';
+      } else if (playerTrainer && lowerText.includes(`(${playerTrainer})`)) {
+        source = 'player';
       } else if (opponentName && lowerText.startsWith(opponentName + ' used')) {
+        source = 'opponent';
+      } else if (opponentTrainer && lowerText.includes(`(${opponentTrainer})`)) {
         source = 'opponent';
       }
 
+      if (source === 'system') {
+        const matchLegacyAttack = /^used\s+(.+?)(?:\s+on\s+.+?)?!/i.exec(text);
+        const attackName = matchLegacyAttack?.[1]?.trim().toLowerCase() ?? '';
+        if (attackName) {
+          const playerHasAttack = Boolean(activePlayer?.attacks?.some((attack) => attack?.name?.trim().toLowerCase() === attackName));
+          const opponentHasAttack = Boolean(activeOpponent?.attacks?.some((attack) => attack?.name?.trim().toLowerCase() === attackName));
+
+          if (playerHasAttack && !opponentHasAttack) {
+            source = 'player';
+          } else if (!playerHasAttack && opponentHasAttack) {
+            source = 'opponent';
+          }
+        }
+      }
+
+      const normalizedText = this.ensureConsoleActorInLog(text, source, activePlayer, activeOpponent);
       return { text: normalizedText, source };
     });
   }
@@ -1641,12 +1712,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
       for (let index = 0; index < data.battle_log.length; index += 1) {
         const text = readBattleLogText(data.battle_log[index]);
-        const match = /^(.+?) used (.+?)!/i.exec(text);
+        const match = /^(.+?) used (.+?)(?: on .+?)?!/i.exec(text);
         if (!match) {
           continue;
         }
 
-        const attackerName = match[1]?.trim().toLowerCase();
+        const attackerRaw = match[1]?.trim().toLowerCase() ?? '';
+        const attackerName = attackerRaw.replace(/\s*\(.+?\)\s*$/, '').trim();
         if (knownCombatants.size > 0 && attackerName && !knownCombatants.has(attackerName)) {
           continue;
         }
@@ -1661,12 +1733,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const attackMatch = /^(.+?) used (.+?)!/.exec(attackLog);
+    const attackMatch = /^(.+?) used (.+?)(?: on .+?)?!/i.exec(attackLog);
     if (!attackMatch) {
       return;
     }
 
-    const attackerName = attackMatch[1]?.trim();
+    const attackerName = attackMatch[1]?.trim().replace(/\s*\(.+?\)\s*$/, '');
     const extractedAttackName = attackMatch[2]?.trim();
     const rollMatch = /Roll:\s*(\d+)/.exec(attackLog);
     const resolvedRoll = rollMatch ? Number(rollMatch[1]) : null;
@@ -1914,15 +1986,44 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, durationMs);
   }
 
-  // Sirve para reiniciar cualquier animación programática anterior y forzar el repintado del nuevo ataque CSS.
+  // Sirve para lanzar la animación de acometida del sprite directamente via Web Animations API para evitar el problema de reinicio de animaciones CSS al reutilizar la misma clase.
   private runSpriteAttackAnimation(side: 'player' | 'opponent', visualType: AttackVisualType): void {
-    void side;
-    void visualType;
-    this.playerSpriteAnimation?.cancel();
-    this.playerSpriteAnimation = null;
-    this.opponentSpriteAnimation?.cancel();
-    this.opponentSpriteAnimation = null;
-    this.flushBattleView();
+    if (side === 'player') {
+      this.playerSpriteAnimation?.cancel();
+      this.playerSpriteAnimation = null;
+    } else {
+      this.opponentSpriteAnimation?.cancel();
+      this.opponentSpriteAnimation = null;
+    }
+
+    if (!this.isBrowser) {
+      return;
+    }
+
+    const el = (side === 'player' ? this.playerSprite : this.opponentSprite)?.nativeElement;
+    if (!el || typeof el.animate !== 'function') {
+      this.flushBattleView();
+      return;
+    }
+
+    const lungeX = side === 'player' ? 72 : -72;
+    const lungeY = side === 'player' ? -16 : 16;
+    const duration = Math.min(this.getAttackAnimationDurationMs(visualType), 520);
+
+    const anim = el.animate(
+      [
+        { transform: 'translate3d(0, 0, 0) scale(1)', offset: 0 },
+        { transform: `translate3d(${lungeX}px, ${lungeY}px, 0) scale(1.08)`, offset: 0.35 },
+        { transform: 'translate3d(0, 0, 0) scale(1)', offset: 1 },
+      ],
+      { duration, easing: 'ease-in-out', fill: 'none' },
+    );
+
+    if (side === 'player') {
+      this.playerSpriteAnimation = anim;
+    } else {
+      this.opponentSpriteAnimation = anim;
+    }
   }
 
   // Sirve para activar el trazo de ataque y el burst de impacto con la variante visual correspondiente.

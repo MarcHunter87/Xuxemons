@@ -762,7 +762,9 @@ class BattleController extends Controller
         $defender->current_hp = max(0, (int) $defender->current_hp - $damageAmount);
         $defender->save();
 
-        $this->appendBattleLog($battle, sprintf('%s used %s! (Roll: %d, -%d HP)', $attacker->name, $attack->name, $roll, $damageAmount));
+        $attackerLabel = $this->formatBattleEntityLabel($battle, $context['player_id'], $attacker);
+        $defenderLabel = $this->formatBattleEntityLabel($battle, $context['opponent_id'], $defender);
+        $this->appendBattleLog($battle, sprintf('%s used %s on %s! (Roll: %d, -%d HP)', $attackerLabel, $attack->name, $defenderLabel, $roll, $damageAmount));
 
         if ($modifiers > 0) {
             $this->appendBattleLog($battle, 'It\'s super effective!');
@@ -773,14 +775,15 @@ class BattleController extends Controller
         $this->applyAttackStatusEffectIfNeeded($battle, $attack, $defender);
 
         if ((int) $defender->current_hp <= 0) {
-            $this->appendBattleLog($battle, sprintf('%s fainted!', $defender->name));
+            $this->appendBattleLog($battle, sprintf('%s fainted!', $defenderLabel));
 
             if ($this->hasAliveTeamMembers($context['opponent_id'], (int) $defender->id)) {
                 $battle->turn = (int) $battle->turn + 1;
             } else {
                 $battle->winner_id = $context['player_id'];
                 $this->applyBattleRewards($context['player_id'], $context['opponent_id']);
-                $this->appendBattleLog($battle, sprintf('%s wins the battle!', $attacker->name));
+                $winnerTrainer = $this->getBattleTrainerName($battle, $context['player_id']);
+                $this->appendBattleLog($battle, sprintf('%s wins the battle!', $winnerTrainer));
             }
         } else {
             $battle->turn = (int) $battle->turn + 1;
@@ -813,7 +816,9 @@ class BattleController extends Controller
 
         $battle->{$context['player_field']} = $targetId;
         $battle->turn = (int) $battle->turn + 1;
-        $this->appendBattleLog($battle, sprintf('%s enters the battle!', $target->name));
+        $actorTrainer = $this->getBattleTrainerName($battle, $context['player_id']);
+        $targetName = $this->getBattleXuxemonDisplayName($target);
+        $this->appendBattleLog($battle, sprintf('%s sent out %s!', $actorTrainer, $targetName));
         $battle->save();
 
         return null;
@@ -871,7 +876,9 @@ class BattleController extends Controller
         $bagItem->reduceQuantity(1);
 
         $battle->turn = (int) $battle->turn + 1;
-        $this->appendBattleLog($battle, sprintf('%s used %s on %s!', $context['player_id'] === $battle->user_id ? $battle->user->name : $battle->opponentUser->name, $bagItem->item->name, $target->name));
+        $actorTrainer = $this->getBattleTrainerName($battle, $context['player_id']);
+        $targetLabel = $this->formatBattleEntityLabel($battle, $context['opponent_id'], $target);
+        $this->appendBattleLog($battle, sprintf('%s used %s on %s!', $actorTrainer, $bagItem->item->name, $targetLabel));
         $battle->save();
 
         return null;
@@ -1076,7 +1083,9 @@ class BattleController extends Controller
         }
 
         $battle->turn = (int) $battle->turn + 1;
-        $this->appendBattleLog($battle, sprintf('%s used %s on %s!', $context['player_id'] === $battle->user_id ? $battle->user->name : $battle->opponentUser->name, $bagItem->item->name, $target->name));
+        $actorTrainer = $this->getBattleTrainerName($battle, $context['player_id']);
+        $targetLabel = $this->formatBattleEntityLabel($battle, $context['player_id'], $target);
+        $this->appendBattleLog($battle, sprintf('%s used %s on %s!', $actorTrainer, $bagItem->item->name, $targetLabel));
         $battle->save();
 
         return null;
@@ -1274,6 +1283,50 @@ class BattleController extends Controller
         $logs = is_array($battle->battle_log) ? $battle->battle_log : [];
         array_unshift($logs, $message);
         $battle->battle_log = array_slice($logs, 0, 8);
+    }
+
+    // Sirve para obtener el nombre del entrenador dentro del combate según su player_id.
+    private function getBattleTrainerName(Battle $battle, string $playerId): string
+    {
+        if ((string) $battle->user_id === (string) $playerId) {
+            return trim((string) ($battle->user->name ?? '')) !== ''
+                ? (string) $battle->user->name
+                : 'Player 1';
+        }
+
+        if ((string) $battle->opponent_user_id === (string) $playerId) {
+            return trim((string) ($battle->opponentUser->name ?? '')) !== ''
+                ? (string) $battle->opponentUser->name
+                : 'Player 2';
+        }
+
+        return 'Unknown Trainer';
+    }
+
+    // Sirve para mostrar el nombre del Xuxemon activo con fallback al nombre base de especie.
+    private function getBattleXuxemonDisplayName(AdquiredXuxemon $adquired): string
+    {
+        $nickname = trim((string) ($adquired->name ?? ''));
+        if ($nickname !== '') {
+            return $nickname;
+        }
+
+        $speciesName = trim((string) ($adquired->xuxemon->name ?? ''));
+        if ($speciesName !== '') {
+            return $speciesName;
+        }
+
+        return 'Unknown Xuxemon';
+    }
+
+    // Sirve para formatear actor/objetivo con estilo "Xuxemon (Entrenador)" en el log.
+    private function formatBattleEntityLabel(Battle $battle, string $playerId, AdquiredXuxemon $adquired): string
+    {
+        return sprintf(
+            '%s (%s)',
+            $this->getBattleXuxemonDisplayName($adquired),
+            $this->getBattleTrainerName($battle, $playerId),
+        );
     }
 
     // Sirve para aplicar curación de objetos durante combate.

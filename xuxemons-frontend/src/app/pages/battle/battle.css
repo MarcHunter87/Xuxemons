@@ -811,14 +811,12 @@
   overflow: visible;
 }
 
-/* Attack animations */
+/* Attack animations — lunge transform is driven by Web Animations API in battle.ts */
 .player-sprite.attacking {
-  animation: playerLunge 0.52s ease-in-out;
   transform-origin: 50% 65%;
 }
 
 .opponent-sprite.attacking {
-  animation: opponentLunge 0.52s ease-in-out;
   transform-origin: 50% 65%;
 }
 
