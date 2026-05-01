@@ -17,6 +17,7 @@ export class Login {
   errorMessage: string | null = null;
   showPassword = false;
 
+  // Sirve para inicializar el formulario de login e inyectar dependencias
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -30,15 +31,18 @@ export class Login {
     });
   }
 
+  // Sirve para verificar si un campo es inválido
   isFieldInvalid(fieldName: string): boolean {
     const control = this.loginForm.get(fieldName);
     return !!(control && control.invalid && control.touched);
   }
 
+  // Sirve para alternar la visibilidad de la contraseña
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
+  // Sirve para obtener el mensaje de error de un campo
   getErrorMessage(fieldName: string): string {
     const control = this.loginForm.get(fieldName);
     if (!control || !control.errors || !control.touched) return '';
@@ -53,6 +57,7 @@ export class Login {
     return 'Unknown error';
   }
 
+  // Sirve para enviar el formulario de login
   onSubmit(): void {
     if (this.isLoading) return;
     if (this.loginForm.invalid) {
@@ -62,8 +67,10 @@ export class Login {
     this.isLoading = true;
     this.errorMessage = null;
 
+    // Sirve para recordar las credenciales
     const rememberMe = this.loginForm.get('rememberMe')!.value;
     
+    // Sirve para iniciar sesión
     this.authService.login({
       id: this.loginForm.get('id')!.value,
       password: this.loginForm.get('password')!.value,

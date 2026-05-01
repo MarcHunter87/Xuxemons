@@ -4,15 +4,15 @@
     padding: 1.5rem;
     background-color: var(--primary-color);
     border-radius: 15px;
-    box-shadow: 0 2px 8px var(--shadow-color);
-    border: 1px solid var(--light-gray-color);
+    box-shadow: 0 2px 8px var(--color-black-soft);
+    border: 1px solid var(--color-gray-light);
 }
 
 .filter-label {
     display: block;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-alt-color);
+    color: var(--neutral-black);
     margin-bottom: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -34,7 +34,7 @@
     left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--medium-gray-color);
+    color: var(--neutral-black);
     pointer-events: none;
 }
 
@@ -43,15 +43,15 @@
     min-height: 52px;
     padding: 0.9rem 1rem 0.9rem 2.65rem;
     border-radius: 8px;
-    border: 1px solid var(--light-gray-color);
-    background-color: var(--white-color);
-    color: var(--black-color);
+    border: 1px solid var(--color-gray-light);
+    background-color: var(--neutral-white);
+    color: var(--neutral-black);
     font-size: 1rem;
     transition: all 0.2s ease;
 }
 
 .search-box input::placeholder {
-    color: var(--text-muted);
+    color: var(--neutral-black);
 }
 
 .search-box input:focus {
@@ -61,13 +61,10 @@
 .search-box input:focus-visible {
     border-color: var(--accent-color);
     box-shadow:
-        0 0 0 2px var(--white-color),
+        0 0 0 2px var(--neutral-white),
         0 0 0 5px var(--accent-color);
 }
 
-.select-box {
-    min-width: 0;
-}
 
 .custom-select {
     position: relative;
@@ -82,9 +79,9 @@
     gap: 0.5rem;
     padding: 0.9rem 1rem;
     border-radius: 8px;
-    border: 1px solid var(--light-gray-color);
-    background: var(--white-color);
-    color: var(--black-color);
+    border: 1px solid var(--color-gray-light);
+    background: var(--neutral-white);
+    color: var(--neutral-black);
     font-size: 1rem;
     font-family: inherit;
     cursor: pointer;
@@ -94,11 +91,10 @@
 
 .custom-select-label {
     flex: 1;
-    min-width: 0;
 }
 
 .custom-select-trigger:hover {
-    border-color: var(--medium-gray-color);
+    border-color: var(--color-gray-medium);
 }
 
 .custom-select-trigger:focus {
@@ -106,25 +102,25 @@
 }
 
 .custom-select-trigger .bi {
-    color: var(--dark-gray-color);
+    color: var(--neutral-black);
     flex-shrink: 0;
 }
 
 .custom-select-trigger:focus-visible {
     border-color: var(--accent-color);
     box-shadow:
-        0 0 0 2px var(--white-color),
+        0 0 0 2px var(--neutral-white),
         0 0 0 5px var(--accent-color);
 }
 
 .custom-select-placeholder {
-    color: var(--text-muted);
+    color: var(--neutral-black);
 }
 
 .custom-select-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 20;
+    z-index: 2;
 }
 
 .custom-select-list {
@@ -135,13 +131,13 @@
     margin: 0.25rem 0 0;
     padding: 0.25rem 0;
     list-style: none;
-    background: var(--white-color);
-    border: 1px solid var(--light-gray-color);
+    background: var(--neutral-white);
+    border: 1px solid var(--color-gray-light);
     border-radius: 8px;
-    box-shadow: 0 4px 16px var(--shadow-color);
+    box-shadow: 0 4px 16px var(--color-black-soft);
     max-height: 280px;
     overflow-y: auto;
-    z-index: 21;
+    z-index: 3;
 }
 
 .custom-select-option {
@@ -151,7 +147,7 @@
     padding: 0.65rem 1rem;
     cursor: pointer;
     font-size: 1rem;
-    color: var(--black-color);
+    color: var(--neutral-black);
     transition: background 0.15s;
 }
 
@@ -166,8 +162,8 @@
 }
 
 .custom-select-option[aria-selected="true"] {
-    background: var(--surface-light);
-    color: var(--black-color);
+    background: var(--color-gray-light);
+    color: var(--neutral-black);
     font-weight: 600;
 }
 

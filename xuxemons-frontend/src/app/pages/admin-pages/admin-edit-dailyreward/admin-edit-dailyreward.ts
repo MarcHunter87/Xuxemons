@@ -32,6 +32,7 @@ export class AdminDailyrewardEdit implements OnInit {
     quantity: [1, [Validators.required, Validators.pattern(/^\d+$/), Validators.min(1)]],
   });
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? parseInt(idParam, 10) : NaN;
@@ -63,6 +64,7 @@ export class AdminDailyrewardEdit implements OnInit {
       });
   }
 
+  // Sirve para actualizar el formulario con los datos de la recompensa
   private patchForm(reward: DailyReward): void {
     this.rewardItemId.set(reward.item_id);
     this.rewardItemName.set(reward.item_name ?? null);
@@ -75,6 +77,7 @@ export class AdminDailyrewardEdit implements OnInit {
     );
   }
 
+  // Sirve para convertir el tiempo a formato de entrada
   private toInputTime(rawTime: string): string {
     if (!rawTime) return '';
     const parts = rawTime.split(':');
@@ -82,11 +85,13 @@ export class AdminDailyrewardEdit implements OnInit {
     return `${parts[0]}:${parts[1]}`;
   }
 
+  // Sirve para verificar si un campo es inválido
   isFieldInvalid(fieldName: string): boolean {
     const control = this.form.get(fieldName);
     return !!(control && control.invalid && control.touched);
   }
 
+  // Sirve para obtener el mensaje de error de un campo
   getErrorMessage(fieldName: string): string {
     const control = this.form.get(fieldName);
     if (!control || !control.errors || !control.touched) {
@@ -99,6 +104,7 @@ export class AdminDailyrewardEdit implements OnInit {
     return 'Invalid value.';
   }
 
+  // Sirve para enviar el formulario
   submit(): void {
     this.errorMessage.set(null);
     this.successMessage.set(null);
@@ -135,6 +141,7 @@ export class AdminDailyrewardEdit implements OnInit {
       });
   }
 
+  // Sirve para volver a la página de recompensas diarias
   goBack(): void {
     this.router.navigateByUrl('/admin/daily-rewards');
   }

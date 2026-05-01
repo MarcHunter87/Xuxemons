@@ -1,17 +1,18 @@
 <div class="battle-container">
-  <audio #battleMusic [src]="getAssetUrl('/Xuxemon_evolving.mp3')" preload="auto" loop></audio>
+  <audio #battleMusic [src]="getAssetUrl('/BattleOST.mp3')" preload="auto" loop></audio>
   <div class="battle-wrapper">
     <!-- Main Battle Arena -->
     <div class="battle-arena">
-      <!-- Turn Indicator -->
-      <div class="turn-indicator" [class.player-turn]="currentTurn() === 'player'" [class.opponent-turn]="currentTurn() === 'opponent'">
-        {{ currentTurn() === 'player' ? 'YOUR TURN' : 'OPPONENT TURN' }}
+      <div class="turn-indicator" [class.player-turn]="vm.isBattleActive() && vm.currentTurn() === 'player'" [class.opponent-turn]="vm.isBattleActive() && vm.currentTurn() === 'opponent'">
+        {{ vm.battleTurnLabel() }}
       </div>
-
-      <div class="battle-screen" [style.background-image]="'url(' + getAssetUrl('/fondo batalla.jfif') + ')'">
-      @if (attackImpactSide()) {
-        <div class="impact-burst" [class.impact-burst--player]="attackImpactSide() === 'player'" [class.impact-burst--opponent]="attackImpactSide() === 'opponent'"></div>
+      @if (vm.battleCallout()) {
+        <div class="battle-callout" [class.battle-callout--buff]="vm.battleCallout()!.tone === 'buff'" [class.battle-callout--nerf]="vm.battleCallout()!.tone === 'nerf'" [class.battle-callout--neutral]="vm.battleCallout()!.tone === 'neutral'">
+          {{ vm.battleCallout()!.text }}
+        </div>
       }
+
+      <div class="battle-screen" [style.background-image]="'url(' + getAssetUrl('/fondo-batalla.webp') + ')'">
       @if (selectedXuxemon() && opponentXuxemon()) {
         <div class="battle-grid">
           <!-- Opponent Position -->
@@ -29,8 +30,17 @@
               </div>
               <hr class="status-divider">
               <div class="name-row">
-                <span class="name">{{ opponentXuxemon()?.name }}</span>
-                <span class="level">Lv.{{ opponentXuxemon()?.level || 50 }}</span>
+                <div class="name-block">
+                  <div class="xuxemon-title-row">
+                    <span class="name">{{ opponentXuxemon()?.name }}</span>
+                    @if (opponentXuxemon()?.level != null) {
+                      <span class="xuxemon-level">Lv.{{ opponentXuxemon()!.level }}</span>
+                    }
+                  </div>
+                  @if (opponentXuxemon()?.size) {
+                    <span class="xuxemon-size-badge">{{ opponentXuxemon()!.size }}</span>
+                  }
+                </div>
               </div>
               <div class="hp-bar-container">
                 <div class="hp-bar" [style.width.%]="opponentHP()" [class.low]="opponentHP() < 20" [class.med]="opponentHP() < 50 && opponentHP() >= 20"></div>
@@ -41,23 +51,20 @@
 
               <!-- Status Effects Display -->
               <div class="status-effects">
-                @if (opponentXuxemon()?.statusEffect?.icon_url) {
-                  <img [src]="opponentXuxemon()?.statusEffect?.icon_url" [title]="opponentXuxemon()?.statusEffect?.name" class="status-icon">
-                }
-                @if (opponentXuxemon()?.side_effect_1?.icon_url) {
-                  <img [src]="opponentXuxemon()?.side_effect_1?.icon_url" [title]="opponentXuxemon()?.side_effect_1?.name" class="status-icon">
-                }
-                @if (opponentXuxemon()?.side_effect_2?.icon_url) {
-                  <img [src]="opponentXuxemon()?.side_effect_2?.icon_url" [title]="opponentXuxemon()?.side_effect_2?.name" class="status-icon">
-                }
-                @if (opponentXuxemon()?.side_effect_3?.icon_url) {
-                  <img [src]="opponentXuxemon()?.side_effect_3?.icon_url" [title]="opponentXuxemon()?.side_effect_3?.name" class="status-icon">
+                @for (effect of getXuxemonAllStates(opponentXuxemon()); track $index) {
+                  <span class="status-banner-badge" [title]="effect.name">
+                    @if (effect.icon_url) {
+                      <img class="status-banner-icon" [src]="effect.icon_url" [alt]="effect.name">
+                    }
+                    <span class="status-banner-text">{{ effect.name }}</span>
+                  </span>
                 }
               </div>
             </div>
 
-            <div class="sprite-container opponent-sprite" [class.hit]="opponentHit()">
-              <img [src]="opponentXuxemon()!.image_url" [class.attacking]="opponentAttacking()" alt="Opponent">
+            <div #opponentSprite class="sprite-container opponent-sprite" [class.attacking]="vm.isOpponentAttacking()" [class.fainting]="vm.isOpponentFainting()" [class.hit]="vm.isOpponentHit()">
+              <img [src]="opponentXuxemon()!.image_url" alt="Opponent" [class.attacking]="vm.isOpponentAttacking()" [class.fainting]="vm.isOpponentFainting()" [class.attacking-speed]="vm.isOpponentAttacking() && vm.attackVisualType() === 'speed'" [class.attacking-technical]="vm.isOpponentAttacking() && vm.attackVisualType() === 'technical'" [class.attacking-power]="vm.isOpponentAttacking() && vm.attackVisualType() === 'power'" [class.attacking-speed-special]="vm.isOpponentAttacking() && vm.attackVisualType() === 'speed-special'" [class.attacking-technical-special]="vm.isOpponentAttacking() && vm.attackVisualType() === 'technical-special'" [class.attacking-power-special]="vm.isOpponentAttacking() && vm.attackVisualType() === 'power-special'">
+              <span class="faint-particles" aria-hidden="true"></span>
               <div class="platform"></div>
             </div>
           </div>
@@ -77,8 +84,17 @@
               </div>
               <hr class="status-divider">
               <div class="name-row">
-                <span class="name">{{ selectedXuxemon()?.name }}</span>
-                <span class="level">Lv.{{ selectedXuxemon()?.level || 50 }}</span>
+                <div class="name-block">
+                  <div class="xuxemon-title-row">
+                    <span class="name">{{ selectedXuxemon()?.name }}</span>
+                    @if (selectedXuxemon()?.level != null) {
+                      <span class="xuxemon-level">Lv.{{ selectedXuxemon()!.level }}</span>
+                    }
+                  </div>
+                  @if (selectedXuxemon()?.size) {
+                    <span class="xuxemon-size-badge">{{ selectedXuxemon()!.size }}</span>
+                  }
+                </div>
               </div>
               <div class="hp-bar-container">
                 <div class="hp-bar" [style.width.%]="playerHP()" [class.low]="playerHP() < 20" [class.med]="playerHP() < 50 && playerHP() >= 20"></div>
@@ -89,26 +105,57 @@
 
               <!-- Status Effects Display -->
               <div class="status-effects">
-                @if (selectedXuxemon()?.statusEffect?.icon_url) {
-                  <img [src]="selectedXuxemon()?.statusEffect?.icon_url" [title]="selectedXuxemon()?.statusEffect?.name" class="status-icon">
-                }
-                @if (selectedXuxemon()?.side_effect_1?.icon_url) {
-                  <img [src]="selectedXuxemon()?.side_effect_1?.icon_url" [title]="selectedXuxemon()?.side_effect_1?.name" class="status-icon">
-                }
-                @if (selectedXuxemon()?.side_effect_2?.icon_url) {
-                  <img [src]="selectedXuxemon()?.side_effect_2?.icon_url" [title]="selectedXuxemon()?.side_effect_2?.name" class="status-icon">
-                }
-                @if (selectedXuxemon()?.side_effect_3?.icon_url) {
-                  <img [src]="selectedXuxemon()?.side_effect_3?.icon_url" [title]="selectedXuxemon()?.side_effect_3?.name" class="status-icon">
+                @for (effect of getXuxemonAllStates(selectedXuxemon()); track $index) {
+                  <span class="status-banner-badge" [title]="effect.name">
+                    @if (effect.icon_url) {
+                      <img class="status-banner-icon" [src]="effect.icon_url" [alt]="effect.name">
+                    }
+                    <span class="status-banner-text">{{ effect.name }}</span>
+                  </span>
                 }
               </div>
             </div>
 
-            <div class="sprite-container player-sprite" [class.hit]="playerHit()">
-              <img [src]="selectedXuxemon()!.image_url" [class.attacking]="playerAttacking()" alt="Player">
+            <div #playerSprite class="sprite-container player-sprite" [class.attacking]="vm.isPlayerAttacking()" [class.fainting]="vm.isPlayerFainting()" [class.hit]="vm.isPlayerHit()">
+              <img [src]="selectedXuxemon()!.image_url" alt="Player" [class.attacking]="vm.isPlayerAttacking()" [class.fainting]="vm.isPlayerFainting()" [class.attacking-speed]="vm.isPlayerAttacking() && vm.attackVisualType() === 'speed'" [class.attacking-technical]="vm.isPlayerAttacking() && vm.attackVisualType() === 'technical'" [class.attacking-power]="vm.isPlayerAttacking() && vm.attackVisualType() === 'power'" [class.attacking-speed-special]="vm.isPlayerAttacking() && vm.attackVisualType() === 'speed-special'" [class.attacking-technical-special]="vm.isPlayerAttacking() && vm.attackVisualType() === 'technical-special'" [class.attacking-power-special]="vm.isPlayerAttacking() && vm.attackVisualType() === 'power-special'">
+              <span class="faint-particles" aria-hidden="true"></span>
               <div class="platform"></div>
             </div>
           </div>
+        </div>
+
+        <div
+          class="attack-trail"
+          [class.active]="vm.activeAttackTrail() !== null"
+          [class.attack-trail--player]="vm.activeAttackTrail() === 'player'"
+          [class.attack-trail--opponent]="vm.activeAttackTrail() === 'opponent'"
+          [class.attack-trail--speed]="vm.attackVisualType() === 'speed'"
+          [class.attack-trail--technical]="vm.attackVisualType() === 'technical'"
+          [class.attack-trail--power]="vm.attackVisualType() === 'power'"
+          [class.attack-trail--speed-special]="vm.attackVisualType() === 'speed-special'"
+          [class.attack-trail--technical-special]="vm.attackVisualType() === 'technical-special'"
+          [class.attack-trail--power-special]="vm.attackVisualType() === 'power-special'"
+          aria-hidden="true">
+        </div>
+
+        <div
+          class="impact-burst"
+          [class.active]="vm.activeImpactBurst() !== null"
+          [class.impact-burst--player]="vm.activeImpactBurst() === 'player'"
+          [class.impact-burst--opponent]="vm.activeImpactBurst() === 'opponent'"
+          [class.impact-burst--speed]="vm.attackVisualType() === 'speed'"
+          [class.impact-burst--technical]="vm.attackVisualType() === 'technical'"
+          [class.impact-burst--power]="vm.attackVisualType() === 'power'"
+          [class.impact-burst--speed-special]="vm.attackVisualType() === 'speed-special'"
+          [class.impact-burst--technical-special]="vm.attackVisualType() === 'technical-special'"
+          [class.impact-burst--power-special]="vm.attackVisualType() === 'power-special'"
+          aria-hidden="true">
+        </div>
+
+        <div
+          class="battle-hit-flash"
+          [class.active]="vm.activeImpactBurst() !== null"
+          aria-hidden="true">
         </div>
       } @else {
         <div class="empty-arena">
@@ -118,203 +165,36 @@
       }
     </div>
 
-    <!-- Battle Footer -->
-    <div class="battle-footer">
-      <div class="battle-logs">
-        @for (log of battleLog(); track $index) {
-          <p [class.new-log]="$index === 0">{{ log }}</p>
-        } @empty {
-          <p>The battle begins!</p>
-        }
-      </div>
-
-      <div class="battle-actions">
-        @if (battleStatus() === 'ready' && currentTurn() === 'player' && !currentSubMenu()) {
-          <div class="menu-grid">
-            <button class="menu-btn fight" (click)="showSubMenu('attacks')">FIGHT</button>
-            <button class="menu-btn bag" (click)="showSubMenu('bag')">BAG</button>
-            <button class="menu-btn pokemon" (click)="showSubMenu('switch')">POKEMON</button>
-            <button class="menu-btn run" (click)="runAway()">RUN</button>
-          </div>
-        } @else if (currentSubMenu() === 'attacks') {
-          <div class="attack-grid">
-            @for (atk of selectedXuxemon()?.attacks; track atk.id) {
-              <button class="atk-btn" (click)="attack(atk)">{{ atk.name }}</button>
-            } @empty {
-              <button class="atk-btn" (click)="attack({name: 'Tackle', dmg: 10})">Tackle</button>
-              <button class="atk-btn" (click)="attack({name: 'Quick Attack', dmg: 15})">Quick Attack</button>
-            }
-            <button class="back-btn" (click)="showSubMenu(null)">BACK</button>
-          </div>
-        } @else if (currentSubMenu() === 'bag') {
-          <div class="bag-panel">
-            <div class="bag-items-grid">
-            @for (item of paginatedBagItems(); track item.id) {
-              <button class="atk-btn bag-item-btn" (click)="chooseBagItem(item)">
-                <img class="bag-item-icon" [src]="item.iconPath" [alt]="item.name">
-                <span class="bag-item-copy">
-                  <span class="bag-item-name">{{ item.name }}</span>
-                  <span class="bag-item-qty">x{{ item.quantity }}</span>
-                </span>
-              </button>
-            } @empty {
-              <p class="no-items">No items available</p>
-            }
-            </div>
-            @if (bagPageCount() > 1) {
-              <div class="bag-pagination">
-                <button class="back-btn bag-pagination-btn" (click)="previousBagPage()" [disabled]="!canGoToPreviousBagPage()">PREV</button>
-                <span class="bag-pagination-status">Page {{ bagPage() + 1 }} / {{ bagPageCount() }}</span>
-                <button class="back-btn bag-pagination-btn" (click)="nextBagPage()" [disabled]="!canGoToNextBagPage()">NEXT</button>
-              </div>
-            }
-            <button class="back-btn" (click)="showSubMenu(null)">BACK</button>
-          </div>
-        } @else if (currentSubMenu() === 'bag-target') {
-          <div class="attack-grid">
-            @for (xuxemon of getEligibleItemTargets(); track xuxemon.adquired_id || xuxemon.id) {
-              <button class="atk-btn" (click)="useItemOnTarget(xuxemon)">
-                {{ xuxemon.name }}
-                <br>
-                HP {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}
-              </button>
-            } @empty {
-              <p class="no-items">No valid targets for {{ selectedBattleItem()?.name }}</p>
-            }
-            <button class="back-btn" (click)="cancelBagTargeting()">BACK</button>
-          </div>
-        } @else if (currentSubMenu() === 'switch') {
-          <div class="attack-grid">
-            @for (xuxemon of myXuxemons(); track xuxemon.adquired_id || xuxemon.id) {
-              <button class="atk-btn switch-option" [class.switch-option--active]="isPlayerActiveXuxemon(xuxemon)" [class.switch-option--fainted]="(xuxemon.current_hp ?? xuxemon.hp ?? 0) <= 0" [disabled]="!canSwitchToXuxemon(xuxemon)" (click)="switchXuxemon(xuxemon)">
-                {{ xuxemon.name }}
-                <br>
-                HP {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}
-                <span class="switch-option-badge">{{ isPlayerActiveXuxemon(xuxemon) ? 'ACTIVE' : ((xuxemon.current_hp ?? xuxemon.hp ?? 0) <= 0 ? 'KO' : 'READY') }}</span>
-              </button>
-            } @empty {
-              <p class="no-items">No other available Xuxemons</p>
-            }
-            @if (!forcedSwitch()) {
-              <button class="back-btn" (click)="showSubMenu(null)">BACK</button>
-            }
-          </div>
-        } @else {
-          <div class="waiting-msg">
-            <span class="pulse">
-              {{ forcedSwitch() ? 'Choose your next Xuxemon...' : (battleStatus() === 'animating' ? 'Executing action...' : 'Waiting for opponent...') }}
-            </span>
-          </div>
-        }
-      </div>
-      </div>
-    </div>
+    <app-battle-footer [vm]="vm"></app-battle-footer>
   </div>
 
-  <!-- Selection Overlay (Only shown if no Xuxemon selected) -->
-  @if (!selectedXuxemon() && isPractice()) {
-    <div class="selection-overlay">
-      <div class="selection-card">
-        <h2>Select your Xuxemon</h2>
-        <p class="sidebar-info">Choose a Xuxemon from your battle team to start.</p>
-        <div class="xuxemon-list">
-          @for (xuxemon of myXuxemons(); track xuxemon.adquired_id || xuxemon.id) {
-            <div class="xuxemon-item-card" (click)="selectXuxemon(xuxemon)">
-              <img [src]="xuxemon.image_url" [alt]="xuxemon.name">
-              <div class="item-card-info">
-                <span class="item-card-name">{{ xuxemon.name }}</span>
-                <div class="item-card-stats">
-                  <span>HP: {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}</span>
-                  <span>ATK: {{ xuxemon.attack }}</span>
-                  <span>DEF: {{ xuxemon.defense }}</span>
-                </div>
-              </div>
-            </div>
-          } @empty {
-            <p class="empty-team-msg">Your team is empty! Go to your profile to select Xuxemons for battle.</p>
-          }
-          <button class="back-btn" routerLink="/profile">Back to Profile</button>
-        </div>
-      </div>
-    </div>
+  @if (vm.showVictoryModal()) {
+    <app-battle-victory-modal [vm]="vm"></app-battle-victory-modal>
+  }
+  @if (vm.showStealModal()) {
+    <app-battle-steal-modal [vm]="vm"></app-battle-steal-modal>
+  }
+  @if (vm.showRunConfirmModal()) {
+    <app-battle-run-confirm-modal [vm]="vm"></app-battle-run-confirm-modal>
+  }
+  @if (vm.showRunawayResultModal()) {
+    <app-battle-runaway-result-modal [vm]="vm"></app-battle-runaway-result-modal>
   }
 
-  <!-- Dice Overlay -->
-  @if (showDice()) {
-    <div class="dice-overlay">
-      <div class="dice-container">
-        <div class="dice" [class.rolling]="diceRolling()">
-          {{ diceValue() || '?' }}
-        </div>
-        <p class="dice-label">{{ diceLabel() }}</p>
+  <div
+    #diceOverlay
+    class="dice-overlay"
+    [class.visible]="vm.isDiceOverlayVisible()"
+    [class.dice-overlay--low]="vm.diceOutcomeTone() === 'low'"
+    [class.dice-overlay--mid]="vm.diceOutcomeTone() === 'mid'"
+    [class.dice-overlay--high]="vm.diceOutcomeTone() === 'high'"
+    aria-live="polite"
+    aria-atomic="true">
+    <div #diceContainer class="dice-container">
+      <div #diceCube class="dice" [attr.data-state]="vm.isDiceRolling() ? 'rolling' : 'landed'" [attr.data-value]="vm.diceValue() || 1">
+        {{ vm.isDiceRolling() ? '?' : vm.diceValue() }}
       </div>
+      <span class="dice-label">{{ vm.isDiceRolling() ? 'Rolling...' : ('Roll: ' + vm.diceValue() + (vm.diceOutcomeTone() === 'low' ? ' - LOW' : vm.diceOutcomeTone() === 'mid' ? ' - MID' : vm.diceOutcomeTone() === 'high' ? ' - HIGH' : '')) }}</span>
     </div>
-  }
-
-  <!-- Victory Modal -->
-  @if (showVictoryModal()) {
-    <div class="victory-modal">
-      <div class="victory-content">
-        <h2 class="victory-title">VICTORY!</h2>
-        <img [src]="selectedXuxemon()?.image_url" class="winner-sprite" alt="">
-        <p>{{ selectedXuxemon()?.name }} won!</p>
-        @if (stolenXuxemon()) {
-          <p>You stole {{ stolenXuxemon()?.name }} from your rival.</p>
-        }
-        <button class="btn-continue" (click)="closeVictoryModal()">CONTINUE</button>
-      </div>
-    </div>
-  }
-
-  @if (showStealModal()) {
-    <div class="victory-modal">
-      <div class="victory-content">
-        <h2 class="victory-title">PRIZE</h2>
-        <p>Choose one Xuxemon from your rival.</p>
-        <div class="xuxemon-list">
-          @for (xuxemon of stealOptions(); track xuxemon.adquired_id || xuxemon.id) {
-            <div class="xuxemon-item-card" (click)="confirmPrizeSelection(xuxemon)">
-              <img [src]="xuxemon.image_url" [alt]="xuxemon.name">
-              <div class="item-card-info">
-                <span class="item-card-name">{{ xuxemon.name }}</span>
-                <div class="item-card-stats">
-                  <span>HP: {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}</span>
-                  <span>ATK: {{ xuxemon.attack }}</span>
-                  <span>DEF: {{ xuxemon.defense }}</span>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-        <button class="btn-continue" (click)="skipPrizeSelection()" [disabled]="isSubmittingBattleResult()">SKIP</button>
-      </div>
-    </div>
-  }
-
-  @if (showRunConfirmModal()) {
-    <div class="victory-modal" (click)="cancelRunAway()">
-      <div class="battle-dialog battle-dialog--warning" (click)="$event.stopPropagation()">
-        <h2 class="battle-dialog-title">Run Away</h2>
-        <p class="battle-dialog-text">Seguro que quieres huir del combate?</p>
-        <div class="battle-dialog-actions">
-          <button type="button" class="battle-dialog-btn battle-dialog-btn--secondary" (click)="cancelRunAway()">Cancel</button>
-          <button type="button" class="battle-dialog-btn battle-dialog-btn--danger" (click)="confirmRunAway()" [disabled]="isSubmittingRun()">
-            @if (isSubmittingRun()) { Leaving... } @else { Run Away }
-          </button>
-        </div>
-      </div>
-    </div>
-  }
-
-  @if (showRunawayResultModal()) {
-    <div class="victory-modal">
-      <div class="battle-dialog battle-dialog--info">
-        <h2 class="battle-dialog-title">Battle Ended</h2>
-        <p class="battle-dialog-text">{{ runawayResultMessage() }}</p>
-        <div class="battle-dialog-actions battle-dialog-actions--single">
-          <button type="button" class="battle-dialog-btn battle-dialog-btn--primary" (click)="closeRunawayResultModal()">Back To Friends</button>
-        </div>
-      </div>
-    </div>
-  }
+  </div>
 </div>

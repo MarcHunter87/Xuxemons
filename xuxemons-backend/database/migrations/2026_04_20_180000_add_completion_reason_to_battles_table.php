@@ -8,16 +8,28 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('battles', function (Blueprint $table) {
-            $table->string('completion_reason')->nullable()->after('winner_id');
-            $table->string('runner_id')->nullable()->after('completion_reason');
-        });
+        if (! Schema::hasColumn('battles', 'completion_reason')) {
+            Schema::table('battles', function (Blueprint $table) {
+                $table->string('completion_reason')->nullable()->after('winner_id');
+            });
+        }
+
+        if (! Schema::hasColumn('battles', 'runner_id')) {
+            Schema::table('battles', function (Blueprint $table) {
+                $table->string('runner_id')->nullable()->after('completion_reason');
+            });
+        }
     }
 
     public function down(): void
     {
         Schema::table('battles', function (Blueprint $table) {
-            $table->dropColumn(['completion_reason', 'runner_id']);
+            if (Schema::hasColumn('battles', 'completion_reason')) {
+                $table->dropColumn('completion_reason');
+            }
+            if (Schema::hasColumn('battles', 'runner_id')) {
+                $table->dropColumn('runner_id');
+            }
         });
     }
 };

@@ -20,14 +20,17 @@ export class AdminSideeffects implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly hasContent = computed(() => !this.isLoading() && !this.errorMessage());
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.loadSideEffects();
   }
 
+  // Sirve para cargar los efectos secundarios
   private loadSideEffects(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
+    // Sirve para cargar los efectos secundarios
     this.adminService
       .getAllSideEffects()
       .pipe(finalize(() => this.isLoading.set(false)))

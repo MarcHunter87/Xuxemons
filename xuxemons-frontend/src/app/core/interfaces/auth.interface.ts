@@ -1,3 +1,4 @@
+// Sirve para definir la interfaz de un usuario
 export interface User {
   id: string;
   name: string;
@@ -11,10 +12,12 @@ export interface User {
   level?: number;
   xp?: number;
   win_streak?: number;
+  total_wins?: number;
   total_battles?: number;
   theme?: 'light' | 'dark';
 }
 
+// Sirve para definir la interfaz de los datos de registro
 export interface RegisterPayload {
   id: string;
   name: string;
@@ -24,11 +27,13 @@ export interface RegisterPayload {
   password_confirmation: string;
 }
 
+// Sirve para definir la interfaz de los datos de inicio de sesión
 export interface LoginPayload {
   id: string;
   password: string;
 }
 
+// Sirve para definir la interfaz de los datos de actualización de información personal
 export interface UpdatePersonalInfoPayload {
   name?: string;
   surname?: string;
@@ -37,32 +42,38 @@ export interface UpdatePersonalInfoPayload {
   theme?: 'light' | 'dark';
 }
 
+// Sirve para definir la interfaz de los datos de actualización de contraseña
 export interface UpdatePasswordPayload {
   current_password: string;
   new_password: string;
 }
 
+// Sirve para definir la interfaz de la respuesta de autenticación
 export interface AuthResponse {
   access_token?: string;
   user?: User;
 }
 
+// Sirve para definir la interfaz de la respuesta de actualización de información personal
 export interface UpdatePersonalInfoResponse {
   message: string;
   user: User;
   errors?: Record<string, string[]>;
 }
 
+// Sirve para definir la interfaz de la respuesta de actualización de contraseña
 export interface UpdatePasswordResponse {
   message: string;
   errors?: Record<string, string[]>;
 }
 
+// Sirve para definir la interfaz de la respuesta de desactivación de cuenta
 export interface DeactivateAccountResponse {
   message: string;
   errors?: Record<string, string[]>;
 }
 
+// Sirve para definir la interfaz de un elemento de notificación de recompensa diaria
 export interface DailyRewardNotificationItem {
   item_id: number;
   name: string;
@@ -71,6 +82,7 @@ export interface DailyRewardNotificationItem {
   quantity: number;
 }
 
+// Sirve para definir la interfaz de la notificación de recompensa diaria
 export interface DailyRewardNotification {
   id: number;
   reward_date: string;
@@ -83,6 +95,7 @@ export interface DailyRewardNotification {
   items: DailyRewardNotificationItem[];
 }
 
+// Sirve para definir la interfaz de la respuesta de la notificación de recompensa diaria
 export interface DailyRewardNotificationResponse {
   data: DailyRewardNotification | null;
 }

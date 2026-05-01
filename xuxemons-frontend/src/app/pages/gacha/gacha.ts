@@ -2,13 +2,14 @@ import { AfterViewChecked, Component, HostListener, inject, signal, OnInit, OnDe
 import { Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { GachaAwardModal } from '../../core/components/modals/gacha-award-modal/gacha-award-modal';
 import { XuxemonService, Xuxemon } from '../../core/services/xuxemon.service';
 import { AuthService } from '../../core/services/auth';
 
 @Component({
     selector: 'app-gacha',
     standalone: true,
-    imports: [DatePipe],
+    imports: [DatePipe, GachaAwardModal],
     templateUrl: './gacha.html',
     styleUrl: './gacha.css',
 })
@@ -22,8 +23,6 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     @ViewChild('rouletteBox') rouletteBox!: ElementRef<HTMLElement>;
     @ViewChild('awardDialogRoot') awardDialogRoot?: ElementRef<HTMLElement>;
     @ViewChild('awardCloseButton') awardCloseButton?: ElementRef<HTMLButtonElement>;
-    @ViewChild('spinErrorDialogRoot') spinErrorDialogRoot?: ElementRef<HTMLElement>;
-    @ViewChild('spinErrorOkButton') spinErrorOkButton?: ElementRef<HTMLButtonElement>;
     @ViewChild('gachaAudio') gachaAudio?: ElementRef<HTMLAudioElement>;
     @ViewChild('modalAudio') modalAudio?: ElementRef<HTMLAudioElement>;
     private modalAudioRestoreTimeout?: ReturnType<typeof setTimeout>;
@@ -32,7 +31,6 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     public noTransition = signal(false);
     public awardedXuxemon = signal<Xuxemon | null>(null);
     public showAward = signal(false);
-    public spinError = signal<string | null>(null);
     public rouletteItems = signal<Xuxemon[]>([]);
     public trackTransform = signal<string>('translateX(0)');
     public isDataLoaded = signal(false);
@@ -40,40 +38,41 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     private myXuxemonsList = signal<Xuxemon[]>([]);
     private previousFocusedElement: HTMLElement | null = null;
     private shouldFocusAwardCloseButton = false;
-    private shouldFocusErrorButton = false;
 
     readonly revealRayAngles = Array.from({ length: 14 }, (_, i) => Math.round((i * 360) / 14));
     revealSparkles: Array<{ x: number; y: number; size: number; delay: number; duration: number }> = [];
 
+    // Sirve para inicializar el componente
     ngOnInit() {
         this.auth.refreshGachaTickets();
         this.loadRoulette();
         this.xuxemonService.loadMyXuxemons();
-        this.subs.add(this.xuxemonService.myXuxemonsList.subscribe(list => this.myXuxemonsList.set(list)));
+        this.subs.add(this.xuxemonService.myXuxemonsList.subscribe(list => {
+            this.myXuxemonsList.set(list);
+        }));
     }
 
+    // Sirve para destruir el componente
     ngOnDestroy() {
         this.subs.unsubscribe();
     }
 
+    // Sirve para verificar si el botón de cerrar el award debe ser enfocado
     ngAfterViewChecked(): void {
         if (this.shouldFocusAwardCloseButton && this.awardCloseButton?.nativeElement) {
             this.awardCloseButton.nativeElement.focus();
             this.shouldFocusAwardCloseButton = false;
         }
-
-        if (this.shouldFocusErrorButton && this.spinErrorOkButton?.nativeElement) {
-            this.spinErrorOkButton.nativeElement.focus();
-            this.shouldFocusErrorButton = false;
-        }
     }
 
+    // Sirve para cargar la ruleta
     async loadRoulette() {
         await this.xuxemonService.loadAllXuxemons();
         this.isDataLoaded.set(true);
         this.initRoulette();
     }
 
+    // Sirve para inicializar la ruleta
     initRoulette() {
         const list = this.xuxemonService.getXuxemonsList();
         if (list.length > 0) {
@@ -83,6 +82,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         }
     }
 
+    // Sirve para obtener el offset responsive del ganador
     private getWinnerOffsetResponsive(index: number): number {
         const box = this.rouletteBox?.nativeElement;
         if (!box) return 0;
@@ -97,6 +97,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         return (containerWidth / 2) - winnerCenter;
     }
 
+    // Sirve para reproducir el audio de la ruleta
     private playGachaAudio() {
         const audio = this.gachaAudio?.nativeElement;
         if (!audio) return;
@@ -105,6 +106,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         audio.play().catch(e => console.warn('Audio playback prevented by browser policy', e));
     }
 
+    // Sirve para detener el audio de la ruleta
     private stopGachaAudio() {
         const audio = this.gachaAudio?.nativeElement;
         if (!audio) return;
@@ -112,6 +114,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         audio.currentTime = 0;
     }
 
+    // Sirve para girar la ruleta
     async spin() {
         if (this.isSpinning()) return;
         if (this.auth.gachaTicketCount() < 1) return;
@@ -122,7 +125,6 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
 
         this.showAward.set(false);
         this.awardedXuxemon.set(null);
-        this.spinError.set(null);
         this.isSpinning.set(true);
         this.playGachaAudio();
 
@@ -130,16 +132,13 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         this.trackTransform.set('translateX(0)');
         this.initRoulette();
 
-        const winner = await this.xuxemonService.awardRandomXuxemonGacha();
+        const winner = await this.getWinnerWithRetry();
 
         if (!winner) {
             this.stopGachaAudio();
             this.isSpinning.set(false);
             this.noTransition.set(false);
-            this.spinError.set(
-                "Couldn't complete the spin. Make sure you have tickets and your session is still active."
-            );
-            this.shouldFocusErrorButton = true;
+            this.restorePreviousFocus();
             return;
         }
 
@@ -167,33 +166,38 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         }, 6200);
     }
 
+    // Sirve para girar la ruleta nuevamente
     spinAgain() {
         this.closeModal();
         this.spin();
     }
 
+    // Sirve para verificar si las animaciones están habilitadas
     get viewAnimations(): boolean {
         return this.auth.getUser()?.view_animations ?? true;
     }
 
+    // Sirve para obtener el color del tipo de Xuxemon
     getTypeColor(typeName: string): string {
         switch (typeName) {
-            case 'Power': return '#D0181B';
-            case 'Speed': return '#0D6EFD';
-            case 'Technical': return '#28A745';
-            default: return '#777';
+            case 'Power': return 'var(--color-red-base)';
+            case 'Speed': return 'var(--accent-color)';
+            case 'Technical': return 'var(--color-green-base)';
+            default: return 'var(--color-gray-medium)';
         }
     }
 
+    // Sirve para obtener el color del tipo de Xuxemon con glow
     getTypeColorGlow(typeName: string): string {
         switch (typeName) {
-            case 'Power': return 'rgba(208, 24, 27, 0.5)';
-            case 'Speed': return 'rgba(13, 110, 253, 0.5)';
-            case 'Technical': return 'rgba(40, 167, 69, 0.5)';
-            default: return 'rgba(119, 119, 119, 0.5)';
+            case 'Power': return 'var(--color-red-overlay-strong)';
+            case 'Speed': return 'var(--color-blue-overlay-strong)';
+            case 'Technical': return 'var(--color-green-glow-strong)';
+            default: return 'var(--color-white-overlay-strong)';
         }
     }
 
+    // Sirve para reproducir el audio de la modal de revelación
     private playModalRevealAudio() {
         const bgm = this.gachaAudio?.nativeElement;
         const sfx = this.modalAudio?.nativeElement;
@@ -208,6 +212,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         }, 2800);
     }
 
+    // Sirve para generar las partículas de la ruleta
     private generateSparkles() {
         const count = 100;
         this.revealSparkles = Array.from({ length: count }, () => {
@@ -220,6 +225,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         });
     }
 
+    // Sirve para navegar a los detalles de un Xuxemon reciente
     goToXuxemonDetailsFromRecent(xuxemonId: number): void {
         if (!Number.isFinite(xuxemonId)) {
             return;
@@ -229,6 +235,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         });
     }
 
+    // Sirve para cerrar la modal
     closeModal() {
         clearTimeout(this.modalAudioRestoreTimeout);
         const sfx = this.modalAudio?.nativeElement;
@@ -240,29 +247,16 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         this.restorePreviousFocus();
     }
 
-    closeSpinError(): void {
-        this.stopGachaAudio();
-        this.spinError.set(null);
-        this.restorePreviousFocus();
-    }
-
+    // Sirve para cerrar la modal al presionar Escape
     @HostListener('document:keydown.escape')
     onEscape(): void {
-        if (this.spinError()) {
-            this.closeSpinError();
-            return;
-        }
         if (this.showAward()) this.closeModal();
     }
 
+    // Sirve para cerrar la modal al presionar Enter
     @HostListener('document:keydown', ['$event'])
     onDocumentKeydown(event: KeyboardEvent): void {
         if (event.key !== 'Tab') {
-            return;
-        }
-
-        if (this.spinError()) {
-            this.trapFocus(event, this.spinErrorDialogRoot?.nativeElement);
             return;
         }
 
@@ -271,23 +265,37 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         }
     }
 
-    onModalKeydown(event: KeyboardEvent, modal: 'award' | 'error'): void {
+    // Sirve para cerrar la modal al presionar Tab
+    onModalKeydown(event: KeyboardEvent, modal: 'award'): void {
         if (event.key !== 'Tab') {
             return;
         }
 
         const root = modal === 'award'
             ? this.awardDialogRoot?.nativeElement
-            : this.spinErrorDialogRoot?.nativeElement;
+            : undefined;
         this.trapFocus(event, root);
     }
 
+    // Sirve para obtener el ganador con reintento
+    private async getWinnerWithRetry(): Promise<Xuxemon | null> {
+        let winner = await this.xuxemonService.awardRandomXuxemonGacha();
+        if (winner) {
+            return winner;
+        }
+
+        winner = await this.xuxemonService.awardRandomXuxemonGacha();
+        return winner ?? null;
+    }
+
+    // Sirve para restaurar el foco al elemento anterior
     private restorePreviousFocus(): void {
         if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
             setTimeout(() => this.previousFocusedElement?.focus(), 0);
         }
     }
 
+    // Sirve para atrapar el foco
     private trapFocus(event: KeyboardEvent, root?: HTMLElement): void {
         if (!root) {
             return;

@@ -13,8 +13,8 @@
   background-color: var(--primary-color);
   border-radius: 16px;
   padding: var(--page-section-gap);
-  border: 1px solid var(--light-gray-color);
-  box-shadow: 0 4px 6px -1px var(--shadow-color);
+  border: 1px solid var(--color-gray-light);
+  box-shadow: 0 4px 6px -1px var(--color-black-soft);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -33,7 +33,7 @@
 }
 
 .label {
-  color: var(--black-color);
+  color: var(--neutral-black);
   font-size: 16px;
   font-weight: 500;
   text-transform: capitalize;
@@ -41,7 +41,7 @@
 }
 
 .streak-text {
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   font-size: 44px;
   font-weight: 800;
   margin: 0;
@@ -75,7 +75,7 @@
 .battle-btn {
   display: block;
   background-color: var(--accent-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
   border: none;
   border-radius: 12px;
   padding: 14px 32px;
@@ -95,7 +95,7 @@
 .battle-btn:hover {
   background-color: var(--accent-on-light);
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px var(--accent-glow);
+  box-shadow: 0 6px 15px var(--color-blue-overlay-medium);
 }
 
 .battle-btn:active {

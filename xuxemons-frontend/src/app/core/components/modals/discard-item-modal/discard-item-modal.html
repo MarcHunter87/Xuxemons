@@ -1,0 +1,38 @@
+<div class="discard-modal-backdrop" role="dialog" aria-modal="true" (click)="onBackdropClick()" (keydown)="onModalKeydown($event)">
+  <div #dialogRoot class="discard-modal" tabindex="-1" (click)="$event.stopPropagation()">
+    <div class="discard-picker">
+      <p id="discard-modal-title" class="discard-label">How many do you want to discard?</p>
+      <label for="discard-qty-input" class="qty-label mb-2">Quantity to discard</label>
+      <div class="qty-controls compact qty-controls-row discard-controls">
+        <button class="qty-btn qty-btn-use qty-decrease" (click)="inventoryContext.updateDiscardQuantity(inventoryContext.discardQuantity() - 1)"
+          [disabled]="inventoryContext.discardQuantity() <= 1 || inventoryContext.isDiscarding()">
+          <i class="bi bi-dash-lg" aria-hidden="true"></i>
+        </button>
+        <input id="discard-qty-input" class="qty-input styled qty-input-use" type="number" [ngModel]="inventoryContext.discardQuantity()"
+          (ngModelChange)="inventoryContext.updateDiscardQuantity($event)" min="1" [max]="inventoryContext.selectedItem()!.quantity"
+          [disabled]="inventoryContext.isDiscarding()" />
+        <button class="qty-btn qty-btn-use qty-increase" (click)="inventoryContext.updateDiscardQuantity(inventoryContext.discardQuantity() + 1)"
+          [disabled]="inventoryContext.discardQuantity() >= inventoryContext.selectedItem()!.quantity || inventoryContext.isDiscarding()">
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      @if (inventoryContext.discardError()) {
+      <p class="discard-error">⚠ {{ inventoryContext.discardError() }}</p>
+      }
+      @if (inventoryContext.discardApiError()) {
+      <div class="discard-api-error">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>{{ inventoryContext.discardApiError() }}</span>
+      </div>
+      }
+      <div class="discard-confirm-row">
+        <button class="btn btn-secondary btn-lg flex-1 discard-cancel-button" (click)="inventoryContext.cancelDiscard()"
+          [disabled]="inventoryContext.isDiscarding()">Cancel</button>
+        <button class="btn btn-danger btn-lg flex-1" (click)="inventoryContext.confirmDiscard()"
+          [disabled]="inventoryContext.isDiscarding() || !!inventoryContext.discardError() || inventoryContext.discardQuantity() < 1">
+          @if (inventoryContext.isDiscarding()) { Discarding... } @else { Confirm Discard }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

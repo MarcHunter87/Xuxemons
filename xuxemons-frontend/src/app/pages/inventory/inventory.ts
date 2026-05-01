@@ -10,13 +10,13 @@ import {
     computed,
     OnInit,
     OnDestroy,
-    ViewChild,
-    AfterViewInit,
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { EvolutionSequence } from '../../core/components/evolution-sequence/evolution-sequence';
+import { DiscardItemModal } from '../../core/components/modals/discard-item-modal/discard-item-modal';
+import { UseItemModal } from '../../core/components/modals/use-item-modal/use-item-modal';
 import type { InventoryItem, UseItemResponseData, Xuxemon, XuxemonSize } from '../../core/interfaces';
 import { AuthService } from '../../core/services/auth';
 import { InventoryService } from '../../core/services/inventory.service';
@@ -24,7 +24,7 @@ import { XuxemonService } from '../../core/services/xuxemon.service';
 
 @Component({
     selector: 'app-inventory',
-    imports: [NgClass, FormsModule, EvolutionSequence],
+    imports: [NgClass, FormsModule, EvolutionSequence, UseItemModal, DiscardItemModal],
     templateUrl: './inventory.html',
     styleUrl: './inventory.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,12 +39,6 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     private focusUseItemSearch = false;
     private focusDiscardCancelButton = false;
     private previousFocusedElement: HTMLElement | null = null;
-
-    @ViewChild('useModalRoot') useModalRoot?: ElementRef<HTMLElement>;
-    @ViewChild('discardModalRoot') discardModalRoot?: ElementRef<HTMLElement>;
-    @ViewChild('discardCancelButton') discardCancelButton?: ElementRef<HTMLButtonElement>;
-    @ViewChild('plusQtyBtn') plusQtyBtn?: ElementRef<HTMLButtonElement>;
-    @ViewChild('qtyInput') qtyInput?: ElementRef<HTMLInputElement>;
 
     readonly items = signal<InventoryItem[]>([]);
     readonly myXuxemons = signal<Xuxemon[]>([]);
@@ -94,6 +88,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return slots;
     });
 
+    // Sirve para obtener el aria label del slot
     getSlotAriaLabel(slot: { slotNumber: number; item?: InventoryItem }): string {
         if (slot.item) {
             return `Slot ${slot.slotNumber} - ${slot.item.quantity} ${slot.item.name}`;
@@ -105,6 +100,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     readonly useQuantity = signal(1);
     readonly useQuantityError = signal<string | null>(null);
 
+    // Sirve para verificar si un Xuxemon tiene un efecto secundario
     private hasSideEffect(xuxemon: Xuxemon | null | undefined, effectName: string): boolean {
         if (!xuxemon) return false;
 
@@ -113,18 +109,22 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
             || xuxemon.side_effect_3?.name === effectName;
     }
 
+    // Sirve para verificar si un Xuxemon está bloqueado por Gluttony
     isGluttonyBlocked(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): boolean {
         return this.selectedItem()?.name === 'Special Meat' && this.hasSideEffect(xuxemon, 'Gluttony');
     }
 
+    // Sirve para verificar si un Xuxemon está bloqueado por Overdose
     isOverdoseBlocked(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): boolean {
         return this.selectedItem()?.name === 'Special Meat' && this.hasSideEffect(xuxemon, 'Overdose');
     }
 
+    // Sirve para verificar si un Xuxemon está bloqueado por Special Meat
     isSpecialMeatUseBlocked(): boolean {
         return this.isGluttonyBlocked() || this.isOverdoseBlocked();
     }
 
+    // Sirve para obtener el mensaje de bloqueo de Special Meat
     getSpecialMeatBlockMessage(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): string | null {
         if (this.selectedItem()?.name !== 'Special Meat' || !xuxemon) return null;
         if (this.hasSideEffect(xuxemon, 'Gluttony')) {
@@ -137,6 +137,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return null;
     }
 
+    // Sirve para verificar si el uso de un item está deshabilitado
     isUseActionDisabled(): boolean {
         if (!this.selectedXuxemonForUse() || this.isUsing()) return true;
         if (this.isSpecialMeatUseBlocked()) return true;
@@ -150,24 +151,29 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return false;
     }
 
+    // Sirve para verificar si un Xuxemon está seleccionado y está en Starving
     isStarvingSelected(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): boolean {
         return this.selectedItem()?.name === 'Special Meat' && this.hasSideEffect(xuxemon, 'Starving');
     }
 
+    // Sirve para obtener el paso de cantidad de uso de Special Meat
     getUseQuantityStep(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): number {
         return this.isStarvingSelected(xuxemon) ? 2 : 1;
     }
 
+    // Sirve para obtener la cantidad mínima de uso de Special Meat
     getUseQuantityMin(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): number {
         return this.isStarvingSelected(xuxemon) ? 2 : 1;
     }
 
+    // Sirve para obtener el progreso de uso de Special Meat
     getProgressForUseQuantity(qty: number, xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): number {
         if (!Number.isFinite(qty) || qty <= 0) return 0;
 
         return this.isStarvingSelected(xuxemon) ? Math.floor(qty / 2) : Math.floor(qty);
     }
 
+    // Sirve para obtener la cantidad normalizada de uso de Special Meat
     private getNormalizedUseQuantity(value: number, xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): number {
         const step = this.getUseQuantityStep(xuxemon);
         const min = this.getUseQuantityMin(xuxemon);
@@ -191,6 +197,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return normalized;
     }
 
+    // Sirve para obtener la cantidad inicial de uso de Special Meat
     getInitialUseQuantity(xuxemon: Xuxemon | null | undefined = this.selectedXuxemonForUse()): number {
         if (this.isStarvingSelected(xuxemon) && this.maxUsableSpecialMeat() >= 2) {
             return 2;
@@ -199,13 +206,14 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return 1;
     }
 
+    // Sirve para obtener la cantidad total de un item
     private getTotalItemQuantity(itemName: string): number {
         return this.items()
             .filter(i => i.name === itemName)
             .reduce((sum, i) => sum + (i.quantity ?? 0), 0);
     }
 
-    // Calcula el máximo de carnes que se pueden usar según inventario, progreso y estado
+    // Sirve para obtener la cantidad máxima de uso de Special Meat
     maxUsableSpecialMeat(): number {
         const item = this.selectedItem();
         const xuxemon = this.selectedXuxemonForUse();
@@ -226,7 +234,8 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
             return Math.min(totalMeat, needed);
         }
     }
-        // Muestra error si está en Starving y solo tiene una carne
+
+    // Sirve para verificar si hay un error de cantidad de uso de Special Meat
     showStarvingMeatError(): boolean {
         const item = this.selectedItem();
         const xuxemon = this.selectedXuxemonForUse();
@@ -236,7 +245,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
     }
 
 
-    // Actualiza la cantidad a usar y valida
+    // Sirve para actualizar la cantidad a usar y validar
     updateUseQuantity(val: number): void {
         const max = this.maxUsableSpecialMeat();
         const totalStock = this.getTotalItemQuantity(this.selectedItem()?.name ?? '');
@@ -264,12 +273,12 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         }
     }
 
-    // Calcula cuántas carnes se consumirán para la cantidad seleccionada
+    // Sirve para obtener la cantidad de carnes a consumir para la cantidad seleccionada
     getMeatToConsumeForQuantity(qty: number): number {
         return Math.max(0, Math.floor(qty));
     }
 
-    // Devuelve el tamaño resultante para un progreso dado usando los size_breakpoints
+    // Sirve para obtener el tamaño resultante para un progreso dado usando los size_breakpoints
     private resolveSizeForProgress(progress: number, sizeBreakpoints?: Record<string, number>): 'Small' | 'Medium' | 'Large' {
         if (!sizeBreakpoints || Object.keys(sizeBreakpoints).length === 0) return 'Small';
         let chosen: string = 'Small';
@@ -292,12 +301,14 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
 
     readonly availableCapacity = computed(() => this.totalCapacity() - this.usedCapacity());
 
+    // Sirve para cargar el inventario después del render inicial
     constructor() {
         afterNextRender(() => {
             this.inventoryService.loadInventory();
         });
     }
 
+    // Sirve para inicializar el componente
     ngOnInit(): void {
         this.subs.add(this.inventoryService.items.subscribe((v) => this.items.set(v)));
         this.subs.add(this.inventoryService.filteredItems.subscribe((v) => this.filteredItems.set(v)));
@@ -322,6 +333,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         this.subs.add(this.xuxemonService.myXuxemonsList.subscribe((v) => this.myXuxemons.set(v)));
     }
 
+    // Sirve para obtener los Xuxemons disponibles para usar
     readonly useModalXuxemons = computed(() => {
         const list = this.myXuxemons();
         const q = this.useSearchQuery().toLowerCase().trim();
@@ -374,27 +386,33 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return filtered;
     });
 
+    // Sirve para destruir el componente
     ngOnDestroy(): void {
         this.subs.unsubscribe();
     }
 
+    // Sirve para cargar el inventario
     loadInventory(): void {
         this.inventoryService.loadInventory();
     }
 
+    // Sirve para aplicar un filtro de efectos
     applyFilter(effectType: string): void {
         this.inventoryService.applyFilter(effectType);
     }
 
+    // Sirve para seleccionar un item
     selectItem(item: InventoryItem): void {
         this.inventoryService.selectItem(item);
     }
 
+    // Sirve para seleccionar un item al entrar en un slot
     onSlotEnter(item: InventoryItem): void {
         this.selectItem(item);
         this.openUseModal();
     }
 
+    // Sirve para abrir el modal de uso
     openUseModal(): void {
         this.previousFocusedElement = typeof document !== 'undefined'
             ? (document.activeElement as HTMLElement | null)
@@ -412,6 +430,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         this.focusUseItemSearch = true;
     }
 
+    // Sirve para verificar si el modal de uso está enfocado
     ngAfterViewChecked(): void {
         if (!this.focusUseItemSearch) return;
         const input = this.elementRef.nativeElement.querySelector('.use-item-search');
@@ -420,12 +439,16 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
             this.focusUseItemSearch = false;
         }
 
-        if (this.focusDiscardCancelButton && this.discardCancelButton?.nativeElement) {
-            setTimeout(() => this.discardCancelButton?.nativeElement.focus(), 0);
+        if (this.focusDiscardCancelButton) {
+            const cancelButton = this.elementRef.nativeElement.querySelector('.discard-cancel-button');
+            if (cancelButton instanceof HTMLButtonElement) {
+                setTimeout(() => cancelButton.focus(), 0);
+            }
             this.focusDiscardCancelButton = false;
         }
     }
 
+    // Sirve para cerrar el modal de uso
     closeUseModal(): void {
         this.useModalOpen.set(false);
         this.selectedXuxemonForUse.set(null);
@@ -435,10 +458,12 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         this.restorePreviousFocus();
     }
 
+    // Sirve para establecer el query de búsqueda de uso
     setUseSearchQuery(value: string): void {
         this.useSearchQuery.set(value);
     }
 
+    // Sirve para seleccionar un Xuxemon para usar
     selectXuxemonForUse(xuxemon: Xuxemon): void {
         this.selectedXuxemonForUse.set(xuxemon);
         this.useApiError.set(null);
@@ -460,13 +485,16 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         }
         // Foco automático en el botón + si corresponde
         setTimeout(() => {
-            if (item?.name === 'Special Meat' && !this.isSpecialMeatUseBlocked() && this.qtyInput?.nativeElement) {
-                this.qtyInput.nativeElement.focus();
+            if (item?.name === 'Special Meat' && !this.isSpecialMeatUseBlocked()) {
+                const qtyInput = this.elementRef.nativeElement.querySelector('#use-qty-input');
+                if (qtyInput instanceof HTMLInputElement) {
+                    qtyInput.focus();
+                }
             }
         }, 0);
     }
 
-    // Keyboard Enter handler for xuxemon list rows: select and (for non-Special Meat) execute immediately
+    // Sirve para seleccionar un Xuxemon para usar al presionar Enter
     onXuxemonEnter(xuxemon: Xuxemon): void {
         this.selectXuxemonForUse(xuxemon);
         const item = this.selectedItem();
@@ -479,6 +507,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         }
     }
 
+    // Sirve para confirmar el uso de un item
     confirmUseItem(): void {
         const item = this.selectedItem();
         const xuxemon = this.selectedXuxemonForUse();
@@ -522,6 +551,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         );
     }
 
+    // Sirve para descartar un item
     discardItem(): void {
         this.previousFocusedElement = typeof document !== 'undefined'
             ? (document.activeElement as HTMLElement | null)
@@ -530,87 +560,48 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         this.inventoryService.discardItem();
     }
 
+    // Sirve para actualizar la cantidad de descartar
     updateDiscardQuantity(val: number): void {
         this.inventoryService.updateDiscardQuantity(val);
     }
 
+    // Sirve para confirmar el descarte
     confirmDiscard(): void {
         this.inventoryService.confirmDiscard();
     }
 
+    // Sirve para cancelar el descarte
     cancelDiscard(): void {
         this.inventoryService.cancelDiscard();
         this.restorePreviousFocus();
     }
 
+    // Sirve para cerrar la animación de evolución
     closeEvolutionAnimation(): void {
         this.evolutionAnimation.set(null);
     }
 
+    // Sirve para cerrar el modal de uso o el descarte al presionar Escape
     @HostListener('document:keydown.escape')
     onEscape(): void {
         if (this.useModalOpen()) this.closeUseModal();
         else if (this.discardMode()) this.cancelDiscard();
     }
 
-    onModalKeydown(event: KeyboardEvent, modal: 'use' | 'discard'): void {
-        if (event.key !== 'Tab') {
-            return;
-        }
-
-        const root = modal === 'use'
-            ? this.useModalRoot?.nativeElement
-            : this.discardModalRoot?.nativeElement;
-        const isOpen = modal === 'use' ? this.useModalOpen() : this.discardMode();
-        if (!isOpen || !root) {
-            return;
-        }
-
-        const focusableSelector = [
-            'a[href]',
-            'button:not([disabled])',
-            'textarea:not([disabled])',
-            'input:not([disabled])',
-            'select:not([disabled])',
-            '[tabindex]:not([tabindex="-1"])',
-        ].join(',');
-
-        const focusableElements = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
-            .filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1);
-
-        if (focusableElements.length === 0) {
-            event.preventDefault();
-            root.focus();
-            return;
-        }
-
-        const first = focusableElements[0];
-        const last = focusableElements[focusableElements.length - 1];
-        const active = document.activeElement as HTMLElement | null;
-
-        if (event.shiftKey && active === first) {
-            event.preventDefault();
-            last.focus();
-            return;
-        }
-
-        if (!event.shiftKey && active === last) {
-            event.preventDefault();
-            first.focus();
-        }
-    }
-
+    // Sirve para restaurar el foco al elemento anterior
     private restorePreviousFocus(): void {
         if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
             setTimeout(() => this.previousFocusedElement?.focus(), 0);
         }
     }
 
+    // Sirve para obtener la clase del slot
     getSlotClass(item: InventoryItem): string {
         const effectType = (item.effect_type || 'default').toLowerCase().trim().replace(/ /g, '-');
         return `slot-bg-${effectType}`;
     }
 
+    // Sirve para obtener la clase del tag
     getTagClass(): string {
         const item = this.selectedItem();
         if (!item) return 'tag-default';
@@ -618,6 +609,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return `tag-${effectType}`;
     }
 
+    // Sirve para obtener la clase del fondo del icono
     getIconBackgroundClass(): string {
         const item = this.selectedItem();
         if (!item) return 'icon-bg-default';
@@ -625,7 +617,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return `icon-bg-${effectType}`;
     }
 
-    /** Devuelve { healed, newHp } para mostrar el preview de curación en el modal */
+    // Sirve para obtener el preview de curación en el modal
     getHealPreview(xu: Xuxemon): { healed: number; newHp: number } {
         const item = this.selectedItem();
         const maxHp = xu.hp ?? 0;
@@ -636,6 +628,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return { healed, newHp };
     }
 
+    // Sirve para verificar si un efecto está dirigido a un Xuxemon
     isEffectTargeted(effectName: string | undefined, isStatusEffect: boolean = false): boolean {
         const item = this.selectedItem();
         if (!item || !effectName) return false;
@@ -645,6 +638,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return false;
     }
 
+    // Sirve para obtener el preview de buff de estadísticas
     getStatBuffPreview(xu: Xuxemon, stat: 'attack' | 'defense'): { boosted: number } {
         const item = this.selectedItem();
         const value = item?.effect_value ?? 0;
@@ -658,6 +652,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return { boosted: current + gain };
     }
     
+    // Sirve para abrir la animación de evolución
     private openEvolutionAnimation(xuxemon: Xuxemon, data?: UseItemResponseData): void {
         const viewAnimations = this.auth.getUser()?.view_animations ?? true;
         if (!viewAnimations) {
@@ -676,6 +671,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         });
     }
 
+    // Sirve para normalizar el tamaño de un Xuxemon
     private normalizeSize(value?: string, fallback: XuxemonSize = 'Small'): XuxemonSize {
         if (value === 'Small' || value === 'Medium' || value === 'Large') {
             return value;
@@ -683,6 +679,7 @@ export class Inventory implements OnInit, OnDestroy, AfterViewChecked {
         return fallback;
     }
 
+    // Sirve para obtener el preview de evolución de un Xuxemon
     getEvolvePreview(xu: Xuxemon, qty: number = 1): { willEvolve: boolean; fromSize: XuxemonSize; toSize: XuxemonSize } {
         const fromSize = this.normalizeSize(xu.size);
         if (this.hasSideEffect(xu, 'Overdose')) {

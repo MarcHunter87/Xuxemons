@@ -1,3 +1,4 @@
+// Sirve para definir la interfaz de un usuario amigo
 export interface FriendUser {
   id: string;
   name: string;
@@ -7,6 +8,7 @@ export interface FriendUser {
   last_seen?: string | null;
 }
 
+// Sirve para definir la interfaz de una solicitud de amistad
 export interface FriendRequestItem {
   id: number;
   sender_id: string;
@@ -16,6 +18,7 @@ export interface FriendRequestItem {
   created_at: string;
 }
 
+// Sirve para definir la interfaz de un usuario buscado
 export interface SearchUser {
   id: string;
   name: string;

@@ -1,11 +1,12 @@
-import { AfterViewChecked, Component, ElementRef, HostListener, inject, Input, signal, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, inject, Input, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { XuxemonDetailModal } from '../modals/xuxemon-detail-modal/xuxemon-detail-modal';
 import { AuthService } from '../../services/auth';
 import type { Xuxemon } from '../../interfaces';
 
 @Component({
   selector: 'app-xuxemon-card',
-  imports: [NgClass],
+  imports: [NgClass, XuxemonDetailModal],
   templateUrl: './xuxemon-card.html',
   styleUrl: './xuxemon-card.css',
 })
@@ -19,26 +20,29 @@ export class XuxemonCard implements AfterViewChecked {
   private focusCloseButton = false;
   private previousFocusedElement: HTMLElement | null = null;
 
-  @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
-
+  // Sirve para obtener la URL del badge del tipo de Xuxemon
   getTypeBadge(): string {
     const type = this.xuxemon?.type?.name || 'Power';
-    const filename = `${type}.svg`;
+    const filename = `${type}.webp`;
     return this.auth.getAssetUrl(`/badges/${encodeURIComponent(filename)}`);
   }
 
+  // Sirve para obtener la clase del tipo de Xuxemon
   getTypeClass(): string {
     return this.xuxemon?.type?.name?.toLowerCase() || 'power';
   }
 
+  // Sirve para obtener la clase del tamaño de Xuxemon
   getSizeClass(): string {
     return this.xuxemon?.size?.toLowerCase() || '';
   }
 
+  // Sirve para obtener las clases dinámicas
   getDynamicClasses(): string {
     return [this.getTypeClass(), this.getSizeClass()].filter(Boolean).join(' ');
   }
 
+  // Sirve para abrir los detalles del Xuxemon
   openDetails(event?: Event): void {
     if (!this.xuxemon) return;
     const clickTarget = event?.currentTarget;
@@ -49,6 +53,7 @@ export class XuxemonCard implements AfterViewChecked {
     this.focusCloseButton = true;
   }
 
+  // Sirve para verificar si el botón de cerrar está enfocado
   ngAfterViewChecked(): void {
     if (!this.focusCloseButton) return;
     const btn = this.elementRef.nativeElement.querySelector('.modal-close');
@@ -58,6 +63,7 @@ export class XuxemonCard implements AfterViewChecked {
     }
   }
 
+  // Sirve para cerrar los detalles del Xuxemon
   closeDetails(): void {
     this.showDetails.set(false);
     if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
@@ -65,55 +71,13 @@ export class XuxemonCard implements AfterViewChecked {
     }
   }
 
+  // Sirve para manejar la tecla Escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.showDetails()) this.closeDetails();
   }
 
-  onModalKeydown(event: KeyboardEvent): void {
-    if (!this.showDetails() || event.key !== 'Tab') {
-      return;
-    }
-
-    const root = this.dialogRoot?.nativeElement;
-    if (!root) {
-      return;
-    }
-
-    const focusableSelector = [
-      'a[href]',
-      'button:not([disabled])',
-      'textarea:not([disabled])',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      '[tabindex]:not([tabindex="-1"])',
-    ].join(',');
-
-    const focusableElements = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
-      .filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1);
-
-    if (focusableElements.length === 0) {
-      event.preventDefault();
-      root.focus();
-      return;
-    }
-
-    const first = focusableElements[0];
-    const last = focusableElements[focusableElements.length - 1];
-    const active = document.activeElement as HTMLElement | null;
-
-    if (event.shiftKey && active === first) {
-      event.preventDefault();
-      last.focus();
-      return;
-    }
-
-    if (!event.shiftKey && active === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }
-
+  // Sirve para verificar si el Xuxemon es de tipo propio
   isOwnedVariant(): boolean {
     return this.detailVariant === 'owned';
   }

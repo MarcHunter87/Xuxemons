@@ -9,23 +9,23 @@
         </h2>
       </div>
       <div class="badge-icon">
-        <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
+        <i class="bi bi-trophy-fill" aria-hidden="true"></i>
       </div>
     </div>
-    <span class="battle-btn battle-btn--placeholder">Friends Battles</span>
+    <span class="battle-btn battle-btn--placeholder">Search Battle</span>
   </div>
 } @else if (user$ | async; as user) {
   <div class="stats-card">
     <div class="card-header">
       <div class="header-info">
         <span class="label">Win Streak</span>
-        <h2 class="streak-text">{{ user.win_streak ?? 0 }}</h2>
+        <h2 class="streak-text">{{ user.total_wins ?? 0 }}</h2>
       </div>
       <div class="badge-icon">
-        <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
+        <i class="bi bi-trophy-fill" aria-hidden="true"></i>
       </div>
     </div>
 
-    <a routerLink="/friends" class="battle-btn">Go To Friends</a>
+    <a routerLink="/friends" class="battle-btn">Search Battle</a>
   </div>
 }

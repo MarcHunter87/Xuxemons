@@ -1,7 +1,7 @@
 <header class="navbar" [class.navbar-dropdown-open]="menuOpen" role="banner">
   <div class="navbar-inner">
     <a class="brand" routerLink="/" aria-label="Xuxemons Home" (click)="closeMenu()">
-      <img src="/icons/logo%20v2.svg" alt="Xuxemons logo">
+      <img src="/icons/logo v2.webp" alt="Xuxemons logo">
       <span class="brand-name">XUXEMONS</span>
     </a>
 
@@ -17,39 +17,29 @@
     </nav>
 
     <div class="navbar-right nav-desktop">
-      @if (user?.role === 'admin') {
-      <a routerLink="/admin" class="icon-btn" aria-label="Admin panel">
+      <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" class="icon-btn" aria-label="Admin panel" [hidden]="user?.role !== 'admin'">
         <i class="bi bi-shield-fill-check"></i>
       </a>
-      }
-      <a routerLink="/friends" class="icon-btn" aria-label="Friends">
+      <a routerLink="/friends" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="icon-btn" aria-label="Friends">
         <i class="bi bi-people-fill"></i>
-        @if ((friendsService.pendingCount | async) ?? 0; as count) {
-          @if (count > 0) {
-            <span class="friend-req-badge" [attr.aria-label]="count + ' pending friend requests'">
-              {{ count > 99 ? '99+' : count }}
-            </span>
-          }
-        }
+        <span class="friend-req-badge" [hidden]="pendingFriendCount() <= 0" [attr.aria-label]="pendingFriendCount() + ' pending friend requests'">
+          {{ pendingFriendCount() > 99 ? '99+' : pendingFriendCount() }}
+        </span>
       </a>
-      @if (user) {
       <a
         routerLink="/gacha"
         class="gacha-ticket-badge"
+        [hidden]="!user"
         [attr.aria-label]="'Gacha (' + auth.gachaTicketCount() + ')'">
         <span class="gacha-ticket-badge-inner">
-          <img [src]="auth.getAssetUrl('items/gacha_ticket.png')" alt="" width="22" height="22" class="gacha-ticket-icon" />
+          <img [src]="auth.getAssetUrl('items/gacha_ticket.webp')" alt="" width="22" height="22" class="gacha-ticket-icon" />
           <span class="gacha-ticket-count">{{ auth.gachaTicketCount() }}</span>
         </span>
       </a>
-      }
       <a routerLink="/profile" routerLinkActive="active" class="profile-link" aria-label="My Profile">
         <div class="avatar" aria-hidden="true">
-          @if (iconUrl && !iconLoadError) {
-          <img [src]="iconUrl" alt="Profile icon" (error)="iconLoadError = true">
-          } @else {
-          <i class="bi bi-person-fill"></i>
-          }
+          <img [attr.src]="iconUrl || null" alt="Profile icon" [hidden]="!iconUrl || iconLoadError" (error)="iconLoadError = true">
+          <i class="bi bi-person-fill" [hidden]="!!iconUrl && !iconLoadError"></i>
         </div>
         <div class="profile-info">
           <span class="profile-name">{{ displayName }}</span>
@@ -92,11 +82,8 @@
       <div class="nav-mobile-bottom">
         <a routerLink="/profile" routerLinkActive="active" class="profile-link" aria-label="My Profile" (click)="closeMenu()">
           <div class="avatar" aria-hidden="true">
-            @if (iconUrl && !iconLoadError) {
-            <img [src]="iconUrl" alt="Profile icon" (error)="iconLoadError = true">
-            } @else {
-            <i class="bi bi-person-fill"></i>
-            }
+            <img [attr.src]="iconUrl || null" alt="Profile icon" [hidden]="!iconUrl || iconLoadError" (error)="iconLoadError = true">
+            <i class="bi bi-person-fill" [hidden]="!!iconUrl && !iconLoadError"></i>
           </div>
           <div class="profile-info">
             <span class="profile-name">{{ displayName }}</span>
@@ -104,33 +91,28 @@
           </div>
         </a>
         <div class="nav-mobile-icons">
-          @if (user?.role === 'admin') {
-          <a routerLink="/admin" class="icon-btn" aria-label="Admin panel" (click)="closeMenu()">
+          <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" class="icon-btn" aria-label="Admin panel" (click)="closeMenu()" [hidden]="user?.role !== 'admin'">
             <i class="bi bi-shield-fill-check"></i>
           </a>
-          }
-          <a routerLink="/friends" class="icon-btn" aria-label="Friends" (click)="closeMenu()">
+          <a routerLink="/friends" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="icon-btn" aria-label="Friends" (click)="closeMenu()">
             <i class="bi bi-people-fill"></i>
-            @if ((friendsService.pendingCount | async) ?? 0; as count) {
-              @if (count > 0) {
-                <span class="friend-req-badge" [attr.aria-label]="count + ' pending friend requests'">
-                  {{ count > 99 ? '99+' : count }}
-                </span>
-              }
-            }
+            <span class="friend-req-badge" [hidden]="pendingFriendCount() <= 0" [attr.aria-label]="pendingFriendCount() + ' pending friend requests'">
+              {{ pendingFriendCount() > 99 ? '99+' : pendingFriendCount() }}
+            </span>
           </a>
-          @if (user) {
           <a
             routerLink="/gacha"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
             class="gacha-ticket-badge"
+            [hidden]="!user"
             [attr.aria-label]="'Gacha (' + auth.gachaTicketCount() + ')'"
             (click)="closeMenu()">
             <span class="gacha-ticket-badge-inner">
-              <img [src]="auth.getAssetUrl('items/gacha_ticket.png')" alt="" width="22" height="22" class="gacha-ticket-icon" />
+              <img [src]="auth.getAssetUrl('items/gacha_ticket.webp')" alt="" width="22" height="22" class="gacha-ticket-icon" />
               <span class="gacha-ticket-count">{{ auth.gachaTicketCount() }}</span>
             </span>
           </a>
-          }
         </div>
       </div>
     </div>

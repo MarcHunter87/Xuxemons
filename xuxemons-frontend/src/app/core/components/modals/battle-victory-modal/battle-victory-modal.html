@@ -1,0 +1,17 @@
+<div
+  class="victory-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="battle-victory-title"
+  (click)="onBackdropClick()"
+  (keydown)="onModalKeydown($event)">
+  <div #dialogRoot class="battle-dialog battle-dialog--info victory-content" tabindex="-1" (click)="$event.stopPropagation()">
+    <h2 class="battle-dialog-title victory-title" id="battle-victory-title">VICTORY!</h2>
+    <img [src]="vm.selectedXuxemon()?.image_url" class="winner-sprite" alt="">
+    <p class="battle-dialog-text">{{ vm.selectedXuxemon()?.name }} won!</p>
+    @if (vm.stolenXuxemon()) {
+      <p class="battle-dialog-text">You stole {{ vm.stolenXuxemon()?.name }} from your rival.</p>
+    }
+    <button type="button" class="battle-dialog-btn battle-dialog-btn--primary btn-continue" (click)="vm.closeVictoryModal()">CONTINUE</button>
+  </div>
+</div>

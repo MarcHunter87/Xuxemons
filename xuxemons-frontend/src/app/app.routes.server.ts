@@ -2,35 +2,19 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
   {
-    path: 'battle/:id',
-    renderMode: RenderMode.Server,
+    path: 'login',
+    renderMode: RenderMode.Prerender
   },
   {
-    path: 'admin/items/edit-item/:id',
-    renderMode: RenderMode.Server,
+    path: 'register',
+    renderMode: RenderMode.Prerender
   },
   {
-    path: 'admin/xuxemons/edit-xuxemon/:id',
-    renderMode: RenderMode.Server,
-  },
-  {
-    path: 'admin/give-item/:userId',
-    renderMode: RenderMode.Server,
-  },
-  {
-    path: 'admin/evolve/edit-evolve/:id',
-    renderMode: RenderMode.Server,
-  },
-  {
-    path: 'admin/daily-rewards/edit/:id',
-    renderMode: RenderMode.Server,
-  },
-  {
-    path: 'admin/side-effects/edit/:id',
-    renderMode: RenderMode.Server,
+    path: 'NotFound',
+    renderMode: RenderMode.Prerender
   },
   {
     path: '**',
-    renderMode: RenderMode.Prerender
+    renderMode: RenderMode.Client
   }
 ];

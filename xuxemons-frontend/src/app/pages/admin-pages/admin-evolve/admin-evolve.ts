@@ -25,10 +25,12 @@ export class AdminEvolve implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly hasContent = computed(() => !this.isLoading() && !this.errorMessage());
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.loadSizes();
   }
 
+  // Sirve para cargar los tamaños de evolución
   private loadSizes(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);

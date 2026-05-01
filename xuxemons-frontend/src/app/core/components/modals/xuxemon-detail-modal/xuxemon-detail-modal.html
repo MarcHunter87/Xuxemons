@@ -1,0 +1,110 @@
+<div class="xuxemon-modal-overlay" role="dialog" aria-modal="true" (click)="onBackdropClick()" (keydown)="onModalKeydown($event)">
+  <div #dialogRoot class="xuxemon-modal-shell" tabindex="-1" (click)="$event.stopPropagation()">
+    <article [class]="'xuxemon-modal-card animate-pop ' + cardContext.getDynamicClasses()">
+      <button type="button" class="btn-primary btn-sm modal-close" (click)="cardContext.closeDetails(); $event.stopPropagation()" aria-label="Cerrar">
+        <span class="modal-close-icon" aria-hidden="true">×</span>
+      </button>
+      <div class="modal-body">
+      <div class="modal-layout">
+          <div class="modal-image-shell">
+              <img [src]="cardContext.xuxemon.image_url" [alt]="cardContext.xuxemon.name" class="modal-image">
+          </div>
+
+          <div class="modal-content">
+              <div class="modal-header-row">
+                  <h1 class="modal-name" id="xuxemon-card-detail-title">
+                      {{ cardContext.xuxemon.name }}
+                      @if (cardContext.isOwnedVariant()) {
+                          <span class="modal-level-inline">Lv. {{ cardContext.xuxemon.level ?? 1 }}</span>
+                      }
+                  </h1>
+              </div>
+
+              <div class="meta-chips">
+                  <span class="modal-type-badge">{{ cardContext.xuxemon.type.name }}</span>
+                  @if (cardContext.showSizeBadge && cardContext.xuxemon.size) {
+                      <span class="size-label">{{ cardContext.xuxemon.size }}</span>
+                  }
+                  @if (cardContext.isOwnedVariant() && cardContext.xuxemon.statusEffect?.icon_url) {
+                      <span class="status-effect-chip" [title]="cardContext.xuxemon.statusEffect?.name ?? ''">
+                          <img [src]="cardContext.xuxemon.statusEffect?.icon_url ?? ''" [alt]="cardContext.xuxemon.statusEffect?.name ?? ''" class="status-effect-icon">
+                          {{ cardContext.xuxemon.statusEffect?.name ?? '' }}
+                      </span>
+                  }
+                  @if (cardContext.isOwnedVariant() && cardContext.xuxemon.side_effect_1?.icon_url) {
+                      <span class="status-effect-chip side-effect-chip" [title]="cardContext.xuxemon.side_effect_1?.name ?? ''">
+                          <img [src]="cardContext.xuxemon.side_effect_1?.icon_url ?? ''" [alt]="cardContext.xuxemon.side_effect_1?.name ?? ''" class="status-effect-icon">
+                          {{ cardContext.xuxemon.side_effect_1?.name ?? '' }}
+                      </span>
+                  }
+                  @if (cardContext.isOwnedVariant() && cardContext.xuxemon.side_effect_2?.icon_url) {
+                      <span class="status-effect-chip side-effect-chip" [title]="cardContext.xuxemon.side_effect_2?.name ?? ''">
+                          <img [src]="cardContext.xuxemon.side_effect_2?.icon_url ?? ''" [alt]="cardContext.xuxemon.side_effect_2?.name ?? ''" class="status-effect-icon">
+                          {{ cardContext.xuxemon.side_effect_2?.name ?? '' }}
+                      </span>
+                  }
+                  @if (cardContext.isOwnedVariant() && cardContext.xuxemon.side_effect_3?.icon_url) {
+                      <span class="status-effect-chip side-effect-chip" [title]="cardContext.xuxemon.side_effect_3?.name ?? ''">
+                          <img [src]="cardContext.xuxemon.side_effect_3?.icon_url ?? ''" [alt]="cardContext.xuxemon.side_effect_3?.name ?? ''" class="status-effect-icon">
+                          {{ cardContext.xuxemon.side_effect_3?.name ?? '' }}
+                      </span>
+                  }
+              </div>
+
+              @if (cardContext.xuxemon.description) {
+                  <p class="modal-description">{{ cardContext.xuxemon.description }}</p>
+              }
+
+              <div class="modal-stats">
+                  <div class="modal-stat stat-hp">
+                      <span class="stat-label">HP</span>
+                      <span class="stat-value">{{ cardContext.isOwnedVariant() && (cardContext.xuxemon.current_hp != null || cardContext.xuxemon.hp != null) ? (cardContext.xuxemon.current_hp ?? cardContext.xuxemon.hp) + ' / ' + (cardContext.xuxemon.hp ?? '-') : (cardContext.xuxemon.hp ?? '-') }}</span>
+                  </div>
+                  <div class="modal-stat stat-attack">
+                      <span class="stat-label">Attack</span>
+                      <span class="stat-value">{{ cardContext.xuxemon.attack ?? '-' }}</span>
+                  </div>
+                  <div class="modal-stat stat-defense">
+                      <span class="stat-label">Defense</span>
+                      <span class="stat-value">{{ cardContext.xuxemon.defense ?? '-' }}</span>
+                  </div>
+              </div>
+
+              <section class="modal-attacks">
+                  @if (cardContext.xuxemon.attacks?.length) {
+                      <ul class="attacks-list">
+                          @for (atk of cardContext.xuxemon.attacks; track atk.id) {
+                              <li class="attack-item">
+                                  @if (cardContext.isOwnedVariant()) {
+                                      <div class="attack-main">
+                                          <span class="attack-name">{{ atk.name }}</span>
+                                          <span class="attack-dmg">DMG {{ atk.dmg ?? '-' }}</span>
+                                      </div>
+                                      @if (atk.description) {
+                                          <p class="attack-description">{{ atk.description }}</p>
+                                      }
+                                      @if (atk.statusEffect && atk.statusEffect.icon_url != null && atk.status_chance != null) {
+                                          <div class="attack-status-row">
+                                              <img [src]="atk.statusEffect.icon_url" [alt]="atk.statusEffect.name" class="attack-status-icon">
+                                              <span class="attack-status-chance">{{ atk.status_chance }}% to apply {{ atk.statusEffect.name }}</span>
+                                          </div>
+                                      }
+                                  } @else {
+                                      <span class="attack-name">{{ atk.name }}</span>
+                                      @if (atk.description) {
+                                          <p class="attack-description">{{ atk.description }}</p>
+                                      }
+                                  }
+                              </li>
+                          }
+                      </ul>
+                  } @else {
+                      <p class="no-attacks">No attacks available.</p>
+                  }
+              </section>
+          </div>
+      </div>
+      </div>
+  </article>
+  </div>
+</div>

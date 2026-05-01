@@ -5,36 +5,35 @@ import {
   OnInit,
   inject,
   signal,
-  ElementRef,
-  ViewChild,
-  AfterViewChecked,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth';
-import { FriendsService } from '../../core/services/friends.service';
 import { BattleService } from '../../core/services/battle.service';
-import { Router } from '@angular/router';
+import { FriendsService } from '../../core/services/friends.service';
+import { ConfirmRemoveFriendModal } from '../../core/components/modals/confirm-remove-friend-modal/confirm-remove-friend-modal';
 import { FriendCard } from '../../core/components/friend-card/friend-card';
 import { FriendRequestCard } from '../../core/components/friend-request-card/friend-request-card';
 import type { FriendUser, FriendRequestItem, SearchUser } from '../../core/interfaces';
 
 @Component({
   selector: 'app-friends',
-  imports: [FriendCard, FriendRequestCard, ReactiveFormsModule],
+  imports: [FriendCard, FriendRequestCard, ReactiveFormsModule, ConfirmRemoveFriendModal],
   templateUrl: './friends.html',
   styleUrl: './friends.css',
 })
 export class Friends implements OnInit, OnDestroy {
-  private readonly cardAnimationMs = 180;
+  private readonly cardAnimationMs = 260;
+  private readonly battlePollMs = 2500;
   private auth = inject(AuthService);
   private friendsService = inject(FriendsService);
   private battleService = inject(BattleService);
   private router = inject(Router);
   private subs = new Subscription();
   private timeoutIds: ReturnType<typeof setTimeout>[] = [];
-  private pendingBattlesInterval: ReturnType<typeof setInterval> | null = null;
+  private battlePollingInterval: ReturnType<typeof setInterval> | null = null;
   private friendsInitialized = false;
   private pendingRequestsInitialized = false;
 
@@ -42,7 +41,6 @@ export class Friends implements OnInit, OnDestroy {
 
   friends = signal<FriendUser[]>([]);
   pendingRequests = signal<FriendRequestItem[]>([]);
-  pendingBattles = signal<any[]>([]);
   searchResults = signal<SearchUser[]>([]);
   searchLoading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -56,38 +54,46 @@ export class Friends implements OnInit, OnDestroy {
   exitingRequestIds = signal<number[]>([]);
   busyRequestIds = signal<number[]>([]);
   busyFriendIds = signal<string[]>([]);
-  showOutgoingBattleModal = signal(false);
+  challengeBusyFriendId = signal<string | null>(null);
   outgoingBattleId = signal<number | null>(null);
-  outgoingBattleOpponentName = signal('');
-  outgoingBattleAccepted = signal(false);
-  isProcessingBattleRequest = signal(false);
-
-  @ViewChild('confirmDialog') confirmDialog?: ElementRef<HTMLElement>;
-  @ViewChild('confirmPrimary') confirmPrimary?: ElementRef<HTMLButtonElement>;
+  outgoingBattleFriendId = signal<string | null>(null);
+  isNavigatingToBattle = signal(false);
 
   private previousFocusedElement: HTMLElement | null = null;
-  private shouldFocusRoot = false;
-  private shouldFocusPrimaryAction = false;
+  private readonly outgoingBattleStorageKey = 'xuxemons_outgoing_battle_id';
 
-  get pendingCount(): number {
-    return this.pendingRequests().length + this.pendingBattles().length;
+  // Sirve para persistir el id del reto saliente y recuperarlo fuera de la vista de amigos.
+  private persistOutgoingBattleId(battleId: number | null): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
+    if (!battleId) {
+      localStorage.removeItem(this.outgoingBattleStorageKey);
+      return;
+    }
+
+    localStorage.setItem(this.outgoingBattleStorageKey, String(battleId));
   }
 
+  // Sirve para exponer cuántas solicitudes pendientes hay en la cabecera de la vista.
+  get pendingCount(): number {
+    return this.pendingRequests().length;
+  }
+
+  // Sirve para leer si las animaciones están habilitadas para el usuario actual.
   get animationsEnabled(): boolean {
     return this.auth.getUser()?.view_animations ?? true;
   }
 
+  // Sirve para mostrar resultados solo cuando la búsqueda tiene longitud mínima.
   get showSearchResults(): boolean {
     const q = this.searchControl.value ?? '';
     return q.length >= 3;
   }
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
-    this.loadPendingBattles();
-    this.pendingBattlesInterval = setInterval(() => {
-      this.loadPendingBattles();
-      this.checkOutgoingBattleStatus();
-    }, 3000);
     this.subs.add(
       this.friendsService.friends.subscribe(f => {
         const previousIds = this.friends().map(friend => friend.id);
@@ -154,149 +160,102 @@ export class Friends implements OnInit, OnDestroy {
     );
 
     this.friendsService.loadAll();
+    this.startBattlePolling();
   }
 
-  loadPendingBattles(): void {
-    this.battleService.getPendingBattles().subscribe({
-      next: (battles) => {
-        this.pendingBattles.set(battles);
-
-        if (battles.length > 0 && !this.showBattleRequestModal() && !this.isProcessingBattleRequest()) {
-          this.currentBattleRequest.set(battles[0]);
-          this.showBattleRequestModal.set(true);
-        }
-      },
-      error: () => {
-        this.pendingBattles.set([]);
-      },
-    });
-  }
-
-  showBattleRequestModal = signal(false);
-  currentBattleRequest = signal<any>(null);
-
-  closeRequestModal(): void {
-    this.showBattleRequestModal.set(false);
-    this.currentBattleRequest.set(null);
-    this.isProcessingBattleRequest.set(false);
-  }
-
-  closeOutgoingBattleModal(): void {
-    this.showOutgoingBattleModal.set(false);
-    this.outgoingBattleAccepted.set(false);
-    this.outgoingBattleId.set(null);
-    this.outgoingBattleOpponentName.set('');
-  }
-
-  onAcceptRequest(): void {
-    if (this.currentBattleRequest() && !this.isProcessingBattleRequest()) {
-      this.isProcessingBattleRequest.set(true);
-      this.acceptBattle(this.currentBattleRequest().id);
-    }
-  }
-
-  onRejectRequest(): void {
-    if (this.currentBattleRequest() && !this.isProcessingBattleRequest()) {
-      this.isProcessingBattleRequest.set(true);
-      this.rejectBattle(this.currentBattleRequest().id);
-    }
-  }
-
-  acceptBattle(battleId: number): void {
-    this.battleService.acceptBattle(battleId).subscribe({
-      next: () => {
-        this.pendingBattles.set(this.pendingBattles().filter((battle) => battle.id !== battleId));
-        this.closeRequestModal();
-        this.router.navigate(['/battle', battleId]);
-      },
-      error: (error) => {
-        this.isProcessingBattleRequest.set(false);
-        this.errorMessage.set(error?.error?.message ?? 'Failed to accept battle request');
-      },
-    });
-  }
-
-  rejectBattle(battleId: number): void {
-    this.battleService.rejectBattle(battleId).subscribe({
-      next: () => {
-        this.pendingBattles.set(this.pendingBattles().filter((battle) => battle.id !== battleId));
-        this.closeRequestModal();
-        this.loadPendingBattles();
-      },
-      error: (error) => {
-        this.isProcessingBattleRequest.set(false);
-        this.errorMessage.set(error?.error?.message ?? 'Failed to reject battle request');
-      },
-    });
-  }
-
-  challengeFriend(friend: FriendUser): void {
-    this.battleService.requestBattle(friend.id).subscribe({
-      next: (battle) => {
-        this.successMessage.set(`Battle request sent to ${friend.name}.`);
-        this.outgoingBattleId.set(Number(battle.id));
-        this.outgoingBattleOpponentName.set(friend.name);
-        this.outgoingBattleAccepted.set(false);
-        this.showOutgoingBattleModal.set(true);
-      },
-      error: (err) => {
-        this.errorMessage.set(err.error?.message || 'Failed to send battle request');
-      },
-    });
-  }
-
-  joinOutgoingBattle(): void {
-    const battleId = this.outgoingBattleId();
-    if (!battleId) {
-      return;
-    }
-
-    this.router.navigate(['/battle', battleId]);
-  }
-
-  private checkOutgoingBattleStatus(): void {
-    const battleId = this.outgoingBattleId();
-    if (!battleId || this.outgoingBattleAccepted() || !this.showOutgoingBattleModal()) {
-      return;
-    }
-
-    this.battleService.getBattle(battleId).subscribe({
-      next: (battle) => {
-        if (battle?.status === 'accepted') {
-          this.outgoingBattleAccepted.set(true);
-          return;
-        }
-
-        if (battle?.status === 'rejected' || battle?.status === 'completed') {
-          this.closeOutgoingBattleModal();
-        }
-      },
-      error: () => {
-        this.closeOutgoingBattleModal();
-      },
-    });
-  }
-
-  ngAfterViewChecked(): void {
-    if (this.shouldFocusRoot && this.confirmDialog?.nativeElement) {
-      this.confirmDialog.nativeElement.focus();
-      this.shouldFocusRoot = false;
-    }
-    if (this.shouldFocusPrimaryAction && this.confirmPrimary?.nativeElement) {
-      this.confirmPrimary.nativeElement.focus();
-      this.shouldFocusPrimaryAction = false;
-    }
-  }
-
+  // Sirve para destruir el componente
   ngOnDestroy(): void {
     this.subs.unsubscribe();
     this.timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
-    if (this.pendingBattlesInterval) {
-      clearInterval(this.pendingBattlesInterval);
-      this.pendingBattlesInterval = null;
+    this.stopBattlePolling();
+  }
+
+  // Sirve para iniciar polling de invitaciones y estado de batalla saliente
+  private startBattlePolling(): void {
+    this.pollBattleState();
+    this.battlePollingInterval = setInterval(() => this.pollBattleState(), this.battlePollMs);
+  }
+
+  // Sirve para detener polling de batalla
+  private stopBattlePolling(): void {
+    if (this.battlePollingInterval) {
+      clearInterval(this.battlePollingInterval);
+      this.battlePollingInterval = null;
     }
   }
 
+  // Sirve para comprobar invitaciones entrantes y reto saliente
+  private pollBattleState(): void {
+    this.pollOutgoingBattleStatus();
+  }
+
+  // Sirve para comprobar si el reto enviado ya fue aceptado/rechazado
+  private pollOutgoingBattleStatus(): void {
+    const battleId = this.outgoingBattleId();
+    if (!battleId || this.isNavigatingToBattle()) {
+      return;
+    }
+
+    this.subs.add(this.battleService.getBattle(battleId).subscribe({
+      next: (battle: any) => {
+        const status = String(battle?.status ?? '').toLowerCase();
+
+        if (status === 'accepted') {
+          this.navigateToBattle(battleId);
+          return;
+        }
+
+        if (status === 'rejected' || status === 'completed' || status === 'finished') {
+          this.outgoingBattleId.set(null);
+          this.outgoingBattleFriendId.set(null);
+          this.persistOutgoingBattleId(null);
+          this.successMessage.set(status === 'rejected'
+            ? 'Your challenge was rejected.'
+            : 'The challenge is no longer active.');
+          return;
+        }
+
+        if (status !== 'pending') {
+          this.outgoingBattleId.set(null);
+          this.outgoingBattleFriendId.set(null);
+          this.persistOutgoingBattleId(null);
+        }
+      },
+      error: (error) => {
+        const status = String(error?.error?.status ?? '').toLowerCase();
+        if (status === 'pending') {
+          return;
+        }
+
+        if (status === 'rejected' || status === 'completed' || status === 'finished') {
+          this.outgoingBattleId.set(null);
+          this.outgoingBattleFriendId.set(null);
+          this.persistOutgoingBattleId(null);
+          this.successMessage.set(status === 'rejected'
+            ? 'Your challenge was rejected.'
+            : 'The challenge is no longer active.');
+          return;
+        }
+
+        this.outgoingBattleId.set(null);
+        this.outgoingBattleFriendId.set(null);
+        this.persistOutgoingBattleId(null);
+      },
+    }));
+  }
+
+  // Sirve para navegar al combate evitando dobles navegaciones
+  private navigateToBattle(battleId: number): void {
+    if (this.isNavigatingToBattle()) {
+      return;
+    }
+
+    this.isNavigatingToBattle.set(true);
+    this.stopBattlePolling();
+    this.router.navigate(['/battle', battleId]);
+  }
+
+  // Sirve para programar un timeout
   private scheduleTimeout(callback: () => void, delay: number): void {
     const timeoutId = setTimeout(() => {
       this.timeoutIds = this.timeoutIds.filter(id => id !== timeoutId);
@@ -305,6 +264,7 @@ export class Friends implements OnInit, OnDestroy {
     this.timeoutIds.push(timeoutId);
   }
 
+  // Sirve para agregar IDs de amigos
   private addFriendIds(target: ReturnType<typeof signal<string[]>>, ids: string[]): void {
     if (ids.length === 0) return;
     const merged = [...target()];
@@ -314,11 +274,13 @@ export class Friends implements OnInit, OnDestroy {
     target.set(merged);
   }
 
+  // Sirve para remover IDs de amigos
   private removeFriendIds(target: ReturnType<typeof signal<string[]>>, ids: string[]): void {
     if (ids.length === 0) return;
     target.set(target().filter(id => !ids.includes(id)));
   }
 
+  // Sirve para agregar IDs de solicitudes de amistad
   private addRequestIds(target: ReturnType<typeof signal<number[]>>, ids: number[]): void {
     if (ids.length === 0) return;
     const merged = [...target()];
@@ -328,11 +290,13 @@ export class Friends implements OnInit, OnDestroy {
     target.set(merged);
   }
 
+  // Sirve para remover IDs de solicitudes de amistad
   private removeRequestIds(target: ReturnType<typeof signal<number[]>>, ids: number[]): void {
     if (ids.length === 0) return;
     target.set(target().filter(id => !ids.includes(id)));
   }
 
+  // Sirve para animar las entradas de amigos
   private animateFriendEntries(previousIds: string[], nextFriends: FriendUser[]): void {
     const shouldAnimateEntries = this.friendsInitialized && this.animationsEnabled;
     this.friendsInitialized = true;
@@ -346,6 +310,7 @@ export class Friends implements OnInit, OnDestroy {
     this.scheduleTimeout(() => this.removeFriendIds(this.enteringFriendIds, enteringIds), this.cardAnimationMs);
   }
 
+  // Sirve para animar las entradas de solicitudes de amistad
   private animateRequestEntries(previousIds: number[], nextRequests: FriendRequestItem[]): void {
     const shouldAnimateEntries = this.pendingRequestsInitialized && this.animationsEnabled;
     this.pendingRequestsInitialized = true;
@@ -359,14 +324,17 @@ export class Friends implements OnInit, OnDestroy {
     this.scheduleTimeout(() => this.removeRequestIds(this.enteringRequestIds, enteringIds), this.cardAnimationMs);
   }
 
+  // Sirve para remover una solicitud de amistad visible
   private removeVisibleRequest(requestId: number): void {
     this.pendingRequests.set(this.pendingRequests().filter(request => request.id !== requestId));
   }
 
+  // Sirve para remover un amigo visible
   private removeVisibleFriend(friendId: string): void {
     this.friends.set(this.friends().filter(friend => friend.id !== friendId));
   }
 
+  // Sirve para animar la eliminación de una solicitud de amistad
   private animateRequestRemoval(requestId: number, callback: () => void): void {
     this.addRequestIds(this.busyRequestIds, [requestId]);
     if (!this.animationsEnabled) {
@@ -383,6 +351,7 @@ export class Friends implements OnInit, OnDestroy {
     }, this.cardAnimationMs);
   }
 
+  // Sirve para animar la eliminación de un amigo
   private animateFriendRemoval(friendId: string, callback: () => void): void {
     this.addFriendIds(this.busyFriendIds, [friendId]);
     if (!this.animationsEnabled) {
@@ -399,30 +368,37 @@ export class Friends implements OnInit, OnDestroy {
     }, this.cardAnimationMs);
   }
 
+  // Sirve para verificar si un amigo está entrando
   isFriendEntering(friendId: string): boolean {
     return this.enteringFriendIds().includes(friendId);
   }
 
+  // Sirve para verificar si un amigo está saliendo
   isFriendExiting(friendId: string): boolean {
     return this.exitingFriendIds().includes(friendId);
   }
 
+  // Sirve para verificar si una solicitud de amistad está entrando
   isRequestEntering(requestId: number): boolean {
     return this.enteringRequestIds().includes(requestId);
   }
 
+  // Sirve para verificar si una solicitud de amistad está saliendo
   isRequestExiting(requestId: number): boolean {
     return this.exitingRequestIds().includes(requestId);
   }
 
+  // Sirve para verificar si una solicitud de amistad está ocupada
   isRequestBusy(requestId: number): boolean {
     return this.busyRequestIds().includes(requestId);
   }
 
+  // Sirve para verificar si un amigo está ocupado
   isFriendBusy(friendId: string): boolean {
     return this.busyFriendIds().includes(friendId);
   }
 
+  // Sirve para recargar todos los datos
   private reloadAll(): void {
     this.friendsService.loadFriends();
     this.friendsService.loadPendingRequests();
@@ -434,6 +410,7 @@ export class Friends implements OnInit, OnDestroy {
     }
   }
 
+  // Sirve para enviar una solicitud de amistad
   sendRequest(user: SearchUser): void {
     const current = [...this.sendingRequestTo()];
     if (!current.includes(user.id)) current.push(user.id);
@@ -452,9 +429,6 @@ export class Friends implements OnInit, OnDestroy {
 
         if (res?.auto_accepted) {
           this.friendsService.loadFriends();
-          this.successMessage.set('Friend added!');
-        } else {
-          this.successMessage.set('Friend request sent!');
         }
       },
       error: () => {
@@ -465,6 +439,74 @@ export class Friends implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para lanzar un challenge a un amigo
+  challengeFriend(friend: FriendUser): void {
+    if (this.challengeBusyFriendId() || this.isNavigatingToBattle()) {
+      return;
+    }
+
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+    this.challengeBusyFriendId.set(friend.id);
+
+    this.subs.add(this.battleService.requestBattle(friend.id).subscribe({
+      next: (battle: any) => {
+        const battleId = Number(battle?.id);
+        if (Number.isFinite(battleId) && battleId > 0) {
+          this.outgoingBattleId.set(battleId);
+          this.outgoingBattleFriendId.set(friend.id);
+          this.persistOutgoingBattleId(battleId);
+          this.successMessage.set(`Challenge sent to ${friend.name}. Waiting for acceptance...`);
+        } else {
+          this.successMessage.set(`Challenge sent to ${friend.name}.`);
+        }
+        this.challengeBusyFriendId.set(null);
+      },
+      error: (error) => {
+        const existingBattleId = Number(error?.error?.battle_id);
+        const existingBattleStatus = String(error?.error?.status ?? '').toLowerCase();
+        if (Number.isFinite(existingBattleId) && existingBattleId > 0) {
+          this.challengeBusyFriendId.set(null);
+          if (existingBattleStatus === 'accepted') {
+            this.persistOutgoingBattleId(existingBattleId);
+            this.successMessage.set('You already have an active battle with this friend. Rejoining...');
+            this.navigateToBattle(existingBattleId);
+            return;
+          }
+
+          if (existingBattleStatus === 'pending') {
+            this.outgoingBattleId.set(existingBattleId);
+            this.outgoingBattleFriendId.set(friend.id);
+            this.persistOutgoingBattleId(existingBattleId);
+            this.successMessage.set(`You already have a pending challenge with ${friend.name}. Waiting for acceptance...`);
+            return;
+          }
+
+          this.successMessage.set('You already have a battle with this friend.');
+          return;
+        }
+
+        const backendMessage = String(error?.error?.message ?? '').trim();
+        this.errorMessage.set(backendMessage || `Could not send challenge to ${friend.name}.`);
+        this.challengeBusyFriendId.set(null);
+      },
+    }));
+  }
+
+  // Sirve para saber si el challenge está ocupado para un amigo
+  isChallengeBusy(friendId: string): boolean {
+    if (this.challengeBusyFriendId() === friendId) {
+      return true;
+    }
+
+    if (this.outgoingBattleId() && this.outgoingBattleFriendId() === friendId) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Sirve para cancelar una solicitud de amistad enviada
   cancelSentRequest(user: SearchUser): void {
     this.errorMessage.set(null);
     this.friendsService.cancelRequest(user.id).subscribe({
@@ -478,6 +520,7 @@ export class Friends implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para aceptar una solicitud de amistad
   acceptRequest(request: FriendRequestItem): void {
     if (this.isRequestBusy(request.id)) return;
     this.errorMessage.set(null);
@@ -485,7 +528,6 @@ export class Friends implements OnInit, OnDestroy {
       this.friendsService.acceptRequest(request.id).subscribe({
         next: () => {
           this.removeRequestIds(this.busyRequestIds, [request.id]);
-          this.successMessage.set('Friend added!');
         },
         error: () => {
           this.removeRequestIds(this.busyRequestIds, [request.id]);
@@ -495,6 +537,7 @@ export class Friends implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para rechazar una solicitud de amistad
   rejectRequest(request: FriendRequestItem): void {
     if (this.isRequestBusy(request.id)) return;
     this.errorMessage.set(null);
@@ -509,15 +552,15 @@ export class Friends implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para preguntar si se desea remover un amigo
   askConfirmRemove(friend: FriendUser): void {
     this.previousFocusedElement = typeof document !== 'undefined'
       ? (document.activeElement as HTMLElement | null)
       : null;
-    this.shouldFocusRoot = true;
-    this.shouldFocusPrimaryAction = true;
     this.confirmRemoveFriend.set(friend);
   }
 
+  // Sirve para confirmar la eliminación de un amigo
   confirmRemove(): void {
     const friend = this.confirmRemoveFriend();
     if (!friend) return;
@@ -540,6 +583,7 @@ export class Friends implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para cancelar la eliminación de un amigo
   cancelRemove(): void {
     this.confirmRemoveFriend.set(null);
     if (this.previousFocusedElement && typeof this.previousFocusedElement.focus === 'function') {
@@ -547,56 +591,38 @@ export class Friends implements OnInit, OnDestroy {
     }
   }
 
+  // Sirve para verificar si se está enviando una solicitud de amistad a un usuario
   isSendingTo(userId: string): boolean {
     return this.sendingRequestTo().includes(userId);
   }
 
+  // Sirve para obtener un amigo por su ID
   getFriendById(userId: string): FriendUser | undefined {
     return this.friends().find(f => f.id === userId);
   }
 
+  // Sirve para obtener la URL del icono de un usuario
   getIconUrl(iconPath: string | null | undefined): string {
     if (!iconPath) return '';
     return this.auth.getAssetUrl(iconPath);
   }
 
+  // Sirve para manejar el error de un icono de búsqueda
   onSearchIconError(userId: string): void {
     const cur = [...this.searchIconErrors()];
     if (!cur.includes(userId)) cur.push(userId);
     this.searchIconErrors.set(cur);
   }
 
+  // Sirve para verificar si hay un error de icono de búsqueda
   hasSearchIconError(userId: string): boolean {
     return this.searchIconErrors().includes(userId);
   }
 
+  // Sirve para cerrar la modal de eliminación de amigo al presionar Escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.confirmRemoveFriend()) this.cancelRemove();
   }
 
-  onConfirmModalKeydown(event: KeyboardEvent): void {
-    if (!this.confirmRemoveFriend() || event.key !== 'Tab') return;
-    const root = this.confirmDialog?.nativeElement;
-    if (!root) return;
-
-    const focusableSelector = [
-      'a[href]',
-      'button:not([disabled])',
-      'textarea:not([disabled])',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      '[tabindex]:not([tabindex="-1"])',
-    ].join(',');
-
-    const focusable = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
-      .filter(el => !el.hasAttribute('disabled') && el.tabIndex !== -1);
-
-    if (focusable.length === 0) { event.preventDefault(); return; }
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const active = document.activeElement as HTMLElement | null;
-    if (event.shiftKey && active === first) { event.preventDefault(); last.focus(); return; }
-    if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
-  }
 }

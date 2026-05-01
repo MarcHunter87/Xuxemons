@@ -2,6 +2,8 @@ import { AfterViewChecked, Component, ElementRef, HostListener, OnInit, ViewChil
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
+import { AdminAwardModal } from '../../../core/components/modals/admin-award-modal/admin-award-modal';
+import { AdminBanModal } from '../../../core/components/modals/admin-ban-modal/admin-ban-modal';
 import { AdminService } from '../../../core/services/admin';
 import { AuthService } from '../../../core/services/auth';
 import { AdminUser, BagStatus } from '../../../core/interfaces';
@@ -19,7 +21,7 @@ export interface AwardedXuxemonDisplay {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AdminAwardModal, AdminBanModal],
   templateUrl: './admin.html',
   styleUrl: './admin.css',
 })
@@ -35,27 +37,28 @@ export class Admin implements OnInit, AfterViewChecked {
   readonly awardedXuxemon = signal<AwardedXuxemonDisplay | null>(null);
   readonly awardLoadingUserId = signal<string | null>(null);
   readonly banLoadingUserId = signal<string | null>(null);
+  readonly showBanModal = signal(false);
+  readonly pendingBanUser = signal<AdminUser | null>(null);
   readonly awardError = signal<string | null>(null);
   private previousFocusedElement: HTMLElement | null = null;
   private shouldFocusAwardCloseButton = false;
-
-  @ViewChild('awardModalRoot') awardModalRoot?: ElementRef<HTMLElement>;
-  @ViewChild('awardCloseButton') awardCloseButton?: ElementRef<HTMLButtonElement>;
   @ViewChild('modalAudio') modalAudio?: ElementRef<HTMLAudioElement>;
 
   readonly hasContent = computed(() => !this.isLoading() && !this.errorMessage());
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.loadAllUsers();
   }
 
+  // Sirve para manejar el focus del modal de recompensa
   ngAfterViewChecked(): void {
-    if (this.shouldFocusAwardCloseButton && this.awardCloseButton?.nativeElement) {
-      this.awardCloseButton.nativeElement.focus();
+    if (this.shouldFocusAwardCloseButton) {
       this.shouldFocusAwardCloseButton = false;
     }
   }
 
+  // Sirve para cargar todos los usuarios
   private loadAllUsers(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -82,6 +85,7 @@ export class Admin implements OnInit, AfterViewChecked {
       });
   }
 
+  // Sirve para verificar el estado de la bolsa del usuario
   private checkBagStatus(userId: string): void {
     this.adminService.checkBagStatus(userId).subscribe({
       next: (response) => {
@@ -91,20 +95,24 @@ export class Admin implements OnInit, AfterViewChecked {
     });
   }
 
+  // Sirve para verificar si se puede dar items al usuario
   canGiveItems(userId: string): boolean {
     const status = this.bagStatusMap()[userId];
     if (!status) return false;
     return status.available_slots > 0;
   }
 
+  // Sirve para obtener el nombre completo del usuario
   getUserFullName(user: AdminUser): string {
     return `${user.name} ${user.surname}`;
   }
 
+  // Sirve para obtener el ID del usuario codificado
   getEncodedUserId(id: string): string {
     return encodeURIComponent(id);
   }
 
+  // Sirve para dar un Xuxemon aleatorio al usuario
   giveRandomXuxemon(user: AdminUser): void {
     this.previousFocusedElement = typeof document !== 'undefined'
       ? (document.activeElement as HTMLElement | null)
@@ -115,7 +123,9 @@ export class Admin implements OnInit, AfterViewChecked {
       finalize(() => this.awardLoadingUserId.set(null))
     ).subscribe({
       next: (raw) => {
-        const image_url = raw?.icon_path ? this.auth.getAssetUrl(`/${raw.icon_path}`) : '';
+        const image_url = raw?.icon_path
+          ? this.auth.getAssetUrl(`/${raw.icon_path}`, raw?.updated_at)
+          : '';
         this.awardedXuxemon.set({
           id: raw?.id,
           name: raw?.name ?? '',
@@ -135,9 +145,22 @@ export class Admin implements OnInit, AfterViewChecked {
     });
   }
 
+  // Sirve para banear al usuario
   banUser(user: AdminUser): void {
-    const confirmed = window.confirm(`Are you sure you want to ban ${this.getUserFullName(user)}?`);
-    if (!confirmed) {
+    this.pendingBanUser.set(user);
+    this.showBanModal.set(true);
+  }
+
+  // Sirve para cerrar el modal de ban
+  closeBanModal(): void {
+    this.showBanModal.set(false);
+    this.pendingBanUser.set(null);
+  }
+
+  // Sirve para confirmar el ban del usuario
+  confirmBanUser(): void {
+    const user = this.pendingBanUser();
+    if (!user) {
       return;
     }
 
@@ -154,13 +177,16 @@ export class Admin implements OnInit, AfterViewChecked {
             delete next[user.id];
             return next;
           });
+          this.closeBanModal();
         },
         error: (err) => {
           this.errorMessage.set(err?.error?.message ?? 'Failed to ban user');
+          this.closeBanModal();
         },
       });
   }
 
+  // Sirve para cerrar el modal de recompensa
   closeAwardModal(): void {
     const sfx = this.modalAudio?.nativeElement;
     if (sfx) { sfx.pause(); sfx.currentTime = 0; }
@@ -173,6 +199,7 @@ export class Admin implements OnInit, AfterViewChecked {
     }
   }
 
+  // Sirve para reproducir el audio de la modal de revelación
   private playModalRevealAudio(): void {
     const sfx = this.modalAudio?.nativeElement;
     if (sfx) {
@@ -182,8 +209,13 @@ export class Admin implements OnInit, AfterViewChecked {
     }
   }
 
+  // Sirve para manejar el escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.showBanModal()) {
+      this.closeBanModal();
+      return;
+    }
     if (this.showAwardModal()) {
       this.closeAwardModal();
       return;
@@ -191,25 +223,25 @@ export class Admin implements OnInit, AfterViewChecked {
     if (this.awardError()) this.dismissAwardError();
   }
 
+  // Sirve para manejar el teclado
   @HostListener('document:keydown', ['$event'])
   onDocumentKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Tab' || !this.showAwardModal()) {
       return;
     }
-    this.trapFocus(event, this.awardModalRoot?.nativeElement);
   }
 
+  // Sirve para cerrar el error de recompensa
   dismissAwardError(): void {
     this.awardError.set(null);
   }
 
+  // Sirve para manejar el teclado en la modal de recompensa
   onModalKeydown(event: KeyboardEvent): void {
-    if (!this.showAwardModal() || event.key !== 'Tab') {
-      return;
-    }
-    this.trapFocus(event, this.awardModalRoot?.nativeElement);
+    if (!this.showAwardModal() || event.key !== 'Tab') return;
   }
 
+  // Sirve para obtener el color del tipo de Xuxemon
   getTypeColor(typeName: string): string {
     switch (typeName) {
       case 'Power': return '#D0181B';
@@ -219,6 +251,7 @@ export class Admin implements OnInit, AfterViewChecked {
     }
   }
 
+  // Sirve para atrapar el focus
   private trapFocus(event: KeyboardEvent, root?: HTMLElement): void {
     if (!root) {
       return;

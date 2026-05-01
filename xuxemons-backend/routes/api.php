@@ -14,39 +14,42 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/battles/{battleId}/stream', [BattleController::class, 'streamBattle']);
+Route::post('/battles/{battleId}/disconnect', [BattleController::class, 'disconnectBattle']);
 
 Route::get('/xuxemons', [XuxemonController::class, 'index']);
 Route::get('/items', [InventoryController::class, 'getAllItems']);
 
 Route::middleware(['auth:api', 'update.last.seen'])->group(function () {
     // Rutas de Admin
-    Route::get('/users', [AdminController::class, 'getAllUsers']);
-    Route::get('/users/{userId}/bag-status', [AdminController::class, 'checkBagStatus']);
-    Route::put('/users/{userId}/ban', [AdminController::class, 'banUser']);
-    Route::post('/users/{userId}/give-item', [AdminController::class, 'giveItemToUser']);
-    Route::post('/users/{userId}/award-random', [XuxemonController::class, 'awardRandomXuxemonToUser']);
-    Route::delete('/admin/items/{id}', [AdminController::class, 'deleteItemCascade']);
-    Route::delete('/admin/xuxemons/{id}', [AdminController::class, 'deleteXuxemonCascade']);
-    Route::get('/admin/meta', [AdminController::class, 'getCreationMeta']); // Get types, attacks, status effects
-    Route::get('/admin/items/{id}', [AdminController::class, 'getItem']);
-    Route::get('/admin/xuxemons/{id}', [AdminController::class, 'getXuxemon']);
-    Route::post('/admin/items', [AdminController::class, 'createItem']);
-    Route::put('/admin/items/{id}', [AdminController::class, 'updateItem']);
-    Route::post('/admin/xuxemons', [AdminController::class, 'createXuxemon']);
-    Route::put('/admin/xuxemons/{id}', [AdminController::class, 'updateXuxemon']);
-    Route::get('/admin/sizes', [AdminController::class, 'getAllSizes']);
-    Route::get('/admin/sizes/{id}', [AdminController::class, 'getSize']);
-    Route::put('/admin/sizes/{id}', [AdminController::class, 'updateSize']);
-    Route::get('/admin/daily-rewards', [AdminController::class, 'getAllDailyRewards']);
-    Route::get('/admin/daily-rewards/{id}', [AdminController::class, 'getDailyReward']);
-    Route::put('/admin/daily-rewards/{id}', [AdminController::class, 'updateDailyReward']);
-    Route::get('/admin/side-effects', [AdminController::class, 'getAllSideEffects']);
-    Route::get('/admin/side-effects/{id}', [AdminController::class, 'getSideEffect']);
-    Route::put('/admin/side-effects/{id}', [AdminController::class, 'updateSideEffect']);
-    // Ejecutar las daily rewards
-    Route::post('/admin/process-daily-items', [AdminController::class, 'processDailyItems']);
-    Route::post('/admin/process-daily-xuxemons', [AdminController::class, 'processDailyXuxemons']);
-    Route::post('/admin/process-daily-all', [AdminController::class, 'processDailyAll']);
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/users', [AdminController::class, 'getAllUsers']);
+        Route::get('/users/{userId}/bag-status', [AdminController::class, 'checkBagStatus']);
+        Route::put('/users/{userId}/ban', [AdminController::class, 'banUser']);
+        Route::post('/users/{userId}/give-item', [AdminController::class, 'giveItemToUser']);
+        Route::post('/users/{userId}/award-random', [XuxemonController::class, 'awardRandomXuxemonToUser']);
+        Route::delete('/admin/items/{id}', [AdminController::class, 'deleteItemCascade']);
+        Route::delete('/admin/xuxemons/{id}', [AdminController::class, 'deleteXuxemonCascade']);
+        Route::get('/admin/meta', [AdminController::class, 'getCreationMeta']); // Get types, attacks, status effects
+        Route::get('/admin/items/{id}', [AdminController::class, 'getItem']);
+        Route::get('/admin/xuxemons/{id}', [AdminController::class, 'getXuxemon']);
+        Route::post('/admin/items', [AdminController::class, 'createItem']);
+        Route::put('/admin/items/{id}', [AdminController::class, 'updateItem']);
+        Route::post('/admin/xuxemons', [AdminController::class, 'createXuxemon']);
+        Route::put('/admin/xuxemons/{id}', [AdminController::class, 'updateXuxemon']);
+        Route::get('/admin/sizes', [AdminController::class, 'getAllSizes']);
+        Route::get('/admin/sizes/{id}', [AdminController::class, 'getSize']);
+        Route::put('/admin/sizes/{id}', [AdminController::class, 'updateSize']);
+        Route::get('/admin/daily-rewards', [AdminController::class, 'getAllDailyRewards']);
+        Route::get('/admin/daily-rewards/{id}', [AdminController::class, 'getDailyReward']);
+        Route::put('/admin/daily-rewards/{id}', [AdminController::class, 'updateDailyReward']);
+        Route::get('/admin/side-effects', [AdminController::class, 'getAllSideEffects']);
+        Route::get('/admin/side-effects/{id}', [AdminController::class, 'getSideEffect']);
+        Route::put('/admin/side-effects/{id}', [AdminController::class, 'updateSideEffect']);
+        // Ejecutar las daily rewards
+        Route::post('/admin/process-daily-items', [AdminController::class, 'processDailyItems']);
+        Route::post('/admin/process-daily-xuxemons', [AdminController::class, 'processDailyXuxemons']);
+        Route::post('/admin/process-daily-all', [AdminController::class, 'processDailyAll']);
+    });
 
     // Rutas de Profile
     Route::get('/user', [AuthController::class, 'me']);
@@ -98,6 +101,7 @@ Route::middleware(['auth:api', 'update.last.seen'])->group(function () {
     Route::get('/battles/pending', [BattleController::class, 'getPendingBattles']);
     Route::get('/battles/{battleId}', [BattleController::class, 'getBattle']);
     Route::post('/battles/{battleId}/action', [BattleController::class, 'submitAction']);
+    Route::post('/battles/{battleId}/forfeit', [BattleController::class, 'forfeitBattle']);
     Route::post('/battles/{battleId}/use-item', [BattleController::class, 'useBattleItem']);
     Route::post('/battles/{battleId}/finish', [BattleController::class, 'finishBattle']);
 

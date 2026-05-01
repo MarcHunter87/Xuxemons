@@ -9,12 +9,7 @@
   <a routerLink="/admin/xuxemons/new-xuxemon" class="btn-primary">New Xuxemon</a>
 </div>
 
-@if (isLoading()) {
-  <div class="loading-state">
-    <div class="spinner"></div>
-    <p class="loading-text">Loading Xuxemons...</p>
-  </div>
-}
+
 
 @if (errorMessage() && !isLoading()) {
   <div class="error-state">

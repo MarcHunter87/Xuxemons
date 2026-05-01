@@ -4,23 +4,22 @@
 
 .empty-state .empty-icon {
   font-size: 2rem;
-  color: var(--text-muted);
+  color: var(--neutral-black);
   margin-bottom: 1rem;
 }
 
-.loading-state,
 .error-state,
 .empty-state {
   text-align: center;
   padding: 3rem 2rem;
   border-radius: 12px;
-  background-color: var(--white-color);
-  border: 1px solid var(--light-gray-color);
+  background-color: var(--neutral-white);
+  border: 1px solid var(--color-gray-light);
   animation: slideInUp 0.4s ease-out;
 }
 
 .error-message {
-  color: var(--danger-color);
+  color: var(--color-red-base);
   font-weight: 500;
   margin: 0;
 }
@@ -36,10 +35,10 @@
 .players-table-wrapper {
   overflow-x: auto;
   width: 100%;
-  background-color: var(--white-color);
-  border: 1px solid var(--light-gray-color);
+  background-color: var(--neutral-white);
+  border: 1px solid var(--color-gray-light);
   border-radius: 12px;
-  box-shadow: 0 2px 8px var(--shadow-color);
+  box-shadow: 0 2px 8px var(--color-black-soft);
   animation: slideInUp 0.4s ease-out;
 }
 
@@ -73,13 +72,13 @@
 }
 
 .admin-nav-btn-daily-all {
-  background-color: var(--warning-dark, #c43e00);
-  color: var(--white-color);
+  background-color: var(--color-amber-deep, #c43e00);
+  color: var(--neutral-white);
 }
 
 .admin-nav-btn-daily-all:hover:not(:disabled) {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--warning-dark, #c43e00) 45%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-amber-deep, #c43e00) 45%, transparent);
 }
 
 .admin-nav-btn-daily-all:active:not(:disabled) {
@@ -87,13 +86,13 @@
 }
 
 .admin-nav-btn-daily-xuxemon {
-  background-color: var(--success-color, #28a745);
-  color: var(--white-color);
+  background-color: var(--color-green-base, #28a745);
+  color: var(--neutral-white);
 }
 
 .admin-nav-btn-daily-xuxemon:hover:not(:disabled) {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+  box-shadow: 0 2px 8px var(--color-green-glow-strong);
 }
 
 .admin-nav-btn-daily-xuxemon:active:not(:disabled) {
@@ -102,12 +101,12 @@
 
 .admin-nav-btn-daily-items {
   background-color: var(--accent-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .admin-nav-btn-daily-items:hover:not(:disabled) {
   filter: brightness(1.1);
-  box-shadow: 0 2px 8px var(--accent-glow);
+  box-shadow: 0 2px 8px var(--color-blue-overlay-medium);
 }
 
 .admin-nav-btn-daily-items:active:not(:disabled) {
@@ -117,8 +116,8 @@
 .btn-loading-icon {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: var(--white-color);
+  border: 2px solid var(--color-white-overlay);
+  border-top-color: var(--neutral-white);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -155,14 +154,14 @@
   text-decoration: none;
   background-color: var(--accent-color);
   border: 1px solid var(--accent-color);
-  color: var(--white-color);
+  color: var(--neutral-white);
   transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .col-actions .btn.btn-edit.btn-sm:hover {
-  background-color: var(--accent-hover, color-mix(in srgb, var(--accent-color) 85%, black));
-  border-color: var(--accent-hover, color-mix(in srgb, var(--accent-color) 85%, black));
-  color: var(--white-color);
+  background-color: var(--accent-on-light, color-mix(in srgb, var(--accent-color) 85%, black));
+  border-color: var(--accent-on-light, color-mix(in srgb, var(--accent-color) 85%, black));
+  color: var(--neutral-white);
 }
 
 .col-actions .btn.btn-edit.btn-sm:active {
@@ -171,7 +170,7 @@
 
 .col-actions .btn.btn-edit.btn-sm .bi {
   font-size: 1.2rem;
-  color: var(--white-color);
+  color: var(--neutral-white);
 }
 
 .players-table thead tr {
@@ -182,15 +181,15 @@
   text-align: left;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--white-color);
+  color: var(--neutral-white);
   letter-spacing: 0.01em;
   padding: 0.9rem 1rem;
-  border-bottom: 1px solid var(--light-gray-color);
+  border-bottom: 1px solid var(--color-gray-light);
 }
 
 .players-table td {
   padding: 0.9rem 1rem;
-  border-bottom: 1px solid var(--light-gray-color);
+  border-bottom: 1px solid var(--color-gray-light);
   vertical-align: middle;
 }
 
@@ -199,17 +198,18 @@
 }
 
 .players-table tbody tr:hover {
-  background-color: color-mix(in srgb, var(--accent-glow) 20%, var(--white-color));
+  background-color: color-mix(in srgb, var(--color-blue-overlay-medium) 20%, var(--neutral-white));
 }
 
 .cell-id,
+
 .cell-num {
   font-variant-numeric: tabular-nums;
-  color: var(--dark-gray-color);
+  color: var(--neutral-black);
 }
 
 .cell-name {
-  color: var(--text-alt-color);
+  color: var(--neutral-black);
   font-weight: 600;
 }
 
@@ -222,21 +222,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  margin: 0 auto 1rem;
-  border: 3px solid var(--accent-border-alpha);
-  border-top-color: var(--accent-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-.loading-text {
-  margin: 0;
-  color: var(--text-muted);
 }
 
 @keyframes spin {

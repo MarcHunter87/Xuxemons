@@ -1,15 +1,31 @@
 import { Component, signal, OnInit, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, interval, Subscription } from 'rxjs';
 import { Header } from './core/layouts/header/header';
 import { Footer } from './core/layouts/footer/footer';
 import { Breadcrumb } from './core/components/breadcrumb/breadcrumb';
-import { DailyNotiModal } from './core/components/daily-noti-modal/daily-noti-modal';
-import { FriendRequestNotiModal } from './core/components/friend-request-noti-modal/friend-request-noti-modal';
+import { DailyNotiModal } from './core/components/modals/daily-noti-modal/daily-noti-modal';
+import { FriendRequestNotiModal } from './core/components/modals/friend-request-noti-modal/friend-request-noti-modal';
 import { AuthService } from './core/services/auth';
+import { BattleService } from './core/services/battle.service';
 import { FriendsService } from './core/services/friends.service';
 import type { DailyRewardNotification, FriendRequestItem } from './core/interfaces';
+import { LoadingService } from './core/services/loading.service';
+import { Meta, Title } from '@angular/platform-browser';
+
+type PendingBattleInvite = {
+  id: number;
+  user_id: string;
+  opponent_user_id: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'finished' | string;
+  user?: {
+    id: string;
+    name?: string;
+    level?: number;
+    icon_path?: string | null;
+  };
+};
 
 @Component({
   selector: 'app-root',
@@ -20,7 +36,6 @@ import type { DailyRewardNotification, FriendRequestItem } from './core/interfac
 })
 export class App implements OnInit, OnDestroy {
   protected readonly showLayout = signal(true);
-  protected readonly showFooter = signal(true);
   protected readonly showTopBreadcrumb = signal(true);
   protected readonly isProfilePage = signal(false);
   protected readonly isBattlePage = signal(false);
@@ -28,26 +43,44 @@ export class App implements OnInit, OnDestroy {
   protected readonly pendingDailyRewards = signal<DailyRewardNotification | null>(null);
   protected readonly showFriendRequestModal = signal(false);
   protected readonly pendingFriendRequests = signal<FriendRequestItem[]>([]);
+  protected readonly pendingBattleInvite = signal<PendingBattleInvite | null>(null);
+  protected readonly isBattleInviteBusy = signal(false);
   private dismissedFriendRequestIds: Record<string, boolean> = {};
+  private readonly battleInvitePollMs = 3000;
   private sub: { unsubscribe: () => void } | null = null;
   private friendSub: { unsubscribe: () => void } | null = null;
   private periodicSyncSub: Subscription | null = null;
+  private battleInviteSub: Subscription | null = null;
   private isCheckingPendingDailyRewards = false;
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  protected readonly loadingService = inject(LoadingService);
+  private readonly meta = inject(Meta);
+  private readonly title = inject(Title);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly outgoingBattleStorageKey = 'xuxemons_outgoing_battle_id';
 
-  constructor(private router: Router, private authService: AuthService, private friendsService: FriendsService) { }
+  // Sirve para inyectar los servicios principales de la app
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private friendsService: FriendsService,
+    private battleService: BattleService,
+  ) { }
 
+  // Sirve para actualizar la visibilidad de la layout y el breadcrumb
   private updateShowLayout(): void {
     const url = this.router.url.split('?')[0];
+    const isBattleRoute = url.startsWith('/battle/');
     this.showLayout.set(url !== '/login' && url !== '/register');
-    this.showFooter.set(url !== '/login' && url !== '/register' && !url.startsWith('/battle'));
-    this.showTopBreadcrumb.set(url !== '/profile' && !url.startsWith('/battle'));
+    this.showTopBreadcrumb.set(url !== '/profile' && !isBattleRoute);
     this.isProfilePage.set(url === '/profile');
-    this.isBattlePage.set(url.startsWith('/battle'));
+    this.isBattlePage.set(isBattleRoute);
   }
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     this.updateShowLayout();
+    this.updateMetaTags();
     this.checkPendingDailyRewards();
 
     this.friendSub = this.friendsService.pendingRequests.subscribe(requests => {
@@ -66,12 +99,21 @@ export class App implements OnInit, OnDestroy {
           this.checkPendingDailyRewards();
         }
       });
+
+      this.battleInviteSub = interval(this.battleInvitePollMs).subscribe(() => {
+        this.pollPendingBattleInvites();
+        this.pollOutgoingBattleTracker();
+      });
     }
 
+    this.pollPendingBattleInvites();
+    this.pollOutgoingBattleTracker();
+
     this.sub = this.router.events.pipe(
-      filter(e => e.constructor.name === 'NavigationEnd')
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.updateShowLayout();
+      this.updateMetaTags();
       this.checkPendingDailyRewards();
       if (this.showLayout()) {
         setTimeout(() => {
@@ -86,12 +128,121 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para destruir el componente
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
     this.friendSub?.unsubscribe();
     this.periodicSyncSub?.unsubscribe();
+    this.battleInviteSub?.unsubscribe();
   }
 
+  // Sirve para obtener invitaciones pendientes de batalla desde cualquier pantalla
+  private pollPendingBattleInvites(): void {
+    if (!this.authService.getUser() || this.router.url.startsWith('/battle/')) {
+      this.pendingBattleInvite.set(null);
+      return;
+    }
+
+    this.battleService.getPendingBattles().subscribe({
+      next: (battles: PendingBattleInvite[] | unknown) => {
+        const pendingBattles = Array.isArray(battles) ? battles : [];
+        const nextInvite = pendingBattles.length > 0 ? pendingBattles[0] : null;
+        const previousInvite = this.pendingBattleInvite();
+        void previousInvite;
+        this.pendingBattleInvite.set(nextInvite);
+      },
+      error: () => {
+        this.pendingBattleInvite.set(null);
+      },
+    });
+  }
+
+  // Sirve para reanudar la redirección a combate aunque el usuario salga de la página de amigos.
+  private pollOutgoingBattleTracker(): void {
+    if (!this.authService.getUser() || typeof localStorage === 'undefined') {
+      return;
+    }
+
+    const rawBattleId = localStorage.getItem(this.outgoingBattleStorageKey);
+    const battleId = Number(rawBattleId);
+    if (!Number.isFinite(battleId) || battleId <= 0) {
+      return;
+    }
+
+    this.battleService.getBattle(battleId).subscribe({
+      next: (battle: any) => {
+        const status = String(battle?.status ?? '').toLowerCase();
+
+        if (status === 'accepted') {
+          const expectedBattleRoute = `/battle/${battleId}`;
+          if (!this.router.url.startsWith(expectedBattleRoute)) {
+            this.router.navigate(['/battle', battleId]);
+          }
+          return;
+        }
+
+        if (status === 'rejected' || status === 'completed' || status === 'finished') {
+          localStorage.removeItem(this.outgoingBattleStorageKey);
+        }
+      },
+      error: (error) => {
+        const status = String(error?.error?.status ?? '').toLowerCase();
+        if (status === 'pending') {
+          return;
+        }
+
+        if (status === 'rejected' || status === 'completed' || status === 'finished') {
+          localStorage.removeItem(this.outgoingBattleStorageKey);
+          return;
+        }
+
+        localStorage.removeItem(this.outgoingBattleStorageKey);
+      },
+    });
+  }
+
+  // Sirve para aceptar una invitación global de batalla
+  onAcceptBattleInvite(): void {
+    const invite = this.pendingBattleInvite();
+    if (!invite || this.isBattleInviteBusy()) {
+      return;
+    }
+
+    this.isBattleInviteBusy.set(true);
+
+    this.battleService.acceptBattle(invite.id).subscribe({
+      next: () => {
+        this.pendingBattleInvite.set(null);
+        this.isBattleInviteBusy.set(false);
+        this.router.navigate(['/battle', invite.id]);
+      },
+      error: () => {
+        this.isBattleInviteBusy.set(false);
+      },
+    });
+  }
+
+  // Sirve para rechazar una invitación global de batalla
+  onRejectBattleInvite(): void {
+    const invite = this.pendingBattleInvite();
+    if (!invite || this.isBattleInviteBusy()) {
+      return;
+    }
+
+    this.isBattleInviteBusy.set(true);
+
+    this.battleService.rejectBattle(invite.id).subscribe({
+      next: () => {
+        this.pendingBattleInvite.set(null);
+        this.isBattleInviteBusy.set(false);
+      },
+      error: () => {
+        this.isBattleInviteBusy.set(false);
+      },
+    });
+  }
+
+  // Sirve para cerrar el modal de recompensas diarias
   onCloseDailyRewardsModal(): void {
     const pending = this.pendingDailyRewards();
 
@@ -108,6 +259,7 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para verificar si hay recompensas pendientes
   private checkPendingDailyRewards(): void {
     const user = this.authService.getUser();
 
@@ -131,12 +283,14 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para cerrar el modal de solicitudes de amistad
   onCloseFriendRequestModal(): void {
     const pending = this.pendingFriendRequests();
     pending.forEach(r => { this.dismissedFriendRequestIds[String(r.id)] = true; });
     this.showFriendRequestModal.set(false);
   }
 
+  // Sirve para aceptar una solicitud de amistad
   onAcceptFriendRequest(req: FriendRequestItem): void {
     this.friendsService.acceptRequest(req.id).subscribe({
       next: () => {
@@ -148,6 +302,7 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para rechazar una solicitud de amistad
   onRejectFriendRequest(req: FriendRequestItem): void {
     this.friendsService.rejectRequest(req.id).subscribe({
       next: () => {
@@ -159,9 +314,35 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Sirve para verificar si hay recompensas pendientes
   private hasAnyDailyRewards(notification: DailyRewardNotification): boolean {
     const gachaQty = notification.gacha_ticket?.quantity ?? 0;
     const itemCount = notification.items?.length ?? 0;
     return gachaQty > 0 || itemCount > 0;
+  }
+
+  // Sirve para actualizar las meta tags
+  private updateMetaTags(): void {
+    const route = this.getDeepestRoute(this.activatedRoute);
+    const pageTitle = route.snapshot.title ?? 'Xuxemons';
+    const appTitle = pageTitle === 'Xuxemons' ? 'Xuxemons' : `${pageTitle} | Xuxemons`;
+    const description = `Explore the ${pageTitle} page in Xuxemons.`;
+    const url = typeof window !== 'undefined' ? window.location.href : 'https://xuxemons.com';
+
+    this.title.setTitle(appTitle);
+    this.meta.updateTag({ name: 'description', content: description });
+    this.meta.updateTag({ property: 'og:title', content: appTitle });
+    this.meta.updateTag({ property: 'og:description', content: description });
+    this.meta.updateTag({ property: 'og:type', content: 'website' });
+    this.meta.updateTag({ property: 'og:url', content: url });
+  }
+
+  // Sirve para obtener la ruta más profunda
+  private getDeepestRoute(route: ActivatedRoute): ActivatedRoute {
+    let current = route;
+    while (current.firstChild) {
+      current = current.firstChild;
+    }
+    return current;
   }
 }

@@ -1,16 +1,11 @@
 <section class="page-hero" aria-labelledby="admin-edit-evolve-title">
   <h1 id="admin-edit-evolve-title">
-    <span class="page-hero-title-black">Edit evolution requirement</span>
+    <span class="page-hero-title-black">Edit evolution size</span>
   </h1>
   <p class="page-hero-desc">Adjust the progress required to reach this size when using Evolve items.</p>
 </section>
 
-@if (isLoadingSize()) {
-  <div class="loading-state">
-    <span class="stat-card__spinner" aria-hidden="true"></span>
-    <p class="loading-text">Loading size...</p>
-  </div>
-}
+
 
 @if (!isLoadingSize()) {
 <section class="form-card card">

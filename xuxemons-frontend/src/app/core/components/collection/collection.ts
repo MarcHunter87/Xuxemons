@@ -16,6 +16,7 @@ export class Collection implements OnInit {
   loading = signal(true);
   loadError = signal(false);
 
+  // Sirve para inicializar el componente
   async ngOnInit(): Promise<void> {
     this.loading.set(true);
     this.loadError.set(false);

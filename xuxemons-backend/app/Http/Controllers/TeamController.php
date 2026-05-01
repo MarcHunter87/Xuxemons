@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class TeamController extends Controller
 {
+    // Sirve para obtener el equipo del usuario autenticado con sus relaciones cargadas.
     public function getTeam()
     {
         $userId = Auth::id();
@@ -27,6 +28,7 @@ class TeamController extends Controller
         return response()->json($team);
     }
 
+    // Sirve para actualizar un slot concreto del equipo validando la propiedad del Xuxemon.
     public function updateSlot(Request $request, $slotNumber)
     {
         if ($slotNumber < 1 || $slotNumber > 6) {

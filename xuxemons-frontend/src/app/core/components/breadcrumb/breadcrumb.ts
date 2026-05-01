@@ -38,8 +38,10 @@ export class Breadcrumb implements OnInit, OnDestroy {
     'leaderboard': 'Leaderboard',
   };
 
+  // Sirve para inyectar el router de navegación
   constructor(private router: Router) {}
 
+  // Sirve para inicializar el componente
   ngOnInit(): void {
     queueMicrotask(() => this.buildBreadcrumb(this.router.url));
     this.sub = this.router.events
@@ -47,10 +49,12 @@ export class Breadcrumb implements OnInit, OnDestroy {
       .subscribe(e => this.buildBreadcrumb(e.urlAfterRedirects));
   }
 
+  // Sirve para destruir el componente
   ngOnDestroy(): void {
     this.sub.unsubscribe();
   }
 
+  // Sirve para construir el breadcrumb
   private buildBreadcrumb(url: string): void {
     const segments = url.split('/').filter(s => s);
     if (segments[0] === 'profile') {
@@ -94,10 +98,12 @@ export class Breadcrumb implements OnInit, OnDestroy {
     }
   }
 
+  // Sirve para verificar si es el último elemento
   isLast(index: number): boolean {
     return index === this.items.length - 1;
   }
 
+  // Sirve para decodificar el ID para el breadcrumb
   private decodeIdForBreadcrumb(raw: string): string {
     let s = raw;
     let stop = false;

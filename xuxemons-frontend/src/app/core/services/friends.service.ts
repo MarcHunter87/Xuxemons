@@ -18,29 +18,34 @@ export class FriendsService {
     readonly pendingRequests = this.pendingRequests$.asObservable();
     readonly pendingCount = this.pendingRequests$.pipe(map(r => r.length));
 
+    // Sirve para cargar todos los amigos y solicitudes pendientes
     loadAll(): void {
         this.loadFriends();
         this.loadPendingRequests();
     }
 
+    // Sirve para cargar todos los amigos
     loadFriends(): void {
         if (!this.isBrowser) return;
         this.http.get<{ data: FriendUser[] }>(`${this.apiUrl}/friends`)
             .subscribe({ next: r => this.friends$.next(r.data ?? []) });
     }
 
+    // Sirve para cargar todas las solicitudes pendientes
     loadPendingRequests(): void {
         if (!this.isBrowser) return;
         this.http.get<{ data: FriendRequestItem[] }>(`${this.apiUrl}/friends/requests`)
             .subscribe({ next: r => this.pendingRequests$.next(r.data ?? []) });
     }
 
+    // Sirve para buscar usuarios
     searchUsers(query: string): Observable<SearchUser[]> {
         return this.http
             .get<{ data: SearchUser[] }>(`${this.apiUrl}/friends/search`, { params: { q: query } })
             .pipe(map(r => r.data ?? []));
     }
 
+    // Sirve para enviar una solicitud de amistad
     sendRequest(receiverId: string): Observable<{ message: string; auto_accepted?: boolean }> {
         return this.http.post<{ message: string; auto_accepted?: boolean }>(
             `${this.apiUrl}/friends/requests`,
@@ -48,10 +53,12 @@ export class FriendsService {
         );
     }
 
+    // Sirve para cancelar una solicitud de amistad
     cancelRequest(receiverId: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/friends/requests/cancel/${encodeURIComponent(receiverId)}`);
     }
 
+    // Sirve para aceptar una solicitud de amistad
     acceptRequest(requestId: number): Observable<void> {
         return this.http.put<void>(`${this.apiUrl}/friends/requests/${requestId}/accept`, {}).pipe(
             tap(() => {
@@ -63,6 +70,7 @@ export class FriendsService {
         );
     }
 
+    // Sirve para rechazar una solicitud de amistad
     rejectRequest(requestId: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/friends/requests/${requestId}`).pipe(
             tap(() => {
@@ -73,6 +81,7 @@ export class FriendsService {
         );
     }
 
+    // Sirve para eliminar un amigo
     removeFriend(friendId: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/friends/${encodeURIComponent(friendId)}`).pipe(
             tap(() => {
