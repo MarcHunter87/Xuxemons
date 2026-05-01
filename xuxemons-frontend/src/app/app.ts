@@ -185,7 +185,17 @@ export class App implements OnInit, OnDestroy {
           localStorage.removeItem(this.outgoingBattleStorageKey);
         }
       },
-      error: () => {
+      error: (error) => {
+        const status = String(error?.error?.status ?? '').toLowerCase();
+        if (status === 'pending') {
+          return;
+        }
+
+        if (status === 'rejected' || status === 'completed' || status === 'finished') {
+          localStorage.removeItem(this.outgoingBattleStorageKey);
+          return;
+        }
+
         localStorage.removeItem(this.outgoingBattleStorageKey);
       },
     });

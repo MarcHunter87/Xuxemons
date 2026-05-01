@@ -221,7 +221,22 @@ export class Friends implements OnInit, OnDestroy {
           this.persistOutgoingBattleId(null);
         }
       },
-      error: () => {
+      error: (error) => {
+        const status = String(error?.error?.status ?? '').toLowerCase();
+        if (status === 'pending') {
+          return;
+        }
+
+        if (status === 'rejected' || status === 'completed' || status === 'finished') {
+          this.outgoingBattleId.set(null);
+          this.outgoingBattleFriendId.set(null);
+          this.persistOutgoingBattleId(null);
+          this.successMessage.set(status === 'rejected'
+            ? 'Your challenge was rejected.'
+            : 'The challenge is no longer active.');
+          return;
+        }
+
         this.outgoingBattleId.set(null);
         this.outgoingBattleFriendId.set(null);
         this.persistOutgoingBattleId(null);

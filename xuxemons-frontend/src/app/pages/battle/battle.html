@@ -3,8 +3,8 @@
   <div class="battle-wrapper">
     <!-- Main Battle Arena -->
     <div class="battle-arena">
-      <div class="turn-indicator" [class.player-turn]="vm.currentTurn() === 'player'" [class.opponent-turn]="vm.currentTurn() === 'opponent'">
-        {{ vm.currentTurn() === 'player' ? 'YOUR TURN' : 'OPPONENT TURN' }}
+      <div class="turn-indicator" [class.player-turn]="vm.isBattleActive() && vm.currentTurn() === 'player'" [class.opponent-turn]="vm.isBattleActive() && vm.currentTurn() === 'opponent'">
+        {{ vm.battleTurnLabel() }}
       </div>
       @if (vm.battleCallout()) {
         <div class="battle-callout" [class.battle-callout--buff]="vm.battleCallout()!.tone === 'buff'" [class.battle-callout--nerf]="vm.battleCallout()!.tone === 'nerf'" [class.battle-callout--neutral]="vm.battleCallout()!.tone === 'neutral'">
@@ -169,12 +169,20 @@
     <app-battle-runaway-result-modal [vm]="vm"></app-battle-runaway-result-modal>
   }
 
-  <div class="dice-overlay" [class.visible]="vm.isDiceOverlayVisible()" aria-live="polite" aria-atomic="true">
-    <div class="dice-container" [class.throwing]="vm.isDiceRolling()">
-      <div class="dice" [class.rolling]="vm.isDiceRolling()" [class.landed]="!vm.isDiceRolling()" [attr.data-value]="vm.diceValue() || 1">
+  <div
+    #diceOverlay
+    class="dice-overlay"
+    [class.visible]="vm.isDiceOverlayVisible()"
+    [class.dice-overlay--low]="vm.diceOutcomeTone() === 'low'"
+    [class.dice-overlay--mid]="vm.diceOutcomeTone() === 'mid'"
+    [class.dice-overlay--high]="vm.diceOutcomeTone() === 'high'"
+    aria-live="polite"
+    aria-atomic="true">
+    <div #diceContainer class="dice-container">
+      <div #diceCube class="dice" [attr.data-state]="vm.isDiceRolling() ? 'rolling' : 'landed'" [attr.data-value]="vm.diceValue() || 1">
         {{ vm.isDiceRolling() ? '?' : vm.diceValue() }}
       </div>
-      <span class="dice-label">{{ vm.isDiceRolling() ? 'Rolling...' : ('Roll: ' + vm.diceValue()) }}</span>
+      <span class="dice-label">{{ vm.isDiceRolling() ? 'Rolling...' : ('Roll: ' + vm.diceValue() + (vm.diceOutcomeTone() === 'low' ? ' - LOW' : vm.diceOutcomeTone() === 'mid' ? ' - MID' : vm.diceOutcomeTone() === 'high' ? ' - HIGH' : '')) }}</span>
     </div>
   </div>
 </div>

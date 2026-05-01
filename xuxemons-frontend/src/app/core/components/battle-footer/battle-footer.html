@@ -35,7 +35,11 @@
   </div>
 
   <div class="battle-actions">
-    @if (vm.battleStatus() === 'ready' && vm.currentTurn() === 'player' && !vm.currentSubMenu()) {
+    @if (!vm.isBattleActive()) {
+      <div class="waiting-msg">
+        <span class="pulse">{{ vm.inactiveBattleMessage() }}</span>
+      </div>
+    } @else if (vm.battleStatus() === 'ready' && vm.currentTurn() === 'player' && !vm.currentSubMenu()) {
       <div class="menu-grid">
         <button class="menu-btn fight" (click)="vm.showSubMenu('attacks')">FIGHT</button>
         <button class="menu-btn bag" (click)="vm.showSubMenu('bag')">BAG</button>

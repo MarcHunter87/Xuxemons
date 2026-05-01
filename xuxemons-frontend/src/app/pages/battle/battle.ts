@@ -63,8 +63,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private battleEventSource: EventSource | null = null;
   private streamBootstrapTimeout: ReturnType<typeof setTimeout> | null = null;
   private battleCalloutTimeout: ReturnType<typeof setTimeout> | null = null;
+  private inactiveBattleRedirectTimeout: ReturnType<typeof setTimeout> | null = null;
   private diceLandingTimeout: ReturnType<typeof setTimeout> | null = null;
   private diceOverlayTimeout: ReturnType<typeof setTimeout> | null = null;
+  private queuedAttackLungeTimeout: ReturnType<typeof setTimeout> | null = null;
   private playerAttackTimeout: ReturnType<typeof setTimeout> | null = null;
   private opponentAttackTimeout: ReturnType<typeof setTimeout> | null = null;
   private attackTrailTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -73,13 +75,21 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private opponentHitTimeout: ReturnType<typeof setTimeout> | null = null;
   @ViewChild('playerSprite') playerSprite?: ElementRef<HTMLDivElement>;
   @ViewChild('opponentSprite') opponentSprite?: ElementRef<HTMLDivElement>;
+  @ViewChild('diceOverlay') diceOverlay?: ElementRef<HTMLDivElement>;
+  @ViewChild('diceContainer') diceContainer?: ElementRef<HTMLDivElement>;
+  @ViewChild('diceCube') diceCube?: ElementRef<HTMLDivElement>;
   private playerFaintTimeout: ReturnType<typeof setTimeout> | null = null;
   private opponentFaintTimeout: ReturnType<typeof setTimeout> | null = null;
   private playerSpriteAnimation: Animation | null = null;
   private opponentSpriteAnimation: Animation | null = null;
+  private diceContainerAnimation: Animation | null = null;
+  private diceCubeAnimation: Animation | null = null;
   private teamIds: number[] = [];
   private disconnectForfeitSent = false;
+  private bypassDeactivateGuard = false;
   private lastBattleAnimationKey = '';
+  private readonly diceLandingDurationMs = 320;
+  private readonly diceOverlayDurationMs = 780;
 
   // Sirve para reactivar el polling cuando la pestaña vuelve a estar visible y no hay stream SSE.
   private readonly handleVisibilityChange = () => {
@@ -89,7 +99,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     this.restartPolling();
   };
-  
+
   // Sirve para enviar la rendición automática al cerrar o recargar la página durante un combate enlazado.
   private readonly handlePageExit = (event: PageTransitionEvent | BeforeUnloadEvent) => {
     if ('persisted' in event && event.persisted) {
@@ -125,6 +135,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   diceValue = signal<number | null>(null);
   isDiceOverlayVisible = signal(false);
   isDiceRolling = signal(false);
+  diceOutcomeTone = signal<'low' | 'mid' | 'high' | null>(null);
   isPlayerAttacking = signal(false);
   isOpponentAttacking = signal(false);
   activeAttackTrail = signal<'player' | 'opponent' | null>(null);
@@ -202,6 +213,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    this.isPractice.set(id === 'practice');
     this.battleId.set(+id);
     this.startBattleSync();
 
@@ -228,6 +240,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       clearTimeout(this.battleCalloutTimeout);
       this.battleCalloutTimeout = null;
     }
+    if (this.inactiveBattleRedirectTimeout) {
+      clearTimeout(this.inactiveBattleRedirectTimeout);
+      this.inactiveBattleRedirectTimeout = null;
+    }
 
     if (this.diceLandingTimeout) {
       clearTimeout(this.diceLandingTimeout);
@@ -236,6 +252,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     if (this.diceOverlayTimeout) {
       clearTimeout(this.diceOverlayTimeout);
       this.diceOverlayTimeout = null;
+    }
+    if (this.queuedAttackLungeTimeout) {
+      clearTimeout(this.queuedAttackLungeTimeout);
+      this.queuedAttackLungeTimeout = null;
     }
     if (this.playerAttackTimeout) {
       clearTimeout(this.playerAttackTimeout);
@@ -273,6 +293,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.playerSpriteAnimation = null;
     this.opponentSpriteAnimation?.cancel();
     this.opponentSpriteAnimation = null;
+    this.diceContainerAnimation?.cancel();
+    this.diceContainerAnimation = null;
+    this.diceCubeAnimation?.cancel();
+    this.diceCubeAnimation = null;
 
     this.stopBattleSync();
     this.stopBattleMusic();
@@ -312,13 +336,29 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     this.subs.add(
       this.battleService.getBattle(this.battleId()!).subscribe((data: any) => {
+        const wasFinished = this.battleStatus() === 'finished';
         this.applyBattleSnapshot(data);
         this.startBattleMusic();
 
-        if (data.winner_id && this.battleStatus() !== 'finished') {
+        if (data.winner_id && !wasFinished) {
           this.handleExternallyFinishedBattle(data);
         }
-      }, () => {}),
+      }, (error) => {
+        const response = error?.error;
+        const status = String(response?.status ?? '').toLowerCase();
+        if (status === 'pending' || status === 'rejected' || status === 'completed' || status === 'finished') {
+          this.battleData.set({
+            ...this.battleData(),
+            ...response,
+            status,
+          });
+          this.currentSubMenu.set(null);
+          this.selectedBattleItem.set(null);
+          this.battleStatus.set(status === 'completed' || status === 'finished' ? 'finished' : 'selecting');
+          this.addLog(response?.message ?? 'Battle is not active.', 'system');
+          this.scheduleInactiveBattleExit();
+        }
+      }),
     );
   }
 
@@ -375,8 +415,83 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Sirve para saber si una batalla enlazada sigue activa y acepta acciones.
+  isLinkedBattleActive(): boolean {
+    const data = this.battleData();
+    return data?.status === 'accepted' && !data?.winner_id;
+  }
+
+  // Sirve para unificar la disponibilidad de acciones entre práctica y PvP.
+  isBattleActive(): boolean {
+    return this.isPractice() || this.isLinkedBattleActive();
+  }
+
+  // Sirve para exponer si el jugador puede abrir o usar el menú principal de combate.
+  canPlayerAct(): boolean {
+    return this.isBattleActive()
+      && this.battleStatus() === 'ready'
+      && this.currentTurn() === 'player'
+      && !!this.selectedXuxemon()
+      && !!this.opponentXuxemon();
+  }
+
+  // Sirve para mostrar un mensaje coherente cuando el combate no admite más acciones.
+  inactiveBattleMessage(): string {
+    const data = this.battleData();
+    if (data?.winner_id || data?.status === 'completed') {
+      return 'Battle finished.';
+    }
+
+    if (data?.status === 'rejected') {
+      return 'Battle is no longer available.';
+    }
+
+    if (data?.status === 'pending') {
+      return 'Waiting for the other trainer to accept the battle.';
+    }
+
+    return 'Battle is not active.';
+  }
+
+  // Sirve para sacar al usuario de una ruta de combate inválida cuando el backend ya no la admite.
+  private scheduleInactiveBattleExit(): void {
+    if (this.isPractice() || this.inactiveBattleRedirectTimeout) {
+      return;
+    }
+
+    this.stopBattleSync();
+    this.inactiveBattleRedirectTimeout = setTimeout(() => {
+      this.inactiveBattleRedirectTimeout = null;
+    }, 0);
+    this.bypassDeactivateGuard = true;
+
+    if (this.isBrowser && typeof window !== 'undefined') {
+      window.location.assign('/friends');
+      return;
+    }
+
+    this.router.navigate(['/friends']);
+  }
+
+  // Sirve para evitar que la cabecera anuncie un turno jugable cuando el backend ya no acepta acciones.
+  battleTurnLabel(): string {
+    if (!this.isBattleActive()) {
+      return this.battleData()?.winner_id ? 'BATTLE FINISHED' : 'BATTLE INACTIVE';
+    }
+
+    if (this.battleStatus() !== 'ready') {
+      return 'WAITING FOR BATTLE';
+    }
+
+    return this.currentTurn() === 'player' ? 'YOUR TURN' : 'OPPONENT TURN';
+  }
+
   // Sirve para abrir o cambiar el submenú de combate (ataques, bolsa, cambio o huida) respetando el cambio forzado.
   showSubMenu(menu: BattleMenu): void {
+    if (!this.isBattleActive()) {
+      return;
+    }
+
     if (this.forcedSwitch() && menu !== 'switch') {
       return;
     }
@@ -417,6 +532,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   // Sirve para iniciar el uso de un objeto de la bolsa comprobando validez y objetivos elegibles.
   chooseBagItem(item: InventoryItem): void {
+    if (!this.isBattleActive()) {
+      return;
+    }
+
     if (!this.isBattleUsableItem(item)) {
       this.addLog(`${item.name} cannot be used during battle.`, 'system');
       return;
@@ -555,7 +674,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   // Sirve para registrar un ataque del jugador: envío al servidor o ejecución local con dado y animación.
   attack(attackObj: any): void {
-    if (this.battleStatus() !== 'ready' || this.currentTurn() !== 'player') {
+    if (!this.canPlayerAct()) {
       return;
     }
 
@@ -579,6 +698,17 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       : Math.floor(Math.random() * 6) + 1;
   }
 
+  // Sirve para clasificar visualmente la tirada en baja, media o alta.
+  private getDiceOutcomeTone(roll: number): 'low' | 'mid' | 'high' {
+    if (roll <= 2) {
+      return 'low';
+    }
+    if (roll <= 4) {
+      return 'mid';
+    }
+    return 'high';
+  }
+
   // Sirve para resolver el ataque del jugador en práctica: estados, daño, animaciones y posible debilitamiento rival.
   executePlayerAttack(attackObj: any): void {
     const attacker = this.selectedXuxemon();
@@ -598,8 +728,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const defenderStat = defender.defense || 5;
     const modifiers = this.calculateModifiers(attacker, defender, 'player');
     const roll = this.diceValue() || 0;
-    this.playDiceRollAnimation(roll);
-    this.playAttackLunge('player');
+    this.playDiceThenAttack('player', roll);
 
     const defenderMaxHp = defender.hp || 100;
     const defenderCurrentHp = this.getCurrentHpValue(defender);
@@ -671,8 +800,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const opponentAttack = opponent.attack || 10;
     const playerDefense = player.defense || 5;
     const roll = this.diceValue() || 0;
-    this.playDiceRollAnimation(roll);
-    this.playAttackLunge('opponent');
+    this.playDiceThenAttack('opponent', roll);
 
     const playerMaxHp = player.hp || 100;
     const playerCurrentHp = this.getCurrentHpValue(player);
@@ -760,18 +888,16 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     modifiers: number,
     defenderMaxHp: number,
   ): number {
-    // Base damage must come from the active myXuxemon attack stat.
-    const baseAttackDamage = Math.max(0, attackerStat);
-    const normalizedAttackPower = Math.max(6, Math.round(baseAttackDamage / 10));
-    const rawDamage = normalizedAttackPower
-      + (attackerStat * 0.35)
+    // Base damage must come from the selected attack shown in battle actions.
+    const baseAttackDamage = Math.max(1, Math.round(attackDamage ?? attackerStat ?? 10));
+    const rawDamage = baseAttackDamage
+      + (attackerStat * 0.12)
       + roll
       + (modifiers * 2)
-      - (defenderStat * 0.18);
+      - (defenderStat * 0.1);
     const damageAmount = Math.max(1, Math.round(rawDamage));
-    const damageCap = Math.max(18, Math.round(defenderMaxHp * 0.18));
 
-    return Math.min(damageAmount, damageCap);
+    return Math.min(damageAmount, Math.max(1, defenderMaxHp));
   }
 
   // Sirve para añadir una línea al registro de combate visible en la interfaz.
@@ -901,6 +1027,11 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   // Sirve para pedir confirmación al usuario antes de abandonar la ruta de batalla con combate activo.
   canDeactivate(): Observable<boolean> | boolean {
+    if (this.bypassDeactivateGuard) {
+      this.bypassDeactivateGuard = false;
+      return true;
+    }
+
     if (this.battleStatus() === 'finished') {
       return true;
     }
@@ -1268,7 +1399,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    if (normalizedData.status === 'accepted') {
+    if (normalizedData.status === 'accepted' && !normalizedData.winner_id) {
       const isMyTurn = (normalizedData.turn % 2 === 0 && normalizedData.user_id === user.id)
         || (normalizedData.turn % 2 !== 0 && normalizedData.opponent_user_id === user.id);
       this.currentTurn.set(isMyTurn ? 'player' : 'opponent');
@@ -1333,6 +1464,31 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     if (requiresForcedSwitch) {
       this.switchPage.set(0);
       this.currentSubMenu.set('switch');
+    }
+
+    if (normalizedData.status === 'rejected') {
+      this.currentSubMenu.set(null);
+      this.selectedBattleItem.set(null);
+      this.battleStatus.set('finished');
+      this.addLog('This battle is no longer available.', 'system');
+      this.scheduleInactiveBattleExit();
+      return;
+    }
+
+    if (normalizedData.status === 'pending') {
+      this.currentSubMenu.set(null);
+      this.selectedBattleItem.set(null);
+      this.battleStatus.set('selecting');
+      this.addLog('Waiting for the other trainer to accept the battle.', 'system');
+      this.scheduleInactiveBattleExit();
+      return;
+    }
+
+    if (normalizedData.winner_id || normalizedData.status === 'completed') {
+      this.currentSubMenu.set(null);
+      this.selectedBattleItem.set(null);
+      this.battleStatus.set('finished');
+      return;
     }
 
     if (!normalizedData.winner_id) {
@@ -1436,9 +1592,22 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       knownCombatants.set(xuxemon.name.trim(), { side: 'opponent', xuxemon });
     }
 
+    const readBattleLogText = (entry: unknown): string => {
+      if (typeof entry === 'string') {
+        return entry.trim();
+      }
+
+      if (entry && typeof entry === 'object' && 'text' in entry) {
+        const raw = (entry as { text?: unknown }).text;
+        return typeof raw === 'string' ? raw.trim() : String(raw ?? '').trim();
+      }
+
+      return String(entry ?? '').trim();
+    };
+
     const attackLog = Array.isArray(data?.battle_log)
-      ? data.battle_log.find((entry: string) => {
-        const text = String(entry ?? '').trim();
+      ? readBattleLogText(data.battle_log.find((entry: unknown) => {
+        const text = readBattleLogText(entry);
         const match = /^(.+?) used (.+?)!\s*\(Roll:\s*\d+/i.exec(text);
         if (!match) {
           return false;
@@ -1446,7 +1615,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
         const attackerName = match[1]?.trim();
         return knownCombatants.size === 0 || knownCombatants.has(attackerName);
-      }) ?? ''
+      }))
       : '';
 
     if (!attackLog || attackLog === 'Battle started!') {
@@ -1521,19 +1690,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     void attackerName;
     void attackName;
     void attackerOverride;
+    void side;
 
     if (roll !== null) {
       this.playDiceRollAnimation(roll);
-    }
-
-    this.playAttackLunge(side);
-
-    if (side === 'player' && this.opponentHP() <= 0) {
-      this.playFaintAnimation('opponent');
-    }
-
-    if (side === 'opponent' && this.playerHP() <= 0) {
-      this.playFaintAnimation('player');
     }
   }
 
@@ -1546,227 +1706,155 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       clearTimeout(this.diceOverlayTimeout);
     }
 
+    this.diceContainerAnimation?.cancel();
+    this.diceContainerAnimation = null;
+    this.diceCubeAnimation?.cancel();
+    this.diceCubeAnimation = null;
+
     this.zone.run(() => {
       this.isDiceOverlayVisible.set(true);
       this.isDiceRolling.set(true);
+      this.diceValue.set(null);
+      this.diceOutcomeTone.set(null);
+
+      this.flushBattleView();
+      this.runDiceOverlayAnimation();
 
       this.diceLandingTimeout = setTimeout(() => {
         this.zone.run(() => {
           this.isDiceRolling.set(false);
           this.diceValue.set(finalRoll);
+          this.diceOutcomeTone.set(this.getDiceOutcomeTone(finalRoll));
+          this.runDiceLandingAnimation();
         });
         this.diceLandingTimeout = null;
-      }, 600);
+      }, this.diceLandingDurationMs);
 
       this.diceOverlayTimeout = setTimeout(() => {
         this.zone.run(() => {
           this.isDiceOverlayVisible.set(false);
+          this.diceOutcomeTone.set(null);
         });
         this.diceOverlayTimeout = null;
-      }, 1200);
+      }, this.diceOverlayDurationMs);
     });
   }
 
-  // Sirve para coordinar el embate visual del atacante, efectos en el objetivo y flags de ataque.
-  private playAttackLunge(side: 'player' | 'opponent'): void {
-    const startAnimation = () => {
-      this.playAttackEffects(side);
-      this.runSpriteAttackAnimation(side);
-
-      if (side === 'player') {
-        if (this.playerAttackTimeout) {
-          clearTimeout(this.playerAttackTimeout);
-        }
-        this.isPlayerAttacking.set(true);
-        this.playerAttackTimeout = setTimeout(() => {
-          this.zone.run(() => {
-            this.isPlayerAttacking.set(false);
-          });
-          this.playerAttackTimeout = null;
-        }, 700);
-        return;
-      }
-
-      if (this.opponentAttackTimeout) {
-        clearTimeout(this.opponentAttackTimeout);
-      }
-      this.isOpponentAttacking.set(true);
-      this.opponentAttackTimeout = setTimeout(() => {
-        this.zone.run(() => {
-          this.isOpponentAttacking.set(false);
-        });
-        this.opponentAttackTimeout = null;
-      }, 700);
-    };
-
-    this.zone.run(() => {
-      if (side === 'player') {
-        if (this.playerAttackTimeout) {
-          clearTimeout(this.playerAttackTimeout);
-        }
-        this.isPlayerAttacking.set(false);
-      } else {
-        if (this.opponentAttackTimeout) {
-          clearTimeout(this.opponentAttackTimeout);
-        }
-        this.isOpponentAttacking.set(false);
-      }
-
-      this.flushBattleView();
-
-      if (this.isBrowser) {
-        requestAnimationFrame(() => {
-          this.zone.run(startAnimation);
-        });
-        return;
-      }
-
-      startAnimation();
-    });
-  }
-
-  // Sirve para animar el sprite del atacante con la API Web Animations cuando el navegador lo permite.
-  private runSpriteAttackAnimation(side: 'player' | 'opponent'): void {
+  // Sirve para lanzar el dado con una animación programática fiable, sin depender del reinicio de clases CSS.
+  private runDiceOverlayAnimation(): void {
     if (!this.isBrowser) {
       return;
     }
 
-    const element = side === 'player'
-      ? this.playerSprite?.nativeElement
-      : this.opponentSprite?.nativeElement;
+    const containerElement = this.diceContainer?.nativeElement;
+    const diceElement = this.diceCube?.nativeElement;
 
-    if (!element || typeof element.animate !== 'function') {
+    if (!containerElement || !diceElement || typeof containerElement.animate !== 'function' || typeof diceElement.animate !== 'function') {
       return;
     }
 
-    const currentAnimation = side === 'player' ? this.playerSpriteAnimation : this.opponentSpriteAnimation;
-    currentAnimation?.cancel();
-
-    const direction = side === 'player' ? 1 : -1;
-    const keyframes: Keyframe[] = [
-      {
-        transform: 'translate3d(0, 0, 0) scale(1)',
-        filter: 'brightness(1)',
-        offset: 0,
-      },
-      {
-        transform: `translate3d(${direction * 84}px, ${direction * -18}px, 0) scale(1.08)`,
-        filter: 'brightness(1.12)',
-        offset: 0.34,
-      },
-      {
-        transform: `translate3d(${direction * 28}px, ${direction * -6}px, 0) scale(1.03)`,
-        filter: 'brightness(1.05)',
-        offset: 0.62,
-      },
-      {
-        transform: 'translate3d(0, 0, 0) scale(1)',
-        filter: 'brightness(1)',
-        offset: 1,
-      },
-    ];
-
-    const animation = element.animate(keyframes, {
-      duration: 700,
-      easing: 'cubic-bezier(0.22, 0.9, 0.24, 1)',
-      fill: 'none',
+    this.diceContainerAnimation = containerElement.animate([
+      { transform: 'translate3d(0, 18px, 0) scale(0.9)', opacity: 0, offset: 0 },
+      { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1, offset: 1 },
+    ], {
+      duration: this.diceLandingDurationMs,
+      easing: 'ease-out',
+      fill: 'both',
     });
 
-    animation.onfinish = () => {
-      if (side === 'player') {
-        this.playerSpriteAnimation = null;
-        return;
-      }
+    this.diceCubeAnimation = diceElement.animate([
+      { transform: 'scale(0.92) rotateZ(0deg)', filter: 'brightness(1)', offset: 0 },
+      { transform: 'scale(1.04) rotateZ(90deg)', filter: 'brightness(1.04)', offset: 0.5 },
+      { transform: 'scale(1) rotateZ(180deg)', filter: 'brightness(1)', offset: 1 },
+    ], {
+      duration: this.diceLandingDurationMs,
+      easing: 'linear',
+      fill: 'both',
+    });
+  }
 
-      this.opponentSpriteAnimation = null;
-    };
-
-    if (side === 'player') {
-      this.playerSpriteAnimation = animation;
+  // Sirve para rematar visualmente el dado cuando cae y ya se conoce el valor final.
+  private runDiceLandingAnimation(): void {
+    if (!this.isBrowser) {
       return;
     }
 
-    this.opponentSpriteAnimation = animation;
+    const containerElement = this.diceContainer?.nativeElement;
+    const diceElement = this.diceCube?.nativeElement;
+
+    if (!containerElement || !diceElement || typeof containerElement.animate !== 'function' || typeof diceElement.animate !== 'function') {
+      return;
+    }
+
+    this.diceContainerAnimation?.cancel();
+    this.diceCubeAnimation?.cancel();
+
+    this.diceContainerAnimation = containerElement.animate([
+      { transform: 'scale(1)', opacity: 1, offset: 0 },
+      { transform: 'scale(1.03)', opacity: 1, offset: 0.45 },
+      { transform: 'scale(1)', opacity: 1, offset: 1 },
+    ], {
+      duration: 180,
+      easing: 'ease-out',
+      fill: 'both',
+    });
+
+    this.diceCubeAnimation = diceElement.animate([
+      { transform: 'translateY(-10px) scale(1.05)', offset: 0 },
+      { transform: 'translateY(2px) scale(0.98)', offset: 0.55 },
+      { transform: 'translateY(0) scale(1)', offset: 1 },
+    ], {
+      duration: 220,
+      easing: 'ease-out',
+      fill: 'both',
+    });
   }
 
-  // Sirve para activar estelas, impacto y parpadeo de daño sobre el bando que recibe el golpe.
-  private playAttackEffects(attackerSide: 'player' | 'opponent'): void {
-    const targetSide = attackerSide === 'player' ? 'opponent' : 'player';
+  // Sirve para mantener compatibilidad con llamadas existentes, dejando solo la animación del dado.
+  private playDiceThenAttack(side: 'player' | 'opponent', roll: number): void {
+    void side;
+    this.playDiceRollAnimation(roll);
+  }
 
-    if (this.attackTrailTimeout) {
-      clearTimeout(this.attackTrailTimeout);
-    }
-    if (this.impactBurstTimeout) {
-      clearTimeout(this.impactBurstTimeout);
-    }
+  // Sirve para desactivar por completo las animaciones visuales del ataque.
+  private playAttackLunge(side: 'player' | 'opponent'): void {
+    void side;
+    this.isPlayerAttacking.set(false);
+    this.isOpponentAttacking.set(false);
+  }
+
+  // Sirve para desactivar por completo la animación del sprite atacante.
+  private runSpriteAttackAnimation(side: 'player' | 'opponent'): void {
+    void side;
+    this.playerSpriteAnimation?.cancel();
+    this.playerSpriteAnimation = null;
+    this.opponentSpriteAnimation?.cancel();
+    this.opponentSpriteAnimation = null;
+  }
+
+  // Sirve para desactivar por completo los efectos visuales de impacto.
+  private playAttackEffects(attackerSide: 'player' | 'opponent'): void {
+    void attackerSide;
     if (this.playerHitTimeout) {
       clearTimeout(this.playerHitTimeout);
+      this.playerHitTimeout = null;
     }
     if (this.opponentHitTimeout) {
       clearTimeout(this.opponentHitTimeout);
+      this.opponentHitTimeout = null;
     }
-
+    if (this.attackTrailTimeout) {
+      clearTimeout(this.attackTrailTimeout);
+      this.attackTrailTimeout = null;
+    }
+    if (this.impactBurstTimeout) {
+      clearTimeout(this.impactBurstTimeout);
+      this.impactBurstTimeout = null;
+    }
     this.activeAttackTrail.set(null);
     this.activeImpactBurst.set(null);
     this.isPlayerHit.set(false);
     this.isOpponentHit.set(false);
-    this.flushBattleView();
-
-    const activateEffects = () => {
-      this.activeAttackTrail.set(attackerSide);
-      this.activeImpactBurst.set(targetSide);
-
-      if (targetSide === 'player') {
-        this.isPlayerHit.set(true);
-      } else {
-        this.isOpponentHit.set(true);
-      }
-
-      this.attackTrailTimeout = setTimeout(() => {
-        this.zone.run(() => {
-          this.activeAttackTrail.set(null);
-        });
-        this.attackTrailTimeout = null;
-      }, 340);
-
-      this.impactBurstTimeout = setTimeout(() => {
-        this.zone.run(() => {
-          this.activeImpactBurst.set(null);
-        });
-        this.impactBurstTimeout = null;
-      }, 420);
-
-      const clearHit = () => {
-        if (targetSide === 'player') {
-          this.isPlayerHit.set(false);
-          this.playerHitTimeout = null;
-          return;
-        }
-
-        this.isOpponentHit.set(false);
-        this.opponentHitTimeout = null;
-      };
-
-      if (targetSide === 'player') {
-        this.playerHitTimeout = setTimeout(() => {
-          this.zone.run(clearHit);
-        }, 360);
-        return;
-      }
-
-      this.opponentHitTimeout = setTimeout(() => {
-        this.zone.run(clearHit);
-      }, 360);
-    };
-
-    if (this.isBrowser) {
-      requestAnimationFrame(() => {
-        this.zone.run(activateEffects);
-      });
-      return;
-    }
-
-    activateEffects();
   }
 
   // Sirve para reproducir la secuencia corta de debilitamiento de un bando y ejecutar un callback al terminar.
@@ -1889,10 +1977,11 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private handleRealtimeBattlePayload(rawPayload: string): void {
     try {
       const data = JSON.parse(rawPayload);
+      const wasFinished = this.battleStatus() === 'finished';
       this.applyBattleSnapshot(data);
       this.startBattleMusic();
 
-      if (data.winner_id && this.battleStatus() !== 'finished') {
+      if (data.winner_id && !wasFinished) {
         this.handleExternallyFinishedBattle(data);
       }
     } catch (error) {
@@ -2566,20 +2655,28 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
           } else {
             this.currentSubMenu.set(null);
           }
+          const wasFinished = this.battleStatus() === 'finished';
           this.applyBattleSnapshot(data);
           this.inventoryService.loadInventory();
 
-          if (data.winner_id && this.battleStatus() !== 'finished') {
+          if (data.winner_id && !wasFinished) {
             this.handleExternallyFinishedBattle(data);
             return;
           }
-
-          this.battleStatus.set(this.forcedSwitch() ? 'ready' : 'ready');
         },
         error: (error) => {
           this.isSubmittingRun.set(false);
           const message = error?.error?.message ?? 'Battle action failed.';
+          this.currentSubMenu.set(null);
+          this.selectedBattleItem.set(null);
           this.addLog(`Error: ${message}`, 'system');
+
+          if (!this.isPractice() && /battle is not active/i.test(message)) {
+            this.battleStatus.set('selecting');
+            this.loadBattleData();
+            return;
+          }
+
           this.battleStatus.set('ready');
         },
       }),

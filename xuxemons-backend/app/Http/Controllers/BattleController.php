@@ -160,6 +160,10 @@ class BattleController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        if ($inactiveResponse = $this->buildInactiveBattleRouteResponse($battle)) {
+            return response()->json($inactiveResponse['body'], $inactiveResponse['status']);
+        }
+
         return response()->json($this->buildBattlePayload($battle, $viewerId));
     }
 
@@ -176,6 +180,10 @@ class BattleController extends Controller
 
         if ($viewerId !== $battle->user_id && $viewerId !== $battle->opponent_user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($inactiveResponse = $this->buildInactiveBattleRouteResponse($battle)) {
+            return response()->json($inactiveResponse['body'], $inactiveResponse['status']);
         }
 
         return response()->stream(function () use ($battleId, $viewerId) {
@@ -656,6 +664,35 @@ class BattleController extends Controller
         ];
     }
 
+    // Sirve para impedir que una batalla no aceptada se use como ruta de combate viva.
+    private function buildInactiveBattleRouteResponse(Battle $battle): ?array
+    {
+        if ($battle->status === 'accepted') {
+            return null;
+        }
+
+        $status = (string) $battle->status;
+        $httpStatus = $status === 'pending' ? 409 : 410;
+        $message = match ($status) {
+            'pending' => 'Battle challenge is still pending',
+            'rejected' => 'Battle challenge was rejected',
+            'completed' => 'Battle already completed',
+            default => 'Battle is not active',
+        };
+
+        return [
+            'status' => $httpStatus,
+            'body' => [
+                'message' => $message,
+                'battle_id' => $battle->id,
+                'status' => $status,
+                'winner_id' => $battle->winner_id,
+                'completion_reason' => $battle->completion_reason,
+                'runner_id' => $battle->runner_id,
+            ],
+        ];
+    }
+
     // Sirve para mapear campos user/opponent según la perspectiva del viewer.
     private function resolveParticipantFields(Battle $battle, string $viewerId): array
     {
@@ -1114,19 +1151,17 @@ class BattleController extends Controller
         int $modifiers,
         int $defenderMaxHp,
     ): int {
-        // Base damage must come from the active myXuxemon attack stat.
-        $baseAttackDamage = max(0, $attackerStat);
-        $normalizedAttackPower = max(6, (int) round($baseAttackDamage / 10));
-        $rawDamage = $normalizedAttackPower
-            + ($attackerStat * 0.35)
+        // Base damage must come from the selected attack damage.
+        $baseAttackDamage = max(1, (int) round($attackDamage ?? ($attackerStat ?: 10)));
+        $rawDamage = $baseAttackDamage
+            + ($attackerStat * 0.12)
             + $roll
             + ($modifiers * 2)
-            - ($defenderStat * 0.18);
+            - ($defenderStat * 0.1);
 
         $damageAmount = max(1, (int) round($rawDamage));
-        $damageCap = max(18, (int) round($defenderMaxHp * 0.18));
 
-        return min($damageAmount, $damageCap);
+        return min($damageAmount, max(1, $defenderMaxHp));
     }
 
     // Sirve para aplicar efectos de estado del ataque cuando corresponde.
