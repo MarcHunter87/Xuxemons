@@ -40,7 +40,7 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
     private shouldFocusAwardCloseButton = false;
 
     readonly revealRayAngles = Array.from({ length: 14 }, (_, i) => Math.round((i * 360) / 14));
-    revealSparkles: Array<{ x: number; y: number; size: number; opacity: number }> = [];
+    revealSparkles: Array<{ x: number; y: number; size: number; delay: number; duration: number }> = [];
 
     // Sirve para inicializar el componente
     ngOnInit() {
@@ -157,9 +157,9 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
         }, 50);
 
         setTimeout(() => {
-            this.awardedXuxemon.set(winner);
             this.generateSparkles();
             this.isSpinning.set(false);
+            this.awardedXuxemon.set(winner);
             this.showAward.set(true);
             this.shouldFocusAwardCloseButton = true;
             this.playModalRevealAudio();
@@ -219,13 +219,9 @@ export class Gacha implements OnInit, OnDestroy, AfterViewChecked {
             const x = -8 + Math.random() * 116;
             const y = -8 + Math.random() * 116;
             const size = 2 + Math.random() * 8;
-            const opacity = 0.55 + Math.random() * 0.35;
-            return {
-                x,
-                y,
-                size,
-                opacity,
-            };
+            const delay = Math.random() * 2.4;
+            const duration = 1.2 + Math.random() * 2.6;
+            return { x, y, size, delay, duration };
         });
     }
 

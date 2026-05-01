@@ -62,15 +62,11 @@
 }
 
 .animate-pop {
-  animation: modalPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  will-change: transform, opacity;
+  animation: modalPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .animate-float {
   animation: pulse-scale 2.5s ease-in-out infinite;
-  animation-delay: 0.6s;
-  animation-fill-mode: backwards;
-  will-change: transform;
 }
 
 /* Este keyframe se encarga de hacer el pop de entrada del premio. */
@@ -274,7 +270,8 @@
 .gacha-reveal-overlay .modal-content {
   position: relative;
   z-index: 5;
-  animation: reveal-modal-entrance 0.65s 0.45s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  animation: reveal-modal-entrance 0.65s 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
 }
 
 /* Este keyframe se encarga de escalar y mostrar el modal en el reveal. */
@@ -444,11 +441,21 @@
   height: var(--sp-size, 5px);
   background: var(--neutral-white);
   border-radius: 50%;
-  opacity: var(--sp-opacity, 0.75);
+  opacity: 0;
   box-shadow:
     0 0 6px 2px var(--type-color, var(--accent-color)),
     0 0 14px 4px var(--type-glow, color-mix(in srgb, var(--accent-color) 30%, transparent));
+  animation: sparkle-twinkle var(--sp-duration, 2s) var(--sp-delay, 1.5s) ease-in-out infinite;
   z-index: 3;
+}
+
+/* Este keyframe se encarga de animar el parpadeo y ascenso de las chispas. */
+@keyframes sparkle-twinkle {
+  0% { opacity: 0; transform: scale(0) translateY(0); }
+  25% { opacity: 1; transform: scale(1.2) translateY(-12px); }
+  50% { opacity: 0.55; transform: scale(0.7) translateY(-30px); }
+  75% { opacity: 0.85; transform: scale(1) translateY(-50px); }
+  100% { opacity: 0; transform: scale(0) translateY(-65px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
