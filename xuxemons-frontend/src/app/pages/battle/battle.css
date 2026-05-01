@@ -280,6 +280,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: visible;
   will-change: transform, filter, opacity;
 }
 
@@ -424,7 +425,6 @@
   border-radius: 50%;
   pointer-events: none;
   z-index: 14;
-  display: none;
   background: radial-gradient(circle, var(--neutral-white) 0%, var(--secondary-color) 18%, var(--color-amber-bright) 48%, var(--color-red-bright) 72%, transparent 100%);
 }
 
@@ -772,6 +772,23 @@
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
   position: relative;
   overflow: visible;
+  transform-style: preserve-3d;
+  perspective: 960px;
+}
+
+.dice-container::after {
+  content: '';
+  position: absolute;
+  inset: -18px;
+  border-radius: 34px;
+  pointer-events: none;
+  opacity: 0;
+  border: 2px solid var(--color-white-overlay-strong);
+  box-shadow: 0 0 28px var(--color-blue-overlay-strong);
+}
+
+.dice-overlay.visible .dice-container::after {
+  animation: diceAuraSpin 1.2s linear infinite;
 }
 
 .dice {
@@ -788,6 +805,22 @@
   border: 4px solid var(--neutral-white);
   box-shadow: 0 18px 38px rgba(0, 0, 0, 0.22), inset 0 -8px 16px rgba(0, 0, 0, 0.08);
   transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, filter;
+  transition: color 120ms ease-out, box-shadow 200ms ease-out;
+}
+
+.dice[data-state='rolling'] {
+  color: var(--accent-color);
+  text-shadow: 0 0 14px var(--color-blue-overlay-strong);
+  box-shadow:
+    0 20px 46px rgba(0, 0, 0, 0.28),
+    0 0 24px var(--color-blue-overlay-strong),
+    inset 0 -10px 18px rgba(0, 0, 0, 0.1);
+}
+
+.dice[data-state='landed'] {
+  animation: diceResultPulse 0.34s ease-out;
 }
 
 .dice[data-state='landed'][data-value='1'] { color: var(--color-gray-medium); }
@@ -802,13 +835,13 @@
   font-size: 1.1rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 2px;
   text-align: center;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+  letter-spacing: 1.5px;
 }
 
-.sprite-container {
-  overflow: visible;
+.dice[data-state='rolling'] + .dice-label {
+  animation: diceLabelPulse 0.66s ease-in-out infinite;
 }
 
 /* Attack animations — lunge transform is driven by Web Animations API in battle.ts */
@@ -826,7 +859,6 @@
 }
 
 .sprite-container.hit img {
-  animation: targetImpactShake 0.22s ease-out;
   filter: brightness(1.15) drop-shadow(0 0 10px var(--neutral-white));
 }
 
@@ -1070,6 +1102,33 @@
   }
 }
 
+@keyframes diceAuraSpin {
+  0% {
+    opacity: 0.25;
+    transform: rotate(0deg) scale(0.96);
+  }
+  50% {
+    opacity: 0.65;
+    transform: rotate(180deg) scale(1.02);
+  }
+  100% {
+    opacity: 0.25;
+    transform: rotate(360deg) scale(0.96);
+  }
+}
+
+@keyframes diceLabelPulse {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+}
+
 /* Este keyframe se encarga del giro continuo de elementos circulares. */
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -1205,14 +1264,6 @@
   }
 }
 
-.sprite-container.hit img { animation: shakeHit 0.1s linear 3, hitFlash 0.3s ease; }
-
-/* Este keyframe se encarga del flash general de impacto. */
-@keyframes hitFlash {
-  0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
-  50% { filter: brightness(2) drop-shadow(0 0 10px var(--neutral-white)); }
-}
-
 /* ── Type-specific screen effects (requires :has() support) ── */
 .battle-screen:has(.impact-burst--speed) {
   animation: speedScreenFlash 0.3s ease-out;
@@ -1257,15 +1308,15 @@
 
 /* ── Type-specific hit flash using :has() ── */
 .battle-screen:has(.impact-burst--speed) .sprite-container.hit img {
-  animation: shakeHit 0.1s linear 3, hitFlashSpeed 0.34s ease;
+  filter: brightness(1.22) drop-shadow(0 0 12px var(--secondary-color));
 }
 
 .battle-screen:has(.impact-burst--technical) .sprite-container.hit img {
-  animation: shakeHit 0.1s linear 3, hitFlashTechnical 0.34s ease;
+  filter: brightness(1.2) drop-shadow(0 0 12px var(--color-amber-bright));
 }
 
 .battle-screen:has(.impact-burst--power) .sprite-container.hit img {
-  animation: shakeHit 0.12s linear 4, hitFlashPower 0.44s ease;
+  filter: brightness(1.22) drop-shadow(0 0 12px var(--color-red-bright));
 }
 
 /* Este keyframe se encarga del hit flash específico de ataques Speed. */
@@ -1529,15 +1580,15 @@
 
 /* ── Hit flash for special variants ── */
 .battle-screen:has(.impact-burst--speed-special) .sprite-container.hit img {
-  animation: shakeHit 0.08s linear 4, hitFlashSpeedSpecial 0.38s ease;
+  filter: brightness(1.28) drop-shadow(0 0 14px var(--neutral-white));
 }
 
 .battle-screen:has(.impact-burst--technical-special) .sprite-container.hit img {
-  animation: shakeHit 0.1s linear 3, hitFlashTechnicalSpecial 0.4s ease;
+  filter: brightness(1.26) drop-shadow(0 0 14px var(--color-amber-bright));
 }
 
 .battle-screen:has(.impact-burst--power-special) .sprite-container.hit img {
-  animation: shakeHit 0.12s linear 5, hitFlashPowerSpecial 0.52s ease;
+  filter: brightness(1.3) drop-shadow(0 0 14px var(--color-red-bright));
 }
 
 @keyframes hitFlashSpeedSpecial {

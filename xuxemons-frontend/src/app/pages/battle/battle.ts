@@ -107,8 +107,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private disconnectForfeitSent = false;
   private bypassDeactivateGuard = false;
   private lastBattleAnimationKey = '';
-  private readonly diceLandingDurationMs = 320;
-  private readonly diceOverlayDurationMs = 780;
+  private readonly diceLandingDurationMs = 430;
+  private readonly diceOverlayDurationMs = 980;
 
   // Sirve para reactivar el polling cuando la pestaña vuelve a estar visible y no hay stream SSE.
   private readonly handleVisibilityChange = () => {
@@ -1710,9 +1710,20 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         return '';
       }
 
+      const newestText = readBattleLogText(data.battle_log[0]);
+      const isSwitchLog = /^.+\s+sent\s+out\s+.+!$/i.test(newestText)
+        || /^come\s+back\s+.+!\s+go\s+.+!$/i.test(newestText)
+        || /^xuxemon\s+changed!?$/i.test(newestText)
+        || /^.+\s+enters\s+the\s+battle!?$/i.test(newestText);
+
+      // Si el último evento es cambio de Xuxemon, no debemos reusar ataques viejos del histórico.
+      if (isSwitchLog) {
+        return '';
+      }
+
       for (let index = 0; index < data.battle_log.length; index += 1) {
         const text = readBattleLogText(data.battle_log[index]);
-        const match = /^(.+?) used (.+?)(?: on .+?)?!/i.exec(text);
+        const match = /^(.+?) used (.+?)(?: on .+?)?!\s*\(Roll:\s*\d+/i.exec(text);
         if (!match) {
           continue;
         }
@@ -1733,7 +1744,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const attackMatch = /^(.+?) used (.+?)(?: on .+?)?!/i.exec(attackLog);
+    const attackMatch = /^(.+?) used (.+?)(?: on .+?)?!\s*\(Roll:\s*\d+/i.exec(attackLog);
     if (!attackMatch) {
       return;
     }
@@ -1874,21 +1885,24 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.diceContainerAnimation = containerElement.animate([
-      { transform: 'translate3d(0, 18px, 0) scale(0.9)', opacity: 0, offset: 0 },
+      { transform: 'translate3d(0, 26px, 0) scale(0.84)', opacity: 0, offset: 0 },
+      { transform: 'translate3d(0, -6px, 0) scale(1.03)', opacity: 1, offset: 0.38 },
       { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1, offset: 1 },
     ], {
       duration: this.diceLandingDurationMs,
-      easing: 'ease-out',
+      easing: 'cubic-bezier(0.2, 0.92, 0.24, 1)',
       fill: 'both',
     });
 
     this.diceCubeAnimation = diceElement.animate([
-      { transform: 'scale(0.92) rotateZ(0deg)', filter: 'brightness(1)', offset: 0 },
-      { transform: 'scale(1.04) rotateZ(90deg)', filter: 'brightness(1.04)', offset: 0.5 },
-      { transform: 'scale(1) rotateZ(180deg)', filter: 'brightness(1)', offset: 1 },
+      { transform: 'translate3d(0, -24px, 0) scale(0.78) rotateX(0deg) rotateY(0deg) rotateZ(0deg)', filter: 'brightness(1)', offset: 0 },
+      { transform: 'translate3d(0, -8px, 0) scale(1.08) rotateX(440deg) rotateY(380deg) rotateZ(220deg)', filter: 'brightness(1.12)', offset: 0.24 },
+      { transform: 'translate3d(0, 4px, 0) scale(0.96) rotateX(980deg) rotateY(820deg) rotateZ(420deg)', filter: 'brightness(1.02)', offset: 0.56 },
+      { transform: 'translate3d(0, 2px, 0) scale(1.03) rotateX(1450deg) rotateY(1220deg) rotateZ(620deg)', filter: 'brightness(1.08)', offset: 0.82 },
+      { transform: 'translate3d(0, 0, 0) scale(1) rotateX(1760deg) rotateY(1440deg) rotateZ(720deg)', filter: 'brightness(1)', offset: 1 },
     ], {
       duration: this.diceLandingDurationMs,
-      easing: 'linear',
+      easing: 'cubic-bezier(0.18, 0.82, 0.24, 1)',
       fill: 'both',
     });
   }
@@ -1910,22 +1924,24 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.diceCubeAnimation?.cancel();
 
     this.diceContainerAnimation = containerElement.animate([
-      { transform: 'scale(1)', opacity: 1, offset: 0 },
-      { transform: 'scale(1.03)', opacity: 1, offset: 0.45 },
-      { transform: 'scale(1)', opacity: 1, offset: 1 },
+      { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1, offset: 0 },
+      { transform: 'translate3d(0, -2px, 0) scale(1.04)', opacity: 1, offset: 0.32 },
+      { transform: 'translate3d(0, 1px, 0) scale(0.99)', opacity: 1, offset: 0.7 },
+      { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1, offset: 1 },
     ], {
-      duration: 180,
-      easing: 'ease-out',
+      duration: 260,
+      easing: 'cubic-bezier(0.22, 0.92, 0.26, 1)',
       fill: 'both',
     });
 
     this.diceCubeAnimation = diceElement.animate([
-      { transform: 'translateY(-10px) scale(1.05)', offset: 0 },
-      { transform: 'translateY(2px) scale(0.98)', offset: 0.55 },
-      { transform: 'translateY(0) scale(1)', offset: 1 },
+      { transform: 'translate3d(0, -14px, 0) scale(1.12) rotateX(0deg) rotateY(0deg) rotateZ(-8deg)', filter: 'brightness(1.14)', offset: 0 },
+      { transform: 'translate3d(0, 8px, 0) scale(0.9) rotateX(0deg) rotateY(0deg) rotateZ(7deg)', filter: 'brightness(0.98)', offset: 0.46 },
+      { transform: 'translate3d(0, -4px, 0) scale(1.04) rotateX(0deg) rotateY(0deg) rotateZ(-3deg)', filter: 'brightness(1.08)', offset: 0.72 },
+      { transform: 'translate3d(0, 0, 0) scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg)', filter: 'brightness(1)', offset: 1 },
     ], {
-      duration: 220,
-      easing: 'ease-out',
+      duration: 340,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
       fill: 'both',
     });
   }
