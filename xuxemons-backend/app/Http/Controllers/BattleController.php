@@ -917,10 +917,56 @@ class BattleController extends Controller
         $this->applyTrainerXpReward($winner, 100);
         $winner->save();
 
+        $this->applyTeamXuxemonsXpReward($winnerId, 100);
+
         if ($loser) {
             $loser->total_battles = (int) $loser->total_battles + 1;
             $loser->save();
         }
+    }
+
+    // Sirve para sumar XP de victoria a cada Xuxemon del equipo del ganador.
+    private function applyTeamXuxemonsXpReward(string $winnerUserId, int $xpReward): void
+    {
+        if ($xpReward <= 0) {
+            return;
+        }
+
+        $ids = array_values(array_unique($this->getOrderedTeamIds($winnerUserId)));
+
+        foreach ($ids as $adquiredId) {
+            $adquired = AdquiredXuxemon::query()
+                ->whereKey($adquiredId)
+                ->where('user_id', $winnerUserId)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $adquired) {
+                continue;
+            }
+
+            $this->applyAdquiredXuxemonXpReward($adquired, $xpReward);
+        }
+    }
+
+    // Sirve para sumar XP a un Xuxemon y subir de nivel.
+    private function applyAdquiredXuxemonXpReward(AdquiredXuxemon $adquired, int $xpReward): void
+    {
+        if ($xpReward <= 0) {
+            return;
+        }
+
+        $pendingXp = max(0, (int) $adquired->experience + $xpReward);
+        $currentLevel = max(1, (int) $adquired->level);
+
+        while ($pendingXp >= ($currentLevel * 100)) {
+            $pendingXp -= $currentLevel * 100;
+            $currentLevel++;
+        }
+
+        $adquired->level = $currentLevel;
+        $adquired->experience = $pendingXp;
+        $adquired->save();
     }
 
     // Sirve para calcular y persistir la experiencia y nivel del entrenador.

@@ -24,8 +24,8 @@
   width: 100%;
   margin: 0;
   padding: 0;
-  height: calc(100dvh - 68px);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .app-content app-breadcrumb {

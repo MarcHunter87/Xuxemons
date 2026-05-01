@@ -183,6 +183,7 @@ export class XuxemonService {
                 name: x.name,
                 type: x.type,
                 size: x.size ?? 'Small',
+                level: x.level,
                 adquired_id: x.adquired_id,
                 requirement_progress: x.requirement_progress ?? 0,
                 requirement_total: x.requirement_total,

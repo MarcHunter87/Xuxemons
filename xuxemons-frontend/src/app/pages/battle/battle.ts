@@ -1,5 +1,5 @@
 import { take } from 'rxjs/operators';
-import { Component, OnDestroy, OnInit, AfterViewInit, ViewChild, ElementRef, inject, signal, PLATFORM_ID, ChangeDetectorRef, NgZone, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit, ViewChild, ElementRef, HostListener, inject, signal, PLATFORM_ID, ChangeDetectorRef, NgZone, ViewEncapsulation } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, Subscription } from 'rxjs';
@@ -8,10 +8,11 @@ import { XuxemonService } from '../../core/services/xuxemon.service';
 import { TeamService } from '../../core/services/team.service';
 import { AuthService } from '../../core/services/auth';
 import { InventoryService } from '../../core/services/inventory.service';
-import { BattleTurnHeaderComponent } from './components/battle-turn-header.component';
-import { BattleFooterComponent } from './components/battle-footer.component';
-import { BattleSelectionOverlayComponent } from './components/battle-selection-overlay.component';
-import { BattleModalsComponent } from './components/battle-modals.component';
+import { BattleFooter } from '../../core/components/battle-footer/battle-footer';
+import { BattleVictoryModal } from '../../core/components/modals/battle-victory-modal/battle-victory-modal';
+import { BattleStealModal } from '../../core/components/modals/battle-steal-modal/battle-steal-modal';
+import { BattleRunConfirmModal } from '../../core/components/modals/battle-run-confirm-modal/battle-run-confirm-modal';
+import { BattleRunawayResultModal } from '../../core/components/modals/battle-runaway-result-modal/battle-runaway-result-modal';
 import type { InventoryItem, UseItemResponseData, Xuxemon } from '../../core/interfaces';
 
 type BattleMenu = 'attacks' | 'bag' | 'bag-target' | 'switch' | null;
@@ -23,10 +24,11 @@ interface BattleLogEntry { text: string; source: BattleLogSource; }
   standalone: true,
   imports: [
     CommonModule,
-    BattleTurnHeaderComponent,
-    BattleFooterComponent,
-    BattleSelectionOverlayComponent,
-    BattleModalsComponent,
+    BattleFooter,
+    BattleVictoryModal,
+    BattleStealModal,
+    BattleRunConfirmModal,
+    BattleRunawayResultModal,
   ],
   templateUrl: './battle.html',
   styleUrl: './battle.css',
@@ -35,7 +37,7 @@ interface BattleLogEntry { text: string; source: BattleLogSource; }
 export class Battle implements OnInit, OnDestroy, AfterViewInit {
   readonly vm = this;
 
-  private readonly bagPageSize = 4;
+  private readonly bagPageSize = 2;
   private readonly supportedBattleEffectTypes = new Set<InventoryItem['effect_type']>([
     'Heal',
     'DMG Up',
@@ -78,6 +80,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private teamIds: number[] = [];
   private disconnectForfeitSent = false;
   private lastBattleAnimationKey = '';
+
+  // Sirve para reactivar el polling cuando la pestaña vuelve a estar visible y no hay stream SSE.
   private readonly handleVisibilityChange = () => {
     if (this.battleEventSource || !this.isBrowser) {
       return;
@@ -85,6 +89,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     this.restartPolling();
   };
+  
+  // Sirve para enviar la rendición automática al cerrar o recargar la página durante un combate enlazado.
   private readonly handlePageExit = (event: PageTransitionEvent | BeforeUnloadEvent) => {
     if ('persisted' in event && event.persisted) {
       return;
@@ -141,6 +147,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   battleLog = signal<BattleLogEntry[]>([]);
   myItems = signal<InventoryItem[]>([]);
   bagPage = signal(0);
+  switchPage = signal(0);
   stealOptions = signal<Xuxemon[]>([]);
   stolenXuxemon = signal<Xuxemon | null>(null);
 
@@ -159,6 +166,24 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   // Sirve para iniciar la música cuando la vista ya está montada.
   ngAfterViewInit(): void {
     this.startBattleMusic();
+  }
+
+  // Sirve para abrir la confirmación de huida con Escape cuando no hay otro modal activo.
+  @HostListener('document:keydown', ['$event'])
+  onBattleDocumentKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape') {
+      return;
+    }
+    if (
+      this.showVictoryModal() ||
+      this.showStealModal() ||
+      this.showRunawayResultModal() ||
+      this.showRunConfirmModal() ||
+      this.isDiceOverlayVisible()
+    ) {
+      return;
+    }
+    this.runAway();
   }
 
   // Sirve para inicializar listeners, datos de combate e inventario.
@@ -191,6 +216,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.loadMyItems();
   }
 
+  // Sirve para limpiar listeners, timeouts y animaciones al destruir la vista.
   ngOnDestroy(): void {
     if (this.isBrowser) {
       document.removeEventListener('visibilitychange', this.handleVisibilityChange);
@@ -311,6 +337,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Sirve para cargar el equipo del jugador desde el backend y disparar la carga de Xuxemons propios.
   loadTeamAndXuxemons(): void {
     this.subs.add(
       this.xuxemonService.myXuxemonsList.subscribe((list: Xuxemon[]) => {
@@ -321,6 +348,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
         this.myXuxemons.set(filtered);
         this.refreshSelectedFromTeam(filtered);
+        const switchMax = Math.max(0, this.getBagTotalPages(this.getSwitchMenuXuxemons().length) - 1);
+        if (this.switchPage() > switchMax) {
+          this.switchPage.set(switchMax);
+        }
         this.cdr.detectChanges();
       }),
     );
@@ -344,6 +375,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Sirve para abrir o cambiar el submenú de combate (ataques, bolsa, cambio o huida) respetando el cambio forzado.
   showSubMenu(menu: BattleMenu): void {
     if (this.forcedSwitch() && menu !== 'switch') {
       return;
@@ -353,9 +385,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.bagPage.set(0);
     }
 
+    if (menu === 'switch') {
+      this.switchPage.set(0);
+    }
+
     this.currentSubMenu.set(menu);
   }
 
+  // Sirve para elegir el Xuxemon activo del jugador en modo práctica y preparar al rival si hace falta.
   selectXuxemon(xuxemon: Xuxemon): void {
     if (!this.isPractice()) {
       return;
@@ -378,6 +415,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  // Sirve para iniciar el uso de un objeto de la bolsa comprobando validez y objetivos elegibles.
   chooseBagItem(item: InventoryItem): void {
     if (!this.isBattleUsableItem(item)) {
       this.addLog(`${item.name} cannot be used during battle.`, 'system');
@@ -394,11 +432,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.currentSubMenu.set('bag-target');
   }
 
+  // Sirve para volver del modo de elegir objetivo al listado de la bolsa sin usar el objeto.
   cancelBagTargeting(): void {
     this.selectedBattleItem.set(null);
     this.currentSubMenu.set('bag');
   }
 
+  // Sirve para aplicar el objeto seleccionado sobre un Xuxemon objetivo (API, práctica o inventario local).
   useItemOnTarget(target: Xuxemon): void {
     const item = this.selectedBattleItem();
     if (!item?.bag_item_id) {
@@ -457,6 +497,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Sirve para cambiar el Xuxemon activo del jugador, enviando la acción al backend o simulándola en práctica.
   switchXuxemon(xuxemon: Xuxemon): void {
     if (this.getCurrentHpValue(xuxemon) <= 0) {
       return;
@@ -500,6 +541,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, 700);
   }
 
+  // Sirve para pasar el turno al oponente al finalizar la acción del jugador en modo práctica.
   endTurn(): void {
     if (!this.isPractice()) {
       this.battleStatus.set('ready');
@@ -511,6 +553,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => this.opponentTurn(), this.isPractice() ? 1200 : 1600);
   }
 
+  // Sirve para registrar un ataque del jugador: envío al servidor o ejecución local con dado y animación.
   attack(attackObj: any): void {
     if (this.battleStatus() !== 'ready' || this.currentTurn() !== 'player') {
       return;
@@ -529,12 +572,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.executePlayerAttack(attackObj);
   }
 
+  // Sirve para obtener un valor de dado válido (1–6) fijo o aleatorio según el contexto.
   private resolveRoll(finalValue?: number): number {
     return typeof finalValue === 'number'
       ? Math.max(1, Math.min(6, Math.round(finalValue)))
       : Math.floor(Math.random() * 6) + 1;
   }
 
+  // Sirve para resolver el ataque del jugador en práctica: estados, daño, animaciones y posible debilitamiento rival.
   executePlayerAttack(attackObj: any): void {
     const attacker = this.selectedXuxemon();
     const defender = this.opponentXuxemon();
@@ -581,6 +626,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, 750);
   }
 
+  // Sirve para ejecutar el turno de la IA en modo práctica eligiendo ataque y aplicando el mismo flujo de daño.
   opponentTurn(): void {
     if (!this.isPractice()) {
       return;
@@ -612,6 +658,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.executeOpponentAttack(randomAttack);
   }
 
+  // Sirve para aplicar el ataque del oponente al jugador en práctica y gestionar debilitamiento o fin de turno.
   private executeOpponentAttack(attackObj: any): void {
     const opponent = this.opponentXuxemon();
     const player = this.selectedXuxemon();
@@ -664,6 +711,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, 750);
   }
 
+  // Sirve para calcular bonificaciones y penalizaciones de daño por tipos y tamaño del atacante.
   calculateModifiers(attacker: Xuxemon, defender: Xuxemon, side: BattleLogSource = 'system'): number {
     let modifiers = 0;
     const attackerType = attacker.type?.name?.toLowerCase() || '';
@@ -703,6 +751,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return modifiers;
   }
 
+  // Sirve para obtener el daño final del golpe a partir de stats, dado, modificadores y un tope relativo al HP máximo.
   calculateDamageAmount(
     attackerStat: number,
     defenderStat: number,
@@ -725,10 +774,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return Math.min(damageAmount, damageCap);
   }
 
+  // Sirve para añadir una línea al registro de combate visible en la interfaz.
   addLog(message: string, source: BattleLogSource = 'system'): void {
     this.battleLog.update((logs) => [{ text: message, source }, ...logs].slice(0, 8));
   }
 
+  // Sirve para convertir entradas crudas del backend en líneas de log tipadas (jugador / rival / sistema).
   private hydrateBattleLogNames(logs: unknown[], activePlayer: Xuxemon | null, activeOpponent: Xuxemon | null): BattleLogEntry[] {
     const playerName = activePlayer?.name?.toLowerCase() ?? '';
     const opponentName = activeOpponent?.name?.toLowerCase() ?? '';
@@ -757,6 +808,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  // Sirve para confirmar el Xuxemon robado al rival tras la victoria y cerrar el flujo de premio.
   confirmPrizeSelection(xuxemon: Xuxemon): void {
     const battleId = this.battleId();
     const winnerId = this.auth.getUser()?.id;
@@ -785,6 +837,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Sirve para omitir el robo y mostrar directamente el modal de victoria cuando no hay opciones o el usuario cancela.
   skipPrizeSelection(): void {
     const battleId = this.battleId();
     const winnerId = this.auth.getUser()?.id;
@@ -810,6 +863,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Sirve para cerrar el combate en práctica o enlazado, detener sync y mostrar victoria, derrota o fin en servidor.
   finishBattle(playerWon: boolean): void {
     this.battleStatus.set('finished');
     this.currentSubMenu.set(null);
@@ -838,12 +892,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, 1500);
   }
 
+  // Sirve para ocultar el modal de victoria y navegar al perfil o a amigos según el modo.
   closeVictoryModal(): void {
     this.showVictoryModal.set(false);
     this.stopBattleMusic();
     this.router.navigate([this.isPractice() ? '/profile' : '/friends']);
   }
 
+  // Sirve para pedir confirmación al usuario antes de abandonar la ruta de batalla con combate activo.
   canDeactivate(): Observable<boolean> | boolean {
     if (this.battleStatus() === 'finished') {
       return true;
@@ -853,6 +909,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return this.navGuardSubject.asObservable();
   }
 
+  // Sirve para abrir la confirmación de huida (el envío real ocurre al confirmar o al rendirse fuera de turno).
   runAway(): void {
     if (this.forcedSwitch()) {
       return;
@@ -861,6 +918,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.showRunConfirmModal.set(true);
   }
 
+  // Sirve para cerrar el modal de huida y rechazar la guarda de navegación si estaba pendiente.
   cancelRunAway(): void {
     this.showRunConfirmModal.set(false);
     if (this.navGuardSubject) {
@@ -870,6 +928,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  // Sirve para confirmar la huida o rendición, ya sea desde el modal o desde la guarda de ruta.
   confirmRunAway(): void {
     if (this.isSubmittingRun()) {
       return;
@@ -913,16 +972,19 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  // Sirve para cerrar el aviso de resultado de huida y salir a la lista de amigos.
   closeRunawayResultModal(): void {
     this.showRunawayResultModal.set(false);
     this.stopBattleMusic();
     this.router.navigate(['/friends']);
   }
 
+  // Sirve para resolver rutas de assets estáticos del combate respetando la configuración de auth.
   getAssetUrl(path: string): string {
     return this.auth.getAssetUrl(path);
   }
 
+  // Sirve para listar efectos secundarios activos de un Xuxemon para mostrarlos en la UI de batalla.
   getXuxemonSideEffects(xuxemon: Xuxemon | null): Array<{ name: string; icon_url: string | null }> {
     if (!xuxemon) {
       return [];
@@ -940,6 +1002,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       }));
   }
 
+  // Sirve para combinar estado alterado principal y efectos secundarios en una lista para la UI.
   getXuxemonAllStates(xuxemon: Xuxemon | null): Array<{ name: string; icon_url: string | null }> {
     if (!xuxemon) {
       return [];
@@ -956,15 +1019,26 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     ].filter((state): state is { name: string; icon_url: string | null } => Boolean(state?.name?.trim()));
   }
 
+  // Sirve para obtener aliados vivos distintos del activo cuando el jugador debe cambiar de Xuxemon.
   getSwitchCandidates(): Xuxemon[] {
     const currentId = this.selectedXuxemon()?.adquired_id;
     return this.myXuxemons().filter((xuxemon) => this.getCurrentHpValue(xuxemon) > 0 && xuxemon.adquired_id !== currentId);
   }
 
+  // Sirve para listar el equipo propio en el menú de cambio sin duplicados ni el combatiente actual.
   getSwitchMenuXuxemons(): Xuxemon[] {
     const seen = new Set<string>();
+    const active = this.selectedXuxemon();
 
     return this.myXuxemons().filter((xuxemon) => {
+      if (this.getCurrentHpValue(xuxemon) <= 0) {
+        return false;
+      }
+
+      if (active && this.isSameXuxemon(active, xuxemon)) {
+        return false;
+      }
+
       const key = xuxemon.adquired_id !== undefined
         ? `adquired:${xuxemon.adquired_id}`
         : `base:${xuxemon.id}`;
@@ -978,41 +1052,50 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  // Sirve para saber si un Xuxemon del equipo puede ser elegido como sustituto en combate.
   canSwitchToXuxemon(xuxemon: Xuxemon): boolean {
     return this.getCurrentHpValue(xuxemon) > 0 && !this.isPlayerActiveXuxemon(xuxemon);
   }
 
+  // Sirve para comprobar si un Xuxemon es el combatiente activo del jugador.
   isPlayerActiveXuxemon(xuxemon: Xuxemon): boolean {
     const active = this.selectedXuxemon();
     return !!active && this.isSameXuxemon(active, xuxemon);
   }
 
+  // Sirve para comprobar si un Xuxemon es el combatiente activo del rival.
   isOpponentActiveXuxemon(xuxemon: Xuxemon): boolean {
     const active = this.opponentXuxemon();
     return !!active && this.isSameXuxemon(active, xuxemon);
   }
 
+  // Sirve para obtener los aliados válidos como objetivo del objeto de bolsa seleccionado.
   getEligibleItemTargets(): Xuxemon[] {
     return this.getEligibleItemTargetsForItem(this.selectedBattleItem());
   }
 
+  // Sirve para exponer el trozo de inventario de bolsa correspondiente a la página actual.
   paginatedBagItems(): InventoryItem[] {
     const start = this.bagPage() * this.bagPageSize;
     return this.myItems().slice(start, start + this.bagPageSize);
   }
 
+  // Sirve para calcular cuántas páginas tiene la bolsa según el tamaño de página configurado.
   bagPageCount(): number {
     return this.getBagTotalPages(this.myItems().length);
   }
 
+  // Sirve para habilitar o no el botón de página anterior en la bolsa.
   canGoToPreviousBagPage(): boolean {
     return this.bagPage() > 0;
   }
 
+  // Sirve para habilitar o no el botón de página siguiente en la bolsa.
   canGoToNextBagPage(): boolean {
     return this.bagPage() < this.bagPageCount() - 1;
   }
 
+  // Sirve para retroceder una página en el listado paginado de la bolsa.
   previousBagPage(): void {
     if (!this.canGoToPreviousBagPage()) {
       return;
@@ -1021,6 +1104,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.bagPage.update((page) => Math.max(0, page - 1));
   }
 
+  // Sirve para avanzar una página en el listado paginado de la bolsa.
   nextBagPage(): void {
     if (!this.canGoToNextBagPage()) {
       return;
@@ -1029,6 +1113,57 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.bagPage.update((page) => Math.min(this.bagPageCount() - 1, page + 1));
   }
 
+  // Sirve para el texto del indicador de página de la bolsa (espacios alrededor de la barra).
+  battleBagPageLabel(): string {
+    return `Page ${this.bagPage() + 1} / ${this.bagPageCount()}`;
+  }
+
+  // Sirve para listar Xuxemons del menú de cambio en la página actual.
+  paginatedSwitchMenuXuxemons(): Xuxemon[] {
+    const list = this.getSwitchMenuXuxemons();
+    const start = this.switchPage() * this.bagPageSize;
+    return list.slice(start, start + this.bagPageSize);
+  }
+
+  // Sirve para calcular cuántas páginas tiene el menú de cambio.
+  switchMenuPageCount(): number {
+    return this.getBagTotalPages(this.getSwitchMenuXuxemons().length);
+  }
+
+  // Sirve para habilitar el botón de página anterior en el menú de cambio.
+  canGoToPreviousSwitchMenuPage(): boolean {
+    return this.switchPage() > 0;
+  }
+
+  // Sirve para habilitar el botón de página siguiente en el menú de cambio.
+  canGoToNextSwitchMenuPage(): boolean {
+    return this.switchPage() < this.switchMenuPageCount() - 1;
+  }
+
+  // Sirve para retroceder una página en el menú de cambio.
+  previousSwitchMenuPage(): void {
+    if (!this.canGoToPreviousSwitchMenuPage()) {
+      return;
+    }
+
+    this.switchPage.update((page) => Math.max(0, page - 1));
+  }
+
+  // Sirve para avanzar una página en el menú de cambio.
+  nextSwitchMenuPage(): void {
+    if (!this.canGoToNextSwitchMenuPage()) {
+      return;
+    }
+
+    this.switchPage.update((page) => Math.min(this.switchMenuPageCount() - 1, page + 1));
+  }
+
+  // Sirve para el texto del indicador de página del menú de cambio (espacios alrededor de la barra).
+  battleSwitchMenuPageLabel(): string {
+    return `Page ${this.switchPage() + 1} / ${this.switchMenuPageCount()}`;
+  }
+
+  // Sirve para resolver objetivos válidos de un objeto concreto según su tipo de efecto.
   private getEligibleItemTargetsForItem(item: InventoryItem | null): Xuxemon[] {
     const team = this.myXuxemons();
     if (!item) {
@@ -1062,10 +1197,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return alive;
   }
 
+  // Sirve para comprobar si un objeto del inventario puede usarse durante el combate.
   private isBattleUsableItem(item: InventoryItem): boolean {
     return item.effect_type !== undefined && this.supportedBattleEffectTypes.has(item.effect_type);
   }
 
+  // Sirve para filtrar qué ítems aparecen en la bolsa de combate frente al inventario completo.
   private shouldDisplayInBattleBag(item: InventoryItem): boolean {
     if (item.effect_type === 'Gacha Ticket') {
       return false;
@@ -1074,14 +1211,17 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return !this.isBattleExcludedEvolutionItem(item);
   }
 
+  // Sirve para excluir objetos de evolución del listado usable en batalla.
   private isBattleExcludedEvolutionItem(item: InventoryItem): boolean {
     return item.effect_type === 'Evolve';
   }
 
+  // Sirve para calcular el número de páginas de bolsa a partir de la cantidad de ítems.
   private getBagTotalPages(itemCount: number): number {
     return Math.max(1, Math.ceil(itemCount / this.bagPageSize));
   }
 
+  // Sirve para actualizar el equipo rival en memoria y mantener coherente al Xuxemon activo rival.
   private syncOpponentTeam(team: Xuxemon[]): void {
     if (team.length === 0) {
       return;
@@ -1101,6 +1241,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  // Sirve para aplicar al estado local la respuesta del backend: equipos, turno, log y cambio forzado.
   private applyBattleSnapshot(data: any): void {
     const previousActivePlayer = this.selectedXuxemon();
     const previousActiveOpponent = this.opponentXuxemon();
@@ -1190,6 +1331,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     this.forcedSwitch.set(requiresForcedSwitch);
     if (requiresForcedSwitch) {
+      this.switchPage.set(0);
       this.currentSubMenu.set('switch');
     }
 
@@ -1198,6 +1340,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  // Sirve para adaptar la forma cruda del API al modelo `Xuxemon` usado en la vista de batalla.
   private normalizeBattleXuxemon(raw: any): Xuxemon {
     const rawImage = typeof raw?.image_url === 'string' ? raw.image_url : '';
     const hasAbsoluteImage = rawImage.startsWith('http://') || rawImage.startsWith('https://');
@@ -1213,10 +1356,20 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       image_url: hasAbsoluteImage
         ? rawImage
         : (rawImage ? this.auth.getAssetUrl(rawImage.startsWith('/') ? rawImage : `/${rawImage}`) : assetPath),
-      statusEffect: this.normalizeEffect(raw?.statusEffect ?? raw?.status_effect),
-      side_effect_1: this.normalizeEffect(raw?.side_effect_1),
-      side_effect_2: this.normalizeEffect(raw?.side_effect_2),
-      side_effect_3: this.normalizeEffect(raw?.side_effect_3),
+      level: (() => {
+        const v = raw?.level;
+        if (v == null || v === '') {
+          return undefined;
+        }
+        const n = Number(v);
+        return Number.isFinite(n) ? n : undefined;
+      })(),
+      statusEffect: this.normalizeEffect(
+        raw?.statusEffect ?? raw?.status_effect ?? raw?.status_effect_applied,
+      ),
+      side_effect_1: this.normalizeEffect(raw?.side_effect_1 ?? raw?.sideEffect1),
+      side_effect_2: this.normalizeEffect(raw?.side_effect_2 ?? raw?.sideEffect2),
+      side_effect_3: this.normalizeEffect(raw?.side_effect_3 ?? raw?.sideEffect3),
       attacks: rawAttacks.map((attack: any) => ({
         id: attack.id,
         name: attack.name,
@@ -1234,6 +1387,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     } as Xuxemon;
   }
 
+  // Sirve para normalizar un efecto de estado o lateral con nombre e icono resueltos a URL.
   private normalizeEffect(
     effect: { name?: string; icon_url?: string; icon_path?: string } | null | undefined,
   ): { name: string; icon_url: string } | undefined {
@@ -1258,6 +1412,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
+  // Sirve para disparar animaciones de ataque y dado a partir del último evento del log del snapshot.
   private triggerBattleAnimationsFromSnapshot(
     data: any,
     combatants?: {
@@ -1355,6 +1510,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Sirve para encadenar overlay de dado, embestida y posible animación de debilitamiento según el bando.
   private playBattleAnimationSequence(
     side: 'player' | 'opponent',
     attackerName: string,
@@ -1381,6 +1537,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  // Sirve para mostrar el overlay del dado y fijar el valor final tras la animación de tirada.
   private playDiceRollAnimation(finalRoll: number): void {
     if (this.diceLandingTimeout) {
       clearTimeout(this.diceLandingTimeout);
@@ -1410,6 +1567,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  // Sirve para coordinar el embate visual del atacante, efectos en el objetivo y flags de ataque.
   private playAttackLunge(side: 'player' | 'opponent'): void {
     const startAnimation = () => {
       this.playAttackEffects(side);
@@ -1467,6 +1625,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  // Sirve para animar el sprite del atacante con la API Web Animations cuando el navegador lo permite.
   private runSpriteAttackAnimation(side: 'player' | 'opponent'): void {
     if (!this.isBrowser) {
       return;
@@ -1530,6 +1689,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.opponentSpriteAnimation = animation;
   }
 
+  // Sirve para activar estelas, impacto y parpadeo de daño sobre el bando que recibe el golpe.
   private playAttackEffects(attackerSide: 'player' | 'opponent'): void {
     const targetSide = attackerSide === 'player' ? 'opponent' : 'player';
 
@@ -1609,6 +1769,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     activateEffects();
   }
 
+  // Sirve para reproducir la secuencia corta de debilitamiento de un bando y ejecutar un callback al terminar.
   private playFaintAnimation(side: 'player' | 'opponent', onComplete?: () => void): void {
     if (side === 'player') {
       if (this.playerFaintTimeout) {
@@ -1634,6 +1795,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, 730);
   }
 
+  // Sirve para mostrar un mensaje destacado temporal (eficacia, bonos) sobre el campo de batalla.
   private showBattleCallout(text: string, tone: 'buff' | 'nerf' | 'neutral'): void {
     this.battleCallout.set({ text, tone });
     this.flushBattleView();
@@ -1649,10 +1811,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, 1300);
   }
 
+  // Sirve para forzar la detección de cambios cuando las animaciones o señales lo requieren al instante.
   private flushBattleView(): void {
     this.cdr.detectChanges();
   }
 
+  // Sirve para iniciar o reanudar la música de fondo del combate si la vista y el estado lo permiten.
   private startBattleMusic(): void {
     const audio = this.battleMusic?.nativeElement;
     if (!audio || !this.isBrowser || this.battleStatus() === 'finished') {
@@ -1671,6 +1835,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  // Sirve para abrir el canal SSE del combate y delegar en polling si no llega snapshot a tiempo.
   private openBattleStream(): boolean {
     const battleId = this.battleId();
     const token = this.auth.getToken();
@@ -1720,6 +1885,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return true;
   }
 
+  // Sirve para parsear un mensaje en vivo del stream y aplicar estado, música y fin de batalla si aplica.
   private handleRealtimeBattlePayload(rawPayload: string): void {
     try {
       const data = JSON.parse(rawPayload);
@@ -1734,11 +1900,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  // Sirve para detener por completo la sincronización (intervalo y EventSource).
   private stopBattleSync(): void {
     this.stopPolling();
     this.closeBattleStream();
   }
 
+  // Sirve para cancelar el intervalo de peticiones periódicas al backend.
   private stopPolling(): void {
     if (!this.pollingInterval) {
       return;
@@ -1748,6 +1916,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.pollingInterval = null;
   }
 
+  // Sirve para volver a encender el polling solo cuando no hay conexión SSE activa.
   private restartPolling(): void {
     if (this.battleEventSource) {
       return;
@@ -1757,6 +1926,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.startPolling();
   }
 
+  // Sirve para cerrar el EventSource y limpiar el temporizador de arranque del stream.
   private closeBattleStream(): void {
     this.clearStreamBootstrapTimeout();
 
@@ -1768,6 +1938,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.battleEventSource = null;
   }
 
+  // Sirve para anular el timeout de espera del primer mensaje del stream SSE.
   private clearStreamBootstrapTimeout(): void {
     if (!this.streamBootstrapTimeout) {
       return;
@@ -1777,6 +1948,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.streamBootstrapTimeout = null;
   }
 
+  // Sirve para espaciar más el polling cuando la pestaña está en segundo plano.
   private getPollingIntervalMs(): number {
     if (!this.isBrowser) {
       return 3000;
@@ -1785,6 +1957,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return document.visibilityState === 'visible' ? 3000 : 6500;
   }
 
+  // Sirve para pausar y reiniciar la pista de música del combate al salir o terminar.
   private stopBattleMusic(): void {
     const audio = this.battleMusic?.nativeElement;
     if (!audio) {
@@ -1795,8 +1968,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     audio.currentTime = 0;
   }
 
+  // Sirve para mantener seleccionado el mismo Xuxemon tras refrescos del equipo.
   private refreshSelectedFromTeam(team: Xuxemon[]): void {
-    // Sirve para mantener seleccionado el mismo Xuxemon tras refrescos del equipo.
     const currentId = this.selectedXuxemon()?.adquired_id;
     if (!currentId) {
       return;
@@ -1811,6 +1984,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.syncPlayerBars(updatedSelection);
   }
 
+  // Sirve para generar un equipo rival aleatorio en modo práctica a partir del catálogo de Xuxemons.
   private pickPracticeOpponentTeam(): void {
     void this.xuxemonService.loadAllXuxemons();
     this.subs.add(
@@ -1841,6 +2015,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Sirve para sustituir al rival debilitado por el siguiente vivo o declarar victoria del jugador.
   private handleOpponentFaint(): void {
     const currentOpponent = this.opponentXuxemon();
     if (!currentOpponent) {
@@ -1867,6 +2042,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  // Sirve para forzar cambio de Xuxemon o derrota cuando el combatiente del jugador cae a 0 HP.
   private handlePlayerFaint(): void {
     const currentPlayer = this.selectedXuxemon();
     if (!currentPlayer) {
@@ -1884,12 +2060,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
       this.forcedSwitch.set(true);
       this.currentTurn.set('player');
+      this.switchPage.set(0);
       this.currentSubMenu.set('switch');
       this.battleStatus.set('ready');
       this.addLog('Choose another Xuxemon to continue the battle.', 'system');
     });
   }
 
+  // Sirve para reaccionar cuando el backend marca la batalla terminada (victoria, derrota o huida).
   private handleExternallyFinishedBattle(data: any): void {
     const userId = this.auth.getUser()?.id;
     const playerWon = data.winner_id === userId;
@@ -1919,10 +2097,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => this.router.navigate(['/friends']), 1200);
   }
 
+  // Sirve para leer el HP actual de un Xuxemon con un valor numérico seguro no negativo.
   private getCurrentHpValue(xuxemon: Xuxemon): number {
     return Math.max(0, xuxemon.current_hp ?? xuxemon.hp ?? 0);
   }
 
+  // Sirve para actualizar las señales de barra de HP del jugador según un Xuxemon concreto.
   private syncPlayerBars(xuxemon: Xuxemon): void {
     const maxHp = xuxemon.hp || 100;
     const currentHp = this.getCurrentHpValue(xuxemon);
@@ -1930,6 +2110,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.playerHP.set(maxHp > 0 ? (currentHp / maxHp) * 100 : 0);
   }
 
+  // Sirve para actualizar las señales de barra de HP del rival según su Xuxemon activo.
   private syncOpponentBars(xuxemon: Xuxemon): void {
     const maxHp = xuxemon.hp || 100;
     const currentHp = this.getCurrentHpValue(xuxemon);
@@ -1937,12 +2118,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.opponentHP.set(maxHp > 0 ? (currentHp / maxHp) * 100 : 0);
   }
 
+  // Sirve para persistir en señales y lista el nuevo HP del Xuxemon activo del jugador.
   private updateMyTeamHp(target: Xuxemon, currentHp: number): void {
     const updated = { ...target, current_hp: currentHp };
     this.selectedXuxemon.set(updated);
     this.replaceMyTeamMember(updated);
   }
 
+  // Sirve para actualizar el rival activo y su entrada en el array del equipo contrario.
   private updateOpponentTeamHp(target: Xuxemon, currentHp: number): void {
     const updated = { ...target, current_hp: currentHp };
     this.opponentXuxemon.set(updated);
@@ -1954,14 +2137,17 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }));
   }
 
+  // Sirve para sustituir un miembro del equipo propio en la señal `myXuxemons` tras un cambio de datos.
   private replaceMyTeamMember(updated: Xuxemon): void {
     this.myXuxemons.update((team) => team.map((xuxemon) => xuxemon.adquired_id === updated.adquired_id ? updated : xuxemon));
   }
 
+  // Sirve para obtener el primer Xuxemon con HP positivo de una lista (p. ej. siguiente en combate).
   private getFirstAlive(team: Xuxemon[]): Xuxemon | null {
     return team.find((xuxemon) => this.getCurrentHpValue(xuxemon) > 0) ?? null;
   }
 
+  // Sirve para comparar dos Xuxemons por `adquired_id` o por `id` de plantilla según lo disponible.
   private isSameXuxemon(left: Xuxemon, right: Xuxemon): boolean {
     if (left.adquired_id !== undefined || right.adquired_id !== undefined) {
       return left.adquired_id === right.adquired_id;
@@ -1970,12 +2156,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return left.id === right.id;
   }
 
+  // Sirve para obtener la lista de Xuxemons del rival que pueden robarse tras ganar.
   private getStealOptions(): Xuxemon[] {
     const data = this.battleData();
     const options = (data?.opponent_available_xuxemons ?? this.opponentTeam()) as Xuxemon[];
     return options.filter((xuxemon) => xuxemon.adquired_id !== undefined);
   }
 
+  // Sirve para resolver el identificador de usuario del rival según si somos dueños o invitados de la batalla.
   private getOpponentUserId(): string | null {
     const data = this.battleData();
     const userId = this.auth.getUser()?.id;
@@ -1985,6 +2173,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return data.user_id === userId ? data.opponent_user_id : data.user_id;
   }
 
+  // Sirve para intentar aplicar el estado alterado de un ataque según probabilidad y reglas de combate.
   private applyAttackStatusEffectToTarget(
     xuxemon: Xuxemon,
     attackObj: { status_chance?: number | null; statusEffect?: { name: string; icon_url: string } },
@@ -2008,6 +2197,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
+  // Sirve para abrir robo, victoria directa o modal de práctica según el tipo de batalla y premios.
   private presentVictoryFlow(): void {
     this.showConfetti.set(true);
 
@@ -2026,6 +2216,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.showVictoryModal.set(true);
   }
 
+  // Sirve para validar si un objeto de estado puede aplicarse a un objetivo concreto (Nulberry, setas, etc.).
   private canUseStatusItemOnTarget(item: InventoryItem, xuxemon: Xuxemon): boolean {
     const hasStatus = Boolean(xuxemon.statusEffect?.name);
     const hasSideEffect = Boolean(xuxemon.side_effect_1?.name || xuxemon.side_effect_2?.name || xuxemon.side_effect_3?.name);
@@ -2043,6 +2234,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return hasStatus;
   }
 
+  // Sirve para fusionar la respuesta del servidor de uso de objeto con el modelo local del Xuxemon.
   private applyItemResponseToXuxemon(xuxemon: Xuxemon | null, data?: UseItemResponseData, item?: InventoryItem | null): Xuxemon | null {
     if (!xuxemon || !data) {
       return xuxemon;
@@ -2086,6 +2278,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
+  // Sirve para aplicar un objeto que altera estados al rival vía API de batalla, acción enlazada o práctica.
   private useStatusItemOnTarget(item: InventoryItem, target: Xuxemon): void {
     const battleId = this.battleId();
 
@@ -2129,6 +2322,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Sirve para la variante de práctica que usa el endpoint de ítems de entrenamiento sin batalla enlazada.
   private usePracticeStatusItem(item: InventoryItem, target: Xuxemon): void {
     this.subs.add(
       this.battleService.usePracticeItem(item.bag_item_id!).subscribe({
@@ -2153,6 +2347,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Sirve para construir el `statusEffect` del Xuxemon a partir del payload de uso de objeto.
   private applyStatusEffectToXuxemon(xuxemon: Xuxemon, data?: UseItemResponseData): Xuxemon {
     const rawStatusEffect = data?.applied_status_effect;
     const statusEffect = rawStatusEffect?.name
@@ -2168,11 +2363,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
+  // Sirve para reflejar en rival activo y en su equipo el Xuxemon actualizado tras un ítem.
   private updateOpponentStateAfterItem(updatedOpponent: Xuxemon): void {
     this.opponentXuxemon.set(updatedOpponent);
     this.opponentTeam.update((team) => team.map((xuxemon) => this.isSameXuxemon(xuxemon, updatedOpponent) ? updatedOpponent : xuxemon));
   }
 
+  // Sirve para comprobar si sueño, parálisis o confusión impiden el ataque y aplicar sus efectos.
   private resolveStatusBeforeAttack(xuxemon: Xuxemon, side: 'player' | 'opponent'): { prevented: boolean } {
     const statusName = xuxemon.statusEffect?.name;
     if (!statusName) {
@@ -2206,6 +2403,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return { prevented: false };
   }
 
+  // Sirve para devolver el turno al otro bando cuando un estado impide completar la acción.
   private finishBlockedTurn(side: 'player' | 'opponent'): void {
     setTimeout(() => {
       if (side === 'player') {
@@ -2220,6 +2418,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, 500);
   }
 
+  // Sirve para aplicar daño por confusión y encadenar debilitamiento o cambio de turno.
   private applySelfDamageFromStatus(xuxemon: Xuxemon, side: 'player' | 'opponent', newHpValue: number): void {
     if (side === 'player') {
       this.updateMyTeamHp(xuxemon, newHpValue);
@@ -2252,6 +2451,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, 450);
   }
 
+  // Sirve para quitar el estado alterado principal tras efectos como el despertar por daño.
   private clearStatusEffect(xuxemon: Xuxemon, side: 'player' | 'opponent'): void {
     const updated = { ...xuxemon, statusEffect: undefined };
 
@@ -2264,6 +2464,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.updateOpponentStateAfterItem(updated);
   }
 
+  // Sirve para eliminar un efecto lateral concreto del modelo si coincide con el nombre buscado.
   private clearNamedSideEffect(
     sideEffect: Xuxemon['side_effect_1'] | undefined,
     effectName: string,
@@ -2271,6 +2472,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return sideEffect?.name === effectName ? undefined : sideEffect;
   }
 
+  // Sirve para enviar al backend el uso de objeto aliado o delegar en el flujo de estados rivales.
   private submitLinkedBattleItemAction(item: InventoryItem, target: Xuxemon): void {
     if (item.effect_type === 'Apply Status Effects') {
       this.useStatusItemOnTarget(item, target);
@@ -2284,6 +2486,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  // Sirve para rendirse en batalla enlazada o salir de práctica cuando no hay `battleId`.
   private submitForfeit(): void {
     const battleId = this.battleId();
     if (!battleId) {
@@ -2313,6 +2516,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  // Sirve para notificar al servidor la rendición al cerrar pestaña o navegar fuera si corresponde.
   private autoForfeitOnExit(): void {
     if (!this.shouldAutoForfeitOnExit()) {
       return;
@@ -2328,6 +2532,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.battleService.autoForfeitOnDisconnect(battleId, token);
   }
 
+  // Sirve para decidir si debe enviarse rendición automática al abandonar la página.
   private shouldAutoForfeitOnExit(): boolean {
     const battleId = this.battleId();
     const battleData = this.battleData();
@@ -2341,6 +2546,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       && !battleData?.winner_id;
   }
 
+  // Sirve para enviar una acción genérica de batalla enlazada y aplicar la respuesta del servidor.
   private submitLinkedBattleAction(payload: Record<string, unknown>): void {
     const battleId = this.battleId();
     if (!battleId) {
@@ -2354,7 +2560,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         next: (data: any) => {
           this.isSubmittingRun.set(false);
           this.selectedBattleItem.set(null);
-          this.currentSubMenu.set(this.forcedSwitch() ? 'switch' : null);
+          if (this.forcedSwitch()) {
+            this.switchPage.set(0);
+            this.currentSubMenu.set('switch');
+          } else {
+            this.currentSubMenu.set(null);
+          }
           this.applyBattleSnapshot(data);
           this.inventoryService.loadInventory();
 

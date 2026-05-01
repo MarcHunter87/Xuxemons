@@ -1,0 +1,156 @@
+.victory-modal {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--color-black-soft);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease;
+}
+
+.victory-content {
+  background: linear-gradient(135deg, var(--neutral-white) 0%, var(--primary-color) 100%);
+  padding: 35px;
+  border-radius: var(--radius-pill);
+  text-align: center;
+  border: 10px solid var(--color-amber-base);
+  box-shadow: 0 20px 60px var(--color-black-soft);
+  max-width: 400px;
+  animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.victory-title {
+  font-size: 3rem;
+  color: var(--color-amber-base);
+  text-shadow: none;
+  margin-bottom: 10px;
+  font-family: inherit;
+  font-weight: 900;
+}
+
+.winner-sprite {
+  width: 130px;
+  height: 130px;
+  margin: 15px 0;
+  object-fit: contain;
+  animation: bounce 0.6s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.btn-continue {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.victory-content .battle-dialog-text + .battle-dialog-text {
+  margin-top: 15px;
+}
+
+.victory-content .xuxemon-list {
+  margin-top: 20px;
+  max-height: 320px;
+  padding-right: 8px;
+}
+
+.battle-dialog {
+  width: min(100%, 420px);
+  background: linear-gradient(180deg, var(--neutral-white) 0%, var(--primary-color) 100%);
+  border-radius: var(--radius-pill);
+  padding: 30px;
+  box-shadow: 0 22px 60px var(--color-black-soft);
+  text-align: center;
+  border: 6px solid var(--accent-color);
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.battle-dialog--warning,
+.battle-dialog--info {
+  border-color: var(--accent-color);
+}
+
+.battle-dialog-title {
+  margin: 0 0 12px;
+  color: var(--neutral-black);
+  font-size: 2rem;
+  font-weight: 900;
+  font-family: inherit;
+}
+
+.battle-dialog-text {
+  margin: 0;
+  color: var(--neutral-black);
+  font-size: 1.05rem;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+.battle-dialog-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.battle-dialog-actions--single {
+  justify-content: center;
+}
+
+.battle-dialog-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  min-height: 52px;
+  padding: 0.75rem 1.5rem;
+  transition: filter 0.2s, transform 0.1s;
+}
+
+.battle-dialog-btn:hover:not(:disabled) {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+.battle-dialog-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.85);
+}
+
+.battle-dialog-btn:focus-visible:not(:disabled) {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+  filter: none;
+  transform: none;
+}
+
+.battle-dialog-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.battle-dialog-btn--primary {
+  background-color: var(--accent-color);
+  color: var(--neutral-white);
+}
+
+.battle-dialog-btn--primary:focus-visible:not(:disabled) {
+  background-color: var(--accent-color);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

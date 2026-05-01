@@ -3,7 +3,14 @@
   <div class="battle-wrapper">
     <!-- Main Battle Arena -->
     <div class="battle-arena">
-      <app-battle-turn-header [vm]="vm"></app-battle-turn-header>
+      <div class="turn-indicator" [class.player-turn]="vm.currentTurn() === 'player'" [class.opponent-turn]="vm.currentTurn() === 'opponent'">
+        {{ vm.currentTurn() === 'player' ? 'YOUR TURN' : 'OPPONENT TURN' }}
+      </div>
+      @if (vm.battleCallout()) {
+        <div class="battle-callout" [class.battle-callout--buff]="vm.battleCallout()!.tone === 'buff'" [class.battle-callout--nerf]="vm.battleCallout()!.tone === 'nerf'" [class.battle-callout--neutral]="vm.battleCallout()!.tone === 'neutral'">
+          {{ vm.battleCallout()!.text }}
+        </div>
+      }
 
       <div class="battle-screen" [style.background-image]="'url(' + getAssetUrl('/fondo-batalla.webp') + ')'">
       @if (selectedXuxemon() && opponentXuxemon()) {
@@ -23,10 +30,17 @@
               </div>
               <hr class="status-divider">
               <div class="name-row">
-                <span class="name-with-status">
-                  <span class="name">{{ opponentXuxemon()?.name }}</span>
-                </span>
-                <span class="level">Lv.{{ opponentXuxemon()?.level || 50 }}</span>
+                <div class="name-block">
+                  <div class="xuxemon-title-row">
+                    <span class="name">{{ opponentXuxemon()?.name }}</span>
+                    @if (opponentXuxemon()?.level != null) {
+                      <span class="xuxemon-level">Lv.{{ opponentXuxemon()!.level }}</span>
+                    }
+                  </div>
+                  @if (opponentXuxemon()?.size) {
+                    <span class="xuxemon-size-badge">{{ opponentXuxemon()!.size }}</span>
+                  }
+                </div>
               </div>
               <div class="hp-bar-container">
                 <div class="hp-bar" [style.width.%]="opponentHP()" [class.low]="opponentHP() < 20" [class.med]="opponentHP() < 50 && opponentHP() >= 20"></div>
@@ -70,10 +84,17 @@
               </div>
               <hr class="status-divider">
               <div class="name-row">
-                <span class="name-with-status">
-                  <span class="name">{{ selectedXuxemon()?.name }}</span>
-                </span>
-                <span class="level">Lv.{{ selectedXuxemon()?.level || 50 }}</span>
+                <div class="name-block">
+                  <div class="xuxemon-title-row">
+                    <span class="name">{{ selectedXuxemon()?.name }}</span>
+                    @if (selectedXuxemon()?.level != null) {
+                      <span class="xuxemon-level">Lv.{{ selectedXuxemon()!.level }}</span>
+                    }
+                  </div>
+                  @if (selectedXuxemon()?.size) {
+                    <span class="xuxemon-size-badge">{{ selectedXuxemon()!.size }}</span>
+                  }
+                </div>
               </div>
               <div class="hp-bar-container">
                 <div class="hp-bar" [style.width.%]="playerHP()" [class.low]="playerHP() < 20" [class.med]="playerHP() < 50 && playerHP() >= 20"></div>
@@ -135,9 +156,18 @@
     <app-battle-footer [vm]="vm"></app-battle-footer>
   </div>
 
-  <app-battle-selection-overlay [vm]="vm"></app-battle-selection-overlay>
-
-  <app-battle-modals [vm]="vm"></app-battle-modals>
+  @if (vm.showVictoryModal()) {
+    <app-battle-victory-modal [vm]="vm"></app-battle-victory-modal>
+  }
+  @if (vm.showStealModal()) {
+    <app-battle-steal-modal [vm]="vm"></app-battle-steal-modal>
+  }
+  @if (vm.showRunConfirmModal()) {
+    <app-battle-run-confirm-modal [vm]="vm"></app-battle-run-confirm-modal>
+  }
+  @if (vm.showRunawayResultModal()) {
+    <app-battle-runaway-result-modal [vm]="vm"></app-battle-runaway-result-modal>
+  }
 
   <div class="dice-overlay" [class.visible]="vm.isDiceOverlayVisible()" aria-live="polite" aria-atomic="true">
     <div class="dice-container" [class.throwing]="vm.isDiceRolling()">

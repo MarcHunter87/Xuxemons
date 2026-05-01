@@ -1,8 +1,0 @@
-<div class="turn-indicator" [class.player-turn]="vm.currentTurn() === 'player'" [class.opponent-turn]="vm.currentTurn() === 'opponent'">
-  {{ vm.currentTurn() === 'player' ? 'YOUR TURN' : 'OPPONENT TURN' }}
-</div>
-@if (vm.battleCallout()) {
-  <div class="battle-callout" [class.battle-callout--buff]="vm.battleCallout()!.tone === 'buff'" [class.battle-callout--nerf]="vm.battleCallout()!.tone === 'nerf'" [class.battle-callout--neutral]="vm.battleCallout()!.tone === 'neutral'">
-    {{ vm.battleCallout()!.text }}
-  </div>
-}
