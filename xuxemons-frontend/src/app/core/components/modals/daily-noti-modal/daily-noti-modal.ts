@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewChecked, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { AuthService } from '../../../services/auth';
 import type { DailyRewardNotification } from '../../../interfaces';
 
@@ -50,40 +50,36 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
     }
   }
 
-  // Sirve para manejar la tecla Escape
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (this.open) {
-      this.handleClose();
-    }
-  }
-
-  // Sirve para manejar la tecla Tab
+  // Sirve para manejar las teclas del modal
   onModalKeydown(event: KeyboardEvent): void {
-    if (!this.open || event.key !== 'Tab') {
+    if (!this.open) {
       return;
     }
 
+    if (event.key === 'Escape') {
+      this.handleClose();
+      return;
+    }
+
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    this.trapFocus(event);
+  }
+
+  // Sirve para atrapar el foco
+  private trapFocus(event: KeyboardEvent): void {
     const root = this.dialogRoot?.nativeElement;
     if (!root) {
       return;
     }
 
-    // Sirve para obtener los elementos focables
-    const focusableSelector = [
-      'a[href]',
-      'button:not([disabled])',
-      'textarea:not([disabled])',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      '[tabindex]:not([tabindex="-1"])',
-    ].join(',');
-
-    const focusableElements = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
-      .filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1);
+    const focusableElements = this.getFocusableElements(root);
 
     if (focusableElements.length === 0) {
       event.preventDefault();
+      root.focus();
       return;
     }
 
@@ -101,6 +97,21 @@ export class DailyNotiModal implements OnChanges, AfterViewChecked {
       event.preventDefault();
       first.focus();
     }
+  }
+
+  // Sirve para obtener los elementos focables
+  private getFocusableElements(root: HTMLElement): HTMLElement[] {
+    const selector = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',');
+
+    return Array.from(root.querySelectorAll<HTMLElement>(selector))
+      .filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1);
   }
 
   // Sirve para verificar si el usuario debe animar

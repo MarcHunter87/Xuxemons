@@ -18,13 +18,13 @@ export class GachaAwardModal implements AfterViewInit {
 
   // Sirve para cerrar el modal
   onBackdropClick(): void {
-    this.closeModal.emit();
+    this.closeCurrentModal();
   }
 
   // Sirve para manejar la tecla Escape
   onModalKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
-      this.closeModal.emit();
+      this.closeCurrentModal();
       return;
     }
     if (event.key !== 'Tab') return;
@@ -73,5 +73,16 @@ export class GachaAwardModal implements AfterViewInit {
     ].join(',');
     return Array.from(root.querySelectorAll<HTMLElement>(selector))
       .filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1);
+  }
+
+  // Sirve para cerrar usando el mismo flujo del contexto cuando exista
+  private closeCurrentModal(): void {
+    const closeFromContext = this.gachaContext?.closeModal;
+    if (typeof closeFromContext === 'function') {
+      closeFromContext();
+      return;
+    }
+
+    this.closeModal.emit();
   }
 }

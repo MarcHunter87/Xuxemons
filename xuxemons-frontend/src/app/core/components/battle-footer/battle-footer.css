@@ -245,6 +245,7 @@
 .attack-grid--targets,
 .attack-grid--switch {
   align-content: start;
+  overflow: visible;
 }
 
 .attack-grid--switch {
@@ -268,7 +269,6 @@
   width: 100%;
   height: 100%;
   min-height: 0;
-  overflow: hidden;
 }
 
 .submenu-panel .attack-grid {
@@ -289,7 +289,6 @@
   width: 100%;
   height: 100%;
   min-height: 0;
-  overflow: hidden;
 }
 
 .bag-items-grid {
@@ -299,7 +298,6 @@
   gap: 8px;
   width: 100%;
   flex: 1 1 auto;
-  overflow: hidden;
   align-content: start;
   padding-right: 0;
 }
@@ -423,7 +421,6 @@
   padding: 10px 12px;
   border-width: 3px;
   text-align: left;
-  overflow: hidden;
 }
 
 .bag-item-icon {
@@ -596,7 +593,6 @@
   color: var(--neutral-black);
   flex-shrink: 0;
 }
-
 
 .waiting-msg {
   width: 100%;

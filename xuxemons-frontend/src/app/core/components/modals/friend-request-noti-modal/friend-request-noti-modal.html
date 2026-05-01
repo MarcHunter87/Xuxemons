@@ -19,7 +19,7 @@
 						<h3 id="friend-req-noti-list-title" class="reward-section-title">
 							{{ requests.length }} pending {{ requests.length === 1 ? 'request' : 'requests' }}
 						</h3>
-						<div class="reward-items-scroll" tabindex="0" aria-label="Pending friend requests">
+						<div class="reward-items-scroll" aria-label="Pending friend requests">
 							<ul class="reward-list" role="list">
 								@for (req of requests; track req.id) {
 									<li class="reward-row friend-req-row">
@@ -40,6 +40,7 @@
 										</div>
 										<div class="friend-req-actions">
 											<button
+												#primaryButton
 												type="button"
 												class="btn-sm btn-primary btn-req-accept"
 												[attr.aria-label]="'Accept request from ' + req.sender_name"
@@ -64,7 +65,7 @@
 				</div>
 
 				<div class="modal-footer border-0 pt-0">
-					<button #primaryButton type="button" class="btn-secondary friend-req-close-btn" (click)="handleClose()">
+					<button type="button" class="btn-secondary friend-req-close-btn" (click)="handleClose()">
 						Close
 					</button>
 				</div>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewChecked, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { AuthService } from '../../../services/auth';
 import type { FriendRequestItem } from '../../../interfaces';
 
@@ -52,19 +52,39 @@ export class FriendRequestNotiModal implements OnChanges, AfterViewChecked {
     }
   }
 
-  // Sirve para manejar la tecla Escape
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (this.open) this.handleClose();
+  // Sirve para manejar las teclas del modal
+  onModalKeydown(event: KeyboardEvent): void {
+    if (!this.open) return;
+    if (event.key === 'Escape') {
+      this.handleClose();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    this.trapFocus(event);
   }
 
-  // Sirve para manejar la tecla Tab
-  onModalKeydown(event: KeyboardEvent): void {
-    if (!this.open || event.key !== 'Tab') return;
+  // Sirve para atrapar el foco
+  private trapFocus(event: KeyboardEvent): void {
     const root = this.dialogRoot?.nativeElement;
     if (!root) return;
 
-    const focusableSelector = [
+    const focusable = this.getFocusableElements(root);
+
+    if (focusable.length === 0) {
+      event.preventDefault();
+      root.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+    if (event.shiftKey && active === first) { event.preventDefault(); last.focus(); return; }
+    if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
+  }
+
+  // Sirve para obtener los elementos focables
+  private getFocusableElements(root: HTMLElement): HTMLElement[] {
+    const selector = [
       'a[href]',
       'button:not([disabled])',
       'textarea:not([disabled])',
@@ -73,15 +93,8 @@ export class FriendRequestNotiModal implements OnChanges, AfterViewChecked {
       '[tabindex]:not([tabindex="-1"])',
     ].join(',');
 
-    const focusable = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
-      .filter(el => !el.hasAttribute('disabled') && el.tabIndex !== -1);
-
-    if (focusable.length === 0) { event.preventDefault(); return; }
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const active = document.activeElement as HTMLElement | null;
-    if (event.shiftKey && active === first) { event.preventDefault(); last.focus(); return; }
-    if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
+    return Array.from(root.querySelectorAll<HTMLElement>(selector))
+      .filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1);
   }
 
   // Sirve para verificar si el usuario debe animar

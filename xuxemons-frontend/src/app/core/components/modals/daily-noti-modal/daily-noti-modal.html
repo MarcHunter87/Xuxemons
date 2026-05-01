@@ -30,7 +30,7 @@
 					@if (hasItemRewards()) {
 					<section class="reward-section" aria-labelledby="daily-items-title">
 						<h3 id="daily-items-title" class="reward-section-title">Items Received</h3>
-						<div class="reward-items-scroll" tabindex="0" aria-label="Received items list">
+						<div class="reward-items-scroll" aria-label="Received items list">
 							<ul class="reward-list" role="list">
 								@for (item of notification.items; track item.item_id) {
 									<li class="reward-row" [ngClass]="getSlotClass(item.effect_type)">

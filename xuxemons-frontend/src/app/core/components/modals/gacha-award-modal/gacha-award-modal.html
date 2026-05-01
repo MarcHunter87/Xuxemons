@@ -7,6 +7,7 @@
     [style.--type-color]="gachaContext.getTypeColor(gachaContext.awardedXuxemon()?.type?.name ?? '')"
     [style.--type-glow]="gachaContext.getTypeColorGlow(gachaContext.awardedXuxemon()?.type?.name ?? '')"
     (click)="gachaContext.closeModal()"
+    (keydown)="onModalKeydown($event)"
   >
     <div class="reveal-effects-layer">
       <div class="reveal-flash"></div>
@@ -97,6 +98,7 @@
     [style.--type-color]="gachaContext.getTypeColor(gachaContext.awardedXuxemon()?.type?.name ?? '')"
     [style.--type-glow]="gachaContext.getTypeColorGlow(gachaContext.awardedXuxemon()?.type?.name ?? '')"
     (click)="gachaContext.closeModal()"
+    (keydown)="onModalKeydown($event)"
   >
     <div #dialogRoot class="modal-content" tabindex="-1" (click)="$event.stopPropagation()">
       <h2 id="gacha-award-title-simple" class="winner-title">Congratulations!</h2>
