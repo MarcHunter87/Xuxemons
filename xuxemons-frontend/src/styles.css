@@ -15,7 +15,7 @@
   --secondary-color: #ACDBFD;
   --accent-color: #0D6EFD;
   --accent-on-light: #0A58CA;
-  
+
   --color-black-soft: #0000001F;
   --color-gray-medium: #777777;
   --color-gray-light: #CED4DA;
@@ -43,6 +43,16 @@
   --color-purple-deep: #5B21B6;
   --color-purple-base: #6D28D9;
   --color-purple-overlay: #8B5CF633;
+
+  --color-black-overlay-90: #000000E6;
+  --color-black-overlay-45: #00000073;
+  --color-black-overlay-28: #00000047;
+  --color-black-overlay-24: #0000003D;
+  --color-black-overlay-22: #00000038;
+  --color-black-overlay-10: #0000001A;
+  --color-black-overlay-08: #00000014;
+  --color-white-overlay-16: #FFFFFF29;
+  --color-white-overlay-06: #FFFFFF0F;
 }
 
 *,
