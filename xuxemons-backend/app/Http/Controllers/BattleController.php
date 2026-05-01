@@ -163,7 +163,7 @@ class BattleController extends Controller
         return response()->json($this->buildBattlePayload($battle, $viewerId));
     }
 
-    // Sirve para abrir un stream SSE con actualizaciones en tiempo real del combate.
+    // Sirve para abrir un stream SSE (Server-Sent Events es un protocolo de comunicación bidireccional entre el servidor y el cliente) con actualizaciones en tiempo real del combate.
     public function streamBattle(Request $request, $battleId)
     {
         $viewerId = $this->resolveViewerIdFromToken($request);
@@ -179,35 +179,38 @@ class BattleController extends Controller
         }
 
         return response()->stream(function () use ($battleId, $viewerId) {
-            ignore_user_abort(true);
-            set_time_limit(0);
+            ignore_user_abort(true); // Ignora la interrupción del usuario para que el stream siga funcionando incluso si el usuario cierra la pestaña.
+            set_time_limit(0); // No limita el tiempo de ejecución del stream.
 
-            while (ob_get_level() > 0) {
+            while (ob_get_level() > 0) { // Cierra todos los buffers de salida.
                 ob_end_flush();
             }
 
             $lastPayloadHash = null;
             $streamDeadline = time() + 45;
 
-            echo "retry: 1500\n\n";
-            flush();
+            echo "retry: 1500\n\n"; // El cliente SSE esperará 1.5 segundos antes de reconectarse si la conexión se pierde.
+            flush(); // Envía los datos al cliente.
 
-            while (! connection_aborted() && time() < $streamDeadline) {
+            $shouldContinue = true;
+            while ($shouldContinue && ! connection_aborted() && time() < $streamDeadline) {
                 $battle = Battle::with(['user', 'opponentUser', 'winner'])->find($battleId);
 
                 if (! $battle) {
                     echo "event: error\n";
                     echo 'data: '.json_encode(['message' => 'Battle not found'])."\n\n";
                     flush();
-                    break;
+                    $shouldContinue = false;
+                    continue;
                 }
 
+                // Construye el payload (estructura de datos que se envía al cliente) de la batalla.
                 $payload = $this->buildBattlePayload($battle, $viewerId);
-                $payloadHash = md5((string) json_encode($payload));
+                $payloadHash = md5((string) json_encode($payload)); // Genera un hash del payload para evitar enviar datos redundantes.
 
-                if ($payloadHash !== $lastPayloadHash) {
+                if ($payloadHash !== $lastPayloadHash) { // Si el hash del payload es diferente al último hash, envía el payload al cliente.
                     echo "event: battle\n";
-                    echo 'data: '.json_encode($payload)."\n\n";
+                    echo 'data: '.json_encode($payload)."\n\n"; // Envía el payload al cliente.
                     flush();
                     $lastPayloadHash = $payloadHash;
                 } else {
@@ -216,7 +219,8 @@ class BattleController extends Controller
                 }
 
                 if ($payload['winner_id']) {
-                    break;
+                    $shouldContinue = false;
+                    continue;
                 }
 
                 usleep(900000);
