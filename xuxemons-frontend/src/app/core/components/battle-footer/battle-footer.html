@@ -26,9 +26,9 @@
 }
 
 <div class="battle-footer">
-  <div class="battle-logs">
+  <div class="battle-logs" #battleLogs>
     @for (log of vm.battleLog(); track $index) {
-      <p [class]="'log-entry log-' + log.source" [class.new-log]="$index === 0">{{ log.text }}</p>
+      <p [class]="'log-entry log-' + log.source" [class.new-log]="$last">{{ log.text }}</p>
     } @empty {
       <p>The battle begins!</p>
     }
@@ -95,15 +95,39 @@
         <button class="back-btn submenu-back-btn" (click)="vm.showSubMenu(null)">BACK</button>
       </div>
     } @else if (vm.currentSubMenu() === 'bag-target') {
-      <div class="attack-grid attack-grid--targets">
-        @for (xuxemon of vm.getEligibleItemTargets(); track xuxemon.adquired_id || xuxemon.id) {
-          <button class="atk-btn" (click)="vm.useItemOnTarget(xuxemon)">
-            {{ xuxemon.name }}
-            <br>
-            HP {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}
-          </button>
-        } @empty {
-          <p class="no-items battle-footer-badge">No valid targets for {{ vm.selectedBattleItem()?.name }}</p>
+      <div class="submenu-panel">
+        <div class="attack-grid attack-grid--switch">
+          @for (xuxemon of vm.paginatedEligibleItemTargets(); track xuxemon.adquired_id || xuxemon.id) {
+            <button
+              type="button"
+              class="atk-btn bag-item-btn switch-option"
+              [class.type-power]="xuxemon.type?.name === 'Power'"
+              [class.type-speed]="xuxemon.type?.name === 'Speed'"
+              [class.type-technical]="xuxemon.type?.name === 'Technical'"
+              (click)="vm.useItemOnTarget(xuxemon)">
+              <span class="switch-option__top">
+                <span class="switch-option__name">{{ xuxemon.name }}</span>
+                <span class="switch-option__badges">
+                  @if (xuxemon.level != null) {
+                    <span class="switch-option__level">Lv.{{ xuxemon.level }}</span>
+                  }
+                  @if (xuxemon.size) {
+                    <span class="switch-option__size">{{ xuxemon.size }}</span>
+                  }
+                </span>
+              </span>
+              <span class="switch-option__hp">HP {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}</span>
+            </button>
+          } @empty {
+            <p class="no-items battle-footer-badge">No valid targets for {{ vm.selectedBattleItem()?.name }}</p>
+          }
+        </div>
+        @if (vm.bagTargetPageCount() > 1) {
+          <div class="bag-pagination">
+            <button type="button" class="back-btn bag-pagination-btn" (click)="vm.previousBagTargetPage()" [disabled]="!vm.canGoToPreviousBagTargetPage()">PREV</button>
+            <span class="bag-pagination-status">{{ vm.battleBagTargetPageLabel() }}</span>
+            <button type="button" class="back-btn bag-pagination-btn" (click)="vm.nextBagTargetPage()" [disabled]="!vm.canGoToNextBagTargetPage()">NEXT</button>
+          </div>
         }
         <button class="back-btn submenu-back-btn" (click)="vm.cancelBagTargeting()">BACK</button>
       </div>
@@ -111,7 +135,13 @@
       <div class="submenu-panel">
         <div class="attack-grid attack-grid--switch">
           @for (xuxemon of vm.paginatedSwitchMenuXuxemons(); track xuxemon.adquired_id || xuxemon.id) {
-            <button type="button" class="atk-btn bag-item-btn switch-option" (click)="vm.switchXuxemon(xuxemon)">
+            <button
+              type="button"
+              class="atk-btn bag-item-btn switch-option"
+              [class.type-power]="xuxemon.type?.name === 'Power'"
+              [class.type-speed]="xuxemon.type?.name === 'Speed'"
+              [class.type-technical]="xuxemon.type?.name === 'Technical'"
+              (click)="vm.switchXuxemon(xuxemon)">
               <span class="switch-option__top">
                 <span class="switch-option__name">{{ xuxemon.name }}</span>
                 <span class="switch-option__badges">

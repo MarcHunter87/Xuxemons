@@ -1,5 +1,7 @@
 .app-main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   background-color: var(--neutral-white);
 }
 
@@ -20,6 +22,9 @@
 }
 
 .app-content.battle-fullscreen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   max-width: none;
   width: 100%;
   margin: 0;

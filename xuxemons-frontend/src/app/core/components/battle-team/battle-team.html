@@ -13,6 +13,9 @@
           [class.team-slot--selected]="isSelectedSlot(slotId)"
           [class.team-slot--filled]="!!getSlotXuxemon(slotId)"
           [class.team-slot--empty]="!getSlotXuxemon(slotId)"
+          [class.type-power]="getSlotXuxemon(slotId)?.type?.name === 'Power'"
+          [class.type-speed]="getSlotXuxemon(slotId)?.type?.name === 'Speed'"
+          [class.type-technical]="getSlotXuxemon(slotId)?.type?.name === 'Technical'"
           (click)="selectTeamSlot(slotId)"
           [disabled]="isTeamBusy()"
           [attr.aria-label]="getSlotLabel(slotId)">
@@ -70,6 +73,9 @@
           <button
             type="button"
             class="team-roster__card"
+            [class.type-power]="xuxemon.type?.name === 'Power'"
+            [class.type-speed]="xuxemon.type?.name === 'Speed'"
+            [class.type-technical]="xuxemon.type?.name === 'Technical'"
             [disabled]="isTeamBusy()"
             (click)="assignXuxemonToSelectedSlot(xuxemon)">
             <img class="team-roster__sprite" [src]="xuxemon.image_url" [alt]="xuxemon.name">

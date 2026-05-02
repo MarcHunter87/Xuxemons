@@ -27,9 +27,10 @@ export class FilterXuxedex implements OnChanges {
 
   // Sirve para manejar los cambios de los inputs
   ngOnChanges(): void {
-    this.typeOptions = Array.from(
-      new Set(this.xuxemons.map(xuxemon => xuxemon.type?.name).filter(Boolean))
-    ).sort((a, b) => a.localeCompare(b));
+    const typeNames = this.xuxemons
+      .map((xuxemon) => xuxemon.type?.name)
+      .filter((name): name is string => typeof name === 'string' && name.length > 0);
+    this.typeOptions = Array.from(new Set(typeNames)).sort((a, b) => a.localeCompare(b));
     this.emitFilteredXuxemons();
   }
 

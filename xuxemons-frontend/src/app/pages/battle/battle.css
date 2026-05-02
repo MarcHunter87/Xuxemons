@@ -1,7 +1,16 @@
+app-battle {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+}
+
 .battle-container {
   display: flex;
-  justify-content: center;
+  flex: 1;
+  flex-direction: column;
   align-items: stretch;
+  width: 100%;
   background-color: transparent;
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   overflow-x: hidden;
@@ -11,12 +20,11 @@
 
 .battle-wrapper {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 0;
   width: 100%;
-  min-height: inherit;
-  max-width: none;
 }
 
 .battle-arena {
@@ -29,7 +37,8 @@
   display: flex;
   flex-direction: column;
   border: none;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .battle-screen {
@@ -37,67 +46,63 @@
   position: relative;
   background-size: cover;
   background-position: center;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   min-height: clamp(380px, 54vh, 740px);
   isolation: isolate;
 }
 
-.battle-screen::after {
-  display: none;
-}
-
+/* Rellena battle-screen: solo hay hijos absolute; sin esto el grid colapsa y top:% no centra. */
 .battle-grid {
-  display: block;
-  height: 100%;
-  min-height: inherit;
-  position: relative;
+  position: absolute;
+  inset: 0;
+  width: 100%;
   z-index: 2;
 }
 
-/* Pokémon Positions */
-.opponent-pos {
+.opponent-pos,
+.player-pos {
   position: absolute;
-  top: clamp(82px, 12%, 126px);
-  right: clamp(16px, 8vw, 110px);
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.opponent-pos {
+  top: clamp(82px, 12%, 126px);
+  right: clamp(16px, 8vw, 110px);
 }
 
 .player-pos {
-  position: absolute;
   bottom: clamp(18px, 5%, 52px);
   left: clamp(16px, 8vw, 110px);
-  display: flex;
-  flex-direction: column;
   padding: 24px;
-  align-items: center;
 }
 
-/* Status Boxes (3DS Style) */
 .status-box {
   background: var(--primary-color);
   border: 4px solid var(--neutral-black);
-  border-radius: 10px 0 20px 0;
   padding: 12px 18px;
-  width: clamp(220px, 25vw, 300px);
+  width: clamp(260px, 32vw, 340px);
   box-shadow: 4px 4px 0 var(--color-black-soft);
   position: absolute;
   z-index: 10;
   font-size: 1rem;
 }
 
-.opponent-status {
+.opponent-status,
+.player-status {
   top: 50%;
-  right: 110%; /* Posicionado a la izquierda del sprite del oponente */
   transform: translateY(-50%);
+}
+
+.opponent-status {
+  right: 110%;
   border-radius: 20px 0 10px 0;
 }
 
 .player-status {
-  top: 50%;
-  left: 110%; /* Posicionado a la derecha del sprite del jugador */
-  transform: translateY(-50%);
+  left: 110%;
   border-radius: 0 20px 0 10px;
 }
 
@@ -141,11 +146,14 @@
 }
 
 .status-effects {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 0.5rem;
+  row-gap: 0.35rem;
   margin-top: 10px;
+  width: 100%;
   min-height: 30px;
+  align-content: start;
 }
 
 .name-row {
@@ -159,7 +167,6 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 0.2rem;
-  min-width: 0;
   width: 100%;
 }
 
@@ -196,12 +203,54 @@
   white-space: nowrap;
 }
 
+.xuxemon-badges-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+  width: 100%;
+}
+
+.xuxemon-type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: clamp(0.72rem, 2.4vw, 1rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  border: 2px solid var(--neutral-black);
+  color: var(--neutral-white);
+  width: fit-content;
+}
+
+.xuxemon-type-badge.type-power {
+  background: var(--color-red-base);
+  border-color: var(--color-red-deep);
+}
+
+.xuxemon-type-badge.type-speed {
+  background: var(--accent-color);
+  border-color: var(--accent-on-light);
+}
+
+.xuxemon-type-badge.type-technical {
+  background: var(--color-green-base);
+  border-color: color-mix(in srgb, var(--color-green-base) 72%, black);
+}
+
 .xuxemon-size-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 0.15rem;
-  font-size: 1rem;
+  flex-shrink: 0;
+  font-size: clamp(0.72rem, 2.4vw, 1rem);
   font-weight: 900;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -215,24 +264,24 @@
 }
 
 .status-banner-badge {
-  max-width: 132px;
+  box-sizing: border-box;
+  width: 100%;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.28rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   border-radius: 6px;
   border: 2px solid var(--accent-on-light);
   background: var(--color-blue-overlay);
   color: var(--neutral-black);
-  font-size: 1rem;
+  font-size: clamp(0.75rem, 2.6vw, 1rem);
   font-weight: 900;
-  line-height: 1;
+  line-height: 1.15;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 0.16rem 0.34rem;
-  flex-shrink: 0;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .status-banner-icon {
@@ -243,6 +292,8 @@
 }
 
 .status-banner-text {
+  flex: 0 1 auto;
+  text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -274,12 +325,12 @@
   color: var(--neutral-black);
 }
 
-/* Sprites and Platforms */
 .sprite-container {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: visible;
   will-change: transform, filter, opacity;
 }
 
@@ -305,64 +356,149 @@
   z-index: 1;
 }
 
-@media (max-height: 820px) and (min-width: 901px) {
-  .opponent-pos {
-    top: clamp(70px, 9%, 96px);
-    right: clamp(16px, 6.4vw, 82px);
-  }
-
-  .player-pos {
-    bottom: clamp(10px, 2.8%, 26px);
-    left: clamp(16px, 6.4vw, 82px);
-  }
-
-  .status-box {
-    width: clamp(208px, 21vw, 264px);
-    padding: 10px 14px;
-  }
-
-  .trainer-icon {
-    width: 30px;
-    height: 30px;
-  }
-
-  .name-row {
-    font-size: 1rem;
-  }
-}
-
-@media (min-width: 1600px) and (min-height: 900px) {
+@media (max-width: 1500px) {
   .battle-screen {
-    min-height: clamp(520px, 62vh, 860px);
+    min-height: clamp(520px, 58vh, 860px);
   }
 
   .opponent-pos {
-    top: clamp(88px, 13%, 138px);
-    right: clamp(44px, 9vw, 150px);
+    flex-direction: column-reverse;
+    gap: clamp(8px, 1.5vw, 14px);
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    right: clamp(16px, 9vw, 150px);
   }
 
   .player-pos {
-    bottom: clamp(26px, 7%, 74px);
-    left: clamp(44px, 9vw, 150px);
+    flex-direction: column;
+    gap: clamp(8px, 1.5vw, 14px);
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    left: clamp(16px, 9vw, 150px);
+    padding: 24px;
   }
 
   .status-box {
-    width: clamp(260px, 23vw, 340px);
-    padding: 13px 20px;
+    position: static;
+    transform: none;
+    width: clamp(220px, 28vw, 340px);
+    padding: 12px clamp(14px, 1.8vw, 20px);
   }
 
   .sprite-container img {
-    width: clamp(280px, 30vw, 420px);
-    height: clamp(280px, 30vw, 420px);
+    width: clamp(200px, 28vw, 420px);
+    height: clamp(200px, 28vw, 420px);
   }
 
   .platform {
-    width: clamp(300px, 34vw, 460px);
-    height: clamp(82px, 9.5vw, 132px);
+    width: clamp(220px, 30vw, 460px);
+    height: clamp(64px, 8.5vw, 132px);
+  }
+
+  .opponent-status,
+  .player-status {
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none;
   }
 }
 
-/* Turn Indicator */
+@media (max-width: 960px) {
+  .battle-container {
+    overflow-y: visible;
+  }
+
+  .battle-wrapper {
+    min-height: auto;
+  }
+
+  .battle-arena {
+    flex: none;
+    min-height: 560px;
+  }
+
+  .battle-grid {
+    position: relative;
+    inset: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    align-content: start;
+    min-height: auto;
+    padding: 72px 12px 12px;
+  }
+
+  .opponent-pos,
+  .player-pos {
+    position: static;
+    width: 100%;
+    transform: none;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .opponent-pos {
+    order: 1;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  .player-pos {
+    order: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px;
+  }
+
+  .status-box {
+    position: static;
+    width: min(100%, 360px);
+    transform: none;
+    margin-bottom: 0;
+    padding: 10px 14px;
+  }
+
+  .sprite-container img {
+    width: min(72vw, 260px) !important;
+    height: min(72vw, 260px) !important;
+    max-width: 260px !important;
+    max-height: 260px !important;
+  }
+
+  .platform {
+    width: min(78vw, 300px);
+    height: 88px;
+    bottom: -20px;
+  }
+
+  .turn-indicator {
+    top: 12px;
+    width: calc(100% - 24px);
+    max-width: 320px;
+    padding: 8px 18px;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  .impact-burst--player {
+    left: 50%;
+    top: 68%;
+  }
+
+  .impact-burst--opponent {
+    left: 50%;
+    top: 34%;
+  }
+}
+
 .turn-indicator {
   position: absolute;
   top: 10px;
@@ -424,7 +560,6 @@
   border-radius: 50%;
   pointer-events: none;
   z-index: 14;
-  display: none;
   background: radial-gradient(circle, var(--neutral-white) 0%, var(--secondary-color) 18%, var(--color-amber-bright) 48%, var(--color-red-bright) 72%, transparent 100%);
 }
 
@@ -535,22 +670,14 @@
   animation: slashFromPlayer 0.48s cubic-bezier(0.16, 0.92, 0.28, 1) forwards;
 }
 
-.attack-trail--opponent {
-  right: 22%;
-  display: none;
-}
-
-.hit { animation: shake 0.1s linear 3; filter: brightness(2) contrast(2); }
-.attack-trail.active {
-  display: block;
-  opacity: 0;
-  transform: translateY(-50%);
-}
-
 .attack-trail.active.attack-trail--player {
   left: 22%;
   background: linear-gradient(90deg, transparent 0%, var(--secondary-color) 14%, var(--neutral-white) 48%, var(--color-amber-bright) 72%, var(--color-red-bright) 100%);
   animation: slashFromPlayer 0.48s cubic-bezier(0.16, 0.92, 0.28, 1) forwards;
+}
+
+.attack-trail.active {
+  display: block;
 }
 
 .attack-trail.active.attack-trail--opponent {
@@ -585,137 +712,6 @@
   margin-bottom: 20px;
 }
 
-@media (max-width: 900px) {
-  .battle-arena {
-    min-height: 620px;
-  }
-
-  .status-box {
-    width: 244px;
-    padding: 10px 14px;
-  }
-
-  .sprite-container img {
-    width: 300px;
-    height: 300px;
-  }
-
-  .platform {
-    width: 320px;
-    height: 96px;
-  }
-}
-
-@media (max-width: 768px) {
-  .battle-container {
-    overflow-y: visible;
-  }
-
-  .battle-wrapper {
-    min-height: auto;
-  }
-
-  .battle-arena {
-    flex: none;
-    min-height: 760px;
-  }
-
-  .battle-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
-    align-content: start;
-    min-height: 100%;
-    padding: 76px 12px 16px;
-  }
-
-  .opponent-pos,
-  .player-pos {
-    position: static;
-    width: 100%;
-    display: grid;
-    justify-items: center;
-    gap: 12px;
-    min-height: 0;
-  }
-
-  .opponent-pos {
-    order: 1;
-  }
-
-  .player-pos {
-    order: 2;
-  }
-
-  .status-box {
-    position: static;
-    width: min(100%, 360px);
-    transform: none;
-    margin-bottom: 0;
-  }
-
-  .opponent-status,
-  .player-status {
-    top: auto;
-    right: auto;
-    left: auto;
-  }
-
-  .sprite-container img {
-    width: min(72vw, 260px);
-    height: min(72vw, 260px);
-  }
-
-  .platform {
-    width: min(78vw, 300px);
-    height: 88px;
-    bottom: -20px;
-  }
-
-  .turn-indicator {
-    top: 12px;
-    width: calc(100% - 24px);
-    max-width: 320px;
-    padding: 8px 18px;
-    font-size: 1rem;
-    letter-spacing: 1px;
-    text-align: center;
-  }
-
-  .impact-burst--player {
-    left: 50%;
-    top: 68%;
-  }
-
-  .impact-burst--opponent {
-    left: 50%;
-    top: 34%;
-  }
-}
-
-@media (max-width: 480px) {
-  .battle-arena {
-    min-height: 700px;
-  }
-}
-
-/* Practice Badge */
-.practice-badge {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  background: var(--color-amber-base);
-  color: var(--neutral-black);
-  padding: 5px 15px;
-  border-radius: 6px;
-  font-weight: 800;
-  font-size: 1rem;
-  z-index: 10;
-  box-shadow: 0 2px 10px var(--color-black-soft);
-  border: 3px solid var(--neutral-black);
-}
-
-/* Dice Overlay */
 .dice-overlay {
   position: fixed;
   inset: 0;
@@ -807,19 +803,17 @@
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 
-.sprite-container {
-  overflow: visible;
+.player-sprite.attacking,
+.opponent-sprite.attacking {
+  transform-origin: 50% 65%;
 }
 
-/* Attack animations */
 .player-sprite.attacking {
   animation: playerLunge 0.52s ease-in-out;
-  transform-origin: 50% 65%;
 }
 
 .opponent-sprite.attacking {
   animation: opponentLunge 0.52s ease-in-out;
-  transform-origin: 50% 65%;
 }
 
 .player-sprite.attacking img,
@@ -828,11 +822,10 @@
 }
 
 .sprite-container.hit img {
-  animation: targetImpactShake 0.22s ease-out;
+  animation: shakeHit 0.1s linear 3, hitFlash 0.3s ease;
   filter: brightness(1.15) drop-shadow(0 0 10px var(--neutral-white));
 }
 
-/* Faint animations */
 .sprite-container img.fainting {
   animation: xuxemonFaintErase 0.72s ease-in forwards;
 }
@@ -981,24 +974,6 @@
   }
 }
 
-@keyframes targetImpactShake {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  25% {
-    transform: translate3d(-10px, 4px, 0);
-  }
-  50% {
-    transform: translate3d(12px, -4px, 0);
-  }
-  75% {
-    transform: translate3d(-6px, 3px, 0);
-  }
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
 @keyframes battleHitFlash {
   0% {
     opacity: 0;
@@ -1037,41 +1012,6 @@
   }
 }
 
-@keyframes diceIntro {
-  from { opacity: 0; transform: translateY(18px) scale(0.94); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes diceRoll {
-  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); }
-  25% { transform: rotateX(90deg) rotateY(180deg) rotateZ(120deg) scale(1.08); }
-  50% { transform: rotateX(180deg) rotateY(360deg) rotateZ(240deg) scale(0.94); }
-  75% { transform: rotateX(270deg) rotateY(540deg) rotateZ(320deg) scale(1.06); }
-  100% { transform: rotateX(360deg) rotateY(720deg) rotateZ(360deg) scale(1); }
-}
-
-@keyframes diceSettle {
-  0% { transform: translateY(-26px) rotateZ(-14deg) scale(1.12); }
-  35% { transform: translateY(8px) rotateZ(8deg) scale(0.9); }
-  65% { transform: translateY(-4px) rotateZ(-4deg) scale(1.04); }
-  100% { transform: translateY(0) rotateZ(0deg) scale(1); }
-}
-
-@keyframes diceResultPulse {
-  0% {
-    transform: scale(1);
-    filter: brightness(1);
-  }
-  45% {
-    transform: scale(1.05);
-    filter: brightness(1.12);
-  }
-  100% {
-    transform: scale(1);
-    filter: brightness(1);
-  }
-}
-
 /* Este keyframe se encarga del giro continuo de elementos circulares. */
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -1095,35 +1035,7 @@
   }
 }
 
-/* Pulse Animation */
-.pulse { animation: pulseAnim 1.5s infinite; }
-/* Este keyframe se encarga del pulso de opacidad en elementos destacados. */
-@keyframes pulseAnim {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
 /* Animations */
-/* Este keyframe se encarga del desplazamiento de ataque del jugador. */
-@keyframes playerAttack {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  35% { transform: translate3d(48px, -38px, 0) scale(1.08) rotate(-4deg); }
-  65% { transform: translate3d(18px, -12px, 0) scale(1.04); }
-  100% { transform: translate3d(0, 0, 0) scale(1); }
-}
-
-/* Este keyframe se encarga del desplazamiento de ataque del oponente. */
-@keyframes opponentAttack {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  35% { transform: translate3d(-48px, 38px, 0) scale(1.08) rotate(4deg); }
-  65% { transform: translate3d(-18px, 12px, 0) scale(1.04); }
-  100% { transform: translate3d(0, 0, 0) scale(1); }
-}
-
-/* Replaced by new playerLunge/opponentLunge animations */
-/* .player-sprite img.attacking { animation: playerAttack 0.5s ease-in-out; }
-.opponent-sprite img.attacking { animation: opponentAttack 0.5s ease-in-out; } */
-
 /* Este keyframe se encarga del shake corto al recibir daño. */
 @keyframes shakeHit {
   0% { transform: translateX(0); }
@@ -1207,8 +1119,6 @@
   }
 }
 
-.sprite-container.hit img { animation: shakeHit 0.1s linear 3, hitFlash 0.3s ease; }
-
 /* Este keyframe se encarga del flash general de impacto. */
 @keyframes hitFlash {
   0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
@@ -1280,16 +1190,16 @@
 /* Este keyframe se encarga del hit flash específico de ataques Technical. */
 @keyframes hitFlashTechnical {
   0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
-  28%  { filter: brightness(2.2) drop-shadow(0 0 16px var(--color-purple-base)) hue-rotate(35deg); }
-  58%  { filter: brightness(1.5) drop-shadow(0 0 9px var(--color-purple-base)); }
+  28%  { filter: brightness(2.2) drop-shadow(0 0 16px var(--color-green-bright)) saturate(1.2); }
+  58%  { filter: brightness(1.5) drop-shadow(0 0 9px var(--color-green-base)); }
 }
 
 /* Este keyframe se encarga del hit flash específico de ataques Power. */
 @keyframes hitFlashPower {
   0%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
-  18%  { filter: brightness(3.5) drop-shadow(0 0 20px var(--color-amber-bright)) saturate(1.6); }
-  42%  { filter: brightness(2.2) drop-shadow(0 0 12px var(--color-amber-deep)); }
-  68%  { filter: brightness(1.4) drop-shadow(0 0 6px var(--color-amber-base)); }
+  18%  { filter: brightness(3.5) drop-shadow(0 0 20px var(--color-red-bright)) saturate(1.6); }
+  42%  { filter: brightness(2.2) drop-shadow(0 0 12px var(--color-red-base)); }
+  68%  { filter: brightness(1.4) drop-shadow(0 0 6px var(--color-red-deep)); }
 }
 
 .dice-container.throwing {
@@ -1302,12 +1212,12 @@
 }
 
 .impact-burst--technical {
-  background: radial-gradient(circle, var(--neutral-white) 0%, var(--color-purple-base) 30%, var(--color-purple-deep) 64%, transparent 100%);
+  background: radial-gradient(circle, var(--neutral-white) 0%, var(--color-green-bright) 28%, var(--color-green-base) 62%, transparent 100%);
   animation: impactBurstTechnical 0.52s ease-out forwards;
 }
 
 .impact-burst--power {
-  background: radial-gradient(circle, var(--neutral-white) 0%, var(--color-amber-bright) 22%, var(--color-amber-deep) 58%, transparent 100%);
+  background: radial-gradient(circle, var(--neutral-white) 0%, var(--color-red-bright) 22%, var(--color-red-base) 58%, transparent 100%);
   width: 240px;
   height: 240px;
   animation: impactBurstPower 0.46s ease-out forwards;
@@ -1327,25 +1237,25 @@
 
 .attack-trail--player.attack-trail--technical {
   height: 34px;
-  background: linear-gradient(90deg, var(--color-purple-overlay) 0%, var(--color-purple-base) 26%, var(--neutral-white) 50%, var(--color-purple-base) 76%, var(--color-purple-deep) 100%);
+  background: linear-gradient(90deg, var(--color-green-overlay) 0%, var(--color-green-base) 26%, var(--neutral-white) 50%, var(--color-green-bright) 76%, var(--color-green-base) 100%);
   animation: technicalFromPlayer 0.48s cubic-bezier(0.12, 0.84, 0.3, 1) forwards;
 }
 
 .attack-trail--opponent.attack-trail--technical {
   height: 34px;
-  background: linear-gradient(270deg, var(--color-purple-overlay) 0%, var(--color-purple-base) 26%, var(--neutral-white) 50%, var(--color-purple-base) 76%, var(--color-purple-deep) 100%);
+  background: linear-gradient(270deg, var(--color-green-overlay) 0%, var(--color-green-base) 26%, var(--neutral-white) 50%, var(--color-green-bright) 76%, var(--color-green-base) 100%);
   animation: technicalFromOpponent 0.48s cubic-bezier(0.12, 0.84, 0.3, 1) forwards;
 }
 
 .attack-trail--player.attack-trail--power {
   height: 36px;
-  background: linear-gradient(90deg, var(--color-amber-overlay) 0%, var(--color-amber-deep) 24%, var(--neutral-white) 50%, var(--color-amber-bright) 78%, var(--color-amber-deep) 100%);
+  background: linear-gradient(90deg, var(--color-red-overlay) 0%, var(--color-red-deep) 24%, var(--neutral-white) 50%, var(--color-red-bright) 78%, var(--color-red-base) 100%);
   animation: powerFromPlayer 0.52s cubic-bezier(0.1, 0.9, 0.28, 1) forwards;
 }
 
 .attack-trail--opponent.attack-trail--power {
   height: 36px;
-  background: linear-gradient(270deg, var(--color-amber-overlay) 0%, var(--color-amber-deep) 24%, var(--neutral-white) 50%, var(--color-amber-bright) 78%, var(--color-amber-deep) 100%);
+  background: linear-gradient(270deg, var(--color-red-overlay) 0%, var(--color-red-deep) 24%, var(--neutral-white) 50%, var(--color-red-bright) 78%, var(--color-red-base) 100%);
   animation: powerFromOpponent 0.52s cubic-bezier(0.1, 0.9, 0.28, 1) forwards;
 }
 
@@ -1509,11 +1419,11 @@
 }
 
 @keyframes technicalSpecialScreenPulse {
-  0%   { filter: brightness(1) hue-rotate(0deg); }
-  18%  { filter: brightness(1.2) hue-rotate(-55deg) saturate(1.4); }
-  42%  { filter: brightness(1.08) hue-rotate(-28deg) saturate(1.2); }
-  70%  { filter: brightness(1.04) hue-rotate(-12deg); }
-  100% { filter: brightness(1) hue-rotate(0deg); }
+  0%   { filter: brightness(1); }
+  18%  { filter: brightness(1.18) saturate(1.3); }
+  42%  { filter: brightness(1.08) saturate(1.15); }
+  70%  { filter: brightness(1.04); }
+  100% { filter: brightness(1); }
 }
 
 @keyframes powerSpecialScreenShake {
@@ -1821,4 +1731,3 @@
   80%  { transform: translate3d(-6px, 2px, 0) scale(1.02) rotate(1deg); }
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
-

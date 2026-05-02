@@ -13,9 +13,8 @@ export class BattleRunConfirmModal implements AfterViewInit {
   @Input({ required: true }) vm!: any;
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
 
-  // Sirve para enfocar el primer elemento
   ngAfterViewInit(): void {
-    queueMicrotask(() => this.focusFirstElement());
+    queueMicrotask(() => this.focusPrimaryAction());
   }
 
   // Sirve para cerrar el modal
@@ -34,12 +33,17 @@ export class BattleRunConfirmModal implements AfterViewInit {
     this.trapFocus(event);
   }
 
-  // Sirve para enfocar el primer elemento
-  private focusFirstElement(): void {
+  /** Foco inicial en confirmar huida. */
+  private focusPrimaryAction(): void {
     const root = this.dialogRoot?.nativeElement;
-    if (!root) return;
-    const focusable = this.getFocusableElements(root);
-    (focusable[0] ?? root).focus();
+    if (!root) {
+      return;
+    }
+    const primary =
+      root.querySelector<HTMLElement>('button.battle-dialog-btn--danger:not([disabled])')
+      ?? this.getFocusableElements(root)[0]
+      ?? root;
+    primary.focus();
   }
 
   // Sirve para atrapar el foco
