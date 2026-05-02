@@ -29,6 +29,7 @@ class Battle extends Model
         'user_active_adquired_xuxemon_id',
         'opponent_active_adquired_xuxemon_id',
         'battle_log',
+        'status_effect_turn_counts',
     ];
 
     protected $casts = [
@@ -36,6 +37,7 @@ class Battle extends Model
         'user_active_adquired_xuxemon_id' => 'integer',
         'opponent_active_adquired_xuxemon_id' => 'integer',
         'battle_log' => 'array',
+        'status_effect_turn_counts' => 'array',
     ];
 
     public function user()

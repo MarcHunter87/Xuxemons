@@ -71,12 +71,20 @@
 .team-slot:hover:not(:disabled) {
   transform: translateY(-3px);
   box-shadow: 0 8px 16px var(--color-black-soft);
+}
+
+.team-slot--empty:hover:not(:disabled),
+.team-slot:hover:not(:disabled):not(.type-power):not(.type-speed):not(.type-technical) {
   border-color: var(--accent-color);
 }
 
 .team-slot:focus-visible:not(:disabled) {
   transform: translateY(-3px);
   box-shadow: 0 8px 16px var(--color-black-soft);
+}
+
+.team-slot--empty:focus-visible:not(:disabled),
+.team-slot:focus-visible:not(:disabled):not(.type-power):not(.type-speed):not(.type-technical) {
   border-color: var(--accent-color);
 }
 
@@ -85,9 +93,31 @@
   cursor: not-allowed;
 }
 
-.team-slot--selected {
+.team-slot--selected.team-slot--empty {
   border-color: var(--accent-color);
   box-shadow: inset 0 0 0 2px var(--color-black-soft);
+}
+
+.team-slot--selected.team-slot--filled {
+  box-shadow: inset 0 0 0 2px var(--color-black-soft);
+}
+
+.team-slot--selected.team-slot--filled.type-power {
+  box-shadow:
+    inset 0 0 0 2px var(--color-black-soft),
+    0 0 0 2px var(--color-red-base);
+}
+
+.team-slot--selected.team-slot--filled.type-speed {
+  box-shadow:
+    inset 0 0 0 2px var(--color-black-soft),
+    0 0 0 2px var(--accent-color);
+}
+
+.team-slot--selected.team-slot--filled.type-technical {
+  box-shadow:
+    inset 0 0 0 2px var(--color-black-soft),
+    0 0 0 2px var(--color-green-base);
 }
 
 .team-slot--filled::before {
@@ -301,16 +331,37 @@
   height: 100%;
 }
 
+.team-slot.type-power,
+.team-roster__card.type-power {
+  border-color: var(--color-red-base);
+}
+
+.team-slot.type-speed,
+.team-roster__card.type-speed {
+  border-color: var(--accent-color);
+}
+
+.team-slot.type-technical,
+.team-roster__card.type-technical {
+  border-color: var(--color-green-base);
+}
+
 .team-roster__card:hover:not(:disabled) {
   transform: translateY(-3px);
-  border-color: var(--accent-color);
   box-shadow: 0 8px 16px var(--color-black-soft);
+}
+
+.team-roster__card:hover:not(:disabled):not(.type-power):not(.type-speed):not(.type-technical) {
+  border-color: var(--accent-color);
 }
 
 .team-roster__card:focus-visible:not(:disabled) {
   transform: translateY(-3px);
-  border-color: var(--accent-color);
   box-shadow: 0 8px 16px var(--color-black-soft);
+}
+
+.team-roster__card:focus-visible:not(:disabled):not(.type-power):not(.type-speed):not(.type-technical) {
+  border-color: var(--accent-color);
 }
 
 .team-roster__card:disabled {

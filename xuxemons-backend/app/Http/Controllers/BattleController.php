@@ -209,6 +209,7 @@ class BattleController extends Controller
                     echo 'data: '.json_encode(['message' => 'Battle not found'])."\n\n";
                     flush();
                     $shouldContinue = false;
+
                     continue;
                 }
 
@@ -228,6 +229,7 @@ class BattleController extends Controller
 
                 if ($payload['winner_id']) {
                     $shouldContinue = false;
+
                     continue;
                 }
 
@@ -379,10 +381,6 @@ class BattleController extends Controller
             return response()->json(['message' => 'Target Xuxemon has already fainted'], 422);
         }
 
-        if ($target->status_effect_id) {
-            return response()->json(['message' => 'Target already has a status effect'], 422);
-        }
-
         $statusEffect = $this->resolveBattleItemStatusEffect($bagItem->item->name, $bagItem->item->statusEffect);
         if (! $statusEffect) {
             return response()->json(['message' => 'This status item is not configured correctly'], 422);
@@ -390,6 +388,12 @@ class BattleController extends Controller
 
         DB::transaction(function () use ($target, $statusEffect, $bagItem) {
             $target->status_effect_id = $statusEffect->id;
+            $statusName = $statusEffect->name;
+            if ($statusName === 'Paralysis' || $statusName === 'Confusion') {
+                $target->status_effect_turns = 3;
+            } else {
+                $target->status_effect_turns = null;
+            }
             $target->save();
             $bagItem->reduceQuantity(1);
         });
@@ -745,10 +749,13 @@ class BattleController extends Controller
             return response()->json(['message' => 'Attack not available for this Xuxemon'], 422);
         }
 
+        $defender->loadMissing('statusEffect');
+
         $roll = random_int(1, 6);
         $attackerStat = $attacker->attack ?: 10;
         $defenderStat = $defender->defense ?: 5;
         $modifiers = $this->calculateBattleModifiers($attacker, $defender);
+        $typeMatchup = $this->calculateTypeMatchupModifier($attacker, $defender);
         $defenderMaxHp = $defender->hp ?: 100;
         $damageAmount = $this->calculateBattleDamageAmount(
             $attackerStat,
@@ -759,31 +766,40 @@ class BattleController extends Controller
             $defenderMaxHp,
         );
 
+        $hadSleep = strtolower(trim((string) ($defender->statusEffect?->name ?? ''))) === 'sleep';
+
+        if ($hadSleep) {
+            $damageAmount = min((int) $defender->current_hp, $damageAmount * 2);
+            $defender->status_effect_id = null;
+            $defender->status_effect_turns = null;
+        }
+
         $defender->current_hp = max(0, (int) $defender->current_hp - $damageAmount);
         $defender->save();
 
-        $attackerLabel = $this->formatBattleEntityLabel($battle, $context['player_id'], $attacker);
-        $defenderLabel = $this->formatBattleEntityLabel($battle, $context['opponent_id'], $defender);
-        $this->appendBattleLog($battle, sprintf('%s used %s on %s! (Roll: %d, -%d HP)', $attackerLabel, $attack->name, $defenderLabel, $roll, $damageAmount));
+        if ($hadSleep) {
+            $this->appendBattleLog($battle, sprintf('%s woke up taking double damage!', $defender->name));
+        }
 
-        if ($modifiers > 0) {
+        $this->appendBattleLog($battle, sprintf('%s used %s! (Roll: %d, -%d HP)', $attacker->name, $attack->name, $roll, $damageAmount));
+
+        if ($typeMatchup > 0) {
             $this->appendBattleLog($battle, 'It\'s super effective!');
-        } elseif ($modifiers < 0) {
+        } elseif ($typeMatchup < 0) {
             $this->appendBattleLog($battle, 'It\'s not very effective...');
         }
 
         $this->applyAttackStatusEffectIfNeeded($battle, $attack, $defender);
 
         if ((int) $defender->current_hp <= 0) {
-            $this->appendBattleLog($battle, sprintf('%s fainted!', $defenderLabel));
+            $this->appendBattleLog($battle, sprintf('%s fainted!', $defender->name));
 
             if ($this->hasAliveTeamMembers($context['opponent_id'], (int) $defender->id)) {
                 $battle->turn = (int) $battle->turn + 1;
             } else {
                 $battle->winner_id = $context['player_id'];
                 $this->applyBattleRewards($context['player_id'], $context['opponent_id']);
-                $winnerTrainer = $this->getBattleTrainerName($battle, $context['player_id']);
-                $this->appendBattleLog($battle, sprintf('%s wins the battle!', $winnerTrainer));
+                $this->appendBattleLog($battle, sprintf('%s wins the battle!', $attacker->name));
             }
         } else {
             $battle->turn = (int) $battle->turn + 1;
@@ -814,11 +830,19 @@ class BattleController extends Controller
             return response()->json(['message' => 'That Xuxemon is already active'], 422);
         }
 
+        $outgoingId = (int) $battle->{$context['player_field']};
+        $outgoing = $outgoingId > 0
+            ? AdquiredXuxemon::where('id', $outgoingId)->first()
+            : null;
+        $wasForcedSwitch = $outgoing !== null && (int) ($outgoing->current_hp ?? 0) <= 0;
+
         $battle->{$context['player_field']} = $targetId;
-        $battle->turn = (int) $battle->turn + 1;
-        $actorTrainer = $this->getBattleTrainerName($battle, $context['player_id']);
-        $targetName = $this->getBattleXuxemonDisplayName($target);
-        $this->appendBattleLog($battle, sprintf('%s sent out %s!', $actorTrainer, $targetName));
+
+        if (! $wasForcedSwitch) {
+            $battle->turn = (int) $battle->turn + 1;
+        }
+
+        $this->appendBattleLog($battle, sprintf('%s enters the battle!', $target->name));
         $battle->save();
 
         return null;
@@ -862,23 +886,23 @@ class BattleController extends Controller
             return response()->json(['message' => 'Target Xuxemon has already fainted'], 422);
         }
 
-        if ($target->status_effect_id) {
-            return response()->json(['message' => 'Target already has a status effect'], 422);
-        }
-
         $statusEffect = $this->resolveBattleItemStatusEffect($bagItem->item->name, $bagItem->item->statusEffect);
         if (! $statusEffect) {
             return response()->json(['message' => 'This status item is not configured correctly'], 422);
         }
 
         $target->status_effect_id = $statusEffect->id;
+        $statusName = $statusEffect->name;
+        if ($statusName === 'Paralysis' || $statusName === 'Confusion') {
+            $target->status_effect_turns = 3;
+        } else {
+            $target->status_effect_turns = null;
+        }
         $target->save();
         $bagItem->reduceQuantity(1);
 
         $battle->turn = (int) $battle->turn + 1;
-        $actorTrainer = $this->getBattleTrainerName($battle, $context['player_id']);
-        $targetLabel = $this->formatBattleEntityLabel($battle, $context['opponent_id'], $target);
-        $this->appendBattleLog($battle, sprintf('%s used %s on %s!', $actorTrainer, $bagItem->item->name, $targetLabel));
+        $this->appendBattleLog($battle, sprintf('%s used %s on %s!', $context['player_id'] === $battle->user_id ? $battle->user->name : $battle->opponentUser->name, $bagItem->item->name, $target->name));
         $battle->save();
 
         return null;
@@ -1083,9 +1107,7 @@ class BattleController extends Controller
         }
 
         $battle->turn = (int) $battle->turn + 1;
-        $actorTrainer = $this->getBattleTrainerName($battle, $context['player_id']);
-        $targetLabel = $this->formatBattleEntityLabel($battle, $context['player_id'], $target);
-        $this->appendBattleLog($battle, sprintf('%s used %s on %s!', $actorTrainer, $bagItem->item->name, $targetLabel));
+        $this->appendBattleLog($battle, sprintf('%s used %s on %s!', $context['player_id'] === $battle->user_id ? $battle->user->name : $battle->opponentUser->name, $bagItem->item->name, $target->name));
         $battle->save();
 
         return null;
@@ -1123,24 +1145,31 @@ class BattleController extends Controller
         ])->first(fn ($attack) => $attack && (int) $attack->id === $attackId);
     }
 
-    // Sirve para calcular modificadores de daño por afinidades y estados.
+    // Sirve para calcular la bonificación o penalización de daño por tipo del atacante.
+    private function calculateTypeMatchupModifier(AdquiredXuxemon $attacker, AdquiredXuxemon $defender): int
+    {
+        $attackerType = strtolower((string) ($attacker->xuxemon?->type?->name ?? ''));
+        $defenderType = strtolower((string) ($defender->xuxemon?->type?->name ?? ''));
+
+        if (($attackerType === 'power' && $defenderType === 'speed')
+            || ($attackerType === 'speed' && $defenderType === 'technical')
+            || ($attackerType === 'technical' && $defenderType === 'power')) {
+            return 1;
+        }
+
+        if (($attackerType === 'speed' && $defenderType === 'power')
+            || ($attackerType === 'technical' && $defenderType === 'speed')
+            || ($attackerType === 'power' && $defenderType === 'technical')) {
+            return -1;
+        }
+
+        return 0;
+    }
+
+    /** Suma plana al daño: tipo (+1/−1/0) + Medium +1, Large +2. */
     private function calculateBattleModifiers(AdquiredXuxemon $attacker, AdquiredXuxemon $defender): int
     {
-        $modifiers = 0;
-        $attackerType = strtolower((string) ($attacker->type->name ?? ''));
-        $defenderType = strtolower((string) ($defender->type->name ?? ''));
-
-        if (($attackerType === 'aigua' && $defenderType === 'terra')
-            || ($attackerType === 'terra' && $defenderType === 'aire')
-            || ($attackerType === 'aire' && $defenderType === 'aigua')) {
-            $modifiers += 1;
-        }
-
-        if (($attackerType === 'terra' && $defenderType === 'aigua')
-            || ($attackerType === 'aire' && $defenderType === 'terra')
-            || ($attackerType === 'aigua' && $defenderType === 'aire')) {
-            $modifiers -= 1;
-        }
+        $modifiers = $this->calculateTypeMatchupModifier($attacker, $defender);
 
         if ($attacker->size === 'Medium') {
             $modifiers += 1;
@@ -1151,7 +1180,7 @@ class BattleController extends Controller
         return $modifiers;
     }
 
-    // Sirve para estimar el daño final del ataque antes de aplicarlo.
+    // Sirve para calcular el daño final del ataque.
     private function calculateBattleDamageAmount(
         int $attackerStat,
         int $defenderStat,
@@ -1160,14 +1189,8 @@ class BattleController extends Controller
         int $modifiers,
         int $defenderMaxHp,
     ): int {
-        // Base damage must come from the selected attack damage.
         $baseAttackDamage = max(1, (int) round($attackDamage ?? ($attackerStat ?: 10)));
-        $rawDamage = $baseAttackDamage
-            + ($attackerStat * 0.12)
-            + $roll
-            + ($modifiers * 2)
-            - ($defenderStat * 0.1);
-
+        $rawDamage = $baseAttackDamage + $roll + $modifiers;
         $damageAmount = max(1, (int) round($rawDamage));
 
         return min($damageAmount, max(1, $defenderMaxHp));
@@ -1194,67 +1217,134 @@ class BattleController extends Controller
         }
 
         $defender->status_effect_id = $statusEffect->id;
+        $statusKey = strtolower(trim((string) $statusEffect->name));
+        if ($statusKey === 'paralysis' || $statusKey === 'confusion') {
+            $defender->status_effect_turns = 3;
+        } else {
+            $defender->status_effect_turns = null;
+        }
         $defender->save();
         $this->appendBattleLog($battle, sprintf('%s is now affected by %s!', $defender->name, $statusEffect->name));
+    }
+
+    // Sirve para mapear nombres de estado principal a clave estable (insensible a mayúsculas).
+    private function normalizePrimaryBattleStatusKey(?string $name): ?string
+    {
+        if ($name === null || $name === '') {
+            return null;
+        }
+
+        return match (strtolower(trim($name))) {
+            'sleep' => 'sleep',
+            'paralysis' => 'paralysis',
+            'confusion' => 'confusion',
+            default => null,
+        };
     }
 
     // Sirve para resolver bloqueos o daños de estado antes de atacar.
     private function resolvePreAttackStatus(Battle $battle, AdquiredXuxemon $xuxemon, string $playerId): bool|JsonResponse
     {
-        $statusName = $xuxemon->statusEffect?->name;
-        if (! $statusName) {
+        $xuxemon->loadMissing('statusEffect');
+        $key = $this->normalizePrimaryBattleStatusKey($xuxemon->statusEffect?->name);
+        if ($key === null) {
             return true;
         }
 
-        if ($statusName === 'Sleep') {
-            $this->appendBattleLog($battle, sprintf('%s is asleep and cannot move!', $xuxemon->name));
-            $xuxemon->status_effect_id = null;
-            $xuxemon->save();
-            $battle->turn = (int) $battle->turn + 1;
+        if ($key === 'sleep') {
+            $this->appendBattleLog($battle, sprintf('%s is fast asleep and cannot attack!', $xuxemon->name));
             $battle->save();
 
             return false;
         }
 
-        if ($statusName === 'Paralysis' && random_int(1, 100) <= 35) {
-            $this->appendBattleLog($battle, sprintf('%s is paralyzed and cannot move!', $xuxemon->name));
-            $battle->turn = (int) $battle->turn + 1;
-            $battle->save();
+        if ($key === 'paralysis') {
+            $this->ensureStatusEffectTurnsInitialized($xuxemon, 3);
 
-            return false;
-        }
-
-        if ($statusName === 'Confusion' && random_int(1, 100) <= 50) {
-            $selfHitDamage = max(1, (int) round(($xuxemon->hp ?: 100) * 0.12));
-            $xuxemon->current_hp = max(0, (int) $xuxemon->current_hp - $selfHitDamage);
-            $xuxemon->save();
-
-            $this->appendBattleLog($battle, sprintf('%s is confused and hurt itself!', $xuxemon->name));
-
-            if ((int) $xuxemon->current_hp <= 0) {
-                $this->appendBattleLog($battle, sprintf('%s fainted!', $xuxemon->name));
-
-                if ($this->hasAliveTeamMembers($playerId, (int) $xuxemon->id)) {
-                    $battle->turn = (int) $battle->turn + 1;
-                    $battle->save();
-
-                    return false;
-                }
-
-                $battle->winner_id = $playerId === $battle->user_id ? $battle->opponent_user_id : $battle->user_id;
-                $this->applyBattleRewards((string) $battle->winner_id, $playerId);
+            if (random_int(1, 100) <= 50) {
+                $this->appendBattleLog($battle, sprintf('%s is paralyzed and cannot move!', $xuxemon->name));
+                $this->tickStatusEffectTurns($xuxemon);
+                $xuxemon->save();
+                $battle->turn = (int) $battle->turn + 1;
                 $battle->save();
 
                 return false;
             }
 
-            $battle->turn = (int) $battle->turn + 1;
-            $battle->save();
+            $this->tickStatusEffectTurns($xuxemon);
+            $xuxemon->save();
 
-            return false;
+            return true;
+        }
+
+        if ($key === 'confusion') {
+            $this->ensureStatusEffectTurnsInitialized($xuxemon, 3);
+
+            if (random_int(1, 100) <= 50) {
+                $selfHitDamage = max(1, (int) round(($xuxemon->hp ?: 100) * 0.12));
+                $xuxemon->current_hp = max(0, (int) $xuxemon->current_hp - $selfHitDamage);
+                $this->tickStatusEffectTurns($xuxemon);
+                $xuxemon->save();
+
+                $this->appendBattleLog($battle, sprintf('%s is confused and hurt itself!', $xuxemon->name));
+
+                if ((int) $xuxemon->current_hp <= 0) {
+                    $this->appendBattleLog($battle, sprintf('%s fainted!', $xuxemon->name));
+
+                    if ($this->hasAliveTeamMembers($playerId, (int) $xuxemon->id)) {
+                        $battle->turn = (int) $battle->turn + 1;
+                        $battle->save();
+
+                        return false;
+                    }
+
+                    $battle->winner_id = $playerId === $battle->user_id ? $battle->opponent_user_id : $battle->user_id;
+                    $this->applyBattleRewards((string) $battle->winner_id, $playerId);
+                    $battle->save();
+
+                    return false;
+                }
+
+                $battle->turn = (int) $battle->turn + 1;
+                $battle->save();
+
+                return false;
+            }
+
+            $this->tickStatusEffectTurns($xuxemon);
+            $xuxemon->save();
+
+            return true;
         }
 
         return true;
+    }
+
+    // Sirve para inicializar el contador de turnos de Paralysis/Confusion en datos antiguos sin contador.
+    private function ensureStatusEffectTurnsInitialized(AdquiredXuxemon $xuxemon, int $defaultTurns): void
+    {
+        if ($xuxemon->status_effect_turns === null) {
+            $xuxemon->status_effect_turns = $defaultTurns;
+        }
+    }
+
+    // Sirve para reducir en uno los turnos restantes de Paralysis/Confusion y limpiar el estado al llegar a cero.
+    private function tickStatusEffectTurns(AdquiredXuxemon $xuxemon): void
+    {
+        $turns = (int) ($xuxemon->status_effect_turns ?? 0);
+        if ($turns <= 0) {
+            return;
+        }
+
+        $turns--;
+        if ($turns <= 0) {
+            $xuxemon->status_effect_id = null;
+            $xuxemon->status_effect_turns = null;
+
+            return;
+        }
+
+        $xuxemon->status_effect_turns = $turns;
     }
 
     // Sirve para verificar si aún quedan miembros vivos en el equipo.
@@ -1281,52 +1371,8 @@ class BattleController extends Controller
     private function appendBattleLog(Battle $battle, string $message): void
     {
         $logs = is_array($battle->battle_log) ? $battle->battle_log : [];
-        array_unshift($logs, $message);
-        $battle->battle_log = array_slice($logs, 0, 8);
-    }
-
-    // Sirve para obtener el nombre del entrenador dentro del combate según su player_id.
-    private function getBattleTrainerName(Battle $battle, string $playerId): string
-    {
-        if ((string) $battle->user_id === (string) $playerId) {
-            return trim((string) ($battle->user->name ?? '')) !== ''
-                ? (string) $battle->user->name
-                : 'Player 1';
-        }
-
-        if ((string) $battle->opponent_user_id === (string) $playerId) {
-            return trim((string) ($battle->opponentUser->name ?? '')) !== ''
-                ? (string) $battle->opponentUser->name
-                : 'Player 2';
-        }
-
-        return 'Unknown Trainer';
-    }
-
-    // Sirve para mostrar el nombre del Xuxemon activo con fallback al nombre base de especie.
-    private function getBattleXuxemonDisplayName(AdquiredXuxemon $adquired): string
-    {
-        $nickname = trim((string) ($adquired->name ?? ''));
-        if ($nickname !== '') {
-            return $nickname;
-        }
-
-        $speciesName = trim((string) ($adquired->xuxemon->name ?? ''));
-        if ($speciesName !== '') {
-            return $speciesName;
-        }
-
-        return 'Unknown Xuxemon';
-    }
-
-    // Sirve para formatear actor/objetivo con estilo "Xuxemon (Entrenador)" en el log.
-    private function formatBattleEntityLabel(Battle $battle, string $playerId, AdquiredXuxemon $adquired): string
-    {
-        return sprintf(
-            '%s (%s)',
-            $this->getBattleXuxemonDisplayName($adquired),
-            $this->getBattleTrainerName($battle, $playerId),
-        );
+        $logs[] = $message;
+        $battle->battle_log = array_slice($logs, -8);
     }
 
     // Sirve para aplicar curación de objetos durante combate.
@@ -1373,6 +1419,7 @@ class BattleController extends Controller
 
         if ($name === 'Nulberry') {
             $adquired->status_effect_id = null;
+            $adquired->status_effect_turns = null;
             $adquired->side_effect_id_1 = null;
             $adquired->side_effect_id_2 = null;
             $adquired->side_effect_id_3 = null;
@@ -1441,6 +1488,7 @@ class BattleController extends Controller
         $xuxemon['next_size'] = $nextSize;
         $xuxemon['will_evolve_next'] = $nextSize !== $xuxemon['size'];
         $xuxemon['status_effect_applied'] = $adquired->statusEffect;
+        $xuxemon['status_effect_turns'] = $adquired->status_effect_turns;
         $xuxemon['side_effect_1'] = $adquired->sideEffect1;
         $xuxemon['side_effect_2'] = $adquired->sideEffect2;
         $xuxemon['side_effect_3'] = $adquired->sideEffect3;

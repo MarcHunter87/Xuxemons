@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -23,8 +24,8 @@ use Illuminate\Support\Facades\DB;
  * @property mixed|null $side_effect_id_1
  * @property mixed|null $side_effect_id_2
  * @property mixed|null $side_effect_id_3
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class AdquiredXuxemon extends Model
 {
@@ -38,6 +39,7 @@ class AdquiredXuxemon extends Model
         'bonus_attack' => 'integer',
         'bonus_defense' => 'integer',
         'status_effect_id' => 'integer',
+        'status_effect_turns' => 'integer',
         'side_effect_id_1' => 'integer',
         'side_effect_id_2' => 'integer',
         'side_effect_id_3' => 'integer',
@@ -55,6 +57,7 @@ class AdquiredXuxemon extends Model
         'bonus_defense',
         'current_hp',
         'status_effect_id',
+        'status_effect_turns',
         'side_effect_id_1',
         'side_effect_id_2',
         'side_effect_id_3',
@@ -110,18 +113,21 @@ class AdquiredXuxemon extends Model
     public function getHpAttribute(): int
     {
         $base = $this->xuxemon?->hp ?? 1;
+
         return $base + (int) round(($this->level - 1) * 1.2) + $this->bonus_hp;
     }
 
     public function getAttackAttribute(): int
     {
         $base = $this->xuxemon?->attack ?? 1;
+
         return $base + (int) round(($this->level - 1) * 1.2) + $this->bonus_attack;
     }
 
     public function getDefenseAttribute(): int
     {
         $base = $this->xuxemon?->defense ?? 1;
+
         return $base + (int) round(($this->level - 1) * 1.2) + $this->bonus_defense;
     }
 }

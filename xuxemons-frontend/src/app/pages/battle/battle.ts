@@ -29,6 +29,10 @@ type AttackAnimationDescriptor = {
 };
 interface BattleLogEntry { text: string; source: BattleLogSource; }
 
+function normalizedStatusName(statusName: string | undefined | null): string {
+  return statusName?.trim().toLowerCase() ?? '';
+}
+
 @Component({
   selector: 'app-battle',
   standalone: true,
@@ -129,6 +133,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   };
 
   @ViewChild('battleMusic') battleMusic?: ElementRef<HTMLAudioElement>;
+  @ViewChild('battleArena') battleArena?: ElementRef<HTMLDivElement>;
+
+  private battleArenaLayoutResizeObserver: ResizeObserver | null = null;
+
 
   battleId = signal<number | null>(null);
   isPractice = signal(false);
@@ -178,6 +186,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   battleLog = signal<BattleLogEntry[]>([]);
   myItems = signal<InventoryItem[]>([]);
   bagPage = signal(0);
+  bagTargetPage = signal(0);
   switchPage = signal(0);
   stealOptions = signal<Xuxemon[]>([]);
   stolenXuxemon = signal<Xuxemon | null>(null);
@@ -198,6 +207,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit(): void {
     this.startBattleMusic();
   }
+
 
   // Sirve para abrir la confirmación de huida con Escape cuando no hay otro modal activo.
   @HostListener('document:keydown', ['$event'])
@@ -568,6 +578,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.selectedBattleItem.set(item);
+    this.bagTargetPage.set(0);
     this.currentSubMenu.set('bag-target');
   }
 
@@ -654,9 +665,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         action_type: 'switch',
         target_adquired_xuxemon_id: xuxemon.adquired_id,
       });
-      if (wasForced) {
-        this.forcedSwitch.set(false);
-      }
       return;
     }
 
@@ -731,7 +739,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   // Sirve para resolver el ataque del jugador en práctica: estados, daño, animaciones y posible debilitamiento rival.
   executePlayerAttack(attackObj: any): void {
-    const attacker = this.selectedXuxemon();
+    let attacker = this.selectedXuxemon();
     const defender = this.opponentXuxemon();
     if (!attacker || !defender) {
       return;
@@ -741,28 +749,42 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     const statusResolution = this.resolveStatusBeforeAttack(attacker, 'player');
     if (statusResolution.prevented) {
+      if (statusResolution.keepTurn) {
+        this.battleStatus.set('ready');
+      }
       return;
     }
+
+    attacker = this.selectedXuxemon()!;
 
     const attackerStat = attacker.attack || 10;
     const defenderStat = defender.defense || 5;
     const modifiers = this.calculateModifiers(attacker, defender, 'player');
     const roll = this.diceValue() || 0;
+    const visualType = this.getAttackVisualType(attacker, attackObj);
+    const damageApplyDelayMs = this.getPracticeDamageApplyDelayMs(visualType);
     this.playDiceThenAttack('player', roll, attacker, attackObj);
 
     const defenderMaxHp = defender.hp || 100;
     const defenderCurrentHp = this.getCurrentHpValue(defender);
-    const damageAmount = this.calculateDamageAmount(attackerStat, defenderStat, attackObj.dmg, roll, modifiers, defenderMaxHp);
+    let damageAmount = this.calculateDamageAmount(attackerStat, defenderStat, attackObj.dmg, roll, modifiers, defenderMaxHp);
+    const hadSleep = normalizedStatusName(defender.statusEffect?.name) === 'sleep';
+
+    if (hadSleep) {
+      damageAmount = Math.min(defenderCurrentHp, damageAmount * 2);
+      this.addLog(`${defender.name} woke up taking double damage!`, 'system');
+    }
+
     const newHpValue = Math.max(0, defenderCurrentHp - damageAmount);
     const newHpPercent = defenderMaxHp > 0 ? (newHpValue / defenderMaxHp) * 100 : 0;
-    const updatedDefender = this.applyAttackStatusEffectToTarget({ ...defender, current_hp: newHpValue }, attackObj, 'player');
+    const defenderAfterHit = hadSleep
+      ? { ...defender, current_hp: newHpValue, statusEffect: undefined, status_effect_turns: undefined }
+      : { ...defender, current_hp: newHpValue };
+    const updatedDefender = this.applyAttackStatusEffectToTarget(defenderAfterHit, attackObj, 'player');
 
-    const attackerName = this.resolveDisplayXuxemonName(attacker, 'Your Xuxemon');
-    const defenderName = this.resolveDisplayXuxemonName(defender, 'Opponent Xuxemon');
-    const trainerName = this.auth.getUser()?.name?.trim() || 'You';
-    this.addLog(`${attackerName} (${trainerName}) used ${attackObj.name} on ${defenderName}! (Roll: ${roll}, -${damageAmount} HP)`, 'player');
+    this.addLog(`${attacker.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`, 'player');
 
-    // Wait for attack animation to finish before applying damage (700ms animation)
+    // Aplica daño tras cerrar el overlay del dado y alcanzar el impacto (no solapar con la tirada).
     setTimeout(() => {
       this.zone.run(() => {
         this.opponentHP.set(newHpPercent);
@@ -775,7 +797,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
         this.endTurn();
       });
-    }, 750);
+    }, damageApplyDelayMs);
   }
 
   // Sirve para ejecutar el turno de la IA en modo práctica eligiendo ataque y aplicando el mismo flujo de daño.
@@ -788,7 +810,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const opponent = this.opponentXuxemon();
+    let opponent = this.opponentXuxemon();
     const player = this.selectedXuxemon();
     if (!opponent || !player) {
       return;
@@ -800,6 +822,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     if (statusResolution.prevented) {
       return;
     }
+
+    opponent = this.opponentXuxemon()!;
 
     const availableAttacks = opponent.attacks && opponent.attacks.length > 0
       ? opponent.attacks
@@ -823,11 +847,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const opponentAttack = opponent.attack || 10;
     const playerDefense = player.defense || 5;
     const roll = this.diceValue() || 0;
+    const visualType = this.getAttackVisualType(opponent, attackObj);
+    const damageApplyDelayMs = this.getPracticeDamageApplyDelayMs(visualType);
     this.playDiceThenAttack('opponent', roll, opponent, attackObj);
 
     const playerMaxHp = player.hp || 100;
     const playerCurrentHp = this.getCurrentHpValue(player);
-    const damageAmount = this.calculateDamageAmount(
+    let damageAmount = this.calculateDamageAmount(
       opponentAttack,
       playerDefense,
       attackObj.dmg,
@@ -835,16 +861,22 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.calculateModifiers(opponent, player, 'opponent'),
       playerMaxHp,
     );
+    const hadSleep = normalizedStatusName(player.statusEffect?.name) === 'sleep';
+
+    if (hadSleep) {
+      damageAmount = Math.min(playerCurrentHp, damageAmount * 2);
+      this.addLog(`${player.name} woke up taking double damage!`, 'system');
+    }
+
     const newHpValue = Math.max(0, playerCurrentHp - damageAmount);
     const newHpPercent = playerMaxHp > 0 ? (newHpValue / playerMaxHp) * 100 : 0;
-    const updatedPlayer = this.applyAttackStatusEffectToTarget({ ...player, current_hp: newHpValue }, attackObj, 'opponent');
+    const playerAfterHit = hadSleep
+      ? { ...player, current_hp: newHpValue, statusEffect: undefined, status_effect_turns: undefined }
+      : { ...player, current_hp: newHpValue };
+    const updatedPlayer = this.applyAttackStatusEffectToTarget(playerAfterHit, attackObj, 'opponent');
 
-    const attackerName = this.resolveDisplayXuxemonName(opponent, 'Opponent Xuxemon');
-    const defenderName = this.resolveDisplayXuxemonName(player, 'Your Xuxemon');
-    const trainerName = this.opponentTrainerName()?.trim() || 'Opponent';
-    this.addLog(`${attackerName} (${trainerName}) used ${attackObj.name} on ${defenderName}! (Roll: ${roll}, -${damageAmount} HP)`, 'opponent');
+    this.addLog(`${opponent.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`, 'opponent');
 
-    // Wait for attack animation to finish before applying damage (700ms animation)
     setTimeout(() => {
       this.zone.run(() => {
         this.playerHP.set(newHpPercent);
@@ -862,28 +894,32 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         this.currentTurn.set('player');
         this.battleStatus.set('ready');
       });
-    }, 750);
+    }, damageApplyDelayMs);
   }
 
-  // Sirve para calcular bonificaciones y penalizaciones de daño por tipos y tamaño del atacante.
+  // Sirve para calcular las bonificaciones y penalizaciones de daño por tipos y tamaño del atacante.
   calculateModifiers(attacker: Xuxemon, defender: Xuxemon, side: BattleLogSource = 'system'): number {
     let modifiers = 0;
     const attackerType = attacker.type?.name?.toLowerCase() || '';
     const defenderType = defender.type?.name?.toLowerCase() || '';
     let effectiveness: 'buff' | 'nerf' | null = null;
 
-    if ((attackerType === 'aigua' && defenderType === 'terra')
-      || (attackerType === 'terra' && defenderType === 'aire')
-      || (attackerType === 'aire' && defenderType === 'aigua')) {
+    const typeAdvantage =
+      (attackerType === 'power' && defenderType === 'speed')
+      || (attackerType === 'speed' && defenderType === 'technical')
+      || (attackerType === 'technical' && defenderType === 'power');
+
+    const typeDisadvantage =
+      (attackerType === 'speed' && defenderType === 'power')
+      || (attackerType === 'technical' && defenderType === 'speed')
+      || (attackerType === 'power' && defenderType === 'technical');
+
+    if (typeAdvantage) {
       modifiers += 1;
       this.addLog(`It's super effective! +1`, side);
       effectiveness = 'buff';
       this.showBattleCallout('SUPER EFFECTIVE!', 'buff');
-    }
-
-    if ((attackerType === 'terra' && defenderType === 'aigua')
-      || (attackerType === 'aire' && defenderType === 'terra')
-      || (attackerType === 'aigua' && defenderType === 'aire')) {
+    } else if (typeDisadvantage) {
       modifiers -= 1;
       this.addLog(`It's not very effective... -1`, side);
       effectiveness = 'nerf';
@@ -905,91 +941,31 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return modifiers;
   }
 
-  // Sirve para obtener el daño final del golpe a partir de stats, dado, modificadores y un tope relativo al HP máximo.
+   // Daño = daño base del ataque + cara del dado + modificadores (ventaja tipo, size, desventaja).
   calculateDamageAmount(
     attackerStat: number,
-    defenderStat: number,
+    _defenderStat: number,
     attackDamage: number | undefined,
     roll: number,
     modifiers: number,
     defenderMaxHp: number,
   ): number {
-    // Base damage must come from the selected attack shown in battle actions.
     const baseAttackDamage = Math.max(1, Math.round(attackDamage ?? attackerStat ?? 10));
-    const rawDamage = baseAttackDamage
-      + (attackerStat * 0.12)
-      + roll
-      + (modifiers * 2)
-      - (defenderStat * 0.1);
+    const rawDamage = baseAttackDamage + roll + modifiers;
     const damageAmount = Math.max(1, Math.round(rawDamage));
 
     return Math.min(damageAmount, Math.max(1, defenderMaxHp));
   }
 
-  // Sirve para resolver un nombre visible de Xuxemon con fallback seguro si el dato llega vacio.
-  private resolveDisplayXuxemonName(xuxemon: Xuxemon | null | undefined, fallback: string): string {
-    const name = xuxemon?.name?.trim();
-    return name ? name : fallback;
-  }
-
-  // Sirve para obtener una etiqueta de actor en consola segun el lado (Xuxemon + entrenador).
-  private getConsoleActorLabel(
-    source: BattleLogSource,
-    activePlayer: Xuxemon | null = this.selectedXuxemon(),
-    activeOpponent: Xuxemon | null = this.opponentXuxemon(),
-  ): string {
-    const myTrainer = this.auth.getUser()?.name?.trim() || 'You';
-    const opponentTrainer = this.opponentTrainerName()?.trim() || 'Opponent';
-
-    if (source === 'player') {
-      const xuxemonName = this.resolveDisplayXuxemonName(activePlayer, 'Your Xuxemon');
-      return `${xuxemonName} (${myTrainer})`;
-    }
-
-    if (source === 'opponent') {
-      const xuxemonName = this.resolveDisplayXuxemonName(activeOpponent, 'Opponent Xuxemon');
-      return `${xuxemonName} (${opponentTrainer})`;
-    }
-
-    return 'Unknown actor';
-  }
-
-  // Sirve para corregir logs heredados/incompletos y asegurar actor delante de la accion en consola.
-  private ensureConsoleActorInLog(
-    message: string,
-    source: BattleLogSource,
-    activePlayer: Xuxemon | null = this.selectedXuxemon(),
-    activeOpponent: Xuxemon | null = this.opponentXuxemon(),
-  ): string {
-    const text = message.trim();
-    if (!text) {
-      return text;
-    }
-
-    if (/^used\s+/i.test(text)) {
-      return `${this.getConsoleActorLabel(source, activePlayer, activeOpponent)} ${text}`;
-    }
-
-    if (/^you\s+used\s+/i.test(text)) {
-      const normalized = text.replace(/^you\s+used\s+/i, 'used ');
-      return `${this.getConsoleActorLabel('player', activePlayer, activeOpponent)} ${normalized}`;
-    }
-
-    return text;
-  }
-
   // Sirve para añadir una línea al registro de combate visible en la interfaz.
   addLog(message: string, source: BattleLogSource = 'system'): void {
-    const normalizedMessage = this.ensureConsoleActorInLog(message, source);
-    this.battleLog.update((logs) => [{ text: normalizedMessage, source }, ...logs].slice(0, 8));
+    this.battleLog.update((logs) => [...logs, { text: message, source }].slice(-8));
   }
 
   // Sirve para convertir entradas crudas del backend en líneas de log tipadas (jugador / rival / sistema).
   private hydrateBattleLogNames(logs: unknown[], activePlayer: Xuxemon | null, activeOpponent: Xuxemon | null): BattleLogEntry[] {
     const playerName = activePlayer?.name?.toLowerCase() ?? '';
     const opponentName = activeOpponent?.name?.toLowerCase() ?? '';
-    const playerTrainer = this.auth.getUser()?.name?.toLowerCase() ?? '';
-    const opponentTrainer = this.opponentTrainerName()?.toLowerCase() ?? '';
 
     return logs.map((entry) => {
       const text = (() => {
@@ -1002,34 +978,24 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         }
         return String(entry ?? '').trim();
       })();
-      const lowerText = text.toLowerCase();
+      let normalizedText = text;
+
+      if (/^come back\s+.+!\s+go\s+.+!$/i.test(text)) {
+        normalizedText = 'Xuxemon changed!';
+      } else if (/^.+\s+sent\s+out\s+.+!$/i.test(text)) {
+        normalizedText = 'A Xuxemon enters the battle!';
+      } else if (/^enters\s+the\s+battle!?$/i.test(text) || /^.+\s+enters\s+the\s+battle!?$/i.test(text)) {
+        normalizedText = 'A Xuxemon enters the battle!';
+      }
+
+      const lowerText = normalizedText.toLowerCase();
       let source: BattleLogSource = 'system';
       if (playerName && lowerText.startsWith(playerName + ' used')) {
         source = 'player';
-      } else if (playerTrainer && lowerText.includes(`(${playerTrainer})`)) {
-        source = 'player';
       } else if (opponentName && lowerText.startsWith(opponentName + ' used')) {
         source = 'opponent';
-      } else if (opponentTrainer && lowerText.includes(`(${opponentTrainer})`)) {
-        source = 'opponent';
       }
 
-      if (source === 'system') {
-        const matchLegacyAttack = /^used\s+(.+?)(?:\s+on\s+.+?)?!/i.exec(text);
-        const attackName = matchLegacyAttack?.[1]?.trim().toLowerCase() ?? '';
-        if (attackName) {
-          const playerHasAttack = Boolean(activePlayer?.attacks?.some((attack) => attack?.name?.trim().toLowerCase() === attackName));
-          const opponentHasAttack = Boolean(activeOpponent?.attacks?.some((attack) => attack?.name?.trim().toLowerCase() === attackName));
-
-          if (playerHasAttack && !opponentHasAttack) {
-            source = 'player';
-          } else if (!playerHasAttack && opponentHasAttack) {
-            source = 'opponent';
-          }
-        }
-      }
-
-      const normalizedText = this.ensureConsoleActorInLog(text, source, activePlayer, activeOpponent);
       return { text: normalizedText, source };
     });
   }
@@ -1305,6 +1271,42 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return this.getEligibleItemTargetsForItem(this.selectedBattleItem());
   }
 
+  paginatedEligibleItemTargets(): Xuxemon[] {
+    const list = this.getEligibleItemTargets();
+    const start = this.bagTargetPage() * this.bagPageSize;
+    return list.slice(start, start + this.bagPageSize);
+  }
+
+  bagTargetPageCount(): number {
+    return this.getBagTotalPages(this.getEligibleItemTargets().length);
+  }
+
+  canGoToPreviousBagTargetPage(): boolean {
+    return this.bagTargetPage() > 0;
+  }
+
+  canGoToNextBagTargetPage(): boolean {
+    return this.bagTargetPage() < this.bagTargetPageCount() - 1;
+  }
+
+  previousBagTargetPage(): void {
+    if (!this.canGoToPreviousBagTargetPage()) {
+      return;
+    }
+    this.bagTargetPage.update((page) => Math.max(0, page - 1));
+  }
+
+  nextBagTargetPage(): void {
+    if (!this.canGoToNextBagTargetPage()) {
+      return;
+    }
+    this.bagTargetPage.update((page) => Math.min(this.bagTargetPageCount() - 1, page + 1));
+  }
+
+  battleBagTargetPageLabel(): string {
+    return `Page ${this.bagTargetPage() + 1} / ${this.bagTargetPageCount()}`;
+  }
+
   // Sirve para exponer el trozo de inventario de bolsa correspondiente a la página actual.
   paginatedBagItems(): InventoryItem[] {
     const start = this.bagPage() * this.bagPageSize;
@@ -1403,7 +1405,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     if (item.effect_type === 'Apply Status Effects') {
       const opponent = this.opponentXuxemon();
-      if (!opponent || this.getCurrentHpValue(opponent) <= 0 || opponent.statusEffect?.name) {
+      if (!opponent || this.getCurrentHpValue(opponent) <= 0) {
         return [];
       }
 
@@ -1414,18 +1416,36 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const alive = available.filter((xuxemon) => this.getCurrentHpValue(xuxemon) > 0);
 
     if (item.effect_type === 'Heal') {
-      return alive.filter((xuxemon) => (xuxemon.current_hp ?? xuxemon.hp ?? 0) < (xuxemon.hp ?? 0));
+      return this.sortEligibleTargetsActiveFirst(
+        alive.filter((xuxemon) => (xuxemon.current_hp ?? xuxemon.hp ?? 0) < (xuxemon.hp ?? 0)),
+      );
     }
 
     if (item.effect_type === 'DMG Up' || item.effect_type === 'Defense Up') {
-      return alive;
+      return this.sortEligibleTargetsActiveFirst(alive);
     }
 
     if (item.effect_type === 'Remove Status Effects') {
-      return alive.filter((xuxemon) => this.canUseStatusItemOnTarget(item, xuxemon));
+      return this.sortEligibleTargetsActiveFirst(
+        alive.filter((xuxemon) => this.canUseStatusItemOnTarget(item, xuxemon)),
+      );
     }
 
-    return alive;
+    return this.sortEligibleTargetsActiveFirst(alive);
+  }
+
+  /** Objetivos aliados: el Xuxemon activo del jugador primero si es elegible. */
+  private sortEligibleTargetsActiveFirst(targets: Xuxemon[]): Xuxemon[] {
+    const active = this.selectedXuxemon();
+    if (!active || targets.length <= 1) {
+      return targets;
+    }
+    const activeEntry = targets.find((xuxemon) => this.isSameXuxemon(xuxemon, active));
+    if (!activeEntry) {
+      return targets;
+    }
+    const rest = targets.filter((xuxemon) => !this.isSameXuxemon(xuxemon, active));
+    return [activeEntry, ...rest];
   }
 
   // Sirve para comprobar si un objeto del inventario puede usarse durante el combate.
@@ -1560,10 +1580,15 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       && !normalizedData.winner_id,
     );
 
+    const hadForcedSwitch = this.forcedSwitch();
     this.forcedSwitch.set(requiresForcedSwitch);
     if (requiresForcedSwitch) {
-      this.switchPage.set(0);
+      if (!hadForcedSwitch) {
+        this.switchPage.set(0);
+      }
       this.currentSubMenu.set('switch');
+    } else if (hadForcedSwitch) {
+      this.currentSubMenu.set(null);
     }
 
     if (normalizedData.status === 'rejected') {
@@ -1607,6 +1632,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       ? raw.attacks
       : [raw?.attack1, raw?.attack2].filter(Boolean);
 
+    const statusEffect = this.normalizeEffect(
+      raw?.statusEffect ?? raw?.status_effect ?? raw?.status_effect_applied,
+    );
+
     return {
       ...raw,
       image_url: hasAbsoluteImage
@@ -1620,9 +1649,18 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         const n = Number(v);
         return Number.isFinite(n) ? n : undefined;
       })(),
-      statusEffect: this.normalizeEffect(
-        raw?.statusEffect ?? raw?.status_effect ?? raw?.status_effect_applied,
-      ),
+      statusEffect,
+      status_effect_turns: (() => {
+        if (!statusEffect) {
+          return undefined;
+        }
+        const v = raw?.status_effect_turns;
+        if (v == null || v === '') {
+          return undefined;
+        }
+        const n = Number(v);
+        return Number.isFinite(n) ? n : undefined;
+      })(),
       side_effect_1: this.normalizeEffect(raw?.side_effect_1 ?? raw?.sideEffect1),
       side_effect_2: this.normalizeEffect(raw?.side_effect_2 ?? raw?.sideEffect2),
       side_effect_3: this.normalizeEffect(raw?.side_effect_3 ?? raw?.sideEffect3),
@@ -1710,15 +1748,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         return '';
       }
 
-      for (let index = 0; index < data.battle_log.length; index += 1) {
+      for (let index = data.battle_log.length - 1; index >= 0; index -= 1) {
         const text = readBattleLogText(data.battle_log[index]);
-        const match = /^(.+?) used (.+?)(?: on .+?)?!/i.exec(text);
+        const match = /^(.+?) used (.+?)!/i.exec(text);
         if (!match) {
           continue;
         }
 
-        const attackerRaw = match[1]?.trim().toLowerCase() ?? '';
-        const attackerName = attackerRaw.replace(/\s*\(.+?\)\s*$/, '').trim();
+        const attackerName = match[1]?.trim().toLowerCase();
         if (knownCombatants.size > 0 && attackerName && !knownCombatants.has(attackerName)) {
           continue;
         }
@@ -1733,12 +1770,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const attackMatch = /^(.+?) used (.+?)(?: on .+?)?!/i.exec(attackLog);
+    const attackMatch = /^(.+?) used (.+?)!/.exec(attackLog);
     if (!attackMatch) {
       return;
     }
 
-    const attackerName = attackMatch[1]?.trim().replace(/\s*\(.+?\)\s*$/, '');
+    const attackerName = attackMatch[1]?.trim();
     const extractedAttackName = attackMatch[2]?.trim();
     const rollMatch = /Roll:\s*(\d+)/.exec(attackLog);
     const resolvedRoll = rollMatch ? Number(rollMatch[1]) : null;
@@ -1837,7 +1874,15 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.diceOutcomeTone.set(null);
 
       this.flushBattleView();
-      this.runDiceOverlayAnimation();
+      if (this.isBrowser) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            this.zone.run(() => this.runDiceOverlayAnimation());
+          });
+        });
+      } else {
+        this.runDiceOverlayAnimation();
+      }
 
       this.diceLandingTimeout = setTimeout(() => {
         this.zone.run(() => {
@@ -1845,7 +1890,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
           this.diceValue.set(finalRoll);
           this.diceOutcomeTone.set(this.getDiceOutcomeTone(finalRoll));
           this.runDiceLandingAnimation();
-          onLanded?.();
         });
         this.diceLandingTimeout = null;
       }, this.diceLandingDurationMs);
@@ -1854,6 +1898,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         this.zone.run(() => {
           this.isDiceOverlayVisible.set(false);
           this.diceOutcomeTone.set(null);
+          onLanded?.();
         });
         this.diceOverlayTimeout = null;
       }, this.diceOverlayDurationMs);
@@ -1986,44 +2031,15 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, durationMs);
   }
 
-  // Sirve para lanzar la animación de acometida del sprite directamente via Web Animations API para evitar el problema de reinicio de animaciones CSS al reutilizar la misma clase.
+  // Sirve para reiniciar cualquier animación programática anterior y forzar el repintado del nuevo ataque CSS.
   private runSpriteAttackAnimation(side: 'player' | 'opponent', visualType: AttackVisualType): void {
-    if (side === 'player') {
-      this.playerSpriteAnimation?.cancel();
-      this.playerSpriteAnimation = null;
-    } else {
-      this.opponentSpriteAnimation?.cancel();
-      this.opponentSpriteAnimation = null;
-    }
-
-    if (!this.isBrowser) {
-      return;
-    }
-
-    const el = (side === 'player' ? this.playerSprite : this.opponentSprite)?.nativeElement;
-    if (!el || typeof el.animate !== 'function') {
-      this.flushBattleView();
-      return;
-    }
-
-    const lungeX = side === 'player' ? 72 : -72;
-    const lungeY = side === 'player' ? -16 : 16;
-    const duration = Math.min(this.getAttackAnimationDurationMs(visualType), 520);
-
-    const anim = el.animate(
-      [
-        { transform: 'translate3d(0, 0, 0) scale(1)', offset: 0 },
-        { transform: `translate3d(${lungeX}px, ${lungeY}px, 0) scale(1.08)`, offset: 0.35 },
-        { transform: 'translate3d(0, 0, 0) scale(1)', offset: 1 },
-      ],
-      { duration, easing: 'ease-in-out', fill: 'none' },
-    );
-
-    if (side === 'player') {
-      this.playerSpriteAnimation = anim;
-    } else {
-      this.opponentSpriteAnimation = anim;
-    }
+    void side;
+    void visualType;
+    this.playerSpriteAnimation?.cancel();
+    this.playerSpriteAnimation = null;
+    this.opponentSpriteAnimation?.cancel();
+    this.opponentSpriteAnimation = null;
+    this.flushBattleView();
   }
 
   // Sirve para activar el trazo de ataque y el burst de impacto con la variante visual correspondiente.
@@ -2264,6 +2280,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       default:
         return 340;
     }
+  }
+
+  /** Retraso hasta aplicar daño en práctica: overlay del dado cerrado + cola + instante de impacto. */
+  private getPracticeDamageApplyDelayMs(visualType: AttackVisualType): number {
+    const queueAfterOverlayMs = 80;
+    return this.diceOverlayDurationMs + queueAfterOverlayMs + this.getImpactDelayMs(visualType) + 120;
   }
 
   // Sirve para desactivar el estado `attacking` cuando el keyframe principal del atacante ya ha terminado.
@@ -2709,9 +2731,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     this.addLog(`${xuxemon.name} is now affected by ${attackObj.statusEffect.name}!`, side);
 
+    const appliedKey = attackObj.statusEffect.name.trim().toLowerCase();
+    const status_effect_turns = appliedKey === 'paralysis' || appliedKey === 'confusion' ? 3 : undefined;
+
     return {
       ...xuxemon,
       statusEffect: attackObj.statusEffect,
+      status_effect_turns,
     };
   }
 
@@ -2868,16 +2894,23 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   // Sirve para construir el `statusEffect` del Xuxemon a partir del payload de uso de objeto.
   private applyStatusEffectToXuxemon(xuxemon: Xuxemon, data?: UseItemResponseData): Xuxemon {
     const rawStatusEffect = data?.applied_status_effect;
-    const statusEffect = rawStatusEffect?.name
-      ? {
-        name: rawStatusEffect.name,
-        icon_url: rawStatusEffect.icon_url ?? this.auth.getAssetUrl(`/${rawStatusEffect.icon_path ?? ''}`),
-      }
-      : xuxemon.statusEffect;
+    if (!rawStatusEffect?.name) {
+      return xuxemon;
+    }
+
+    const statusEffect = {
+      name: rawStatusEffect.name,
+      icon_url: rawStatusEffect.icon_url ?? this.auth.getAssetUrl(`/${rawStatusEffect.icon_path ?? ''}`),
+    };
+
+    const itemStatusKey = statusEffect.name.trim().toLowerCase();
+    const status_effect_turns =
+      itemStatusKey === 'paralysis' || itemStatusKey === 'confusion' ? 3 : undefined;
 
     return {
       ...xuxemon,
       statusEffect,
+      status_effect_turns,
     };
   }
 
@@ -2888,37 +2921,98 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // Sirve para comprobar si sueño, parálisis o confusión impiden el ataque y aplicar sus efectos.
-  private resolveStatusBeforeAttack(xuxemon: Xuxemon, side: 'player' | 'opponent'): { prevented: boolean } {
-    const statusName = xuxemon.statusEffect?.name;
-    if (!statusName) {
+  private resolveStatusBeforeAttack(xuxemon: Xuxemon, side: 'player' | 'opponent'): { prevented: boolean; keepTurn?: boolean } {
+    const statusName = normalizedStatusName(xuxemon.statusEffect?.name);
+
+    if (statusName === 'sleep') {
+      this.addLog(`${xuxemon.name} is fast asleep and cannot attack!`, side);
+      if (side === 'player') {
+        return { prevented: true, keepTurn: true };
+      }
+      this.finishBlockedTurn(side);
+      return { prevented: true };
+    }
+
+    if (statusName === 'paralysis') {
+      const withTurns = this.ensureBattleStatusTurns(xuxemon, 3);
+
+      if (Math.random() < 0.5) {
+        this.addLog(`${withTurns.name} is paralyzed and cannot move!`, side);
+        const afterTick = this.tickBattleStatusTurns(withTurns);
+        this.persistXuxemonAfterStatusTick(afterTick, side);
+        this.finishBlockedTurn(side);
+        return { prevented: true };
+      }
+
+      const afterTick = this.tickBattleStatusTurns(withTurns);
+      this.persistXuxemonAfterStatusTick(afterTick, side);
       return { prevented: false };
     }
 
-    if (statusName === 'Sleep') {
-      this.addLog(`${xuxemon.name} is asleep and cannot move!`, side);
-      this.clearStatusEffect(xuxemon, side);
-      this.finishBlockedTurn(side);
-      return { prevented: true };
-    }
+    if (statusName === 'confusion') {
+      const withTurns = this.ensureBattleStatusTurns(xuxemon, 3);
 
-    if (statusName === 'Paralysis' && Math.random() < 0.35) {
-      this.addLog(`${xuxemon.name} is paralyzed and cannot move!`, side);
-      this.finishBlockedTurn(side);
-      return { prevented: true };
-    }
+      if (Math.random() < 0.5) {
+        const maxHp = withTurns.hp || 100;
+        const currentHp = this.getCurrentHpValue(withTurns);
+        const selfHitDamage = Math.max(1, Math.round(maxHp * 0.12));
+        const newHpValue = Math.max(0, currentHp - selfHitDamage);
+        const damaged = { ...withTurns, current_hp: newHpValue };
+        const afterTick = this.tickBattleStatusTurns(damaged);
 
-    if (statusName === 'Confusion' && Math.random() < 0.5) {
-      const maxHp = xuxemon.hp || 100;
-      const currentHp = this.getCurrentHpValue(xuxemon);
-      const selfHitDamage = Math.max(1, Math.round(maxHp * 0.12));
-      const newHpValue = Math.max(0, currentHp - selfHitDamage);
+        this.addLog(`${withTurns.name} is confused and hurt itself!`, side);
+        this.applySelfDamageFromStatus(afterTick, side, newHpValue);
+        return { prevented: true };
+      }
 
-      this.addLog(`${xuxemon.name} is confused and hurt itself!`, side);
-      this.applySelfDamageFromStatus(xuxemon, side, newHpValue);
-      return { prevented: true };
+      const afterTick = this.tickBattleStatusTurns(withTurns);
+      this.persistXuxemonAfterStatusTick(afterTick, side);
+      return { prevented: false };
     }
 
     return { prevented: false };
+  }
+
+  // Sirve para inicializar el contador de turnos de Paralysis/Confusion en datos antiguos sin contador.
+  private ensureBattleStatusTurns(xuxemon: Xuxemon, defaultTurns: number): Xuxemon {
+    const statusName = normalizedStatusName(xuxemon.statusEffect?.name);
+    if ((statusName !== 'paralysis' && statusName !== 'confusion') || xuxemon.status_effect_turns != null) {
+      return xuxemon;
+    }
+
+    return { ...xuxemon, status_effect_turns: defaultTurns };
+  }
+
+  // Sirve para reducir en uno los turnos restantes de Paralysis/Confusion y limpiar el estado al llegar a cero.
+  private tickBattleStatusTurns(xuxemon: Xuxemon): Xuxemon {
+    const statusName = normalizedStatusName(xuxemon.statusEffect?.name);
+    if (statusName !== 'paralysis' && statusName !== 'confusion') {
+      return xuxemon;
+    }
+
+    let turns = xuxemon.status_effect_turns ?? 0;
+    if (turns <= 0) {
+      return xuxemon;
+    }
+
+    turns--;
+    if (turns <= 0) {
+      return { ...xuxemon, statusEffect: undefined, status_effect_turns: undefined };
+    }
+
+    return { ...xuxemon, status_effect_turns: turns };
+  }
+
+  // Sirve para persistir el Xuxemon tras tick de parálisis/confusión en el estado local de batalla.
+  private persistXuxemonAfterStatusTick(xuxemon: Xuxemon, side: 'player' | 'opponent'): void {
+    if (side === 'player') {
+      this.selectedXuxemon.set(xuxemon);
+      this.replaceMyTeamMember(xuxemon);
+      return;
+    }
+
+    this.opponentXuxemon.set(xuxemon);
+    this.opponentTeam.update((team) => team.map((member) => (this.isSameXuxemon(member, xuxemon) ? xuxemon : member)));
   }
 
   // Sirve para devolver el turno al otro bando cuando un estado impide completar la acción.
@@ -2971,7 +3065,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   // Sirve para quitar el estado alterado principal tras efectos como el despertar por daño.
   private clearStatusEffect(xuxemon: Xuxemon, side: 'player' | 'opponent'): void {
-    const updated = { ...xuxemon, statusEffect: undefined };
+    const updated = { ...xuxemon, statusEffect: undefined, status_effect_turns: undefined };
 
     if (side === 'player') {
       this.selectedXuxemon.set(updated);
@@ -3078,12 +3172,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         next: (data: any) => {
           this.isSubmittingRun.set(false);
           this.selectedBattleItem.set(null);
-          if (this.forcedSwitch()) {
-            this.switchPage.set(0);
-            this.currentSubMenu.set('switch');
-          } else {
-            this.currentSubMenu.set(null);
-          }
+          this.currentSubMenu.set(null);
           const wasFinished = this.battleStatus() === 'finished';
           this.applyBattleSnapshot(data);
           this.inventoryService.loadInventory();

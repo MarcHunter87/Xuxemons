@@ -2,7 +2,7 @@
   <audio #battleMusic [src]="getAssetUrl('/BattleOST.mp3')" preload="auto" loop></audio>
   <div class="battle-wrapper">
     <!-- Main Battle Arena -->
-    <div class="battle-arena">
+    <div #battleArena class="battle-arena">
       <div class="turn-indicator" [class.player-turn]="vm.isBattleActive() && vm.currentTurn() === 'player'" [class.opponent-turn]="vm.isBattleActive() && vm.currentTurn() === 'opponent'">
         {{ vm.battleTurnLabel() }}
       </div>
@@ -37,8 +37,15 @@
                       <span class="xuxemon-level">Lv.{{ opponentXuxemon()!.level }}</span>
                     }
                   </div>
-                  @if (opponentXuxemon()?.size) {
-                    <span class="xuxemon-size-badge">{{ opponentXuxemon()!.size }}</span>
+                  @if (opponentXuxemon()?.type?.name || opponentXuxemon()?.size) {
+                    <div class="xuxemon-badges-row">
+                      @if (opponentXuxemon()?.type?.name) {
+                        <span [class]="'xuxemon-type-badge type-' + (opponentXuxemon()!.type!.name | lowercase)">{{ opponentXuxemon()!.type!.name }}</span>
+                      }
+                      @if (opponentXuxemon()?.size) {
+                        <span class="xuxemon-size-badge">{{ opponentXuxemon()!.size }}</span>
+                      }
+                    </div>
                   }
                 </div>
               </div>
@@ -91,8 +98,15 @@
                       <span class="xuxemon-level">Lv.{{ selectedXuxemon()!.level }}</span>
                     }
                   </div>
-                  @if (selectedXuxemon()?.size) {
-                    <span class="xuxemon-size-badge">{{ selectedXuxemon()!.size }}</span>
+                  @if (selectedXuxemon()?.type?.name || selectedXuxemon()?.size) {
+                    <div class="xuxemon-badges-row">
+                      @if (selectedXuxemon()?.type?.name) {
+                        <span [class]="'xuxemon-type-badge type-' + (selectedXuxemon()!.type!.name | lowercase)">{{ selectedXuxemon()!.type!.name }}</span>
+                      }
+                      @if (selectedXuxemon()?.size) {
+                        <span class="xuxemon-size-badge">{{ selectedXuxemon()!.size }}</span>
+                      }
+                    </div>
                   }
                 </div>
               </div>

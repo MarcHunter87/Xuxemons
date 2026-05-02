@@ -27,7 +27,7 @@
         @for (item of rouletteItems(); track $index) {
           <div
             class="roulette-item"
-            [style.background-color]="getTypeColor(item.type.name)"
+            [style.background-color]="getTypeColor(item.type?.name ?? '')"
           >
             <img [src]="item.image_url" [alt]="item.name" />
             <span>{{ item.name }}</span>
@@ -70,7 +70,7 @@
             >
               <div
                 class="recent-image-box"
-                [style.background-color]="getTypeColor(xuxe.type.name)"
+                [style.background-color]="getTypeColor(xuxe.type?.name ?? '')"
               >
                 <img [src]="xuxe.image_url" [alt]="xuxe.name" class="img-fluid" />
               </div>

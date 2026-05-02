@@ -2,7 +2,7 @@
 export interface Xuxemon {
   id: number;
   name: string;
-  type: { name: string };
+  type?: { name: string };
   size: 'Small' | 'Medium' | 'Large';
   image_url: string;
   adquired_id?: number;
@@ -16,6 +16,7 @@ export interface Xuxemon {
     name: string;
     icon_url: string;
   };
+  status_effect_turns?: number | null;
   side_effect_1?: {
     name: string;
     description?: string;
