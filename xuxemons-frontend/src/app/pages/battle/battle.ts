@@ -2457,7 +2457,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         this.isPlayerFainting.set(false);
         this.playerFaintTimeout = null;
         onComplete?.();
-      }, 730);
+      }, 460);
       return;
     }
 
@@ -2469,7 +2469,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.isOpponentFainting.set(false);
       this.opponentFaintTimeout = null;
       onComplete?.();
-    }, 730);
+    }, 460);
   }
 
   // Sirve para mostrar un mensaje destacado temporal (eficacia, bonos) sobre el campo de batalla.

@@ -1,7 +1,7 @@
-<div class="award-modal-overlay" role="dialog" aria-modal="true" (click)="onBackdropClick()" (keydown)="onModalKeydown($event)">
+<div class="award-modal-overlay xux-modal-overlay" role="dialog" aria-modal="true" (click)="onBackdropClick()" (keydown)="onModalKeydown($event)">
   <div #dialogRoot class="award-modal-shell" tabindex="-1" (click)="$event.stopPropagation()">
-    <div class="award-modal-content animate-pop">
-      <h2 id="award-modal-title" class="award-modal-title">Xuxemon awarded</h2>
+    <div class="award-modal-content animate-pop xux-modal-card">
+      <h2 id="award-modal-title" class="award-modal-title xux-modal-title">Xuxemon awarded</h2>
       <div class="award-modal-display">
         <div
           class="award-modal-image-wrapper"
@@ -37,8 +37,8 @@
           </div>
         }
       </div>
-      <div class="award-modal-actions">
-        <button type="button" (click)="adminContext.closeAwardModal()" class="btn btn-primary">Close</button>
+      <div class="award-modal-actions xux-modal-actions">
+        <button type="button" (click)="adminContext.closeAwardModal()" class="btn btn-primary xux-modal-btn">Close</button>
       </div>
     </div>
   </div>

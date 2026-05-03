@@ -1,7 +1,7 @@
-<div class="use-item-modal-backdrop" role="dialog" aria-modal="true" (click)="onBackdropClick()" (keydown)="onModalKeydown($event)">
-  <div #dialogRoot class="use-item-modal" tabindex="-1" (click)="$event.stopPropagation()">
-    <h2 id="use-item-modal-title" class="use-item-modal-title">Use item on a Xuxemon</h2>
-    <p class="use-item-modal-subtitle">Select a Xuxemon to use {{ inventoryContext.selectedItem()!.name }} on.</p>
+<div class="use-item-modal-backdrop xux-modal-overlay" role="dialog" aria-modal="true" (click)="onBackdropClick()" (keydown)="onModalKeydown($event)">
+  <div #dialogRoot class="use-item-modal xux-modal-card" tabindex="-1" (click)="$event.stopPropagation()">
+    <h2 id="use-item-modal-title" class="use-item-modal-title xux-modal-title">Use item on a Xuxemon</h2>
+    <p class="use-item-modal-subtitle xux-modal-text">Select a Xuxemon to use {{ inventoryContext.selectedItem()!.name }} on.</p>
     <div class="use-item-search-wrap">
       <label for="use-item-search" class="visually-hidden">Search your Xuxemons</label>
       <input id="use-item-search" type="text" class="use-item-search" placeholder="Search by name..."
@@ -209,9 +209,9 @@
       <span>{{ inventoryContext.useApiError() }}</span>
     </div>
     }
-    <div class="use-item-actions">
-      <button type="button" class="btn btn-secondary btn-lg" (click)="inventoryContext.closeUseModal()">Cancel</button>
-      <button type="button" class="btn btn-primary btn-lg" [disabled]="inventoryContext.isUseActionDisabled()"
+    <div class="use-item-actions xux-modal-actions">
+      <button type="button" class="btn btn-secondary btn-lg xux-modal-btn" (click)="inventoryContext.closeUseModal()">Cancel</button>
+      <button type="button" class="btn btn-primary btn-lg xux-modal-btn" [disabled]="inventoryContext.isUseActionDisabled()"
         [attr.aria-busy]="inventoryContext.isUsing()" (click)="inventoryContext.confirmUseItem()">
         @if (inventoryContext.isUsing()) {
         <span class="btn-loading-icon" aria-hidden="true"></span>

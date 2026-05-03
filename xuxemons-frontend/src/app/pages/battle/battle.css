@@ -477,8 +477,8 @@ app-battle {
   filter: brightness(1.15) drop-shadow(0 0 10px var(--neutral-white));
 }
 
-.sprite-container img.fainting         { animation: xuxemonFaintErase    0.72s ease-in forwards; }
-.sprite-container.fainting .platform   { animation: xuxemonPlatformFade  0.72s ease-in forwards; }
+.sprite-container img.fainting         { animation: xuxemonFaintSimple   0.46s ease-out forwards; }
+.sprite-container.fainting .platform   { animation: xuxemonPlatformSimple 0.46s ease-out forwards; }
 
 /* faint particles */
 .faint-particles,
@@ -489,6 +489,8 @@ app-battle {
   opacity: 0;
   border-radius: 999px;
 }
+
+.faint-particles { display: none !important; }
 
 .faint-particles {
   left: 50%; top: 48%;
@@ -777,15 +779,14 @@ app-battle {
 /* ═══════════════════════════════════════════════════════
    KEYFRAMES
    ═══════════════════════════════════════════════════════ */
-@keyframes xuxemonFaintErase {
-  0%   { opacity: 1; transform: translate3d(0,0,0) scale(1); filter: brightness(1) drop-shadow(0 10px 15px var(--color-black-soft)); }
-  45%  { opacity: 0.8; transform: translate3d(0,-10px,0) scale(0.95); }
-  100% { opacity: 0; transform: translate3d(0,-24px,0) scale(0.72); filter: brightness(1.25) drop-shadow(0 0 0 transparent); }
+@keyframes xuxemonFaintSimple {
+  0%   { opacity: 1; transform: translate3d(0,0,0) scale(1); filter: drop-shadow(0 10px 15px var(--color-black-soft)); }
+  100% { opacity: 0; transform: translate3d(0,16px,0) scale(0.88); filter: drop-shadow(0 0 0 transparent); }
 }
 
-@keyframes xuxemonPlatformFade {
+@keyframes xuxemonPlatformSimple {
   0%   { opacity: 1; transform: rotateX(60deg) scale(1); }
-  100% { opacity: 0.28; transform: rotateX(60deg) scale(0.82); }
+  100% { opacity: 0.1; transform: rotateX(60deg) scale(0.92); }
 }
 
 @keyframes xuxemonFaintParticles {

@@ -2,12 +2,12 @@
 <audio #modalAudio [src]="auth.getAssetUrl('Xuxemon Modal.mp3')" preload="auto"></audio>
 
 @if (open && notification && hasAnyRewards()) {
-	<div class="modal fade show d-block daily-noti-modal" tabindex="-1" role="dialog" aria-modal="true"
+	<div class="modal fade show d-block daily-noti-modal xux-modal-overlay" tabindex="-1" role="dialog" aria-modal="true"
 		aria-labelledby="daily-noti-title" (keydown)="onModalKeydown($event)">
 		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content daily-noti-content" [class.animate-scale-up]="shouldAnimate()" #dialogRoot tabindex="-1">
+			<div class="modal-content daily-noti-content xux-modal-card" [class.animate-scale-up]="shouldAnimate()" #dialogRoot tabindex="-1">
 				<div class="modal-header border-0 pb-0">
-					<h2 class="modal-title h4 mb-0" id="daily-noti-title">Daily Rewards</h2>
+					<h2 class="modal-title h4 mb-0 xux-modal-title" id="daily-noti-title">Daily Rewards</h2>
 				</div>
 
 				<div class="modal-body">
@@ -49,8 +49,8 @@
 					}
 				</div>
 
-				<div class="modal-footer border-0 pt-0">
-					<button #confirmButton type="button" class="btn btn-primary daily-cta-btn" (click)="handleClose()">
+				<div class="modal-footer border-0 pt-0 xux-modal-actions">
+					<button #confirmButton type="button" class="btn btn-primary daily-cta-btn xux-modal-btn" (click)="handleClose()">
 						Get Rewards
 					</button>
 				</div>

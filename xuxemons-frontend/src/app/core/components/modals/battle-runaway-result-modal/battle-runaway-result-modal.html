@@ -1,15 +1,15 @@
 <div
-  class="victory-modal"
+  class="victory-modal xux-modal-overlay"
   role="dialog"
   aria-modal="true"
   aria-labelledby="battle-runaway-result-title"
   (click)="onBackdropClick()"
   (keydown)="onModalKeydown($event)">
-  <div #dialogRoot class="battle-dialog battle-dialog--info" tabindex="-1" (click)="$event.stopPropagation()">
-    <h2 class="battle-dialog-title" id="battle-runaway-result-title">Run Away</h2>
-    <p class="battle-dialog-text">{{ vm.runawayResultMessage() }}</p>
-    <div class="battle-dialog-actions battle-dialog-actions--single">
-      <button type="button" class="battle-dialog-btn battle-dialog-btn--primary" (click)="vm.closeRunawayResultModal()">Continue</button>
+  <div #dialogRoot class="battle-dialog battle-dialog--info xux-modal-card" tabindex="-1" (click)="$event.stopPropagation()">
+    <h2 class="battle-dialog-title xux-modal-title" id="battle-runaway-result-title">Run Away</h2>
+    <p class="battle-dialog-text xux-modal-text">{{ vm.runawayResultMessage() }}</p>
+    <div class="battle-dialog-actions battle-dialog-actions--single xux-modal-actions">
+      <button type="button" class="battle-dialog-btn battle-dialog-btn--primary xux-modal-btn" (click)="vm.closeRunawayResultModal()">Continue</button>
     </div>
   </div>
 </div>

@@ -37,17 +37,17 @@
 </app-friend-request-noti-modal>
 
 @if (pendingBattleInvite(); as invite) {
-  <div class="battle-invite-modal" role="dialog" aria-modal="true" aria-labelledby="global-battle-invite-title">
-    <div class="battle-invite-card">
-      <h2 id="global-battle-invite-title" class="battle-invite-title">Battle Challenge</h2>
-      <p class="battle-invite-text">
+  <div class="battle-invite-modal xux-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="global-battle-invite-title">
+    <div class="battle-invite-card xux-modal-card">
+      <h2 id="global-battle-invite-title" class="battle-invite-title xux-modal-title">Battle Challenge</h2>
+      <p class="battle-invite-text xux-modal-text">
         <strong>{{ invite.user?.name || invite.user_id }}</strong> challenged you to a PvP battle.
       </p>
-      <div class="battle-invite-actions">
-        <button type="button" class="btn-danger btn-sm" (click)="onRejectBattleInvite()" [disabled]="isBattleInviteBusy()">
+      <div class="battle-invite-actions xux-modal-actions">
+        <button type="button" class="btn-danger btn-sm xux-modal-btn" (click)="onRejectBattleInvite()" [disabled]="isBattleInviteBusy()">
           Decline
         </button>
-        <button type="button" class="btn-primary btn-sm" (click)="onAcceptBattleInvite()" [disabled]="isBattleInviteBusy()">
+        <button type="button" class="btn-primary btn-sm xux-modal-btn" (click)="onAcceptBattleInvite()" [disabled]="isBattleInviteBusy()">
           Accept
         </button>
       </div>

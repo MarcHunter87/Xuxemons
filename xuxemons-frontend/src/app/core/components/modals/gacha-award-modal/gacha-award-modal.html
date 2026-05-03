@@ -1,6 +1,6 @@
 @if (gachaContext.viewAnimations) {
   <div
-    class="gacha-reveal-overlay"
+    class="gacha-reveal-overlay xux-modal-overlay"
     role="dialog"
     aria-modal="true"
     aria-labelledby="gacha-reveal-title"
@@ -32,8 +32,8 @@
       }
     </div>
 
-    <div #dialogRoot class="modal-content animate-pop" tabindex="-1" (click)="$event.stopPropagation()">
-      <h2 id="gacha-reveal-title" class="winner-title">Congratulations!</h2>
+    <div #dialogRoot class="modal-content animate-pop xux-modal-card" tabindex="-1" (click)="$event.stopPropagation()">
+      <h2 id="gacha-reveal-title" class="winner-title xux-modal-title">Congratulations!</h2>
       <div class="winner-display">
         <button
           type="button"
@@ -76,12 +76,12 @@
           </div>
         }
       </div>
-      <div class="modal-actions">
-        <button type="button" (click)="gachaContext.closeModal()" class="btn-secondary">Close</button>
+      <div class="modal-actions xux-modal-actions">
+        <button type="button" (click)="gachaContext.closeModal()" class="btn-secondary xux-modal-btn">Close</button>
         <button
           type="button"
           (click)="gachaContext.spinAgain()"
-          class="btn-primary"
+          class="btn-primary xux-modal-btn"
           [disabled]="gachaContext.auth.gachaTicketCount() < 1"
         >
           Spin Again
@@ -91,7 +91,7 @@
   </div>
 } @else {
   <div
-    class="modal-overlay"
+    class="modal-overlay xux-modal-overlay"
     role="dialog"
     aria-modal="true"
     aria-labelledby="gacha-award-title-simple"
@@ -100,8 +100,8 @@
     (click)="gachaContext.closeModal()"
     (keydown)="onModalKeydown($event)"
   >
-    <div #dialogRoot class="modal-content" tabindex="-1" (click)="$event.stopPropagation()">
-      <h2 id="gacha-award-title-simple" class="winner-title">Congratulations!</h2>
+    <div #dialogRoot class="modal-content xux-modal-card" tabindex="-1" (click)="$event.stopPropagation()">
+      <h2 id="gacha-award-title-simple" class="winner-title xux-modal-title">Congratulations!</h2>
       <div class="winner-display">
         <button
           type="button"
@@ -143,12 +143,12 @@
           </div>
         }
       </div>
-      <div class="modal-actions">
-        <button type="button" (click)="gachaContext.closeModal()" class="btn-secondary">Close</button>
+      <div class="modal-actions xux-modal-actions">
+        <button type="button" (click)="gachaContext.closeModal()" class="btn-secondary xux-modal-btn">Close</button>
         <button
           type="button"
           (click)="gachaContext.spinAgain()"
-          class="btn-primary"
+          class="btn-primary xux-modal-btn"
           [disabled]="gachaContext.auth.gachaTicketCount() < 1"
         >
           Spin Again

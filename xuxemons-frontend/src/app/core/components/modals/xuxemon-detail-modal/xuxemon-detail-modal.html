@@ -1,6 +1,6 @@
-<div class="xuxemon-modal-overlay" role="dialog" aria-modal="true" (click)="onBackdropClick()" (keydown)="onModalKeydown($event)">
+<div class="xuxemon-modal-overlay xux-modal-overlay" role="dialog" aria-modal="true" (click)="onBackdropClick()" (keydown)="onModalKeydown($event)">
   <div #dialogRoot class="xuxemon-modal-shell" tabindex="-1" (click)="$event.stopPropagation()">
-    <article [class]="'xuxemon-modal-card animate-pop ' + cardContext.getDynamicClasses()">
+    <article [class]="'xuxemon-modal-card xux-modal-card animate-pop ' + cardContext.getDynamicClasses()">
       <button type="button" class="btn-primary btn-sm modal-close" (click)="cardContext.closeDetails(); $event.stopPropagation()" aria-label="Cerrar">
         <span class="modal-close-icon" aria-hidden="true">×</span>
       </button>
