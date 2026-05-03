@@ -17,6 +17,7 @@ export class BattleFooter implements AfterViewChecked {
 
   private lastLogFingerprint = '';
 
+  // Sirve para actualizar el scroll del logs cuando se añaden nuevos logs.
   ngAfterViewChecked(): void {
     const vm = this.vm;
     if (!vm) {

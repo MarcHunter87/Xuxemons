@@ -17,16 +17,6 @@ import type { InventoryItem, UseItemResponseData, Xuxemon } from '../../core/int
 
 type BattleMenu = 'attacks' | 'bag' | 'bag-target' | 'switch' | null;
 type BattleLogSource = 'player' | 'opponent' | 'system';
-type AttackVisualType = 'speed' | 'technical' | 'power' | 'speed-special' | 'technical-special' | 'power-special' | 'neutral';
-type AttackAnimationDescriptor = {
-  name?: string;
-  dmg?: number;
-  status_chance?: number | null;
-  statusEffect?: {
-    name: string;
-    icon_url: string;
-  };
-};
 interface BattleLogEntry { text: string; source: BattleLogSource; }
 
 function normalizedStatusName(statusName: string | undefined | null): string {
@@ -102,18 +92,25 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('diceOverlay') diceOverlay?: ElementRef<HTMLDivElement>;
   @ViewChild('diceContainer') diceContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('diceCube') diceCube?: ElementRef<HTMLDivElement>;
-  private playerFaintTimeout: ReturnType<typeof setTimeout> | null = null;
-  private opponentFaintTimeout: ReturnType<typeof setTimeout> | null = null;
-  private playerSpriteAnimation: Animation | null = null;
-  private opponentSpriteAnimation: Animation | null = null;
   private diceContainerAnimation: Animation | null = null;
   private diceCubeAnimation: Animation | null = null;
   private teamIds: number[] = [];
   private disconnectForfeitSent = false;
   private bypassDeactivateGuard = false;
   private lastBattleAnimationKey = '';
+  private pendingPlayerFaintVisual = false;
+  private pendingOpponentFaintVisual = false;
+  private opponentAwaitingBenchSwitch = false;
+  private playerAwaitingBenchSwitch = false;
+  private opponentFieldClearTimeout: ReturnType<typeof setTimeout> | null = null;
+  private playerFieldClearTimeout: ReturnType<typeof setTimeout> | null = null;
   private readonly diceLandingDurationMs = 430;
   private readonly diceOverlayDurationMs = 980;
+  private readonly attackLungeDurationMs = 520;
+  private readonly attackTrailDurationMs = 450;
+  private readonly attackImpactDelayMs = 200;
+  private readonly receiveHitPulseMs = 420;
+  private readonly attackImpactSyncDelayMs = 182;
 
   // Sirve para reactivar el polling cuando la pestaña vuelve a estar visible y no hay stream SSE.
   private readonly handleVisibilityChange = () => {
@@ -164,16 +161,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   isDiceOverlayVisible = signal(false);
   isDiceRolling = signal(false);
   diceOutcomeTone = signal<'low' | 'mid' | 'high' | null>(null);
-  // TAREA 3: attackVisualType siempre 'neutral' — misma animación para todos los ataques.
-  attackVisualType = signal<AttackVisualType>('neutral');
   isPlayerAttacking = signal(false);
   isOpponentAttacking = signal(false);
   activeAttackTrail = signal<'player' | 'opponent' | null>(null);
   activeImpactBurst = signal<'player' | 'opponent' | null>(null);
   isPlayerHit = signal(false);
   isOpponentHit = signal(false);
-  isPlayerFainting = signal(false);
-  isOpponentFainting = signal(false);
+  playerSpriteHiddenAfterFaint = signal(false);
+  opponentSpriteHiddenAfterFaint = signal(false);
   showConfetti = signal(false);
   showVictoryModal = signal(false);
   showStealModal = signal(false);
@@ -317,18 +312,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       clearTimeout(this.opponentHitTimeout);
       this.opponentHitTimeout = null;
     }
-    if (this.playerFaintTimeout) {
-      clearTimeout(this.playerFaintTimeout);
-      this.playerFaintTimeout = null;
-    }
-    if (this.opponentFaintTimeout) {
-      clearTimeout(this.opponentFaintTimeout);
-      this.opponentFaintTimeout = null;
-    }
-    this.playerSpriteAnimation?.cancel();
-    this.playerSpriteAnimation = null;
-    this.opponentSpriteAnimation?.cancel();
-    this.opponentSpriteAnimation = null;
+    this.clearScheduledOpponentFieldClear();
+    this.clearScheduledPlayerFieldClear();
     this.diceContainerAnimation?.cancel();
     this.diceContainerAnimation = null;
     this.diceCubeAnimation?.cancel();
@@ -464,11 +449,29 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   // Sirve para exponer si el jugador puede abrir o usar el menú principal de combate.
   canPlayerAct(): boolean {
+    const hasOpponentField = !!this.opponentXuxemon() || this.opponentAwaitingBenchSwitch;
     return this.isBattleActive()
       && this.battleStatus() === 'ready'
       && this.currentTurn() === 'player'
       && !!this.selectedXuxemon()
-      && !!this.opponentXuxemon();
+      && hasOpponentField
+      && !this.forcedSwitch();
+  }
+
+  // Muestra la arena en PvP aunque un lado esté vacío tras debilitamiento hasta el siguiente envío.
+  battleGridVisible(): boolean {
+    if (!this.isBattleActive()) {
+      return false;
+    }
+    if (this.isPractice()) {
+      return !!this.selectedXuxemon();
+    }
+    return !!(
+      this.selectedXuxemon()
+      || this.opponentXuxemon()
+      || this.opponentAwaitingBenchSwitch
+      || this.playerAwaitingBenchSwitch
+    );
   }
 
   // Sirve para mostrar un mensaje coherente cuando el combate no admite más acciones.
@@ -555,6 +558,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     this.selectedXuxemon.set(xuxemon);
     this.syncPlayerBars(xuxemon);
+    this.playerSpriteHiddenAfterFaint.set(false);
 
     if (this.isPractice() && this.opponentTeam().length === 0) {
       this.pickPracticeOpponentTeam();
@@ -677,9 +681,11 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.battleStatus.set('animating');
     this.addLog('Xuxemon changed!', 'player');
 
+    const delayMs = wasForced ? 0 : 700;
     setTimeout(() => {
       this.selectedXuxemon.set(xuxemon);
       this.syncPlayerBars(xuxemon);
+      this.playerSpriteHiddenAfterFaint.set(false);
       this.currentSubMenu.set(null);
       this.selectedBattleItem.set(null);
 
@@ -691,7 +697,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       }
 
       this.endTurn();
-    }, 700);
+    }, delayMs);
   }
 
   // Sirve para pasar el turno al oponente al finalizar la acción del jugador en modo práctica.
@@ -765,20 +771,17 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     const modifiers = this.calculateModifiers(attacker, defender, 'player');
     const roll = this.diceValue() || 0;
-    const visualType = this.getAttackVisualType(attacker, attackObj);
-    const damageApplyDelayMs = this.getPracticeDamageApplyDelayMs(visualType);
-    this.playDiceThenAttack('player', roll, attacker, attackObj);
+    const damageApplyDelayMs = this.getPracticeDamageApplyDelayMs();
+    this.playDiceThenAttack('player', roll);
 
     const defenderMaxHp = defender.hp || 100;
     const defenderCurrentHp = this.getCurrentHpValue(defender);
 
-    // TAREA 1: daño calculado con atributos reales del Xuxemon (power, speed, technical).
-    // attackerStat usa el ataque base del atacante (campo `attack`).
     const attackerStat = attacker.attack || 10;
     let damageAmount = this.calculateDamageAmount(attackerStat, attackObj.dmg, roll, modifiers, defenderMaxHp);
     const hadSleep = normalizedStatusName(defender.statusEffect?.name) === 'sleep';
 
-    // TAREA 6 – Sleep: recibe el doble de daño y despierta al recibir el golpe.
+    // Recibe el doble de daño y despierta al recibir el golpe si tiene Sleep.
     if (hadSleep) {
       damageAmount = Math.min(defenderCurrentHp, damageAmount * 2);
       this.addLog(`${defender.name} woke up!`, 'system');
@@ -855,14 +858,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     const opponentAttack = opponent.attack || 10;
     const roll = this.diceValue() || 0;
-    const visualType = this.getAttackVisualType(opponent, attackObj);
-    const damageApplyDelayMs = this.getPracticeDamageApplyDelayMs(visualType);
-    this.playDiceThenAttack('opponent', roll, opponent, attackObj);
+    const damageApplyDelayMs = this.getPracticeDamageApplyDelayMs();
+    this.playDiceThenAttack('opponent', roll);
 
     const playerMaxHp = player.hp || 100;
     const playerCurrentHp = this.getCurrentHpValue(player);
 
-    // TAREA 1: daño usa atributos reales del Xuxemon.
+    // Calcula el daño usando atributos reales del Xuxemon.
     let damageAmount = this.calculateDamageAmount(
       opponentAttack,
       attackObj.dmg,
@@ -872,7 +874,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
     const hadSleep = normalizedStatusName(player.statusEffect?.name) === 'sleep';
 
-    // TAREA 6 – Sleep: recibe el doble de daño y despierta.
+    // Recibe el doble de daño y despierta si tiene Sleep.
     if (hadSleep) {
       damageAmount = Math.min(playerCurrentHp, damageAmount * 2);
       this.addLog(`${player.name} woke up!`, 'system');
@@ -914,15 +916,16 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const defenderType = defender.type?.name?.toLowerCase() || '';
     let effectiveness: 'buff' | 'nerf' | null = null;
 
+    // Speed > Power > Technical > Speed
     const typeAdvantage =
-      (attackerType === 'power' && defenderType === 'speed')
-      || (attackerType === 'speed' && defenderType === 'technical')
-      || (attackerType === 'technical' && defenderType === 'power');
+      (attackerType === 'speed' && defenderType === 'power')
+      || (attackerType === 'power' && defenderType === 'technical')
+      || (attackerType === 'technical' && defenderType === 'speed');
 
     const typeDisadvantage =
-      (attackerType === 'speed' && defenderType === 'power')
-      || (attackerType === 'technical' && defenderType === 'speed')
-      || (attackerType === 'power' && defenderType === 'technical');
+      (attackerType === 'power' && defenderType === 'speed')
+      || (attackerType === 'technical' && defenderType === 'power')
+      || (attackerType === 'speed' && defenderType === 'technical');
 
     if (typeAdvantage) {
       modifiers += 1;
@@ -951,9 +954,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return modifiers;
   }
 
-  // TAREA 1: Daño = daño base del ataque + cara del dado + modificadores.
-  // Solo usa atributos reales del Xuxemon (power, speed, technical → campo `attack`).
-  // El factor *0.12 eliminado — no se usaba correctamente.
+  // Calcula el daño con el daño base del ataque, el valor del dado y los modificadores.
   calculateDamageAmount(
     attackerStat: number,
     attackDamage: number | undefined,
@@ -1069,6 +1070,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   // Sirve para cerrar el combate en práctica o enlazado, detener sync y mostrar victoria, derrota o fin en servidor.
   finishBattle(playerWon: boolean): void {
     this.battleStatus.set('finished');
+    this.playerSpriteHiddenAfterFaint.set(false);
+    this.opponentSpriteHiddenAfterFaint.set(false);
     this.currentSubMenu.set(null);
     this.selectedBattleItem.set(null);
     this.stopBattleMusic();
@@ -1492,7 +1495,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.opponentTeam.set(team);
     const currentOpponentId = this.opponentXuxemon()?.adquired_id;
     const refreshedOpponent = team.find((xuxemon) => xuxemon.adquired_id === currentOpponentId);
-    const nextOpponent = refreshedOpponent ?? this.getFirstAlive(team);
+    const nextOpponent = refreshedOpponent
+      ?? (!this.isPractice() && this.opponentAwaitingBenchSwitch ? null : this.getFirstAlive(team));
 
     if (nextOpponent) {
       this.opponentXuxemon.set(nextOpponent);
@@ -1547,7 +1551,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const myTeam = normalizedMyTeam;
     const opponentTeam = normalizedOpponentTeam;
 
-    // Sirve para priorizar el activo indicado por backend y hacer fallback al primer Xuxemon vivo.
     if (myTeam.length > 0) {
       this.myXuxemons.set(myTeam);
     }
@@ -1555,16 +1558,118 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.opponentTeam.set(opponentTeam);
     }
 
-    const activePlayer = myTeam.find((xuxemon: Xuxemon) => xuxemon.adquired_id === normalizedData.my_active_xuxemon_id)
-      ?? this.getFirstAlive(myTeam);
-    if (activePlayer) {
-      this.selectedXuxemon.set(activePlayer);
+    let activePlayer: Xuxemon | null = myTeam.find(
+      (xuxemon: Xuxemon) => xuxemon.adquired_id === normalizedData.my_active_xuxemon_id,
+    ) ?? null;
+    if (!activePlayer && previousActivePlayer) {
+      activePlayer = myTeam.find((m: Xuxemon) => this.isSameXuxemon(m, previousActivePlayer)) ?? null;
+    }
+    if (this.isPractice() && !activePlayer && myTeam.length > 0) {
+      activePlayer = this.getFirstAlive(myTeam);
+    }
+    let activeOpponent: Xuxemon | null = opponentTeam.find(
+      (xuxemon: Xuxemon) => xuxemon.adquired_id === normalizedData.opponent_active_xuxemon_id,
+    ) ?? null;
+    if (!activeOpponent && previousActiveOpponent) {
+      activeOpponent = opponentTeam.find((m: Xuxemon) => this.isSameXuxemon(m, previousActiveOpponent)) ?? null;
     }
 
-    const activeOpponent = opponentTeam.find((xuxemon: Xuxemon) => xuxemon.adquired_id === normalizedData.opponent_active_xuxemon_id)
-      ?? this.getFirstAlive(opponentTeam);
-    if (activeOpponent) {
+    if (!this.isPractice()) {
+      this.pendingPlayerFaintVisual = this.shouldPlayLinkedFaintVisual(
+        previousActivePlayer,
+        myTeam,
+      );
+      this.pendingOpponentFaintVisual = this.shouldPlayLinkedFaintVisual(
+        previousActiveOpponent,
+        opponentTeam,
+      );
+    } else {
+      this.pendingPlayerFaintVisual = false;
+      this.pendingOpponentFaintVisual = false;
+    }
+
+    const myServerId = normalizedData.my_active_xuxemon_id;
+    const myByServerId = myTeam.find((x: Xuxemon) => x.adquired_id === myServerId) ?? null;
+    const myBenchHasAlive = myTeam.some((x: Xuxemon) => this.getCurrentHpValue(x) > 0);
+    const playerDeadSlotAwaitingBench = !this.isPractice()
+      && !normalizedData.winner_id
+      && myBenchHasAlive
+      && !!myByServerId
+      && this.getCurrentHpValue(myByServerId) <= 0;
+
+    if (playerDeadSlotAwaitingBench) {
+      this.playerAwaitingBenchSwitch = true;
+    }
+
+    if (this.pendingPlayerFaintVisual && previousActivePlayer) {
+      const deadRef = myTeam.find((x: Xuxemon) => this.isSameXuxemon(x, previousActivePlayer));
+      this.selectedXuxemon.set(deadRef ?? { ...previousActivePlayer, current_hp: 0 });
+      this.playerSpriteHiddenAfterFaint.set(false);
+    } else if (playerDeadSlotAwaitingBench && !this.pendingPlayerFaintVisual) {
+      const playerKnockoutInProgress = this.playerSpriteHiddenAfterFaint()
+        && !!this.selectedXuxemon()
+        && this.getCurrentHpValue(this.selectedXuxemon()!) <= 0;
+      if (playerKnockoutInProgress) {
+        // El timeout tras applyKnockoutHide vacía el campo; no pisar aquí.
+      } else if (!this.selectedXuxemon() && this.playerAwaitingBenchSwitch) {
+        this.clearPlayerBarsForEmptySlot();
+      } else {
+        this.selectedXuxemon.set(null);
+        this.playerSpriteHiddenAfterFaint.set(false);
+        this.clearPlayerBarsForEmptySlot();
+      }
+    } else if (activePlayer && this.getCurrentHpValue(activePlayer) > 0) {
+      this.playerAwaitingBenchSwitch = false;
+      this.clearScheduledPlayerFieldClear();
+      this.selectedXuxemon.set(activePlayer);
+      this.playerSpriteHiddenAfterFaint.set(false);
+    } else if (activePlayer) {
+      this.selectedXuxemon.set(activePlayer);
+      if (this.getCurrentHpValue(activePlayer) > 0) {
+        this.playerSpriteHiddenAfterFaint.set(false);
+      }
+    }
+
+    const oppServerId = normalizedData.opponent_active_xuxemon_id;
+    const oppByServerId = opponentTeam.find((x: Xuxemon) => x.adquired_id === oppServerId) ?? null;
+    const opponentBenchHasAlive = opponentTeam.some((x: Xuxemon) => this.getCurrentHpValue(x) > 0);
+    const opponentDeadSlotAwaitingBench = !this.isPractice()
+      && !normalizedData.winner_id
+      && opponentBenchHasAlive
+      && !!oppByServerId
+      && this.getCurrentHpValue(oppByServerId) <= 0;
+
+    if (opponentDeadSlotAwaitingBench) {
+      this.opponentAwaitingBenchSwitch = true;
+    }
+
+    if (this.pendingOpponentFaintVisual && previousActiveOpponent) {
+      const deadRef = opponentTeam.find((x: Xuxemon) => this.isSameXuxemon(x, previousActiveOpponent));
+      this.opponentXuxemon.set(deadRef ?? { ...previousActiveOpponent, current_hp: 0 });
+      this.opponentSpriteHiddenAfterFaint.set(false);
+    } else if (opponentDeadSlotAwaitingBench && !this.pendingOpponentFaintVisual) {
+      const knockoutInProgress = this.opponentSpriteHiddenAfterFaint()
+        && !!this.opponentXuxemon()
+        && this.getCurrentHpValue(this.opponentXuxemon()!) <= 0;
+      if (knockoutInProgress) {
+        // El timeout tras applyKnockoutHide vacía el campo; no pisar aquí.
+      } else if (!this.opponentXuxemon() && this.opponentAwaitingBenchSwitch) {
+        this.clearOpponentBarsForEmptySlot();
+      } else {
+        this.opponentXuxemon.set(null);
+        this.opponentSpriteHiddenAfterFaint.set(false);
+        this.clearOpponentBarsForEmptySlot();
+      }
+    } else if (activeOpponent && this.getCurrentHpValue(activeOpponent) > 0) {
+      this.opponentAwaitingBenchSwitch = false;
+      this.clearScheduledOpponentFieldClear();
       this.opponentXuxemon.set(activeOpponent);
+      this.opponentSpriteHiddenAfterFaint.set(false);
+    } else if (activeOpponent) {
+      this.opponentXuxemon.set(activeOpponent);
+      if (this.getCurrentHpValue(activeOpponent) > 0) {
+        this.opponentSpriteHiddenAfterFaint.set(false);
+      }
     }
 
     let barsSyncDelayMs = 0;
@@ -1604,6 +1709,18 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.currentSubMenu.set(null);
     }
 
+    if (!this.isPractice() && activePlayer && this.getCurrentHpValue(activePlayer) <= 0) {
+      if (!this.pendingPlayerFaintVisual) {
+        this.playerSpriteHiddenAfterFaint.set(true);
+      }
+    }
+
+    if (!this.isPractice() && activeOpponent && this.getCurrentHpValue(activeOpponent) <= 0) {
+      if (!this.pendingOpponentFaintVisual) {
+        this.opponentSpriteHiddenAfterFaint.set(true);
+      }
+    }
+
     if (normalizedData.status === 'rejected') {
       this.currentSubMenu.set(null);
       this.selectedBattleItem.set(null);
@@ -1623,6 +1740,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (normalizedData.winner_id || normalizedData.status === 'completed') {
+      this.clearScheduledOpponentFieldClear();
+      this.clearScheduledPlayerFieldClear();
+      this.opponentAwaitingBenchSwitch = false;
+      this.playerAwaitingBenchSwitch = false;
       this.currentSubMenu.set(null);
       this.selectedBattleItem.set(null);
       this.battleStatus.set('finished');
@@ -1877,8 +1998,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.lastBattleAnimationKey = animationKey;
-    const visualType = this.getAttackVisualType(attackerContext.xuxemon, extractedAttackName);
-    const attackImpactDelayMs = this.getAttackImpactSyncDelayMs(visualType);
+    const attackImpactDelayMs = this.attackImpactSyncDelayMs;
     const barsSyncDelayMs = resolvedRoll !== null
       ? this.diceOverlayDurationMs + 80 + attackImpactDelayMs
       : attackImpactDelayMs;
@@ -1906,14 +2026,37 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const applyBars = () => {
-      const player = this.selectedXuxemon() ?? activePlayer;
-      const opponent = this.opponentXuxemon() ?? activeOpponent;
+      const playerDisplay = this.selectedXuxemon();
+      const playerForBars = playerDisplay
+        ?? (!this.playerAwaitingBenchSwitch ? activePlayer : null);
+      const opponentDisplay = this.opponentXuxemon();
+      const opponentForBars = opponentDisplay
+        ?? (!this.opponentAwaitingBenchSwitch ? activeOpponent : null);
 
-      if (player) {
-        this.syncPlayerBars(player);
+      if (playerForBars) {
+        this.syncPlayerBars(playerForBars);
+      } else if (!playerDisplay) {
+        this.clearPlayerBarsForEmptySlot();
       }
-      if (opponent) {
-        this.syncOpponentBars(opponent);
+      if (opponentForBars) {
+        this.syncOpponentBars(opponentForBars);
+      } else if (!opponentDisplay) {
+        this.clearOpponentBarsForEmptySlot();
+      }
+
+      if (this.pendingPlayerFaintVisual) {
+        this.pendingPlayerFaintVisual = false;
+        this.applyKnockoutHide('player');
+        if (!this.isPractice()) {
+          this.schedulePlayerFieldClearAfterKnockout();
+        }
+      }
+      if (this.pendingOpponentFaintVisual) {
+        this.pendingOpponentFaintVisual = false;
+        this.applyKnockoutHide('opponent');
+        if (!this.isPractice()) {
+          this.scheduleOpponentFieldClearAfterKnockout();
+        }
       }
     };
 
@@ -1938,21 +2081,15 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     attackerOverride?: Xuxemon | null,
   ): void {
     void attackerName;
-    const attacker = attackerOverride ?? (side === 'player' ? this.selectedXuxemon() : this.opponentXuxemon());
-    const attack = this.resolveAttackAnimationDescriptor(attacker, attackName);
-    const visualType = this.getAttackVisualType(attacker, attackName ?? attack);
+    void attackName;
+    void attackerOverride;
 
     if (roll !== null) {
-      this.playDiceRollAnimation(roll, () => this.queueAttackLunge(side, visualType));
+      this.playDiceRollAnimation(roll, () => this.queueAttackLunge(side));
       return;
     }
 
-    if (attack) {
-      this.playAttackLunge(side, visualType);
-      return;
-    }
-
-    this.playAttackLunge(side, visualType);
+    this.playAttackLunge(side);
   }
 
   // Sirve para mostrar el overlay del dado y fijar el valor final tras la animación de tirada.
@@ -2075,45 +2212,36 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // Sirve para encadenar la tirada y la animación del ataque según el atacante y el movimiento usado.
-  private playDiceThenAttack(
-    side: 'player' | 'opponent',
-    roll: number,
-    attacker: Xuxemon | null,
-    attack?: AttackAnimationDescriptor | null,
-  ): void {
-    const visualType = this.getAttackVisualType(attacker, attack ?? undefined);
-    this.playDiceRollAnimation(roll, () => this.queueAttackLunge(side, visualType));
+  private playDiceThenAttack(side: 'player' | 'opponent', roll: number): void {
+    this.playDiceRollAnimation(roll, () => this.queueAttackLunge(side));
   }
 
   // Sirve para programar el inicio del ataque justo después de que el dado aterrice.
-  private queueAttackLunge(side: 'player' | 'opponent', visualType: AttackVisualType): void {
+  private queueAttackLunge(side: 'player' | 'opponent'): void {
     if (this.queuedAttackLungeTimeout) {
       clearTimeout(this.queuedAttackLungeTimeout);
     }
 
     this.queuedAttackLungeTimeout = setTimeout(() => {
       this.zone.run(() => {
-        this.playAttackLunge(side, visualType);
+        this.playAttackLunge(side);
       });
       this.queuedAttackLungeTimeout = null;
     }, 80);
   }
 
   // Sirve para lanzar la animación de acometida del atacante y coordinar trazo e impacto.
-  private playAttackLunge(side: 'player' | 'opponent', visualType: AttackVisualType): void {
-    this.clearAttackAnimationState(false);
-    this.attackVisualType.set(visualType);
-    // Visual simplificado: solo movimiento del Xuxemon, sin trail/burst/flash.
-    this.runSpriteAttackAnimation(side, visualType);
+  private playAttackLunge(side: 'player' | 'opponent'): void {
+    this.clearAttackAnimationState();
+    this.playAttackEffects(side);
 
-    const durationMs = this.getAttackAnimationDurationMs(visualType);
+    const durationMs = this.attackLungeDurationMs;
 
     if (side === 'player') {
       this.isPlayerAttacking.set(true);
       this.playerAttackTimeout = setTimeout(() => {
         this.zone.run(() => {
           this.isPlayerAttacking.set(false);
-          this.resetAttackVisualTypeIfIdle();
         });
         this.playerAttackTimeout = null;
       }, durationMs);
@@ -2124,54 +2252,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.opponentAttackTimeout = setTimeout(() => {
       this.zone.run(() => {
         this.isOpponentAttacking.set(false);
-        this.resetAttackVisualTypeIfIdle();
       });
       this.opponentAttackTimeout = null;
     }, durationMs);
   }
 
-  // Sirve para lanzar la animación de acometida del sprite directamente via Web Animations API para evitar reinicios CSS inconsistentes.
-  private runSpriteAttackAnimation(side: 'player' | 'opponent', visualType: AttackVisualType): void {
-    if (side === 'player') {
-      this.playerSpriteAnimation?.cancel();
-      this.playerSpriteAnimation = null;
-    } else {
-      this.opponentSpriteAnimation?.cancel();
-      this.opponentSpriteAnimation = null;
-    }
-
-    if (!this.isBrowser) {
-      return;
-    }
-
-    const el = (side === 'player' ? this.playerSprite : this.opponentSprite)?.nativeElement;
-    if (!el || typeof el.animate !== 'function') {
-      this.flushBattleView();
-      return;
-    }
-
-    const lungeX = side === 'player' ? 72 : -72;
-    const lungeY = side === 'player' ? -16 : 16;
-    const duration = Math.min(this.getAttackAnimationDurationMs(visualType), 520);
-
-    const anim = el.animate(
-      [
-        { transform: 'translate3d(0, 0, 0) scale(1)', offset: 0 },
-        { transform: `translate3d(${lungeX}px, ${lungeY}px, 0) scale(1.08)`, offset: 0.35 },
-        { transform: 'translate3d(0, 0, 0) scale(1)', offset: 1 },
-      ],
-      { duration, easing: 'ease-in-out', fill: 'none' },
-    );
-
-    if (side === 'player') {
-      this.playerSpriteAnimation = anim;
-    } else {
-      this.opponentSpriteAnimation = anim;
-    }
-  }
-
-  // Sirve para activar el trazo de ataque y el burst de impacto con la variante visual correspondiente.
-  private playAttackEffects(attackerSide: 'player' | 'opponent', visualType: AttackVisualType): void {
+  // Sirve para activar el trazo de ataque, el burst de impacto y la vibración del receptor.
+  private playAttackEffects(attackerSide: 'player' | 'opponent'): void {
     const targetSide = attackerSide === 'player' ? 'opponent' : 'player';
 
     if (this.playerHitTimeout) {
@@ -2195,21 +2282,15 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.activeImpactBurst.set(null);
     this.isPlayerHit.set(false);
     this.isOpponentHit.set(false);
-    this.attackVisualType.set(visualType);
     this.activeAttackTrail.set(attackerSide);
     this.flushBattleView();
-
-    const trailDuration = this.getAttackTrailDurationMs(visualType);
-    const impactDelay = this.getImpactDelayMs(visualType);
-    const impactDuration = this.getImpactDurationMs(visualType);
 
     this.attackTrailTimeout = setTimeout(() => {
       this.zone.run(() => {
         this.activeAttackTrail.set(null);
-        this.resetAttackVisualTypeIfIdle();
       });
       this.attackTrailTimeout = null;
-    }, trailDuration);
+    }, this.attackTrailDurationMs);
 
     this.impactBurstTimeout = setTimeout(() => {
       this.zone.run(() => {
@@ -2221,30 +2302,28 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
             this.zone.run(() => {
               this.isPlayerHit.set(false);
               this.activeImpactBurst.set(null);
-              this.resetAttackVisualTypeIfIdle();
             });
             this.playerHitTimeout = null;
-          }, impactDuration);
+          }, this.receiveHitPulseMs);
         } else {
           this.isOpponentHit.set(true);
           this.opponentHitTimeout = setTimeout(() => {
             this.zone.run(() => {
               this.isOpponentHit.set(false);
               this.activeImpactBurst.set(null);
-              this.resetAttackVisualTypeIfIdle();
             });
             this.opponentHitTimeout = null;
-          }, impactDuration);
+          }, this.receiveHitPulseMs);
         }
 
         this.flushBattleView();
       });
       this.impactBurstTimeout = null;
-    }, impactDelay);
+    }, this.attackImpactDelayMs);
   }
 
   // Sirve para limpiar la traza, el burst y los flags del último ataque antes de iniciar uno nuevo o al destruir.
-  private clearAttackAnimationState(resetVisualType = true): void {
+  private clearAttackAnimationState(): void {
     if (this.queuedAttackLungeTimeout) {
       clearTimeout(this.queuedAttackLungeTimeout);
       this.queuedAttackLungeTimeout = null;
@@ -2280,196 +2359,95 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.activeImpactBurst.set(null);
     this.isPlayerHit.set(false);
     this.isOpponentHit.set(false);
-
-    if (resetVisualType) {
-      this.attackVisualType.set('neutral');
-    }
-  }
-
-  // Sirve para volver a neutral cuando ya no quedan efectos visuales activos del ataque.
-  private resetAttackVisualTypeIfIdle(): void {
-    if (
-      this.activeAttackTrail()
-      || this.activeImpactBurst()
-      || this.isPlayerAttacking()
-      || this.isOpponentAttacking()
-      || this.isPlayerHit()
-      || this.isOpponentHit()
-    ) {
-      return;
-    }
-
-    this.attackVisualType.set('neutral');
-  }
-
-  // Sirve para resolver el descriptor del ataque a partir del atacante y el nombre presente en el log del snapshot.
-  private resolveAttackAnimationDescriptor(
-    attacker: Xuxemon | null,
-    attackName?: string,
-  ): AttackAnimationDescriptor | undefined {
-    const normalizedAttackName = attackName?.trim().toLowerCase();
-    if (!attacker || !normalizedAttackName) {
-      return undefined;
-    }
-
-    return attacker.attacks?.find((attack) => attack.name?.trim().toLowerCase() === normalizedAttackName);
-  }
-
-  // Sirve para decidir qué familia visual usa el ataque actual y si debe activar la variante especial.
-  private getAttackVisualType(
-    attacker: Xuxemon | null,
-    attack?: AttackAnimationDescriptor | string,
-  ): AttackVisualType {
-    const baseType = this.getBaseAttackVisualType(attacker, attack);
-    const descriptor = typeof attack === 'string' ? this.resolveAttackAnimationDescriptor(attacker, attack) : attack;
-
-    if ((descriptor?.status_chance ?? 0) > 0) {
-      return `${baseType}-special` as AttackVisualType;
-    }
-
-    return baseType;
-  }
-
-  // Sirve para mapear el estilo del golpe a partir del tipo elemental o, en fallback, del perfil del ataque.
-  private getBaseAttackVisualType(
-    attacker: Xuxemon | null,
-    attack?: AttackAnimationDescriptor | string,
-  ): Exclude<AttackVisualType, 'speed-special' | 'technical-special' | 'power-special' | 'neutral'> {
-    const elementalType = attacker?.type?.name?.trim().toLowerCase() ?? '';
-    if (elementalType === 'aire') {
-      return 'speed';
-    }
-    if (elementalType === 'aigua') {
-      return 'technical';
-    }
-    if (elementalType === 'terra') {
-      return 'power';
-    }
-
-    const descriptor = typeof attack === 'string' ? this.resolveAttackAnimationDescriptor(attacker, attack) : attack;
-    const attackDamage = descriptor?.dmg ?? 0;
-    if ((descriptor?.status_chance ?? 0) > 0) {
-      return 'technical';
-    }
-    if (attackDamage >= 18) {
-      return 'power';
-    }
-    if (attackDamage > 0 && attackDamage <= 10) {
-      return 'speed';
-    }
-
-    return 'technical';
-  }
-
-  // Sirve para mantener la duración del trazo alineada con los keyframes CSS de cada variante.
-  private getAttackTrailDurationMs(visualType: AttackVisualType): number {
-    switch (visualType) {
-      case 'speed-special':
-        return 360;
-      case 'technical-special':
-        return 460;
-      case 'power-special':
-        return 400;
-      case 'speed':
-        return 420;
-      case 'technical':
-        return 480;
-      case 'power':
-        return 520;
-      default:
-        return 420;
-    }
-  }
-
-  // Sirve para retrasar el burst al instante en que el atacante ya ha avanzado visualmente.
-  private getImpactDelayMs(visualType: AttackVisualType): number {
-    switch (visualType) {
-      case 'speed-special':
-      case 'speed':
-        return 170;
-      case 'technical-special':
-      case 'technical':
-        return 220;
-      case 'power-special':
-      case 'power':
-        return 260;
-      default:
-        return 200;
-    }
-  }
-
-  // Sirve para mantener el burst y el flash el tiempo justo antes de limpiar la clase visual.
-  private getImpactDurationMs(visualType: AttackVisualType): number {
-    switch (visualType) {
-      case 'speed-special':
-      case 'technical-special':
-      case 'power-special':
-        return 420;
-      case 'speed':
-      case 'technical':
-      case 'power':
-        return 360;
-      default:
-        return 340;
-    }
   }
 
   // Retraso para aplicar daño en práctica: overlay + cola + impacto.
-  private getPracticeDamageApplyDelayMs(visualType: AttackVisualType): number {
+  private getPracticeDamageApplyDelayMs(): number {
     const queueAfterOverlayMs = 80;
-    return this.diceOverlayDurationMs + queueAfterOverlayMs + this.getImpactDelayMs(visualType) + 120;
+    return this.diceOverlayDurationMs + queueAfterOverlayMs + this.attackImpactDelayMs + 120;
   }
 
-  // Sirve para desactivar el estado attacking cuando el keyframe principal del atacante ya ha terminado.
-  private getAttackAnimationDurationMs(visualType: AttackVisualType): number {
-    switch (visualType) {
-      case 'speed-special':
-        return 460;
-      case 'technical-special':
-        return 560;
-      case 'power-special':
-        return 620;
-      case 'speed':
-        return 480;
-      case 'technical':
-        return 540;
-      case 'power':
-        return 580;
-      default:
-        return 500;
+  // Sirve a dejar barras del rival en blanco cuando no hay Xuxemon en campo (cambio forzado pendiente).
+  private clearOpponentBarsForEmptySlot(): void {
+    this.opponentHP.set(0);
+    this.opponentMaxHP.set(0);
+  }
+
+  private clearPlayerBarsForEmptySlot(): void {
+    this.playerHP.set(0);
+    this.playerMaxHP.set(0);
+  }
+
+  private clearScheduledPlayerFieldClear(): void {
+    if (this.playerFieldClearTimeout) {
+      clearTimeout(this.playerFieldClearTimeout);
+      this.playerFieldClearTimeout = null;
     }
   }
 
-  // Sirve para sincronizar el daño visual en el frame de impacto (avance máximo del lunge), no al final completo.
-  private getAttackImpactSyncDelayMs(visualType: AttackVisualType): number {
-    const spriteLungeDurationMs = Math.min(this.getAttackAnimationDurationMs(visualType), 520);
-    return Math.round(spriteLungeDurationMs * 0.35);
+  private schedulePlayerFieldClearAfterKnockout(): void {
+    this.clearScheduledPlayerFieldClear();
+    const knockoutFieldClearMs = 240;
+    this.playerFieldClearTimeout = setTimeout(() => {
+      this.playerFieldClearTimeout = null;
+      this.zone.run(() => {
+        if (this.isPractice()) {
+          return;
+        }
+        this.selectedXuxemon.set(null);
+        this.playerSpriteHiddenAfterFaint.set(false);
+        this.clearPlayerBarsForEmptySlot();
+        this.flushBattleView();
+      });
+    }, knockoutFieldClearMs);
   }
 
-  // Sirve para reproducir la secuencia corta de debilitamiento de un bando y ejecutar un callback al terminar.
-  private playFaintAnimation(side: 'player' | 'opponent', onComplete?: () => void): void {
+  // Sirve para cancelar el timeout de limpieza del campo del rival cuando se desvanece.
+  private clearScheduledOpponentFieldClear(): void {
+    if (this.opponentFieldClearTimeout) {
+      clearTimeout(this.opponentFieldClearTimeout);
+      this.opponentFieldClearTimeout = null;
+    }
+  }
+
+  // Tras el CSS de desvanecimiento, quita al rival del campo hasta el snapshot con un activo vivo.
+  private scheduleOpponentFieldClearAfterKnockout(): void {
+    this.clearScheduledOpponentFieldClear();
+    const knockoutFieldClearMs = 240;
+    this.opponentFieldClearTimeout = setTimeout(() => {
+      this.opponentFieldClearTimeout = null;
+      this.zone.run(() => {
+        if (this.isPractice()) {
+          return;
+        }
+        this.opponentXuxemon.set(null);
+        this.opponentSpriteHiddenAfterFaint.set(false);
+        this.clearOpponentBarsForEmptySlot();
+        this.flushBattleView();
+      });
+    }, knockoutFieldClearMs);
+  }
+
+  // Sirve para ocultar el sprite al caer a 0 HP.
+  private applyKnockoutHide(side: 'player' | 'opponent', onComplete?: () => void): void {
+    this.clearAttackAnimationState();
+
     if (side === 'player') {
-      if (this.playerFaintTimeout) {
-        clearTimeout(this.playerFaintTimeout);
+      this.playerSpriteHiddenAfterFaint.set(true);
+      onComplete?.();
+      const sel = this.selectedXuxemon();
+      if (sel && this.getCurrentHpValue(sel) > 0) {
+        this.playerSpriteHiddenAfterFaint.set(false);
       }
-      this.isPlayerFainting.set(true);
-      this.playerFaintTimeout = setTimeout(() => {
-        this.isPlayerFainting.set(false);
-        this.playerFaintTimeout = null;
-        onComplete?.();
-      }, 460);
       return;
     }
 
-    if (this.opponentFaintTimeout) {
-      clearTimeout(this.opponentFaintTimeout);
+    this.opponentSpriteHiddenAfterFaint.set(true);
+    onComplete?.();
+    const sel = this.opponentXuxemon();
+    if (sel && this.getCurrentHpValue(sel) > 0) {
+      this.opponentSpriteHiddenAfterFaint.set(false);
     }
-    this.isOpponentFainting.set(true);
-    this.opponentFaintTimeout = setTimeout(() => {
-      this.isOpponentFainting.set(false);
-      this.opponentFaintTimeout = null;
-      onComplete?.();
-    }, 460);
   }
 
   // Sirve para mostrar un mensaje destacado temporal (eficacia, bonos) sobre el campo de batalla.
@@ -2501,7 +2479,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     audio.loop = true;
-    audio.volume = 0.6;
+    audio.volume = 0.5;
 
     if (!audio.paused) {
       return;
@@ -2705,7 +2683,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.opponentTeam().filter((xuxemon) => !this.isSameXuxemon(xuxemon, currentOpponent)),
     );
 
-    this.playFaintAnimation('opponent', () => {
+    this.applyKnockoutHide('opponent', () => {
       if (!nextOpponent) {
         this.finishBattle(true);
         return;
@@ -2730,7 +2708,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.addLog(`${currentPlayer.name} fainted!`, 'player');
     const backups = this.getSwitchCandidates();
 
-    this.playFaintAnimation('player', () => {
+    this.applyKnockoutHide('player', () => {
       if (backups.length === 0) {
         this.finishBattle(false);
         return;
@@ -2749,6 +2727,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private handleExternallyFinishedBattle(data: any): void {
     const userId = this.auth.getUser()?.id;
     const playerWon = this.sameId(data.winner_id, userId);
+    this.clearScheduledOpponentFieldClear();
+    this.clearScheduledPlayerFieldClear();
+    this.opponentAwaitingBenchSwitch = false;
+    this.playerAwaitingBenchSwitch = false;
     this.battleStatus.set('finished');
     this.stopBattleSync();
 
@@ -2778,6 +2760,22 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   // Sirve para leer el HP actual de un Xuxemon con un valor numérico seguro no negativo.
   private getCurrentHpValue(xuxemon: Xuxemon): number {
     return Math.max(0, xuxemon.current_hp ?? xuxemon.hp ?? 0);
+  }
+
+  // Sirve a animar el debilitamiento en PvP cuando el snapshot pasa de vivo a 0 HP (misma ficha en el equipo).
+  private shouldPlayLinkedFaintVisual(
+    previousActive: Xuxemon | null,
+    updatedTeam: Xuxemon[],
+  ): boolean {
+    if (!previousActive || updatedTeam.length === 0) {
+      return false;
+    }
+
+    const hpWas = this.getCurrentHpValue(previousActive);
+    const refreshed = updatedTeam.find((xuxemon) => this.isSameXuxemon(xuxemon, previousActive));
+    const hpNow = refreshed ? this.getCurrentHpValue(refreshed) : 0;
+
+    return hpWas > 0 && hpNow <= 0;
   }
 
   // Sirve para actualizar las señales de barra de HP del jugador según un Xuxemon concreto.
@@ -2836,9 +2834,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
   // Sirve para obtener la lista de Xuxemons del rival que pueden robarse tras ganar.
   private getStealOptions(): Xuxemon[] {
-    const data = this.battleData();
-    const options = (data?.opponent_available_xuxemons ?? this.opponentTeam()) as Xuxemon[];
-    return options.filter((xuxemon) => xuxemon.adquired_id !== undefined);
+    return this.opponentTeam().filter((xuxemon) => xuxemon.adquired_id !== undefined);
   }
 
   // Sirve para resolver el identificador de usuario del rival según si somos dueños o invitados de la batalla.
@@ -2870,7 +2866,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.addLog(`${xuxemon.name} is now affected by ${attackObj.statusEffect.name}!`, side);
 
     const appliedKey = attackObj.statusEffect.name.trim().toLowerCase();
-    // TAREA 6: paralysis y confusion duran exactamente 3 turnos.
+    // Paralysis y Confusion duran exactamente 3 turnos.
     const status_effect_turns = appliedKey === 'paralysis' || appliedKey === 'paralyzed' || appliedKey === 'confusion' || appliedKey === 'confused' ? 3 : undefined;
 
     return {
@@ -3043,7 +3039,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     };
 
     const itemStatusKey = statusEffect.name.trim().toLowerCase();
-    // TAREA 6: paralysis y confusion duran 3 turnos.
+    // Paralysis y Confusion duran 3 turnos.
     const status_effect_turns =
       itemStatusKey === 'paralysis' || itemStatusKey === 'paralyzed' || itemStatusKey === 'confusion' || itemStatusKey === 'confused' ? 3 : undefined;
 
@@ -3060,7 +3056,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.opponentTeam.update((team) => team.map((xuxemon) => this.isSameXuxemon(xuxemon, updatedOpponent) ? updatedOpponent : xuxemon));
   }
 
-  // TAREA 6: comprueba si sueño, parálisis o confusión impiden el ataque y aplica sus efectos.
+  // Comprueba si Sueño, Paralysis o Confusion impiden el ataque y aplica sus efectos.
   // Paralysis y Confusion: 3 turnos, 50% fallo. Confusion: autodaño 12% HP total si falla.
   // Sleep: no puede atacar, despierta al recibir daño.
   private resolveStatusBeforeAttack(xuxemon: Xuxemon, side: 'player' | 'opponent'): { prevented: boolean; keepTurn?: boolean } {
@@ -3081,7 +3077,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       if (Math.random() < 0.5) {
         this.addLog(`${withTurns.name} is paralyzed and cannot move!`, side);
         const afterTick = this.tickBattleStatusTurns(withTurns);
-        // TAREA 5: mensaje de fin de debuff al expirar.
+        // Muestra un mensaje de fin de debuff al expirar.
         if (!afterTick.statusEffect) {
           this.addLog(`${withTurns.name} is no longer paralyzed`, side);
         }
@@ -3104,14 +3100,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       if (Math.random() < 0.5) {
         const maxHp = withTurns.hp || 100;
         const currentHp = this.getCurrentHpValue(withTurns);
-        // TAREA 6: autodaño confusión = 12% HP total.
+        // Calcula el autodaño de confusión como el 12% del HP total.
         const selfHitDamage = Math.max(1, Math.round(maxHp * 0.12));
         const newHpValue = Math.max(0, currentHp - selfHitDamage);
         const damaged = { ...withTurns, current_hp: newHpValue };
         const afterTick = this.tickBattleStatusTurns(damaged);
 
         this.addLog(`${withTurns.name} is confused and hurt itself!`, side);
-        // TAREA 5: mensaje de fin de debuff al expirar.
+        // Muestra un mensaje de fin de debuff al expirar.
         if (!afterTick.statusEffect) {
           this.addLog(`${withTurns.name} is no longer confused`, side);
         }

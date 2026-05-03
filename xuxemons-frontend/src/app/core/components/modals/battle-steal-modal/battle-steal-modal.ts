@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import type { Xuxemon } from '../../../interfaces';
 
 @Component({
   selector: 'app-battle-steal-modal',
@@ -65,6 +66,20 @@ export class BattleStealModal implements AfterViewInit {
   }
 
   // Sirve para obtener los elementos focables
+  isXuxemonType(xuxemon: Xuxemon, kind: 'power' | 'speed' | 'technical'): boolean {
+    return (xuxemon.type?.name ?? '').trim().toLowerCase() === kind;
+  }
+
+  prizeStat(xuxemon: Xuxemon, stat: 'hp' | 'attack' | 'defense'): number {
+    if (stat === 'hp') {
+      return xuxemon.current_hp ?? xuxemon.hp ?? 0;
+    }
+    if (stat === 'attack') {
+      return xuxemon.attack ?? 0;
+    }
+    return xuxemon.defense ?? 0;
+  }
+
   private getFocusableElements(root: HTMLElement): HTMLElement[] {
     const selector = [
       'a[href]',

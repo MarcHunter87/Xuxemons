@@ -11,20 +11,30 @@
     <div class="xuxemon-list">
       @for (xuxemon of vm.stealOptions(); track xuxemon.adquired_id || xuxemon.id) {
         <div
-          class="xuxemon-item-card"
+          class="prize-xux-card"
+          [class.type-power]="isXuxemonType(xuxemon, 'power')"
+          [class.type-speed]="isXuxemonType(xuxemon, 'speed')"
+          [class.type-technical]="isXuxemonType(xuxemon, 'technical')"
           role="button"
           tabindex="0"
           (click)="vm.confirmPrizeSelection(xuxemon)"
           (keydown.enter)="vm.confirmPrizeSelection(xuxemon)"
           (keydown.space)="$event.preventDefault(); vm.confirmPrizeSelection(xuxemon)">
-          <img [src]="xuxemon.image_url" [alt]="xuxemon.name">
-          <div class="item-card-info">
-            <span class="item-card-name">{{ xuxemon.name }}</span>
-            <div class="item-card-stats">
-              <span>HP: {{ xuxemon.current_hp ?? xuxemon.hp }}/{{ xuxemon.hp }}</span>
-              <span>ATK: {{ xuxemon.attack }}</span>
-              <span>DEF: {{ xuxemon.defense }}</span>
-            </div>
+          <img class="prize-xux-card__icon" [src]="xuxemon.image_url" [alt]="xuxemon.name">
+          <span class="prize-xux-card__name">{{ xuxemon.name }}</span>
+          <div class="prize-xux-card__stats" aria-label="Stats">
+            <span class="prize-stat prize-stat--hp">
+              <span class="prize-stat__label">HP</span>
+              <span class="prize-stat__value">{{ prizeStat(xuxemon, 'hp') }}</span>
+            </span>
+            <span class="prize-stat prize-stat--atk">
+              <span class="prize-stat__label">ATK</span>
+              <span class="prize-stat__value">{{ prizeStat(xuxemon, 'attack') }}</span>
+            </span>
+            <span class="prize-stat prize-stat--def">
+              <span class="prize-stat__label">DEF</span>
+              <span class="prize-stat__value">{{ prizeStat(xuxemon, 'defense') }}</span>
+            </span>
           </div>
         </div>
       }

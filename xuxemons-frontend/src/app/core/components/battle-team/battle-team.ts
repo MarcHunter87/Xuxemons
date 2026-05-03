@@ -29,6 +29,7 @@ export class BattleTeam implements OnInit {
   ngOnInit(): void {
     this.xuxemonService.myXuxemonsList.subscribe((list) => {
       this.myXuxemons.set(list ?? []);
+      void this.pruneDeadFromTeamSlots();
     });
     void this.loadTeamBuilder();
   }
@@ -39,6 +40,7 @@ export class BattleTeam implements OnInit {
       await this.xuxemonService.loadMyXuxemons();
       const team = await firstValueFrom(this.teamService.getTeam());
       this.teamSlots.set(this.mapTeamToSlots(team));
+      await this.pruneDeadFromTeamSlots();
       this.teamFeedback.set(null);
     } catch {
       this.teamFeedback.set('Could not load your battle team right now.');
@@ -75,20 +77,28 @@ export class BattleTeam implements OnInit {
     if (!adquiredId) {
       return null;
     }
-    return this.myXuxemons().find((xuxemon) => xuxemon.adquired_id === adquiredId) ?? null;
+    const resolved = this.myXuxemons().find((xuxemon) => xuxemon.adquired_id === adquiredId) ?? null;
+    if (!resolved || !this.isXuxemonBattleReady(resolved)) {
+      return null;
+    }
+    return resolved;
   }
 
   // Sirve para filtrar roster dejando fuera los xuxemons ya asignados al team
   availableRosterXuxemons(): Xuxemon[] {
     const usedIds = new Set(this.teamSlots().filter((value): value is number => value != null));
-    return this.myXuxemons().filter((xuxemon) => !xuxemon.adquired_id || !usedIds.has(xuxemon.adquired_id));
+    return this.myXuxemons().filter(
+      (xuxemon) =>
+        this.isXuxemonBattleReady(xuxemon)
+        && (!xuxemon.adquired_id || !usedIds.has(xuxemon.adquired_id)),
+    );
   }
 
   // Sirve para asignar un xuxemon al slot seleccionado
   async assignXuxemonToSelectedSlot(xuxemon: Xuxemon): Promise<void> {
     const adquiredId = xuxemon.adquired_id;
     const destinationIndex = this.selectedTeamSlot();
-    if (!adquiredId || destinationIndex == null || this.isTeamBusy()) {
+    if (!adquiredId || destinationIndex == null || this.isTeamBusy() || !this.isXuxemonBattleReady(xuxemon)) {
       return;
     }
 
@@ -153,6 +163,55 @@ export class BattleTeam implements OnInit {
     if (stat === 'hp') return xuxemon.current_hp ?? xuxemon.hp ?? 0;
     if (stat === 'attack') return xuxemon.attack ?? 0;
     return xuxemon.defense ?? 0;
+  }
+
+  isXuxemonBattleReady(xuxemon: Xuxemon): boolean {
+    return this.getXuxemonStat(xuxemon, 'hp') > 0;
+  }
+
+  // Sirve para vaciar en backend los slots cuyo Xuxemon tiene 0 HP
+  private async pruneDeadFromTeamSlots(): Promise<void> {
+    if (this.isTeamBusy()) {
+      return;
+    }
+
+    const roster = this.myXuxemons();
+    if (roster.length === 0) {
+      return;
+    }
+
+    const slots = [...this.teamSlots()];
+    const toClear: number[] = [];
+
+    for (let i = 0; i < slots.length; i++) {
+      const id = slots[i];
+      if (!id) {
+        continue;
+      }
+
+      const xuxemon = roster.find((entry) => entry.adquired_id === id);
+      const hp = xuxemon ? this.getXuxemonStat(xuxemon, 'hp') : 0;
+      if (hp <= 0) {
+        toClear.push(i);
+      }
+    }
+
+    if (toClear.length === 0) {
+      return;
+    }
+
+    this.isTeamBusy.set(true);
+    try {
+      for (const i of toClear) {
+        await firstValueFrom(this.teamService.updateSlot(i + 1, null));
+        slots[i] = null;
+      }
+      this.teamSlots.set(slots);
+    } catch {
+      this.teamFeedback.set('Could not update team after a faint. Clear slots manually if needed.');
+    } finally {
+      this.isTeamBusy.set(false);
+    }
   }
 
   // Sirve para obtener estados/side effects únicos junto con su icono

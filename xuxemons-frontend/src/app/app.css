@@ -94,3 +94,18 @@
   justify-content: flex-end;
   gap: 0.65rem;
 }
+
+@media (max-width: 540px) {
+  .battle-invite-actions {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+    width: 100%;
+  }
+
+  .battle-invite-actions .btn-primary,
+  .battle-invite-actions .btn-danger,
+  .battle-invite-actions .btn-secondary {
+    width: 100%;
+  }
+}

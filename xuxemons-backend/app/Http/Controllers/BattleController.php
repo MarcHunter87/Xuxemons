@@ -661,7 +661,7 @@ class BattleController extends Controller
             'winner' => $battle->winner,
             'my_team' => $this->getTeamXuxemons($viewerId),
             'opponent_team' => $this->getTeamXuxemons($context['opponent_id']),
-            'opponent_available_xuxemons' => $this->getOwnedXuxemons($context['opponent_id']),
+            'opponent_available_xuxemons' => $this->getTeamXuxemons($context['opponent_id']),
             'my_active_xuxemon_id' => (int) ($battle->{$context['player_field']} ?? 0),
             'opponent_active_xuxemon_id' => (int) ($battle->{$context['opponent_field']} ?? 0),
             'battle_log' => array_values($battle->battle_log ?? []),
@@ -1151,15 +1151,16 @@ class BattleController extends Controller
         $attackerType = strtolower((string) ($attacker->xuxemon?->type?->name ?? ''));
         $defenderType = strtolower((string) ($defender->xuxemon?->type?->name ?? ''));
 
-        if (($attackerType === 'power' && $defenderType === 'speed')
-            || ($attackerType === 'speed' && $defenderType === 'technical')
-            || ($attackerType === 'technical' && $defenderType === 'power')) {
+        // Speed > Power > Technical > Speed
+        if (($attackerType === 'speed' && $defenderType === 'power')
+            || ($attackerType === 'power' && $defenderType === 'technical')
+            || ($attackerType === 'technical' && $defenderType === 'speed')) {
             return 1;
         }
 
-        if (($attackerType === 'speed' && $defenderType === 'power')
-            || ($attackerType === 'technical' && $defenderType === 'speed')
-            || ($attackerType === 'power' && $defenderType === 'technical')) {
+        if (($attackerType === 'power' && $defenderType === 'speed')
+            || ($attackerType === 'technical' && $defenderType === 'power')
+            || ($attackerType === 'speed' && $defenderType === 'technical')) {
             return -1;
         }
 

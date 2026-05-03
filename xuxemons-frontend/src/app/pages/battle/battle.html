@@ -13,10 +13,11 @@
       }
 
       <div class="battle-screen" [style.background-image]="'url(' + getAssetUrl('/fondo-batalla.webp') + ')'">
-      @if (selectedXuxemon() && opponentXuxemon()) {
+      @if (vm.battleGridVisible()) {
         <div class="battle-grid">
           <!-- Opponent Position -->
           <div class="opponent-pos">
+            @if (opponentXuxemon()) {
             <!-- Opponent Status Card -->
             <div class="status-box opponent-status">
               <div class="trainer-info">
@@ -49,12 +50,14 @@
                   }
                 </div>
               </div>
+              @if (opponentMaxHP() > 0) {
               <div class="hp-bar-container">
                 <div class="hp-bar" [style.width.%]="opponentHP()" [class.low]="opponentHP() < 20" [class.med]="opponentHP() < 50 && opponentHP() >= 20"></div>
               </div>
               <div class="hp-text">
                 {{ (opponentHP() * opponentMaxHP() / 100) | number:'1.0-0' }} / {{ opponentMaxHP() }}
               </div>
+              }
 
               <!-- Status Effects Display -->
               <div class="status-effects">
@@ -72,24 +75,36 @@
             <!-- Opponent sprite -->
             <div #opponentSprite class="sprite-container opponent-sprite"
               [class.attacking]="vm.isOpponentAttacking()"
-              [class.fainting]="vm.isOpponentFainting()"
-              [class.hit]="vm.isOpponentHit()">
+              [class.hit]="vm.isOpponentHit()"
+              [class.opponent-sprite--concealed]="vm.opponentSpriteHiddenAfterFaint()"
+              [attr.aria-hidden]="vm.opponentSpriteHiddenAfterFaint()">
               <img [src]="opponentXuxemon()!.image_url" alt="Opponent"
                 [class.attacking]="vm.isOpponentAttacking()"
-                [class.fainting]="vm.isOpponentFainting()"
-                [class.attacking-speed]="vm.isOpponentAttacking() && vm.attackVisualType() === 'speed'"
-                [class.attacking-technical]="vm.isOpponentAttacking() && vm.attackVisualType() === 'technical'"
-                [class.attacking-power]="vm.isOpponentAttacking() && vm.attackVisualType() === 'power'"
-                [class.attacking-speed-special]="vm.isOpponentAttacking() && vm.attackVisualType() === 'speed-special'"
-                [class.attacking-technical-special]="vm.isOpponentAttacking() && vm.attackVisualType() === 'technical-special'"
-                [class.attacking-power-special]="vm.isOpponentAttacking() && vm.attackVisualType() === 'power-special'">
-              <span class="faint-particles" aria-hidden="true"></span>
+                [attr.aria-hidden]="vm.opponentSpriteHiddenAfterFaint()">
               <div class="platform"></div>
             </div>
+            } @else {
+            <div class="status-box opponent-status">
+              <div class="trainer-info">
+                @if (opponentTrainerIcon()) {
+                  <img [src]="opponentTrainerIcon()" class="trainer-icon" alt="">
+                }
+                <div class="trainer-details">
+                  <span class="trainer-name">{{ opponentTrainerName() }}</span>
+                  <span class="trainer-level">Lv.{{ opponentTrainerLevel() }}</span>
+                </div>
+              </div>
+              <hr class="status-divider">
+            </div>
+            <div class="sprite-container opponent-sprite opponent-sprite--empty-field" aria-hidden="true">
+              <div class="platform"></div>
+            </div>
+            }
           </div>
 
           <!-- Player Position -->
           <div class="player-pos">
+            @if (selectedXuxemon()) {
             <!-- Player Status Card -->
             <div class="status-box player-status">
               <div class="trainer-info">
@@ -122,12 +137,14 @@
                   }
                 </div>
               </div>
+              @if (playerMaxHP() > 0) {
               <div class="hp-bar-container">
                 <div class="hp-bar" [style.width.%]="playerHP()" [class.low]="playerHP() < 20" [class.med]="playerHP() < 50 && playerHP() >= 20"></div>
               </div>
               <div class="hp-text">
                 {{ (playerHP() * playerMaxHP() / 100) | number:'1.0-0' }} / {{ playerMaxHP() }}
               </div>
+              }
 
               <!-- Status Effects Display -->
               <div class="status-effects">
@@ -145,20 +162,31 @@
             <!-- Player sprite -->
             <div #playerSprite class="sprite-container player-sprite"
               [class.attacking]="vm.isPlayerAttacking()"
-              [class.fainting]="vm.isPlayerFainting()"
-              [class.hit]="vm.isPlayerHit()">
+              [class.hit]="vm.isPlayerHit()"
+              [class.player-sprite--concealed]="vm.playerSpriteHiddenAfterFaint()"
+              [attr.aria-hidden]="vm.playerSpriteHiddenAfterFaint()">
               <img [src]="selectedXuxemon()!.image_url" alt="Player"
                 [class.attacking]="vm.isPlayerAttacking()"
-                [class.fainting]="vm.isPlayerFainting()"
-                [class.attacking-speed]="vm.isPlayerAttacking() && vm.attackVisualType() === 'speed'"
-                [class.attacking-technical]="vm.isPlayerAttacking() && vm.attackVisualType() === 'technical'"
-                [class.attacking-power]="vm.isPlayerAttacking() && vm.attackVisualType() === 'power'"
-                [class.attacking-speed-special]="vm.isPlayerAttacking() && vm.attackVisualType() === 'speed-special'"
-                [class.attacking-technical-special]="vm.isPlayerAttacking() && vm.attackVisualType() === 'technical-special'"
-                [class.attacking-power-special]="vm.isPlayerAttacking() && vm.attackVisualType() === 'power-special'">
-              <span class="faint-particles" aria-hidden="true"></span>
+                [attr.aria-hidden]="vm.playerSpriteHiddenAfterFaint()">
               <div class="platform"></div>
             </div>
+            } @else {
+            <div class="status-box player-status">
+              <div class="trainer-info">
+                @if (playerTrainerIcon()) {
+                  <img [src]="playerTrainerIcon()" class="trainer-icon" alt="">
+                }
+                <div class="trainer-details">
+                  <span class="trainer-name">{{ playerTrainerName() }}</span>
+                  <span class="trainer-level">Lv.{{ playerTrainerLevel() }}</span>
+                </div>
+              </div>
+              <hr class="status-divider">
+            </div>
+            <div class="sprite-container player-sprite player-sprite--empty-field" aria-hidden="true">
+              <div class="platform"></div>
+            </div>
+            }
           </div>
         </div>
 
@@ -168,12 +196,6 @@
           [class.active]="vm.activeAttackTrail() !== null"
           [class.attack-trail--player]="vm.activeAttackTrail() === 'player'"
           [class.attack-trail--opponent]="vm.activeAttackTrail() === 'opponent'"
-          [class.attack-trail--speed]="vm.attackVisualType() === 'speed'"
-          [class.attack-trail--technical]="vm.attackVisualType() === 'technical'"
-          [class.attack-trail--power]="vm.attackVisualType() === 'power'"
-          [class.attack-trail--speed-special]="vm.attackVisualType() === 'speed-special'"
-          [class.attack-trail--technical-special]="vm.attackVisualType() === 'technical-special'"
-          [class.attack-trail--power-special]="vm.attackVisualType() === 'power-special'"
           aria-hidden="true">
         </div>
 
@@ -183,12 +205,6 @@
           [class.active]="vm.activeImpactBurst() !== null"
           [class.impact-burst--player]="vm.activeImpactBurst() === 'player'"
           [class.impact-burst--opponent]="vm.activeImpactBurst() === 'opponent'"
-          [class.impact-burst--speed]="vm.attackVisualType() === 'speed'"
-          [class.impact-burst--technical]="vm.attackVisualType() === 'technical'"
-          [class.impact-burst--power]="vm.attackVisualType() === 'power'"
-          [class.impact-burst--speed-special]="vm.attackVisualType() === 'speed-special'"
-          [class.impact-burst--technical-special]="vm.attackVisualType() === 'technical-special'"
-          [class.impact-burst--power-special]="vm.attackVisualType() === 'power-special'"
           aria-hidden="true">
         </div>
 

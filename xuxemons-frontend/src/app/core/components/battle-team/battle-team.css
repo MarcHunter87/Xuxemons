@@ -199,13 +199,15 @@
 }
 
 .team-roster__stat {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
   white-space: normal;
   line-height: 1.15;
-  min-height: 30px;
+  min-height: 3rem;
   width: 100%;
-  font-size: 1rem;
   padding: 0.22rem 0.4rem;
   font-variant-numeric: tabular-nums;
   text-align: center;
@@ -214,9 +216,27 @@
   border: 1px solid transparent;
 }
 
+.team-roster__stat-label {
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.team-roster__stat-value {
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
 .team-roster__stat--hp {
   background: var(--color-green-overlay-soft);
   border-color: var(--color-green-bright);
+  color: var(--color-green-base);
+}
+
+.team-roster__stat--hp .team-roster__stat-value {
   color: var(--color-green-base);
 }
 
@@ -226,9 +246,17 @@
   color: var(--color-red-deep);
 }
 
+.team-roster__stat--atk .team-roster__stat-value {
+  color: var(--color-red-deep);
+}
+
 .team-roster__stat--def {
   background: var(--color-amber-overlay);
   border-color: var(--color-amber-base);
+  color: var(--color-amber-deep);
+}
+
+.team-roster__stat--def .team-roster__stat-value {
   color: var(--color-amber-deep);
 }
 

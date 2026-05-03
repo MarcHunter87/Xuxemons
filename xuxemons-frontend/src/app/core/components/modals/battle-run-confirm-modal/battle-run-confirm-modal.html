@@ -9,10 +9,10 @@
     <h2 class="battle-dialog-title xux-modal-title" id="battle-run-confirm-title">Run Away</h2>
     <p class="battle-dialog-text xux-modal-text">Are you sure you want to run away from the battle?</p>
     <div class="battle-dialog-actions xux-modal-actions">
-      <button type="button" class="battle-dialog-btn battle-dialog-btn--secondary xux-modal-btn" (click)="vm.cancelRunAway()">Cancel</button>
       <button type="button" class="battle-dialog-btn battle-dialog-btn--danger xux-modal-btn" (click)="vm.confirmRunAway()" [disabled]="vm.isSubmittingRun()">
         @if (vm.isSubmittingRun()) { Leaving... } @else { Run Away }
       </button>
+      <button type="button" class="battle-dialog-btn battle-dialog-btn--secondary xux-modal-btn" (click)="vm.cancelRunAway()">Cancel</button>
     </div>
   </div>
 </div>

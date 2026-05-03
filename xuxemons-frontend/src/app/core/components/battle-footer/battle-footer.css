@@ -87,8 +87,6 @@
 }
 
 .battle-footer {
-  min-height: 220px;
-  height: min(31vh, 252px);
   background: var(--neutral-black);
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -127,7 +125,6 @@
 @media (min-width: 901px) {
   .battle-footer {
     min-height: 190px;
-    height: min(29vh, 220px);
   }
 
   .battle-logs {

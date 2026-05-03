@@ -49,45 +49,136 @@
 .victory-content .xuxemon-list {
   margin-top: 20px;
   max-height: 320px;
-  padding-right: 8px;
+  padding: 12px 18px 14px 12px;
+  margin-inline: -4px;
+  scrollbar-gutter: stable;
 }
 
 .xuxemon-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   overflow-y: auto;
-  padding-right: 5px;
+  overflow-x: hidden;
+  padding: 6px 4px 10px 2px;
+  scrollbar-gutter: stable;
 }
 
-.xuxemon-item-card {
+.prize-xux-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: var(--primary-color);
-  border: 3px solid var(--color-gray-light);
+  gap: 10px;
+  padding: 14px 12px;
+  background: var(--neutral-white);
+  border: 2px solid var(--color-gray-light);
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+  text-align: center;
 }
 
-.xuxemon-item-card:hover {
+.prize-xux-card.type-power {
+  border-color: var(--color-red-base);
+}
+
+.prize-xux-card.type-speed {
   border-color: var(--accent-color);
-  background: var(--secondary-color);
-  transform: translateX(5px);
 }
 
-.xuxemon-item-card img {
-  width: 60px;
-  height: 60px;
+.prize-xux-card.type-technical {
+  border-color: var(--color-green-base);
+}
+
+.prize-xux-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px var(--color-black-soft);
+}
+
+.prize-xux-card:focus-visible {
+  outline: 3px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.prize-xux-card__icon {
+  width: 96px;
+  height: 96px;
   object-fit: contain;
+  filter: drop-shadow(0 4px 8px var(--color-blue-overlay-medium));
 }
 
-.item-card-info { flex: 1; }
-.item-card-name { font-weight: 800; display: block; }
-.item-card-stats { display: flex; gap: 8px; font-size: 1rem; margin-top: 4px; color: var(--neutral-black); }
-.item-card-stats span { background: var(--color-gray-light); padding: 2px 6px; border-radius: 4px; }
+.prize-xux-card__name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--neutral-black);
+  line-height: 1.2;
+  max-width: 100%;
+}
+
+.prize-xux-card__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.prize-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 3rem;
+  padding: 0.28rem 0.35rem;
+  border-radius: 5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid transparent;
+}
+
+.prize-stat__label {
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.prize-stat__value {
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.prize-stat--hp {
+  background: var(--color-green-overlay-soft);
+  border-color: var(--color-green-bright);
+  color: var(--color-green-base);
+}
+
+.prize-stat--hp .prize-stat__value {
+  color: var(--color-green-base);
+}
+
+.prize-stat--atk {
+  background: var(--color-red-overlay-medium);
+  border-color: var(--color-red-bright);
+  color: var(--color-red-deep);
+}
+
+.prize-stat--atk .prize-stat__value {
+  color: var(--color-red-deep);
+}
+
+.prize-stat--def {
+  background: var(--color-amber-overlay);
+  border-color: var(--color-amber-base);
+  color: var(--color-amber-deep);
+}
+
+.prize-stat--def .prize-stat__value {
+  color: var(--color-amber-deep);
+}
 
 .battle-dialog {
   width: min(100%, 420px);

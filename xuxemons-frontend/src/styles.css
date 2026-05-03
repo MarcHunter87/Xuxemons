@@ -402,21 +402,6 @@ button.btn-secondary {
 /* ═══════════════════════════════════════════════════════
    MODAL SYSTEM – estilo y estructura unificada
    ═══════════════════════════════════════════════════════ */
-.xux-modal-overlay,
-.battle-invite-modal,
-.victory-modal,
-.confirm-overlay,
-.award-modal-overlay,
-.delete-account-modal-backdrop,
-.admin-ban-modal-backdrop,
-.discard-modal-backdrop,
-.use-item-modal-backdrop,
-.xuxemon-modal-overlay,
-.modal-overlay,
-.gacha-reveal-overlay,
-.modal-backdrop.fade.show {
-  background: color-mix(in srgb, var(--neutral-black) 44%, transparent) !important;
-}
 
 .xux-modal-overlay,
 .battle-invite-modal,
