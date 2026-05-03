@@ -1733,14 +1733,30 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       .filter((xuxemon): xuxemon is Xuxemon => Boolean(xuxemon));
     const opponentCandidates = [combatants?.currentOpponent, combatants?.previousOpponent]
       .filter((xuxemon): xuxemon is Xuxemon => Boolean(xuxemon));
-    const knownCombatants = new Map<string, { side: 'player' | 'opponent'; xuxemon: Xuxemon }>();
+    const knownCombatants = new Map<string, Array<{ side: 'player' | 'opponent'; xuxemon: Xuxemon }>>();
+    const registerCombatant = (side: 'player' | 'opponent', xuxemon: Xuxemon): void => {
+      const key = xuxemon.name.trim().toLowerCase();
+      if (!key) {
+        return;
+      }
+
+      const entries = knownCombatants.get(key) ?? [];
+      const alreadyRegistered = entries.some((entry) =>
+        entry.side === side && this.isSameXuxemon(entry.xuxemon, xuxemon),
+      );
+
+      if (!alreadyRegistered) {
+        entries.push({ side, xuxemon });
+        knownCombatants.set(key, entries);
+      }
+    };
 
     for (const xuxemon of playerCandidates) {
-      knownCombatants.set(xuxemon.name.trim().toLowerCase(), { side: 'player', xuxemon });
+      registerCombatant('player', xuxemon);
     }
 
     for (const xuxemon of opponentCandidates) {
-      knownCombatants.set(xuxemon.name.trim().toLowerCase(), { side: 'opponent', xuxemon });
+      registerCombatant('opponent', xuxemon);
     }
 
     const readBattleLogText = (entry: unknown): string => {
@@ -1812,28 +1828,42 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return 0;
     }
 
-    let attackerContext = knownCombatants.get(attackerName.toLowerCase()) ?? null;
+    const attackerCandidates = knownCombatants.get(attackerName.toLowerCase()) ?? [];
+    let attackerContext = attackerCandidates.length === 1 ? attackerCandidates[0] : null;
 
-    if (!attackerContext) {
+    const inferAttackerFromHpDelta = (): { side: 'player' | 'opponent'; xuxemon: Xuxemon } | null => {
       const previousPlayerHp = combatants?.previousPlayer ? this.getCurrentHpValue(combatants.previousPlayer) : null;
       const currentPlayerHp = combatants?.currentPlayer ? this.getCurrentHpValue(combatants.currentPlayer) : null;
       const previousOpponentHp = combatants?.previousOpponent ? this.getCurrentHpValue(combatants.previousOpponent) : null;
       const currentOpponentHp = combatants?.currentOpponent ? this.getCurrentHpValue(combatants.currentOpponent) : null;
 
-      if (
-        previousOpponentHp !== null
+      const opponentTookDamage = previousOpponentHp !== null
         && currentOpponentHp !== null
-        && currentOpponentHp < previousOpponentHp
-        && combatants?.currentPlayer
-      ) {
-        attackerContext = { side: 'player', xuxemon: combatants.currentPlayer };
-      } else if (
-        previousPlayerHp !== null
+        && currentOpponentHp < previousOpponentHp;
+      const playerTookDamage = previousPlayerHp !== null
         && currentPlayerHp !== null
-        && currentPlayerHp < previousPlayerHp
-        && combatants?.currentOpponent
-      ) {
-        attackerContext = { side: 'opponent', xuxemon: combatants.currentOpponent };
+        && currentPlayerHp < previousPlayerHp;
+
+      if (opponentTookDamage && !playerTookDamage && combatants?.currentPlayer) {
+        return { side: 'player', xuxemon: combatants.currentPlayer };
+      }
+
+      if (playerTookDamage && !opponentTookDamage && combatants?.currentOpponent) {
+        return { side: 'opponent', xuxemon: combatants.currentOpponent };
+      }
+
+      return null;
+    };
+
+    if (!attackerContext) {
+      const inferredAttacker = inferAttackerFromHpDelta();
+      if (inferredAttacker) {
+        if (
+          attackerCandidates.length === 0
+          || attackerCandidates.some((candidate) => candidate.side === inferredAttacker.side)
+        ) {
+          attackerContext = inferredAttacker;
+        }
       }
     }
 
