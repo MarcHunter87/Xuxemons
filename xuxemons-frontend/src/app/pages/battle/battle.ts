@@ -111,8 +111,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private disconnectForfeitSent = false;
   private bypassDeactivateGuard = false;
   private lastBattleAnimationKey = '';
-  private readonly diceLandingDurationMs = 320;
-  private readonly diceOverlayDurationMs = 780;
+  private readonly diceLandingDurationMs = 430;
+  private readonly diceOverlayDurationMs = 980;
 
   // Sirve para reactivar el polling cuando la pestaña vuelve a estar visible y no hay stream SSE.
   private readonly handleVisibilityChange = () => {
@@ -163,6 +163,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   isDiceOverlayVisible = signal(false);
   isDiceRolling = signal(false);
   diceOutcomeTone = signal<'low' | 'mid' | 'high' | null>(null);
+  // TAREA 3: attackVisualType siempre 'neutral' — misma animación para todos los ataques.
   attackVisualType = signal<AttackVisualType>('neutral');
   isPlayerAttacking = signal(false);
   isOpponentAttacking = signal(false);
@@ -757,8 +758,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     attacker = this.selectedXuxemon()!;
 
-    const attackerStat = attacker.attack || 10;
-    const defenderStat = defender.defense || 5;
     const modifiers = this.calculateModifiers(attacker, defender, 'player');
     const roll = this.diceValue() || 0;
     const visualType = this.getAttackVisualType(attacker, attackObj);
@@ -767,12 +766,17 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     const defenderMaxHp = defender.hp || 100;
     const defenderCurrentHp = this.getCurrentHpValue(defender);
-    let damageAmount = this.calculateDamageAmount(attackerStat, defenderStat, attackObj.dmg, roll, modifiers, defenderMaxHp);
+
+    // TAREA 1: daño calculado con atributos reales del Xuxemon (power, speed, technical).
+    // attackerStat usa el ataque base del atacante (campo `attack`).
+    const attackerStat = attacker.attack || 10;
+    let damageAmount = this.calculateDamageAmount(attackerStat, attackObj.dmg, roll, modifiers, defenderMaxHp);
     const hadSleep = normalizedStatusName(defender.statusEffect?.name) === 'sleep';
 
+    // TAREA 6 – Sleep: recibe el doble de daño y despierta al recibir el golpe.
     if (hadSleep) {
       damageAmount = Math.min(defenderCurrentHp, damageAmount * 2);
-      this.addLog(`${defender.name} woke up taking double damage!`, 'system');
+      this.addLog(`${defender.name} woke up!`, 'system');
     }
 
     const newHpValue = Math.max(0, defenderCurrentHp - damageAmount);
@@ -845,7 +849,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const opponentAttack = opponent.attack || 10;
-    const playerDefense = player.defense || 5;
     const roll = this.diceValue() || 0;
     const visualType = this.getAttackVisualType(opponent, attackObj);
     const damageApplyDelayMs = this.getPracticeDamageApplyDelayMs(visualType);
@@ -853,9 +856,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     const playerMaxHp = player.hp || 100;
     const playerCurrentHp = this.getCurrentHpValue(player);
+
+    // TAREA 1: daño usa atributos reales del Xuxemon.
     let damageAmount = this.calculateDamageAmount(
       opponentAttack,
-      playerDefense,
       attackObj.dmg,
       roll,
       this.calculateModifiers(opponent, player, 'opponent'),
@@ -863,9 +867,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
     const hadSleep = normalizedStatusName(player.statusEffect?.name) === 'sleep';
 
+    // TAREA 6 – Sleep: recibe el doble de daño y despierta.
     if (hadSleep) {
       damageAmount = Math.min(playerCurrentHp, damageAmount * 2);
-      this.addLog(`${player.name} woke up taking double damage!`, 'system');
+      this.addLog(`${player.name} woke up!`, 'system');
     }
 
     const newHpValue = Math.max(0, playerCurrentHp - damageAmount);
@@ -941,10 +946,11 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     return modifiers;
   }
 
-   // Daño = daño base del ataque + cara del dado + modificadores (ventaja tipo, size, desventaja).
+  // TAREA 1: Daño = daño base del ataque + cara del dado + modificadores.
+  // Solo usa atributos reales del Xuxemon (power, speed, technical → campo `attack`).
+  // El factor *0.12 eliminado — no se usaba correctamente.
   calculateDamageAmount(
     attackerStat: number,
-    _defenderStat: number,
     attackDamage: number | undefined,
     roll: number,
     modifiers: number,
@@ -1748,14 +1754,25 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         return '';
       }
 
-      for (let index = data.battle_log.length - 1; index >= 0; index -= 1) {
+      const newestText = readBattleLogText(data.battle_log[0]);
+      const isSwitchLog = /^.+\s+sent\s+out\s+.+!$/i.test(newestText)
+        || /^come\s+back\s+.+!\s+go\s+.+!$/i.test(newestText)
+        || /^xuxemon\s+changed!?$/i.test(newestText)
+        || /^.+\s+enters\s+the\s+battle!?$/i.test(newestText);
+
+      if (isSwitchLog) {
+        return '';
+      }
+
+      for (let index = 0; index < data.battle_log.length; index += 1) {
         const text = readBattleLogText(data.battle_log[index]);
-        const match = /^(.+?) used (.+?)!/i.exec(text);
+        const match = /^(.+?) used (.+?)(?: on .+?)?!\s*\(Roll:\s*\d+/i.exec(text);
         if (!match) {
           continue;
         }
 
-        const attackerName = match[1]?.trim().toLowerCase();
+        const attackerRaw = match[1]?.trim().toLowerCase() ?? '';
+        const attackerName = attackerRaw.replace(/\s*\(.+?\)\s*$/, '').trim();
         if (knownCombatants.size > 0 && attackerName && !knownCombatants.has(attackerName)) {
           continue;
         }
@@ -1770,12 +1787,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const attackMatch = /^(.+?) used (.+?)!/.exec(attackLog);
+    const attackMatch = /^(.+?) used (.+?)(?: on .+?)?!\s*\(Roll:\s*\d+/i.exec(attackLog);
     if (!attackMatch) {
       return;
     }
 
-    const attackerName = attackMatch[1]?.trim();
+    const attackerName = attackMatch[1]?.trim().replace(/\s*\(.+?\)\s*$/, '');
     const extractedAttackName = attackMatch[2]?.trim();
     const rollMatch = /Roll:\s*(\d+)/.exec(attackLog);
     const resolvedRoll = rollMatch ? Number(rollMatch[1]) : null;
@@ -1827,7 +1844,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
-  // Sirve para encadenar overlay de dado, embestida y posible animación de debilitamiento según el bando.
   private playBattleAnimationSequence(
     side: 'player' | 'opponent',
     attackerName: string,
@@ -1874,15 +1890,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.diceOutcomeTone.set(null);
 
       this.flushBattleView();
-      if (this.isBrowser) {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            this.zone.run(() => this.runDiceOverlayAnimation());
-          });
-        });
-      } else {
-        this.runDiceOverlayAnimation();
-      }
+      this.runDiceOverlayAnimation();
 
       this.diceLandingTimeout = setTimeout(() => {
         this.zone.run(() => {
@@ -1890,6 +1898,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
           this.diceValue.set(finalRoll);
           this.diceOutcomeTone.set(this.getDiceOutcomeTone(finalRoll));
           this.runDiceLandingAnimation();
+          onLanded?.();
         });
         this.diceLandingTimeout = null;
       }, this.diceLandingDurationMs);
@@ -1898,7 +1907,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         this.zone.run(() => {
           this.isDiceOverlayVisible.set(false);
           this.diceOutcomeTone.set(null);
-          onLanded?.();
         });
         this.diceOverlayTimeout = null;
       }, this.diceOverlayDurationMs);
@@ -1919,21 +1927,24 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.diceContainerAnimation = containerElement.animate([
-      { transform: 'translate3d(0, 18px, 0) scale(0.9)', opacity: 0, offset: 0 },
+      { transform: 'translate3d(0, 26px, 0) scale(0.84)', opacity: 0, offset: 0 },
+      { transform: 'translate3d(0, -6px, 0) scale(1.03)', opacity: 1, offset: 0.38 },
       { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1, offset: 1 },
     ], {
       duration: this.diceLandingDurationMs,
-      easing: 'ease-out',
+      easing: 'cubic-bezier(0.2, 0.92, 0.24, 1)',
       fill: 'both',
     });
 
     this.diceCubeAnimation = diceElement.animate([
-      { transform: 'scale(0.92) rotateZ(0deg)', filter: 'brightness(1)', offset: 0 },
-      { transform: 'scale(1.04) rotateZ(90deg)', filter: 'brightness(1.04)', offset: 0.5 },
-      { transform: 'scale(1) rotateZ(180deg)', filter: 'brightness(1)', offset: 1 },
+      { transform: 'translate3d(0, -24px, 0) scale(0.78) rotateX(0deg) rotateY(0deg) rotateZ(0deg)', filter: 'brightness(1)', offset: 0 },
+      { transform: 'translate3d(0, -8px, 0) scale(1.08) rotateX(440deg) rotateY(380deg) rotateZ(220deg)', filter: 'brightness(1.12)', offset: 0.24 },
+      { transform: 'translate3d(0, 4px, 0) scale(0.96) rotateX(980deg) rotateY(820deg) rotateZ(420deg)', filter: 'brightness(1.02)', offset: 0.56 },
+      { transform: 'translate3d(0, 2px, 0) scale(1.03) rotateX(1450deg) rotateY(1220deg) rotateZ(620deg)', filter: 'brightness(1.08)', offset: 0.82 },
+      { transform: 'translate3d(0, 0, 0) scale(1) rotateX(1760deg) rotateY(1440deg) rotateZ(720deg)', filter: 'brightness(1)', offset: 1 },
     ], {
       duration: this.diceLandingDurationMs,
-      easing: 'linear',
+      easing: 'cubic-bezier(0.18, 0.82, 0.24, 1)',
       fill: 'both',
     });
   }
@@ -1955,22 +1966,24 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.diceCubeAnimation?.cancel();
 
     this.diceContainerAnimation = containerElement.animate([
-      { transform: 'scale(1)', opacity: 1, offset: 0 },
-      { transform: 'scale(1.03)', opacity: 1, offset: 0.45 },
-      { transform: 'scale(1)', opacity: 1, offset: 1 },
+      { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1, offset: 0 },
+      { transform: 'translate3d(0, -2px, 0) scale(1.04)', opacity: 1, offset: 0.32 },
+      { transform: 'translate3d(0, 1px, 0) scale(0.99)', opacity: 1, offset: 0.7 },
+      { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1, offset: 1 },
     ], {
-      duration: 180,
-      easing: 'ease-out',
+      duration: 260,
+      easing: 'cubic-bezier(0.22, 0.92, 0.26, 1)',
       fill: 'both',
     });
 
     this.diceCubeAnimation = diceElement.animate([
-      { transform: 'translateY(-10px) scale(1.05)', offset: 0 },
-      { transform: 'translateY(2px) scale(0.98)', offset: 0.55 },
-      { transform: 'translateY(0) scale(1)', offset: 1 },
+      { transform: 'translate3d(0, -14px, 0) scale(1.12) rotateX(0deg) rotateY(0deg) rotateZ(-8deg)', filter: 'brightness(1.14)', offset: 0 },
+      { transform: 'translate3d(0, 8px, 0) scale(0.9) rotateX(0deg) rotateY(0deg) rotateZ(7deg)', filter: 'brightness(0.98)', offset: 0.46 },
+      { transform: 'translate3d(0, -4px, 0) scale(1.04) rotateX(0deg) rotateY(0deg) rotateZ(-3deg)', filter: 'brightness(1.08)', offset: 0.72 },
+      { transform: 'translate3d(0, 0, 0) scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg)', filter: 'brightness(1)', offset: 1 },
     ], {
-      duration: 220,
-      easing: 'ease-out',
+      duration: 340,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
       fill: 'both',
     });
   }
@@ -2031,15 +2044,44 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, durationMs);
   }
 
-  // Sirve para reiniciar cualquier animación programática anterior y forzar el repintado del nuevo ataque CSS.
+  // Sirve para lanzar la animación de acometida del sprite directamente via Web Animations API para evitar reinicios CSS inconsistentes.
   private runSpriteAttackAnimation(side: 'player' | 'opponent', visualType: AttackVisualType): void {
-    void side;
-    void visualType;
-    this.playerSpriteAnimation?.cancel();
-    this.playerSpriteAnimation = null;
-    this.opponentSpriteAnimation?.cancel();
-    this.opponentSpriteAnimation = null;
-    this.flushBattleView();
+    if (side === 'player') {
+      this.playerSpriteAnimation?.cancel();
+      this.playerSpriteAnimation = null;
+    } else {
+      this.opponentSpriteAnimation?.cancel();
+      this.opponentSpriteAnimation = null;
+    }
+
+    if (!this.isBrowser) {
+      return;
+    }
+
+    const el = (side === 'player' ? this.playerSprite : this.opponentSprite)?.nativeElement;
+    if (!el || typeof el.animate !== 'function') {
+      this.flushBattleView();
+      return;
+    }
+
+    const lungeX = side === 'player' ? 72 : -72;
+    const lungeY = side === 'player' ? -16 : 16;
+    const duration = Math.min(this.getAttackAnimationDurationMs(visualType), 520);
+
+    const anim = el.animate(
+      [
+        { transform: 'translate3d(0, 0, 0) scale(1)', offset: 0 },
+        { transform: `translate3d(${lungeX}px, ${lungeY}px, 0) scale(1.08)`, offset: 0.35 },
+        { transform: 'translate3d(0, 0, 0) scale(1)', offset: 1 },
+      ],
+      { duration, easing: 'ease-in-out', fill: 'none' },
+    );
+
+    if (side === 'player') {
+      this.playerSpriteAnimation = anim;
+    } else {
+      this.opponentSpriteAnimation = anim;
+    }
   }
 
   // Sirve para activar el trazo de ataque y el burst de impacto con la variante visual correspondiente.
@@ -2071,13 +2113,17 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.activeAttackTrail.set(attackerSide);
     this.flushBattleView();
 
+    const trailDuration = this.getAttackTrailDurationMs(visualType);
+    const impactDelay = this.getImpactDelayMs(visualType);
+    const impactDuration = this.getImpactDurationMs(visualType);
+
     this.attackTrailTimeout = setTimeout(() => {
       this.zone.run(() => {
         this.activeAttackTrail.set(null);
         this.resetAttackVisualTypeIfIdle();
       });
       this.attackTrailTimeout = null;
-    }, this.getAttackTrailDurationMs(visualType));
+    }, trailDuration);
 
     this.impactBurstTimeout = setTimeout(() => {
       this.zone.run(() => {
@@ -2092,7 +2138,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
               this.resetAttackVisualTypeIfIdle();
             });
             this.playerHitTimeout = null;
-          }, this.getImpactDurationMs(visualType));
+          }, impactDuration);
         } else {
           this.isOpponentHit.set(true);
           this.opponentHitTimeout = setTimeout(() => {
@@ -2102,13 +2148,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
               this.resetAttackVisualTypeIfIdle();
             });
             this.opponentHitTimeout = null;
-          }, this.getImpactDurationMs(visualType));
+          }, impactDuration);
         }
 
         this.flushBattleView();
       });
       this.impactBurstTimeout = null;
-    }, this.getImpactDelayMs(visualType));
+    }, impactDelay);
   }
 
   // Sirve para limpiar la traza, el burst y los flags del último ataque antes de iniciar uno nuevo o al destruir.
@@ -2154,7 +2200,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  // Sirve para volver a `neutral` cuando ya no queda ningún efecto visual activo del ataque.
+  // Sirve para volver a neutral cuando ya no quedan efectos visuales activos del ataque.
   private resetAttackVisualTypeIfIdle(): void {
     if (
       this.activeAttackTrail()
@@ -2282,13 +2328,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  /** Retraso hasta aplicar daño en práctica: overlay del dado cerrado + cola + instante de impacto. */
+  // Retraso para aplicar daño en práctica: overlay + cola + impacto.
   private getPracticeDamageApplyDelayMs(visualType: AttackVisualType): number {
     const queueAfterOverlayMs = 80;
-    return this.diceOverlayDurationMs + queueAfterOverlayMs + this.getImpactDelayMs(visualType) + 120;
+    return this.diceLandingDurationMs + queueAfterOverlayMs + this.getImpactDelayMs(visualType) + 120;
   }
 
-  // Sirve para desactivar el estado `attacking` cuando el keyframe principal del atacante ya ha terminado.
+  // Sirve para desactivar el estado attacking cuando el keyframe principal del atacante ya ha terminado.
   private getAttackAnimationDurationMs(visualType: AttackVisualType): number {
     switch (visualType) {
       case 'speed-special':
@@ -2732,7 +2778,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.addLog(`${xuxemon.name} is now affected by ${attackObj.statusEffect.name}!`, side);
 
     const appliedKey = attackObj.statusEffect.name.trim().toLowerCase();
-    const status_effect_turns = appliedKey === 'paralysis' || appliedKey === 'confusion' ? 3 : undefined;
+    // TAREA 6: paralysis y confusion duran exactamente 3 turnos.
+    const status_effect_turns = appliedKey === 'paralysis' || appliedKey === 'paralyzed' || appliedKey === 'confusion' || appliedKey === 'confused' ? 3 : undefined;
 
     return {
       ...xuxemon,
@@ -2904,8 +2951,9 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     };
 
     const itemStatusKey = statusEffect.name.trim().toLowerCase();
+    // TAREA 6: paralysis y confusion duran 3 turnos.
     const status_effect_turns =
-      itemStatusKey === 'paralysis' || itemStatusKey === 'confusion' ? 3 : undefined;
+      itemStatusKey === 'paralysis' || itemStatusKey === 'paralyzed' || itemStatusKey === 'confusion' || itemStatusKey === 'confused' ? 3 : undefined;
 
     return {
       ...xuxemon,
@@ -2920,7 +2968,9 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     this.opponentTeam.update((team) => team.map((xuxemon) => this.isSameXuxemon(xuxemon, updatedOpponent) ? updatedOpponent : xuxemon));
   }
 
-  // Sirve para comprobar si sueño, parálisis o confusión impiden el ataque y aplicar sus efectos.
+  // TAREA 6: comprueba si sueño, parálisis o confusión impiden el ataque y aplica sus efectos.
+  // Paralysis y Confusion: 3 turnos, 50% fallo. Confusion: autodaño 12% HP total si falla.
+  // Sleep: no puede atacar, despierta al recibir daño.
   private resolveStatusBeforeAttack(xuxemon: Xuxemon, side: 'player' | 'opponent'): { prevented: boolean; keepTurn?: boolean } {
     const statusName = normalizedStatusName(xuxemon.statusEffect?.name);
 
@@ -2933,39 +2983,54 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return { prevented: true };
     }
 
-    if (statusName === 'paralysis') {
+    if (statusName === 'paralysis' || statusName === 'paralyzed') {
       const withTurns = this.ensureBattleStatusTurns(xuxemon, 3);
 
       if (Math.random() < 0.5) {
         this.addLog(`${withTurns.name} is paralyzed and cannot move!`, side);
         const afterTick = this.tickBattleStatusTurns(withTurns);
+        // TAREA 5: mensaje de fin de debuff al expirar.
+        if (!afterTick.statusEffect) {
+          this.addLog(`${withTurns.name} is no longer paralyzed`, side);
+        }
         this.persistXuxemonAfterStatusTick(afterTick, side);
         this.finishBlockedTurn(side);
         return { prevented: true };
       }
 
       const afterTick = this.tickBattleStatusTurns(withTurns);
+      if (!afterTick.statusEffect) {
+        this.addLog(`${withTurns.name} is no longer paralyzed`, side);
+      }
       this.persistXuxemonAfterStatusTick(afterTick, side);
       return { prevented: false };
     }
 
-    if (statusName === 'confusion') {
+    if (statusName === 'confusion' || statusName === 'confused') {
       const withTurns = this.ensureBattleStatusTurns(xuxemon, 3);
 
       if (Math.random() < 0.5) {
         const maxHp = withTurns.hp || 100;
         const currentHp = this.getCurrentHpValue(withTurns);
+        // TAREA 6: autodaño confusión = 12% HP total.
         const selfHitDamage = Math.max(1, Math.round(maxHp * 0.12));
         const newHpValue = Math.max(0, currentHp - selfHitDamage);
         const damaged = { ...withTurns, current_hp: newHpValue };
         const afterTick = this.tickBattleStatusTurns(damaged);
 
         this.addLog(`${withTurns.name} is confused and hurt itself!`, side);
+        // TAREA 5: mensaje de fin de debuff al expirar.
+        if (!afterTick.statusEffect) {
+          this.addLog(`${withTurns.name} is no longer confused`, side);
+        }
         this.applySelfDamageFromStatus(afterTick, side, newHpValue);
         return { prevented: true };
       }
 
       const afterTick = this.tickBattleStatusTurns(withTurns);
+      if (!afterTick.statusEffect) {
+        this.addLog(`${withTurns.name} is no longer confused`, side);
+      }
       this.persistXuxemonAfterStatusTick(afterTick, side);
       return { prevented: false };
     }
@@ -2976,7 +3041,9 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   // Sirve para inicializar el contador de turnos de Paralysis/Confusion en datos antiguos sin contador.
   private ensureBattleStatusTurns(xuxemon: Xuxemon, defaultTurns: number): Xuxemon {
     const statusName = normalizedStatusName(xuxemon.statusEffect?.name);
-    if ((statusName !== 'paralysis' && statusName !== 'confusion') || xuxemon.status_effect_turns != null) {
+    const isCountedStatus = statusName === 'paralysis' || statusName === 'paralyzed'
+      || statusName === 'confusion' || statusName === 'confused';
+    if (!isCountedStatus || xuxemon.status_effect_turns != null) {
       return xuxemon;
     }
 
@@ -2986,7 +3053,9 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   // Sirve para reducir en uno los turnos restantes de Paralysis/Confusion y limpiar el estado al llegar a cero.
   private tickBattleStatusTurns(xuxemon: Xuxemon): Xuxemon {
     const statusName = normalizedStatusName(xuxemon.statusEffect?.name);
-    if (statusName !== 'paralysis' && statusName !== 'confusion') {
+    const isCountedStatus = statusName === 'paralysis' || statusName === 'paralyzed'
+      || statusName === 'confusion' || statusName === 'confused';
+    if (!isCountedStatus) {
       return xuxemon;
     }
 

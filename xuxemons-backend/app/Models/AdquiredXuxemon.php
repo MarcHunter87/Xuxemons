@@ -130,4 +130,11 @@ class AdquiredXuxemon extends Model
 
         return $base + (int) round(($this->level - 1) * 1.2) + $this->bonus_defense;
     }
+
+    public function getNameAttribute(): string
+    {
+        $this->loadMissing('xuxemon');
+
+        return $this->xuxemon?->name ?? 'Unknown';
+    }
 }

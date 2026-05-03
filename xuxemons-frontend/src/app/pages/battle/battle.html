@@ -69,8 +69,20 @@
               </div>
             </div>
 
-            <div #opponentSprite class="sprite-container opponent-sprite" [class.attacking]="vm.isOpponentAttacking()" [class.fainting]="vm.isOpponentFainting()" [class.hit]="vm.isOpponentHit()">
-              <img [src]="opponentXuxemon()!.image_url" alt="Opponent" [class.attacking]="vm.isOpponentAttacking()" [class.fainting]="vm.isOpponentFainting()" [class.attacking-speed]="vm.attackVisualType() === 'speed'" [class.attacking-technical]="vm.attackVisualType() === 'technical'" [class.attacking-power]="vm.attackVisualType() === 'power'" [class.attacking-speed-special]="vm.attackVisualType() === 'speed-special'" [class.attacking-technical-special]="vm.attackVisualType() === 'technical-special'" [class.attacking-power-special]="vm.attackVisualType() === 'power-special'">
+            <!-- Opponent sprite -->
+            <div #opponentSprite class="sprite-container opponent-sprite"
+              [class.attacking]="vm.isOpponentAttacking()"
+              [class.fainting]="vm.isOpponentFainting()"
+              [class.hit]="vm.isOpponentHit()">
+              <img [src]="opponentXuxemon()!.image_url" alt="Opponent"
+                [class.attacking]="vm.isOpponentAttacking()"
+                [class.fainting]="vm.isOpponentFainting()"
+                [class.attacking-speed]="vm.isOpponentAttacking() && vm.attackVisualType() === 'speed'"
+                [class.attacking-technical]="vm.isOpponentAttacking() && vm.attackVisualType() === 'technical'"
+                [class.attacking-power]="vm.isOpponentAttacking() && vm.attackVisualType() === 'power'"
+                [class.attacking-speed-special]="vm.isOpponentAttacking() && vm.attackVisualType() === 'speed-special'"
+                [class.attacking-technical-special]="vm.isOpponentAttacking() && vm.attackVisualType() === 'technical-special'"
+                [class.attacking-power-special]="vm.isOpponentAttacking() && vm.attackVisualType() === 'power-special'">
               <span class="faint-particles" aria-hidden="true"></span>
               <div class="platform"></div>
             </div>
@@ -130,14 +142,27 @@
               </div>
             </div>
 
-            <div #playerSprite class="sprite-container player-sprite" [class.attacking]="vm.isPlayerAttacking()" [class.fainting]="vm.isPlayerFainting()" [class.hit]="vm.isPlayerHit()">
-              <img [src]="selectedXuxemon()!.image_url" alt="Player" [class.attacking]="vm.isPlayerAttacking()" [class.fainting]="vm.isPlayerFainting()" [class.attacking-speed]="vm.attackVisualType() === 'speed'" [class.attacking-technical]="vm.attackVisualType() === 'technical'" [class.attacking-power]="vm.attackVisualType() === 'power'" [class.attacking-speed-special]="vm.attackVisualType() === 'speed-special'" [class.attacking-technical-special]="vm.attackVisualType() === 'technical-special'" [class.attacking-power-special]="vm.attackVisualType() === 'power-special'">
+            <!-- Player sprite -->
+            <div #playerSprite class="sprite-container player-sprite"
+              [class.attacking]="vm.isPlayerAttacking()"
+              [class.fainting]="vm.isPlayerFainting()"
+              [class.hit]="vm.isPlayerHit()">
+              <img [src]="selectedXuxemon()!.image_url" alt="Player"
+                [class.attacking]="vm.isPlayerAttacking()"
+                [class.fainting]="vm.isPlayerFainting()"
+                [class.attacking-speed]="vm.isPlayerAttacking() && vm.attackVisualType() === 'speed'"
+                [class.attacking-technical]="vm.isPlayerAttacking() && vm.attackVisualType() === 'technical'"
+                [class.attacking-power]="vm.isPlayerAttacking() && vm.attackVisualType() === 'power'"
+                [class.attacking-speed-special]="vm.isPlayerAttacking() && vm.attackVisualType() === 'speed-special'"
+                [class.attacking-technical-special]="vm.isPlayerAttacking() && vm.attackVisualType() === 'technical-special'"
+                [class.attacking-power-special]="vm.isPlayerAttacking() && vm.attackVisualType() === 'power-special'">
               <span class="faint-particles" aria-hidden="true"></span>
               <div class="platform"></div>
             </div>
           </div>
         </div>
 
+        <!-- Attack trail (neutral) -->
         <div
           class="attack-trail"
           [class.active]="vm.activeAttackTrail() !== null"
@@ -152,6 +177,7 @@
           aria-hidden="true">
         </div>
 
+        <!-- Impact burst (neutral) -->
         <div
           class="impact-burst"
           [class.active]="vm.activeImpactBurst() !== null"
@@ -195,6 +221,7 @@
     <app-battle-runaway-result-modal [vm]="vm"></app-battle-runaway-result-modal>
   }
 
+  <!-- Dice overlay -->
   <div
     #diceOverlay
     class="dice-overlay"
