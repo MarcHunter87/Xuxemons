@@ -1749,22 +1749,26 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return String(entry ?? '').trim();
     };
 
-    const attackLog = (() => {
+    const attackLogData = (() => {
       if (!Array.isArray(data?.battle_log)) {
-        return '';
+        return null;
       }
 
-      const newestText = readBattleLogText(data.battle_log[0]);
+      const newestText = readBattleLogText(data.battle_log[data.battle_log.length - 1]);
       const isSwitchLog = /^.+\s+sent\s+out\s+.+!$/i.test(newestText)
         || /^come\s+back\s+.+!\s+go\s+.+!$/i.test(newestText)
         || /^xuxemon\s+changed!?$/i.test(newestText)
-        || /^.+\s+enters\s+the\s+battle!?$/i.test(newestText);
+        || /^.+\s+enters\s+the\s+battle!?$/i.test(newestText)
+        || /^.+\s+fled\s+the\s+battle!?$/i.test(newestText)
+        || /^battle\s+(already\s+)?completed!?$/i.test(newestText)
+        || /^you\s+used\s+.+/i.test(newestText)
+        || /^.+\s+used\s+.+\s+on\s+.+!$/i.test(newestText);
 
       if (isSwitchLog) {
-        return '';
+        return null;
       }
 
-      for (let index = 0; index < data.battle_log.length; index += 1) {
+      for (let index = data.battle_log.length - 1; index >= 0; index -= 1) {
         const text = readBattleLogText(data.battle_log[index]);
         const match = /^(.+?) used (.+?)(?: on .+?)?!\s*\(Roll:\s*\d+/i.exec(text);
         if (!match) {
@@ -1777,12 +1781,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
           continue;
         }
 
-        return text;
+        return { text, index };
       }
 
-      return '';
+      return null;
     })();
 
+    const attackLog = attackLogData?.text ?? '';
     if (!attackLog || attackLog === 'Battle started!') {
       return;
     }
@@ -1829,7 +1834,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const animationKey = `${data?.turn ?? ''}|${attackLog}`;
+    const animationKey = `${attackLogData?.index ?? -1}|${attackLog}`;
     if (this.lastBattleAnimationKey === animationKey) {
       return;
     }
@@ -1898,7 +1903,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
           this.diceValue.set(finalRoll);
           this.diceOutcomeTone.set(this.getDiceOutcomeTone(finalRoll));
           this.runDiceLandingAnimation();
-          onLanded?.();
         });
         this.diceLandingTimeout = null;
       }, this.diceLandingDurationMs);
@@ -1907,6 +1911,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         this.zone.run(() => {
           this.isDiceOverlayVisible.set(false);
           this.diceOutcomeTone.set(null);
+          onLanded?.();
         });
         this.diceOverlayTimeout = null;
       }, this.diceOverlayDurationMs);
@@ -2017,7 +2022,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private playAttackLunge(side: 'player' | 'opponent', visualType: AttackVisualType): void {
     this.clearAttackAnimationState(false);
     this.attackVisualType.set(visualType);
-    this.playAttackEffects(side, visualType);
+    // Visual simplificado: solo movimiento del Xuxemon, sin trail/burst/flash.
     this.runSpriteAttackAnimation(side, visualType);
 
     const durationMs = this.getAttackAnimationDurationMs(visualType);
@@ -2331,7 +2336,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   // Retraso para aplicar daño en práctica: overlay + cola + impacto.
   private getPracticeDamageApplyDelayMs(visualType: AttackVisualType): number {
     const queueAfterOverlayMs = 80;
-    return this.diceLandingDurationMs + queueAfterOverlayMs + this.getImpactDelayMs(visualType) + 120;
+    return this.diceOverlayDurationMs + queueAfterOverlayMs + this.getImpactDelayMs(visualType) + 120;
   }
 
   // Sirve para desactivar el estado attacking cuando el keyframe principal del atacante ya ha terminado.
