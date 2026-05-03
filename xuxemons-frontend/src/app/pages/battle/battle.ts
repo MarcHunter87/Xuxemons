@@ -90,6 +90,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   private diceLandingTimeout: ReturnType<typeof setTimeout> | null = null;
   private diceOverlayTimeout: ReturnType<typeof setTimeout> | null = null;
   private queuedAttackLungeTimeout: ReturnType<typeof setTimeout> | null = null;
+  private pendingBarsSyncTimeout: ReturnType<typeof setTimeout> | null = null;
   private playerAttackTimeout: ReturnType<typeof setTimeout> | null = null;
   private opponentAttackTimeout: ReturnType<typeof setTimeout> | null = null;
   private attackTrailTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -287,6 +288,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     if (this.queuedAttackLungeTimeout) {
       clearTimeout(this.queuedAttackLungeTimeout);
       this.queuedAttackLungeTimeout = null;
+    }
+    if (this.pendingBarsSyncTimeout) {
+      clearTimeout(this.pendingBarsSyncTimeout);
+      this.pendingBarsSyncTimeout = null;
     }
     if (this.playerAttackTimeout) {
       clearTimeout(this.playerAttackTimeout);
@@ -1554,20 +1559,20 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       ?? this.getFirstAlive(myTeam);
     if (activePlayer) {
       this.selectedXuxemon.set(activePlayer);
-      this.syncPlayerBars(activePlayer);
     }
 
     const activeOpponent = opponentTeam.find((xuxemon: Xuxemon) => xuxemon.adquired_id === normalizedData.opponent_active_xuxemon_id)
       ?? this.getFirstAlive(opponentTeam);
     if (activeOpponent) {
       this.opponentXuxemon.set(activeOpponent);
-      this.syncOpponentBars(activeOpponent);
     }
+
+    let barsSyncDelayMs = 0;
 
     if (Array.isArray(normalizedData.battle_log)) {
       const hydratedLog = this.hydrateBattleLogNames(normalizedData.battle_log, activePlayer, activeOpponent);
       this.battleLog.set(hydratedLog);
-      this.triggerBattleAnimationsFromSnapshot(
+      barsSyncDelayMs = this.triggerBattleAnimationsFromSnapshot(
         { ...normalizedData, battle_log: hydratedLog },
         {
           currentPlayer: activePlayer ?? null,
@@ -1577,6 +1582,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         },
       );
     }
+
+    this.syncCombatantBarsWithDelay(activePlayer ?? null, activeOpponent ?? null, barsSyncDelayMs);
 
     const requiresForcedSwitch = Boolean(
       activePlayer
@@ -1721,7 +1728,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       previousPlayer: Xuxemon | null;
       previousOpponent: Xuxemon | null;
     },
-  ): void {
+  ): number {
     const playerCandidates = [combatants?.currentPlayer, combatants?.previousPlayer]
       .filter((xuxemon): xuxemon is Xuxemon => Boolean(xuxemon));
     const opponentCandidates = [combatants?.currentOpponent, combatants?.previousOpponent]
@@ -1789,12 +1796,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
 
     const attackLog = attackLogData?.text ?? '';
     if (!attackLog || attackLog === 'Battle started!') {
-      return;
+      return 0;
     }
 
     const attackMatch = /^(.+?) used (.+?)(?: on .+?)?!\s*\(Roll:\s*\d+/i.exec(attackLog);
     if (!attackMatch) {
-      return;
+      return 0;
     }
 
     const attackerName = attackMatch[1]?.trim().replace(/\s*\(.+?\)\s*$/, '');
@@ -1802,7 +1809,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     const rollMatch = /Roll:\s*(\d+)/.exec(attackLog);
     const resolvedRoll = rollMatch ? Number(rollMatch[1]) : null;
     if (!attackerName) {
-      return;
+      return 0;
     }
 
     let attackerContext = knownCombatants.get(attackerName.toLowerCase()) ?? null;
@@ -1831,15 +1838,21 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (!attackerContext) {
-      return;
+      return 0;
     }
 
     const animationKey = `${attackLogData?.index ?? -1}|${attackLog}`;
     if (this.lastBattleAnimationKey === animationKey) {
-      return;
+      return 0;
     }
 
     this.lastBattleAnimationKey = animationKey;
+    const visualType = this.getAttackVisualType(attackerContext.xuxemon, extractedAttackName);
+    const attackImpactDelayMs = this.getAttackImpactSyncDelayMs(visualType);
+    const barsSyncDelayMs = resolvedRoll !== null
+      ? this.diceOverlayDurationMs + 80 + attackImpactDelayMs
+      : attackImpactDelayMs;
+
     this.playBattleAnimationSequence(
       attackerContext.side,
       attackerName,
@@ -1847,6 +1860,44 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       extractedAttackName,
       attackerContext.xuxemon,
     );
+
+    return barsSyncDelayMs;
+  }
+
+  // Sirve para retrasar la actualización visual de barras HP hasta que termina la animación del golpe.
+  private syncCombatantBarsWithDelay(
+    activePlayer: Xuxemon | null,
+    activeOpponent: Xuxemon | null,
+    delayMs: number,
+  ): void {
+    if (this.pendingBarsSyncTimeout) {
+      clearTimeout(this.pendingBarsSyncTimeout);
+      this.pendingBarsSyncTimeout = null;
+    }
+
+    const applyBars = () => {
+      const player = this.selectedXuxemon() ?? activePlayer;
+      const opponent = this.opponentXuxemon() ?? activeOpponent;
+
+      if (player) {
+        this.syncPlayerBars(player);
+      }
+      if (opponent) {
+        this.syncOpponentBars(opponent);
+      }
+    };
+
+    if (delayMs <= 0) {
+      applyBars();
+      return;
+    }
+
+    this.pendingBarsSyncTimeout = setTimeout(() => {
+      this.zone.run(() => {
+        applyBars();
+      });
+      this.pendingBarsSyncTimeout = null;
+    }, delayMs);
   }
 
   private playBattleAnimationSequence(
@@ -2357,6 +2408,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       default:
         return 500;
     }
+  }
+
+  // Sirve para sincronizar el daño visual en el frame de impacto (avance máximo del lunge), no al final completo.
+  private getAttackImpactSyncDelayMs(visualType: AttackVisualType): number {
+    const spriteLungeDurationMs = Math.min(this.getAttackAnimationDurationMs(visualType), 520);
+    return Math.round(spriteLungeDurationMs * 0.35);
   }
 
   // Sirve para reproducir la secuencia corta de debilitamiento de un bando y ejecutar un callback al terminar.
