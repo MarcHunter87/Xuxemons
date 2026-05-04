@@ -1,0 +1,24 @@
+.company-page {
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.page-section h2 {
+  margin: 0 0 0.5rem;
+  font-size: 20px;
+  color: var(--neutral-black);
+}
+
+.page-section p {
+  margin: 0 0 1rem;
+  color: color-mix(in srgb, var(--neutral-black) 86%, white 14%);
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .company-page { padding: 1rem; }
+}

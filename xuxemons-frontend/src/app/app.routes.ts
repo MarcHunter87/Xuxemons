@@ -28,6 +28,8 @@ import { battleDeactivateGuard } from './guard/battle-deactivate.guard';
 import { Register } from './pages/auth/register/register';
 import { Login } from './pages/auth/login/login';
 import { NotFound } from './pages/not-found/not-found';
+import { PrivacyPolicy } from './pages/company-pages/privacy-policy/privacy-policy';
+import { TermsOfService } from './pages/company-pages/terms-of-service/terms-of-service';
 
 export const routes: Routes = [
   {
@@ -139,6 +141,16 @@ export const routes: Routes = [
     path: 'NotFound',
     component: NotFound,
     title: '404 Not Found',
+  },
+  {
+    path: 'privacy',
+    component: PrivacyPolicy,
+    title: 'Privacy Policy',
+  },
+  {
+    path: 'terms',
+    component: TermsOfService,
+    title: 'Terms of Service',
   },
   {
     path: '**',
