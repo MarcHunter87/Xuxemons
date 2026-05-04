@@ -1907,7 +1907,6 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         || /\bis\s+fast\s+asleep\b/i.test(newestText)
         || /\bfast\s+asleep\s+and\s+cannot\s+attack\b/i.test(newestText)
         || /\bparalyzed\s+and\s+cannot\s+move\b/i.test(newestText)
-        || /\bconfused\s+and\s+hurt\s+itself\b/i.test(newestText)
         || /\bis\s+no\s+longer\s+(paralyzed|confused)\b/i.test(newestText)
         || /\bwoke\s+up\b/i.test(newestText);
 
@@ -1918,36 +1917,48 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       for (let index = data.battle_log.length - 1; index >= 0; index -= 1) {
         const text = readBattleLogText(data.battle_log[index]);
         const match = /^(.+?) used (.+?)(?: on .+?)?!\s*\(Roll:\s*\d+/i.exec(text);
-        if (!match) {
+        const selfHitMatch = /^(.+?) is confused and hurt itself/i.exec(text);
+
+        if (!match && !selfHitMatch) {
           continue;
         }
 
-        const attackerRaw = match[1]?.trim().toLowerCase() ?? '';
+        const attackerRaw = (match ? match[1] : selfHitMatch![1])?.trim().toLowerCase() ?? '';
         const attackerName = attackerRaw.replace(/\s*\(.+?\)\s*$/, '').trim();
         if (knownCombatants.size > 0 && attackerName && !knownCombatants.has(attackerName)) {
           continue;
         }
 
-        return { text, index };
+        return { text, index, isSelfHit: !!selfHitMatch };
       }
 
       return null;
     })();
 
     const attackLog = attackLogData?.text ?? '';
+    const isSelfHit = attackLogData?.isSelfHit ?? false;
+
     if (!attackLog || attackLog === 'Battle started!') {
       return 0;
     }
 
-    const attackMatch = /^(.+?) used (.+?)(?: on .+?)?!\s*\(Roll:\s*\d+/i.exec(attackLog);
-    if (!attackMatch) {
-      return 0;
+    let attackerName = '';
+    let extractedAttackName = '';
+    let resolvedRoll: number | null = null;
+
+    if (isSelfHit) {
+      const selfHitMatch = /^(.+?) is confused and hurt itself/i.exec(attackLog);
+      if (!selfHitMatch) return 0;
+      attackerName = selfHitMatch[1]?.trim().replace(/\s*\(.+?\)\s*$/, '');
+    } else {
+      const attackMatch = /^(.+?) used (.+?)(?: on .+?)?!\s*\(Roll:\s*\d+/i.exec(attackLog);
+      if (!attackMatch) return 0;
+      attackerName = attackMatch[1]?.trim().replace(/\s*\(.+?\)\s*$/, '');
+      extractedAttackName = attackMatch[2]?.trim();
+      const rollMatch = /Roll:\s*(\d+)/.exec(attackLog);
+      resolvedRoll = rollMatch ? Number(rollMatch[1]) : null;
     }
 
-    const attackerName = attackMatch[1]?.trim().replace(/\s*\(.+?\)\s*$/, '');
-    const extractedAttackName = attackMatch[2]?.trim();
-    const rollMatch = /Roll:\s*(\d+)/.exec(attackLog);
-    const resolvedRoll = rollMatch ? Number(rollMatch[1]) : null;
     if (!attackerName) {
       return 0;
     }
@@ -1961,19 +1972,19 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       const previousOpponentHp = combatants?.previousOpponent ? this.getCurrentHpValue(combatants.previousOpponent) : null;
       const currentOpponentHp = combatants?.currentOpponent ? this.getCurrentHpValue(combatants.currentOpponent) : null;
 
-      const opponentTookDamage = previousOpponentHp !== null
-        && currentOpponentHp !== null
-        && currentOpponentHp < previousOpponentHp;
-      const playerTookDamage = previousPlayerHp !== null
-        && currentPlayerHp !== null
-        && currentPlayerHp < previousPlayerHp;
+      const opponentTookDamage = previousOpponentHp !== null && currentOpponentHp !== null && currentOpponentHp < previousOpponentHp;
+      const playerTookDamage = previousPlayerHp !== null && currentPlayerHp !== null && currentPlayerHp < previousPlayerHp;
 
-      if (opponentTookDamage && !playerTookDamage && combatants?.currentPlayer) {
-        return { side: 'player', xuxemon: combatants.currentPlayer };
-      }
-
-      if (playerTookDamage && !opponentTookDamage && combatants?.currentOpponent) {
-        return { side: 'opponent', xuxemon: combatants.currentOpponent };
+      if (isSelfHit) {
+        if (playerTookDamage && combatants?.currentPlayer) return { side: 'player', xuxemon: combatants.currentPlayer };
+        if (opponentTookDamage && combatants?.currentOpponent) return { side: 'opponent', xuxemon: combatants.currentOpponent };
+      } else {
+        if (opponentTookDamage && !playerTookDamage && combatants?.currentPlayer) {
+          return { side: 'player', xuxemon: combatants.currentPlayer };
+        }
+        if (playerTookDamage && !opponentTookDamage && combatants?.currentOpponent) {
+          return { side: 'opponent', xuxemon: combatants.currentOpponent };
+        }
       }
 
       return null;
@@ -2001,6 +2012,12 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.lastBattleAnimationKey = animationKey;
+
+    if (isSelfHit) {
+      this.playConfusionSelfHitEffects(attackerContext.side);
+      return this.receiveHitPulseMs + 120;
+    }
+
     const attackImpactDelayMs = this.attackImpactSyncDelayMs;
     const barsSyncDelayMs = resolvedRoll !== null
       ? this.diceOverlayDurationMs + 80 + attackImpactDelayMs
