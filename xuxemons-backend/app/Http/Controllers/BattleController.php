@@ -1283,7 +1283,7 @@ class BattleController extends Controller
 
             if (random_int(1, 100) <= 50) {
                 $selfHitDamage = max(1, (int) round(($xuxemon->hp ?: 100) * 0.12));
-                $xuxemon->current_hp = max(0, (int) $xuxemon->current_hp - $selfHitDamage);
+                $xuxemon->current_hp = max(1, (int) $xuxemon->current_hp - $selfHitDamage);
                 $this->tickStatusEffectTurns($xuxemon);
                 $xuxemon->save();
 

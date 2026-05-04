@@ -756,92 +756,89 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     if (!attacker || !defender) {
       return;
     }
-
+  
     this.battleStatus.set('animating');
-
+  
     const statusResolution = this.resolveStatusBeforeAttack(attacker, 'player');
     if (statusResolution.prevented) {
-      if (statusResolution.keepTurn) {
-        this.battleStatus.set('ready');
-      }
       return;
     }
-
+  
     attacker = this.selectedXuxemon()!;
-
+  
     const modifiers = this.calculateModifiers(attacker, defender, 'player');
     const roll = this.diceValue() || 0;
     const damageApplyDelayMs = this.getPracticeDamageApplyDelayMs();
     this.playDiceThenAttack('player', roll);
-
+  
     const defenderMaxHp = defender.hp || 100;
     const defenderCurrentHp = this.getCurrentHpValue(defender);
-
+  
     const attackerStat = attacker.attack || 10;
     let damageAmount = this.calculateDamageAmount(attackerStat, attackObj.dmg, roll, modifiers, defenderMaxHp);
     const hadSleep = normalizedStatusName(defender.statusEffect?.name) === 'sleep';
-
+  
     // Recibe el doble de daño y despierta al recibir el golpe si tiene Sleep.
     if (hadSleep) {
       damageAmount = Math.min(defenderCurrentHp, damageAmount * 2);
       this.addLog(`${defender.name} woke up!`, 'system');
     }
-
+  
     const newHpValue = Math.max(0, defenderCurrentHp - damageAmount);
     const newHpPercent = defenderMaxHp > 0 ? (newHpValue / defenderMaxHp) * 100 : 0;
     const defenderAfterHit = hadSleep
       ? { ...defender, current_hp: newHpValue, statusEffect: undefined, status_effect_turns: undefined }
       : { ...defender, current_hp: newHpValue };
     const updatedDefender = this.applyAttackStatusEffectToTarget(defenderAfterHit, attackObj, 'player');
-
+  
     this.addLog(`${attacker.name} used ${attackObj.name}! (Roll: ${roll}, -${damageAmount} HP)`, 'player');
-
+  
     // Aplica daño tras cerrar el overlay del dado y alcanzar el impacto (no solapar con la tirada).
     setTimeout(() => {
       this.zone.run(() => {
         this.opponentHP.set(newHpPercent);
         this.updateOpponentStateAfterItem(updatedDefender);
-
+  
         if (newHpValue <= 0) {
           this.handleOpponentFaint();
           return;
         }
-
+  
         this.endTurn();
       });
     }, damageApplyDelayMs);
   }
 
-  // Sirve para ejecutar el turno de la IA en modo práctica eligiendo ataque y aplicando el mismo flujo de daño.
+  // Sirve para ejecutar el turno del oponente: elección de ataque, resolución de estados y aplicación de daño.
   opponentTurn(): void {
     if (!this.isPractice()) {
       return;
     }
-
+  
     if (this.battleStatus() === 'finished' || this.forcedSwitch()) {
       return;
     }
-
+  
     let opponent = this.opponentXuxemon();
     const player = this.selectedXuxemon();
     if (!opponent || !player) {
       return;
     }
-
+  
     this.battleStatus.set('animating');
-
+  
     const statusResolution = this.resolveStatusBeforeAttack(opponent, 'opponent');
     if (statusResolution.prevented) {
       return;
     }
-
+  
     opponent = this.opponentXuxemon()!;
-
+  
     const availableAttacks = opponent.attacks && opponent.attacks.length > 0
       ? opponent.attacks
       : [{ name: 'Tackle', dmg: 10, status_chance: null, statusEffect: undefined }];
     const randomAttack = availableAttacks[Math.floor(Math.random() * availableAttacks.length)];
-
+  
     this.diceValue.set(this.resolveRoll());
     this.executeOpponentAttack(randomAttack);
   }
@@ -2322,6 +2319,49 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     }, this.attackImpactDelayMs);
   }
 
+  // Sirve para mostrar el impacto de autodaño por confusión sin lunge ni trail hacia el enemigo.
+  private playConfusionSelfHitEffects(side: 'player' | 'opponent'): void {
+    if (this.playerHitTimeout) { clearTimeout(this.playerHitTimeout); this.playerHitTimeout = null; }
+    if (this.opponentHitTimeout) { clearTimeout(this.opponentHitTimeout); this.opponentHitTimeout = null; }
+    if (this.attackTrailTimeout) { clearTimeout(this.attackTrailTimeout); this.attackTrailTimeout = null; }
+    if (this.impactBurstTimeout) { clearTimeout(this.impactBurstTimeout); this.impactBurstTimeout = null; }
+
+    this.activeAttackTrail.set(null);
+    this.activeImpactBurst.set(null);
+    this.isPlayerHit.set(false);
+    this.isOpponentHit.set(false);
+    this.flushBattleView();
+
+    this.impactBurstTimeout = setTimeout(() => {
+      this.zone.run(() => {
+        this.activeImpactBurst.set(side);
+
+        if (side === 'player') {
+          this.isPlayerHit.set(true);
+          this.playerHitTimeout = setTimeout(() => {
+            this.zone.run(() => {
+              this.isPlayerHit.set(false);
+              this.activeImpactBurst.set(null);
+            });
+            this.playerHitTimeout = null;
+          }, this.receiveHitPulseMs);
+        } else {
+          this.isOpponentHit.set(true);
+          this.opponentHitTimeout = setTimeout(() => {
+            this.zone.run(() => {
+              this.isOpponentHit.set(false);
+              this.activeImpactBurst.set(null);
+            });
+            this.opponentHitTimeout = null;
+          }, this.receiveHitPulseMs);
+        }
+
+        this.flushBattleView();
+      });
+      this.impactBurstTimeout = null;
+    }, this.attackImpactDelayMs);
+  }
+
   // Sirve para limpiar la traza, el burst y los flags del último ataque antes de iniciar uno nuevo o al destruir.
   private clearAttackAnimationState(): void {
     if (this.queuedAttackLungeTimeout) {
@@ -3059,21 +3099,20 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
   // Comprueba si Sueño, Paralysis o Confusion impiden el ataque y aplica sus efectos.
   // Paralysis y Confusion: 3 turnos, 50% fallo. Confusion: autodaño 12% HP total si falla.
   // Sleep: no puede atacar, despierta al recibir daño.
-  private resolveStatusBeforeAttack(xuxemon: Xuxemon, side: 'player' | 'opponent'): { prevented: boolean; keepTurn?: boolean } {
+  private resolveStatusBeforeAttack(xuxemon: Xuxemon, side: 'player' | 'opponent'): { prevented: boolean } {
+    this.clearAttackAnimationState();
     const statusName = normalizedStatusName(xuxemon.statusEffect?.name);
-
+  
     if (statusName === 'sleep') {
       this.addLog(`${xuxemon.name} is fast asleep and cannot attack!`, side);
-      if (side === 'player') {
-        return { prevented: true, keepTurn: true };
-      }
       this.finishBlockedTurn(side);
       return { prevented: true };
     }
-
+  
     if (statusName === 'paralysis' || statusName === 'paralyzed') {
       const withTurns = this.ensureBattleStatusTurns(xuxemon, 3);
-
+  
+      // 50% de probabilidad de que el Xuxemon se paralice y no pueda moverse.
       if (Math.random() < 0.5) {
         this.addLog(`${withTurns.name} is paralyzed and cannot move!`, side);
         const afterTick = this.tickBattleStatusTurns(withTurns);
@@ -3085,7 +3124,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         this.finishBlockedTurn(side);
         return { prevented: true };
       }
-
+  
       const afterTick = this.tickBattleStatusTurns(withTurns);
       if (!afterTick.statusEffect) {
         this.addLog(`${withTurns.name} is no longer paralyzed`, side);
@@ -3093,10 +3132,10 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.persistXuxemonAfterStatusTick(afterTick, side);
       return { prevented: false };
     }
-
+  
     if (statusName === 'confusion' || statusName === 'confused') {
       const withTurns = this.ensureBattleStatusTurns(xuxemon, 3);
-
+  
       // 50% de probabilidad de que el Xuxemon se confunda y se dañe a sí mismo.
       if (Math.random() < 0.5) {
         const maxHp = withTurns.hp || 100;
@@ -3107,7 +3146,8 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         const newHpValue = Math.max(1, currentHp - selfHitDamage);
         const damaged = { ...withTurns, current_hp: newHpValue };
         const afterTick = this.tickBattleStatusTurns(damaged);
-
+  
+        this.playConfusionSelfHitEffects(side);
         this.addLog(`${withTurns.name} is confused and hurt itself!`, side);
         // Muestra un mensaje de fin de debuff al expirar.
         if (!afterTick.statusEffect) {
@@ -3116,7 +3156,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
         this.applySelfDamageFromStatus(afterTick, side, newHpValue);
         return { prevented: true };
       }
-
+  
       const afterTick = this.tickBattleStatusTurns(withTurns);
       if (!afterTick.statusEffect) {
         this.addLog(`${withTurns.name} is no longer confused`, side);
@@ -3124,7 +3164,7 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
       this.persistXuxemonAfterStatusTick(afterTick, side);
       return { prevented: false };
     }
-
+  
     return { prevented: false };
   }
 
