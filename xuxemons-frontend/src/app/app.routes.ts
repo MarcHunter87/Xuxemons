@@ -140,16 +140,19 @@ export const routes: Routes = [
   {
     path: 'NotFound',
     component: NotFound,
+    canActivate: [authGuard],
     title: '404 Not Found',
   },
   {
     path: 'privacy',
     component: PrivacyPolicy,
+    canActivate: [authGuard],
     title: 'Privacy Policy',
   },
   {
     path: 'terms',
     component: TermsOfService,
+    canActivate: [authGuard],
     title: 'Terms of Service',
   },
   {

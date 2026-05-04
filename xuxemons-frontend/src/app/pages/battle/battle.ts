@@ -3097,12 +3097,14 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     if (statusName === 'confusion' || statusName === 'confused') {
       const withTurns = this.ensureBattleStatusTurns(xuxemon, 3);
 
+      // 50% de probabilidad de que el Xuxemon se confunda y se dañe a sí mismo.
       if (Math.random() < 0.5) {
         const maxHp = withTurns.hp || 100;
         const currentHp = this.getCurrentHpValue(withTurns);
         // Calcula el autodaño de confusión como el 12% del HP total.
         const selfHitDamage = Math.max(1, Math.round(maxHp * 0.12));
-        const newHpValue = Math.max(0, currentHp - selfHitDamage);
+        // Asegura que el HP no sea menor que 1.
+        const newHpValue = Math.max(1, currentHp - selfHitDamage);
         const damaged = { ...withTurns, current_hp: newHpValue };
         const afterTick = this.tickBattleStatusTurns(damaged);
 
