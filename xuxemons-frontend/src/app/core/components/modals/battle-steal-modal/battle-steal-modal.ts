@@ -13,10 +13,14 @@ export class BattleStealModal implements AfterViewInit {
   // Sirve para enlazar el view-model del combate y la selección de premio.
   @Input({ required: true }) vm!: any;
   @ViewChild('dialogRoot') dialogRoot?: ElementRef<HTMLElement>;
+  liveMessage = '';
 
   // Sirve para enfocar el primer elemento
   ngAfterViewInit(): void {
-    queueMicrotask(() => this.focusFirstElement());
+    queueMicrotask(() => {
+      this.focusFirstElement();
+      this.setLiveMessage();
+    });
   }
 
   // Sirve para cerrar el modal
@@ -92,5 +96,19 @@ export class BattleStealModal implements AfterViewInit {
     return Array.from(root.querySelectorAll<HTMLElement>(selector)).filter(
       element => !element.hasAttribute('disabled') && element.tabIndex !== -1,
     );
+  }
+
+  private setLiveMessage(): void {
+    try {
+      const options = typeof this.vm?.stealOptions === 'function' ? this.vm.stealOptions() : this.vm?.stealOptions ?? [];
+      const count = Array.isArray(options) ? options.length : 0;
+      if (count > 0) {
+        this.liveMessage = `Choose one Xuxemon. ${count} option${count !== 1 ? 's' : ''} available.`;
+      } else {
+        this.liveMessage = 'No prize options available.';
+      }
+    } catch {
+      this.liveMessage = '';
+    }
   }
 }
