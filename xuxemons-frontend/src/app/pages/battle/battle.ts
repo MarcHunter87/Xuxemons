@@ -2800,12 +2800,13 @@ export class Battle implements OnInit, OnDestroy, AfterViewInit {
     if (data.completion_reason === 'runaway') {
       if (this.sameId(data.runner_id, userId)) {
         this.runawayResultMessage.set('You ran away from the battle.');
+        this.showRunawayResultModal.set(true);
       } else {
-        this.runawayResultMessage.set('Your rival ran away from the battle.');
+        this.addLog('Your rival ran away from the battle.', 'system');
         this.refreshAuthenticatedUserStats();
+        this.presentVictoryFlow();
       }
 
-      this.showRunawayResultModal.set(true);
       return;
     }
 

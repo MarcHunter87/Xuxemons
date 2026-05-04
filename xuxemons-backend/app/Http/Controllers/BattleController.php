@@ -965,7 +965,6 @@ class BattleController extends Controller
             : ($battle->opponentUser->name ?? 'A player');
 
         $battle->winner_id = $context['opponent_id'];
-        $battle->status = 'completed';
         $battle->completion_reason = 'runaway';
         $battle->runner_id = $context['player_id'];
         $this->appendBattleLog($battle, sprintf('%s fled the battle!', $runnerName));
