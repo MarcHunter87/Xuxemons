@@ -11,6 +11,33 @@
   box-sizing: border-box;
 }
 
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  animation: slideDown 0.25s ease;
+}
+
+.alert-danger {
+  background-color: var(--color-red-overlay-soft);
+  border: 1px solid var(--color-red-overlay-strong);
+  color: var(--color-red-deep);
+}
+
+.alert-danger .bi {
+  font-size: 18px;
+  flex-shrink: 0;
+  color: var(--color-red-deep);
+}
+
+.toggle-password .bi {
+  font-size: 20px;
+}
+
 .brand {
   text-align: center;
 }
